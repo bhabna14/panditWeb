@@ -1,14 +1,10 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
-    <!-- DataTables CSS -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
-
-    <!-- Select2 CSS (if used elsewhere) -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
-
     <style>
         .page-title{font-weight:700}
         .toolbar{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:space-between;align-items:center}
@@ -33,21 +29,13 @@
         .metric-card .label{font-size:.8rem;color:#64748b}
         .badge-status{font-size:.78rem}
 
-        /* Single reusable modal */
         .send-modal .modal-content{border-radius:14px;overflow:hidden}
         .send-modal .modal-header{
             background:linear-gradient(180deg,#f8fafc 0%, #ffffff 100%);
             border-bottom:1px solid #eef2f7;
         }
-        .chip{
-            display:inline-flex;align-items:center;gap:.4rem;
-            padding:.25rem .6rem;border-radius:999px;
-            border:1px solid #e2e8f0;background:#f8fafc;
-            font-size:.78rem;font-weight:600;color:#334155;
-        }
-        .img-preview{
-            display:block;max-height:110px;border:1px dashed #cbd5e1;border-radius:12px;padding:6px;background:#f8fafc
-        }
+        .chip{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .6rem;border-radius:999px;border:1px solid #e2e8f0;background:#f8fafc;font-size:.78rem;font-weight:600;color:#334155}
+        .img-preview{display:block;max-height:110px;border:1px dashed #cbd5e1;border-radius:12px;padding:6px;background:#f8fafc}
         .form-hint{font-size:.8rem;color:#64748b}
         .counter{font-size:.76rem;color:#64748b}
         .counter.ok{color:#059669}.counter.warn{color:#b45309}.counter.bad{color:#b91c1c}
@@ -57,7 +45,6 @@
 @endsection
 
 @section('content')
-    <!-- Header -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="page-title">Subscriptions Ending Soon</span>
@@ -71,29 +58,20 @@
         </div>
     </div>
 
-    <!-- Flash / validation messages -->
+    {{-- Global flashes & validation --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>There were some problems:</strong>
             <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                @foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach
             </ul>
         </div>
     @endif
-    @if (session('success'))
-        <div id="Message" class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-        <div id="Message" class="alert alert-danger">{{ session('error') }}</div>
-    @endif
-    @if (session('warning'))
-        <div id="Message" class="alert alert-warning">{{ session('warning') }}</div>
-    @endif
-    @if (session('info'))
-        <div id="Message" class="alert alert-info">{{ session('info') }}</div>
-    @endif
+    @foreach (['success','error','warning','info'] as $flash)
+        @if (session($flash))
+            <div id="Message" class="alert alert-{{ $flash == 'error' ? 'danger' : $flash }}">{{ session($flash) }}</div>
+        @endif
+    @endforeach
 
     @php
         $total = $orders->count();
@@ -102,26 +80,16 @@
     @endphp
     <div class="row g-3 mb-3">
         <div class="col-6 col-md-3">
-            <div class="metric-card p-3 h-100">
-                <div class="label">Rows</div>
-                <div class="value">{{ number_format($total) }}</div>
-            </div>
+            <div class="metric-card p-3 h-100"><div class="label">Rows</div><div class="value">{{ number_format($total) }}</div></div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="metric-card p-3 h-100">
-                <div class="label">Unique users</div>
-                <div class="value">{{ number_format($uniqueUsers) }}</div>
-            </div>
+            <div class="metric-card p-3 h-100"><div class="label">Unique users</div><div class="value">{{ number_format($uniqueUsers) }}</div></div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="metric-card p-3 h-100">
-                <div class="label">With subscription</div>
-                <div class="value text-info">{{ number_format($endingCount) }}</div>
-            </div>
+            <div class="metric-card p-3 h-100"><div class="label">With subscription</div><div class="value text-info">{{ number_format($endingCount) }}</div></div>
         </div>
     </div>
 
-    <!-- Card -->
     <div class="card custom-card mt-2">
         <div class="card-body">
             <div class="toolbar mb-3">
@@ -172,32 +140,21 @@
                                         <div class="fw-600">
                                             {{ $order->address->apartment_flat_plot ?? '' }}{{ !empty($order->address->apartment_name) ? ', ' . $order->address->apartment_name : '' }}
                                         </div>
-                                        <div class="text-xs text-muted">
-                                            {{ $order->address->localityDetails->locality_name ?? '' }}</div>
+                                        <div class="text-xs text-muted">{{ $order->address->localityDetails->locality_name ?? '' }}</div>
                                         <div class="text-xs text-muted">
                                             {{ $order->address->city ?? '' }}{{ !empty($order->address->state) ? ', ' . $order->address->state : '' }}{{ !empty($order->address->pincode) ? ' - ' . $order->address->pincode : '' }}
                                         </div>
                                     </td>
                                     <td>
                                         <div class="contact-btns d-flex flex-wrap gap-2">
-                                            <a href="tel:{{ $order->user->mobile_number }}" class="btn btn-sm btn-success">
-                                                <i class="bi bi-telephone"></i> Call
-                                            </a>
-                                            <a href="https://wa.me/{{ preg_replace('/\D+/','',$order->user->mobile_number) }}" target="_blank" rel="noopener" class="btn btn-sm btn-success">
-                                                <i class="bi bi-whatsapp"></i> WhatsApp
-                                            </a>
-                                            <a href="mailto:{{ $order->user->email }}" class="btn btn-sm btn-info">
-                                                <i class="bi bi-envelope"></i> Mail
-                                            </a>
-                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#followUpModal-{{ $order->id }}">
-                                                <i class="bi bi-journal-plus"></i> Add Note
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#viewNotesModal-{{ $order->id }}">
-                                                <i class="bi bi-eye"></i> View Notes
-                                            </button>
+                                            <a href="tel:{{ $order->user->mobile_number }}" class="btn btn-sm btn-success"><i class="bi bi-telephone"></i> Call</a>
+                                            <a href="https://wa.me/{{ preg_replace('/\D+/','',$order->user->mobile_number) }}" target="_blank" rel="noopener" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+                                            <a href="mailto:{{ $order->user->email }}" class="btn btn-sm btn-info"><i class="bi bi-envelope"></i> Mail</a>
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#followUpModal-{{ $order->id }}"><i class="bi bi-journal-plus"></i> Add Note</button>
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#viewNotesModal-{{ $order->id }}"><i class="bi bi-eye"></i> View Notes</button>
 
-                                            <!-- Single modal trigger with row data -->
                                             <button
+                                                type="button"
                                                 class="btn btn-sm btn-warning js-open-send-modal"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#sendNotifModal"
@@ -212,9 +169,9 @@
                                     </td>
                                 </tr>
 
-                                <!-- View Notes Modal (existing) -->
+                                {{-- View Notes Modal --}}
                                 <div class="modal fade" id="viewNotesModal-{{ $order->id }}" tabindex="-1"
-                                    aria-labelledby="viewNotesModalLabel-{{ $order->id }}" aria-hidden="true">
+                                     aria-labelledby="viewNotesModalLabel-{{ $order->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -228,26 +185,22 @@
                                                     <div class="timeline">
                                                         @foreach ($order->marketingFollowUps as $followUp)
                                                             <div class="timeline-item">
-                                                                <div class="timeline-date">
-                                                                    {{ \Carbon\Carbon::parse($followUp->followup_date)->format('d M Y') }}</div>
+                                                                <div class="timeline-date">{{ \Carbon\Carbon::parse($followUp->followup_date)->format('d M Y') }}</div>
                                                                 <div class="timeline-content">
                                                                     <div><strong>Note:</strong> {{ $followUp->note }}</div>
-                                                                    <div class="text-xxs text-muted mt-1">Added on
-                                                                        {{ $followUp->created_at->format('d M Y, h:i A') }}</div>
+                                                                    <div class="text-xxs text-muted mt-1">Added on {{ $followUp->created_at->format('d M Y, h:i A') }}</div>
                                                                 </div>
                                                             </div>
                                                         @endforeach
                                                     </div>
                                                 @endif
                                             </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            </div>
+                                            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Add Note Modal (existing) -->
+                                {{-- Add Note Modal --}}
                                 <div class="modal fade" id="followUpModal-{{ $order->id }}" tabindex="-1" role="dialog">
                                     <div class="modal-dialog" role="document">
                                         <form action="{{ route('admin.saveFollowUp') }}" method="POST">
@@ -261,7 +214,6 @@
                                                     <input type="hidden" name="order_id" value="{{ $order->order_id }}">
                                                     <input type="hidden" name="subscription_id" value="{{ $order->subscription->subscription_id }}">
                                                     <input type="hidden" name="user_id" value="{{ $order->user->userid }}">
-
                                                     <div class="mb-3">
                                                         <label for="note-{{ $order->id }}" class="form-label">Follow-Up Note</label>
                                                         <textarea name="note" id="note-{{ $order->id }}" class="form-control" rows="4" required></textarea>
@@ -276,7 +228,6 @@
                                         </form>
                                     </div>
                                 </div>
-
                             @endif
                         @endforeach
                     </tbody>
@@ -285,7 +236,7 @@
         </div>
     </div>
 
-    <!-- === SINGLE REUSABLE SEND NOTIFICATION MODAL === -->
+    {{-- SINGLE REUSABLE SEND NOTIFICATION MODAL --}}
     <div class="modal fade send-modal" id="sendNotifModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <form action="{{ route('admin.followup.sendUserNotification') }}" method="POST" enctype="multipart/form-data" class="modal-content" id="sendNotifForm">
@@ -306,11 +257,11 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" name="user_id" id="notif_user_id" value="">
-                    <!-- to re-open correctly after redirect -->
-                    <input type="hidden" name="context_user_name" id="context_user_name" value="">
-                    <input type="hidden" name="context_order_id" id="context_order_id" value="">
-                    <input type="hidden" name="context_end_date" id="context_end_date" value="">
+                    {{-- user_id default from old()/session in case JS doesn’t run --}}
+                    <input type="hidden" name="user_id" id="notif_user_id" value="{{ old('user_id', session('open_user_id')) }}">
+                    <input type="hidden" name="context_user_name" id="context_user_name" value="{{ old('context_user_name', session('open_user_name')) }}">
+                    <input type="hidden" name="context_order_id"  id="context_order_id"  value="{{ old('context_order_id',  session('open_order_id')) }}">
+                    <input type="hidden" name="context_end_date"  id="context_end_date"  value="{{ old('context_end_date',  session('open_end')) }}">
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Title</label>
@@ -355,7 +306,6 @@
 @endsection
 
 @section('scripts')
-    <!-- DataTables -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -375,34 +325,28 @@
             document.querySelectorAll('#Message').forEach(el => el.style.display = 'none');
         }, 3000);
 
-        // DataTable init
+        // DataTable
         const table = new DataTable('#ending-table', {
-            responsive: true,
-            stateSave: true,
-            pageLength: 25,
-            lengthMenu: [[10, 25, 50, 100, -1],[10, 25, 50, 100, 'All']],
-            order: [[2, 'asc']],
+            responsive: true, stateSave: true, pageLength: 25,
+            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
+            order: [[2,'asc']],
             dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
             buttons: [
-                { extend: 'copyHtml5',  title: 'Subscriptions Ending Soon' },
-                { extend: 'csvHtml5',   title: 'subscriptions_ending' },
-                { extend: 'excelHtml5', title: 'subscriptions_ending' },
-                { extend: 'pdfHtml5',   title: 'Subscriptions Ending Soon', orientation: 'landscape', pageSize: 'A4' },
-                { extend: 'print',      title: 'Subscriptions Ending Soon' },
-                { extend: 'colvis',     text: 'Columns' }
+                { extend:'copyHtml5',  title:'Subscriptions Ending Soon' },
+                { extend:'csvHtml5',   title:'subscriptions_ending' },
+                { extend:'excelHtml5', title:'subscriptions_ending' },
+                { extend:'pdfHtml5',   title:'Subscriptions Ending Soon', orientation:'landscape', pageSize:'A4' },
+                { extend:'print',      title:'Subscriptions Ending Soon' },
+                { extend:'colvis',     text:'Columns' }
             ],
         });
 
-        // Hook search input to DataTable
         const searchInput = document.getElementById('tableSearch');
-        if (searchInput) {
-            searchInput.addEventListener('keyup', function() {
-                table.search(this.value).draw();
-            });
-        }
+        if (searchInput) searchInput.addEventListener('keyup', function(){ table.search(this.value).draw(); });
 
-        // Single reusable modal logic
+        // Modal logic
         const sendModal = document.getElementById('sendNotifModal');
+        const form      = document.getElementById('sendNotifForm');
         const userField = document.getElementById('notif_user_id');
         const chipUser  = document.getElementById('chipUser');
         const chipOrder = document.getElementById('chipOrder');
@@ -413,76 +357,84 @@
         const countD    = document.getElementById('count_desc');
         const imgInput  = document.getElementById('notif_image');
         const imgPrev   = document.getElementById('notif_preview');
-        const form      = document.getElementById('sendNotifForm');
 
-        // Extra hidden context fields (so we can reopen with the same user/order after redirect)
         const ctxUserName = document.getElementById('context_user_name');
         const ctxOrderId  = document.getElementById('context_order_id');
         const ctxEndDate  = document.getElementById('context_end_date');
+
+        let currentUserId = userField.value || ''; // persist across opens
 
         function updateCounter(el, out, max) {
             const len = el.value.length;
             out.textContent = `${len}/${max}`;
             out.className = 'counter ' + (len <= max*0.7 ? 'ok' : (len <= max ? 'warn' : 'bad'));
         }
-
         titleEl.addEventListener('input', () => updateCounter(titleEl, countT, 255));
         descEl.addEventListener('input',  () => updateCounter(descEl,  countD, 1000));
 
-        imgInput.addEventListener('change', (e) => {
+        imgInput.addEventListener('change', e => {
             const f = e.target.files[0];
             if (!f) { imgPrev.classList.add('d-none'); imgPrev.src=''; return; }
             imgPrev.src = URL.createObjectURL(f);
             imgPrev.classList.remove('d-none');
         });
 
-        // Fill modal when opened from a row button
+        // Fill when opened from a row
         sendModal.addEventListener('show.bs.modal', (evt) => {
             const btn = evt.relatedTarget;
             if (!btn) return;
-
             const userId   = btn.getAttribute('data-userid') || '';
             const userName = btn.getAttribute('data-username') || 'User';
             const orderId  = btn.getAttribute('data-orderid') || '-';
             const endDate  = btn.getAttribute('data-end') || '-';
 
-            // Reset form fields
             form.reset();
-            imgPrev.classList.add('d-none');
-            imgPrev.src = '';
+            imgPrev.classList.add('d-none'); imgPrev.src = '';
 
-            // Fill hidden + chips
-            userField.value = userId;
+            currentUserId     = userId;
+            userField.value   = userId;
             chipUser.innerHTML  = `<i class="bi bi-person"></i> ${userName}`;
             chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${orderId}`;
             chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${endDate}`;
 
-            // Store context for round-trip
             ctxUserName.value = userName;
             ctxOrderId.value  = orderId;
             ctxEndDate.value  = endDate;
 
-            // Reset counters
+            // restore old() values if present (already in the DOM), then update counters
             updateCounter(titleEl, countT, 255);
             updateCounter(descEl,  countD, 1000);
         });
 
-        // If backend told us to reopen the modal (validation error, no tokens, etc.)
+        // Failsafe: ensure user_id is set just before submit
+        form.addEventListener('submit', function(e){
+            if (!userField.value && currentUserId) {
+                userField.value = currentUserId;
+            }
+        });
+
+        // Re-open after server-side error/validation
         @if (session('open_send_modal'))
             (function reopenFromServer(){
                 const modal = new bootstrap.Modal(sendModal);
 
-                // Restore fields from old() + session context
-                userField.value = @json(session('open_user_id', ''));
-                chipUser.innerHTML  = `<i class="bi bi-person"></i> {{ session('open_user_name','User') }}`;
-                chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order {{ session('open_order_id','-') }}`;
-                chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends {{ session('open_end','-') }}`;
+                // Fill UI chips from session
+                const sessUser = @json(session('open_user_name','User'));
+                const sessOrder= @json(session('open_order_id','-'));
+                const sessEnd  = @json(session('open_end','-'));
+                const sessId   = @json(session('open_user_id',''));
 
-                ctxUserName.value = @json(session('open_user_name','User'));
-                ctxOrderId.value  = @json(session('open_order_id','-'));
-                ctxEndDate.value  = @json(session('open_end','-'));
+                currentUserId   = sessId;
+                userField.value = sessId;
 
-                // Title/description already restored via old()
+                chipUser.innerHTML  = `<i class="bi bi-person"></i> ${sessUser}`;
+                chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${sessOrder}`;
+                chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${sessEnd}`;
+
+                ctxUserName.value = sessUser;
+                ctxOrderId.value  = sessOrder;
+                ctxEndDate.value  = sessEnd;
+
                 updateCounter(titleEl, countT, 255);
                 updateCounter(descEl,  countD, 1000);
 

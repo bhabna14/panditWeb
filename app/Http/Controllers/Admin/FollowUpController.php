@@ -63,15 +63,15 @@ class FollowUpController extends Controller
     /**
      * ★ NEW: Send a push notification (FCM) to a single user (by users.userid).
      */
-   public function sendUserNotification(Request $request)
+
+public function sendUserNotification(Request $request)
 {
-    // NOTE: user_id is the string like "USER77499" (NOT the numeric id)
+    // Validate (user_id is a string like USER77499)
     $validated = $request->validate([
         'user_id'     => 'required|string',
         'title'       => 'required|string|max:255',
         'description' => 'required|string|max:1000',
         'image'       => 'nullable|image|max:2048',
-        // context (optional; used to reopen modal nicely)
         'context_user_name' => 'nullable|string',
         'context_order_id'  => 'nullable|string',
         'context_end_date'  => 'nullable|string',
@@ -81,7 +81,6 @@ class FollowUpController extends Controller
         ? $request->file('image')->store('notifications', 'public')
         : null;
 
-    // Create a log row (optional but handy to keep parity with bulk screen)
     $notification = FCMNotification::create([
         'title'         => $validated['title'],
         'description'   => $validated['description'],
@@ -91,7 +90,7 @@ class FollowUpController extends Controller
         'failure_count' => 0,
     ]);
 
-    // Fetch this user's device tokens (user_id in devices table must match your "userid" column)
+    // Find device tokens for this user_id (string)
     $tokens = UserDevice::query()
         ->where('user_id', $validated['user_id'])
         ->whereNotNull('device_id')
@@ -102,7 +101,6 @@ class FollowUpController extends Controller
         ->toArray();
 
     if (empty($tokens)) {
-        // Reopen modal with same context + old inputs
         return back()
             ->withInput()
             ->with([
@@ -117,7 +115,6 @@ class FollowUpController extends Controller
 
     try {
         $service = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-
         $resp = $service->sendBulkNotifications(
             $tokens,
             $notification->title,
@@ -136,13 +133,9 @@ class FollowUpController extends Controller
 
         return back()->with('success', 'Notification sent successfully to the selected user!');
     } catch (\Throwable $e) {
-        Log::error('Single user FCM send error: '.$e->getMessage(), [
-            'user_id' => $validated['user_id'],
-        ]);
-
+        Log::error('Single user FCM send error: '.$e->getMessage(), ['user_id' => $validated['user_id']]);
         $notification->update(['status' => 'failed']);
 
-        // Reopen modal with same context + old inputs
         return back()
             ->withInput()
             ->with([
