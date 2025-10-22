@@ -50,6 +50,22 @@ return [
             'credentials' => env('FIREBASE_USER_CREDENTIALS_PATH'),
         ],
     ],
+'msg91' => [
+    'authkey'   => env('MSG91_AUTHKEY'),                    // required
+    'wa_number' => env('MSG91_WA_NUMBER'),                  // your approved integrated WA number (e.g. +919124420330)
+    'template'  => env('MSG91_WA_TEMPLATE'),                // approved template name
+    'namespace' => env('MSG91_WA_NAMESPACE'),               // approved namespace
+    'endpoint'  => env('MSG91_WA_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message'),
+    'language'  => env('MSG91_WA_LANG', 'en'),
+
+    // === template settings ===
+    // total body parameters your template expects (integer: 0,1,2,...)
+    'body_param_count' => (int) env('MSG91_WA_BODY_PARAM_COUNT', 2),
+
+    // header media type your template defines: 'none' | 'image' | 'video' | 'document'
+    'header_media' => env('MSG91_WA_HEADER_MEDIA', 'none'),
+],
+
 
 
 ];

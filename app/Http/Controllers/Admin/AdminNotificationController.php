@@ -10,6 +10,7 @@ use Twilio\Rest\Client;
 use App\Services\NotificationService;
 use App\Models\FCMNotification;
 use Illuminate\Support\Facades\Log;
+use App\Services\Msg91WhatsappService;
 
 class AdminNotificationController extends Controller
 {
@@ -173,66 +174,109 @@ class AdminNotificationController extends Controller
         }
     }
 
-    public function sendWhatsappNotification(Request $request)
-    {
-        // WhatsApp page still accepts phone numbers directly:
-        $validated = $request->validate([
-            'title'       => 'required|string|max:255',
-            'user'        => 'required|array|min:1',
-            'user.*'      => 'required|string',
-            'description' => 'required|string',
-            'image'       => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'default_cc'  => 'nullable|string',
-        ]);
 
-        $title       = $validated['title'];
-        $description = $validated['description'];
-        $numbers     = $validated['user'];
-        $imagePath   = $request->file('image') ? $request->file('image')->store('uploads', 'public') : null;
+public function sendWhatsappNotification(Request $request)
+{
+    $validated = $request->validate([
+        'title'       => 'required|string|max:255',
+        'user'        => 'required|array|min:1',
+        'user.*'      => 'required|string',
+        'description' => 'required|string',
+        'image'       => 'nullable|file|mimes:jpg,jpeg,png|max:4096',
+        'default_cc'  => 'nullable|string', // e.g. +91
+    ]);
 
-        $sid   = config('services.twilio.sid');
-        $token = config('services.twilio.token');
-        $twilio = new Client($sid, $token);
+    $title       = trim($validated['title']);
+    $description = trim($validated['description']);
+    $numbers     = array_unique(array_map('trim', $validated['user'] ?? []));
 
-        $mediaArr = $imagePath ? [asset('storage/'.$imagePath)] : null;
-        $body = "*{$title}*\n\n{$description}";
+    $imagePath   = $request->file('image') ? $request->file('image')->store('uploads', 'public') : null;
+    $mediaUrl    = $imagePath ? asset('storage/'.$imagePath) : null;
 
-        $failed = [];
-        foreach ($numbers as $rawNumber) {
-            $to = $this->formatWhatsapp($rawNumber, $request->input('default_cc', '+91'));
-            try {
-                $twilio->messages->create(
-                    'whatsapp:' . $to,
-                    [
-                        'from'     => config('services.twilio.whatsapp_number'),
-                        'body'     => $body,
-                        'mediaUrl' => $mediaArr,
-                    ]
-                );
-            } catch (\Throwable $e) {
-                Log::error('Twilio WhatsApp send error', ['to' => $to, 'error' => $e->getMessage()]);
-                $failed[] = $to;
-                continue;
+    $wa = new Msg91WhatsappService();
+
+    $failed   = [];
+    $reasons  = []; // collect reason per number for better feedback
+    $ok       = [];
+
+    // build body params as per your template: we’ll send [title, description]
+    // the service will trim/pad to the configured MSG91_WA_BODY_PARAM_COUNT
+    $bodyParams = [$title, $description];
+
+    foreach ($numbers as $rawNumber) {
+        $to = $this->formatWhatsapp($rawNumber, $request->input('default_cc', '+91'));
+
+        // Basic sanity: at least 10 digits after normalization
+        $digits = preg_replace('/\D+/', '', $to);
+        if (strlen($digits) < 10) {
+            $failed[]        = $to;
+            $reasons[$to]    = 'invalid_number';
+            continue;
+        }
+
+        try {
+            $res    = $wa->sendTemplate($to, $bodyParams, $mediaUrl);
+            $status = $res->getStatusCode();
+            $body   = (string) $res->getBody();
+
+            // Try to decode response (MSG91 returns JSON)
+            $json = null;
+            try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
+
+            // Decide success based on HTTP and, if present, JSON flags
+            $okHttp = ($status >= 200 && $status < 300);
+
+            // Many MSG91 responses include keys like "type":"success" or "success":true
+            $okJson = $json && (
+                (isset($json['type']) && strtolower((string) $json['type']) === 'success') ||
+                (isset($json['success']) && $json['success'] === true) ||
+                (isset($json['status']) && in_array(strtolower((string) $json['status']), ['success','queued','accepted'], true))
+            );
+
+            if ($okHttp && (!$json || $okJson)) {
+                $ok[] = $to;
+            } else {
+                \Log::error('MSG91 WA failed', ['to' => $to, 'status' => $status, 'resp' => $json ?: $body]);
+                $failed[]     = $to;
+                $reasons[$to] = $json['message'] ?? $json['error'] ?? 'send_failed';
             }
+        } catch (\Throwable $e) {
+            \Log::error('MSG91 WA exception', ['to' => $to, 'error' => $e->getMessage()]);
+            $failed[]     = $to;
+            $reasons[$to] = $e->getMessage();
         }
-
-        if (count($failed)) {
-            return back()->with('error', 'Some messages failed: ' . implode(', ', $failed));
-        }
-
-        return back()->with('success', 'WhatsApp notifications sent successfully!');
     }
 
-    private function formatWhatsapp(?string $raw, string $defaultCc = '+91'): string
-    {
-        $digits = preg_replace('/\D+/', '', (string)$raw);
+    if ($failed) {
+        // Show reasons inline to help you debug quickly
+        $msg = 'Some messages failed: ' . implode(', ', array_map(function ($n) use ($reasons) {
+            return $n . (isset($reasons[$n]) ? ' ('.$reasons[$n].')' : '');
+        }, $failed));
+        return back()->with('error', $msg);
+    }
 
-        if (strlen($digits) === 10) {
-            return $defaultCc . $digits;
-        }
-        if ($digits && $raw && str_starts_with($raw, '+')) {
-            return '+' . $digits;
-        }
+    return back()->with('success', 'WhatsApp notifications sent successfully!');
+}
+
+private function formatWhatsapp(?string $raw, string $defaultCc = '+91'): string
+{
+    $raw    = (string) $raw;
+    $digits = preg_replace('/\D+/', '', $raw);
+
+    // if already starts with +CC
+    if (str_starts_with($raw, '+') && strlen($digits) >= 11) {
         return '+' . $digits;
     }
+    // local 10-digit (India)
+    if (strlen($digits) === 10) {
+        return $defaultCc . $digits;
+    }
+    // common India prefixes (e.g. 0XXXXXXXXXX)
+    if (strlen($digits) === 11 && $digits[0] === '0') {
+        return $defaultCc . substr($digits, 1);
+    }
+    // fallback: add plus
+    return '+' . $digits;
+}
+
 }
