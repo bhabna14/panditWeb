@@ -24,6 +24,7 @@ class AdminNotificationController extends Controller
 
     public function whatsappcreate()
     {
+        // We’ll still show users to pick from, but the option VALUE will be a phone number now.
         $users = User::orderBy('name')->select('userid','name','mobile_number','email')->get();
         return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
     }
@@ -34,7 +35,6 @@ class AdminNotificationController extends Controller
             'title'       => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'image'       => 'nullable|image|max:2048',
-            // Audience controls
             'audience'    => 'required|in:all,users,platform',
             'users'       => 'nullable|array',
             'users.*'     => 'nullable|integer',
@@ -47,7 +47,6 @@ class AdminNotificationController extends Controller
             ? $request->file('image')->store('notifications', 'public')
             : null;
 
-        // Create row first (queued)
         $notification = FCMNotification::create([
             'title'         => $validated['title'],
             'description'   => $validated['description'],
@@ -57,7 +56,6 @@ class AdminNotificationController extends Controller
             'failure_count' => 0,
         ]);
 
-        // Build token query
         $tokensQuery = UserDevice::query()
             ->authorized()
             ->whereNotNull('device_id');
@@ -78,7 +76,6 @@ class AdminNotificationController extends Controller
             return back()->with('error', 'No valid device tokens found for the selected audience.');
         }
 
-        // Send via FCM
         try {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
             $resp = $notificationService->sendBulkNotifications(
@@ -88,7 +85,6 @@ class AdminNotificationController extends Controller
                 ['image' => $notification->image ? asset('storage/' . $notification->image) : '']
             );
 
-            // Update status using response counts (if available)
             $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
             $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
 
@@ -154,10 +150,11 @@ class AdminNotificationController extends Controller
 
     public function sendWhatsappNotification(Request $request)
     {
+        // 🔧 Accept phone numbers in user[]
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'user'        => 'required|array|min:1',
-            'user.*'      => 'integer',
+            'user.*'      => 'required|string', // << was integer; now string to allow phone numbers
             'description' => 'required|string',
             'image'       => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
             'default_cc'  => 'nullable|string', // e.g. +91
@@ -165,10 +162,9 @@ class AdminNotificationController extends Controller
 
         $title       = $validated['title'];
         $description = $validated['description'];
-        $userIds     = $validated['user'];
+        $numbers     = $validated['user']; // each is a phone number string now
         $imagePath   = $request->file('image') ? $request->file('image')->store('uploads', 'public') : null;
 
-        $users = User::whereIn('userid', $userIds)->get();
         $sid   = config('services.twilio.sid');
         $token = config('services.twilio.token');
         $twilio = new Client($sid, $token);
@@ -177,15 +173,15 @@ class AdminNotificationController extends Controller
         $body = "*{$title}*\n\n{$description}";
 
         $failed = [];
-        foreach ($users as $user) {
-            $to = $this->formatWhatsapp($user->mobile_number, $request->input('default_cc', '+91'));
+        foreach ($numbers as $rawNumber) {
+            $to = $this->formatWhatsapp($rawNumber, $request->input('default_cc', '+91'));
             try {
                 $twilio->messages->create(
                     'whatsapp:' . $to,
                     [
-                        'from'     => config('services.twilio.whatsapp_number'), // 'whatsapp:+1415xxxxxxx'
+                        'from'     => config('services.twilio.whatsapp_number'), // e.g. 'whatsapp:+1415xxxxxxx'
                         'body'     => $body,
-                        'mediaUrl' => $mediaArr, // MUST be array or null
+                        'mediaUrl' => $mediaArr, // array or null
                     ]
                 );
             } catch (\Throwable $e) {
@@ -206,17 +202,17 @@ class AdminNotificationController extends Controller
     {
         $digits = preg_replace('/\D+/', '', (string)$raw);
 
-        // Add default CC if we see 10-digit local number (India example)
+        // 10-digit local: add default country code
         if (strlen($digits) === 10) {
             return $defaultCc . $digits;
         }
 
-        // If already has CC, just prefix with '+'
+        // already with +
         if ($digits && $raw && str_starts_with($raw, '+')) {
             return '+' . $digits;
         }
 
-        // Fallback: try to ensure leading '+'
+        // fallback
         return '+' . $digits;
     }
 }

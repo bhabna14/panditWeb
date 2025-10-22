@@ -15,7 +15,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h3 class="mb-1 fw-bold">Send WhatsApp Notification</h3>
-                <div class="text-muted">Deliver messages via Twilio WhatsApp. Supports bold title and optional image.</div>
+                <div class="text-muted">Pick recipients by phone number. Supports bold title and optional image.</div>
             </div>
             <a class="btn btn-outline-primary" href="{{ route('admin.notification.create') }}">
                 <i class="fe fe-bell me-1"></i> App Notification
@@ -37,19 +37,24 @@
                     @csrf
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Recipients</label>
+                        <label class="form-label fw-semibold">Recipients (phone numbers)</label>
                         <select class="form-control" name="user[]" id="waUsers" multiple required>
                             @foreach($users as $u)
-                                <option value="{{ $u->userid }}">{{ $u->name }} — {{ $u->mobile_number }}</option>
+                                {{-- VALUE is the phone number now --}}
+                                <option value="{{ $u->mobile_number }}">
+                                    {{ $u->name }} — {{ $u->mobile_number }} {{ $u->email ? ' ('.$u->email.')' : '' }}
+                                </option>
                             @endforeach
                         </select>
-                        <div class="form-text">Select one or more users. Numbers should be E.164 (e.g. +91XXXXXXXXXX). You can set default country code below for local numbers.</div>
+                        <div class="form-text">
+                            You can also type and add numbers directly (press Enter). Use E.164 (e.g. +91XXXXXXXXXX) or local 10-digit numbers.
+                        </div>
                     </div>
 
                     <div class="mb-3">
                         <label for="default_cc" class="form-label fw-semibold">Default Country Code</label>
                         <input type="text" name="default_cc" id="default_cc" class="form-control" value="+91">
-                        <div class="form-text">Used when a number looks like a 10-digit local number.</div>
+                        <div class="form-text">If a number looks like a 10-digit local number, we’ll prepend this.</div>
                     </div>
 
                     <div class="mb-3">
@@ -85,9 +90,9 @@
             <div class="nu-card p-4">
                 <h5 class="fw-bold mb-3">Tips</h5>
                 <ul class="mb-0">
-                    <li>Ensure your Twilio sandbox/WhatsApp sender is approved and verified.</li>
-                    <li>Media URL must be reachable publicly (we use <code>asset('storage/...')</code>).</li>
-                    <li>Use templates if your account requires preapproved message templates.</li>
+                    <li>Ensure your Twilio WhatsApp sender is approved and verified.</li>
+                    <li>Media URL is public (we use <code>asset('storage/...')</code>).</li>
+                    <li>If your account requires templates, use preapproved templates.</li>
                 </ul>
             </div>
         </div>
@@ -99,7 +104,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    $('#waUsers').select2({ placeholder: 'Pick recipients…', width: '100%' });
+    // Allow free tagging of numbers in Select2 (press Enter to add any number)
+    $('#waUsers').select2({
+        placeholder: 'Pick or type numbers…',
+        width: '100%',
+        tags: true,            // <-- enables free entry
+        tokenSeparators: [',',' ',';']
+    });
 
     const waImg = document.getElementById('waImage');
     const waPrev = document.getElementById('waPreview');
