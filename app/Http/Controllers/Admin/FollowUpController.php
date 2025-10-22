@@ -63,71 +63,96 @@ class FollowUpController extends Controller
     /**
      * ★ NEW: Send a push notification (FCM) to a single user (by users.userid).
      */
-    public function sendUserNotification(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id'     => 'required|string',       // this is users.userid (e.g., USER30382)
-            'title'       => 'required|string|max:255',
-            'description' => 'required|string|max:1000',
-            'image'       => 'nullable|image|max:4096',
-        ]);
+   public function sendUserNotification(Request $request)
+{
+    // NOTE: user_id is the string like "USER77499" (NOT the numeric id)
+    $validated = $request->validate([
+        'user_id'     => 'required|string',
+        'title'       => 'required|string|max:255',
+        'description' => 'required|string|max:1000',
+        'image'       => 'nullable|image|max:2048',
+        // context (optional; used to reopen modal nicely)
+        'context_user_name' => 'nullable|string',
+        'context_order_id'  => 'nullable|string',
+        'context_end_date'  => 'nullable|string',
+    ]);
 
-        // Store image (optional)
-        $imagePath = $request->file('image')
-            ? $request->file('image')->store('notifications', 'public')
-            : null;
+    $imagePath = $request->hasFile('image')
+        ? $request->file('image')->store('notifications', 'public')
+        : null;
 
-        // Create an FCMNotification row (for history)
-        $notification = FCMNotification::create([
-            'title'         => $validated['title'],
-            'description'   => $validated['description'],
-            'image'         => $imagePath,
-            'status'        => 'queued',
-            'success_count' => 0,
-            'failure_count' => 0,
-        ]);
+    // Create a log row (optional but handy to keep parity with bulk screen)
+    $notification = FCMNotification::create([
+        'title'         => $validated['title'],
+        'description'   => $validated['description'],
+        'image'         => $imagePath,
+        'status'        => 'queued',
+        'success_count' => 0,
+        'failure_count' => 0,
+    ]);
 
-        // Collect this user's device tokens. IMPORTANT:
-        // UserDevice.user_id stores users.userid (string), not users.id
-        $deviceTokens = UserDevice::query()
-            ->where('user_id', $validated['user_id'])
-            ->whereNotNull('device_id')
-            ->distinct()
-            ->pluck('device_id')
-            ->toArray();
+    // Fetch this user's device tokens (user_id in devices table must match your "userid" column)
+    $tokens = UserDevice::query()
+        ->where('user_id', $validated['user_id'])
+        ->whereNotNull('device_id')
+        ->pluck('device_id')
+        ->filter()
+        ->unique()
+        ->values()
+        ->toArray();
 
-        if (empty($deviceTokens)) {
-            Log::warning('No device tokens for user', ['user_id' => $validated['user_id']]);
-            $notification->update(['status' => 'failed']);
-            return back()->with('danger', 'No valid device tokens found for this user.');
-        }
-
-        try {
-            $service = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $resp = $service->sendBulkNotifications(
-                $deviceTokens,
-                $notification->title,
-                $notification->description,
-                ['image' => $notification->image ? asset('storage/' . $notification->image) : '']
-            );
-
-            // Try to derive counts (Kreait responses expose successes/failures)
-            $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : count($deviceTokens);
-            $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : 0;
-
-            $notification->update([
-                'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
-                'success_count' => $success,
-                'failure_count' => $failure,
+    if (empty($tokens)) {
+        // Reopen modal with same context + old inputs
+        return back()
+            ->withInput()
+            ->with([
+                'error' => 'No valid device tokens found for this user.',
+                'open_send_modal' => true,
+                'open_user_id'    => $validated['user_id'],
+                'open_user_name'  => $request->input('context_user_name', 'User'),
+                'open_order_id'   => $request->input('context_order_id', '-'),
+                'open_end'        => $request->input('context_end_date', '-'),
             ]);
-
-            return back()->with('success', 'Notification sent to the user successfully!');
-        } catch (\Throwable $e) {
-            Log::error('FCM single-user send error: '.$e->getMessage(), [
-                'user_id' => $validated['user_id']
-            ]);
-            $notification->update(['status' => 'failed']);
-            return back()->with('danger', 'Failed to send notification to this user. '.$e->getMessage());
-        }
     }
+
+    try {
+        $service = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+
+        $resp = $service->sendBulkNotifications(
+            $tokens,
+            $notification->title,
+            $notification->description,
+            ['image' => $imagePath ? asset('storage/'.$imagePath) : '']
+        );
+
+        $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
+        $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
+
+        $notification->update([
+            'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
+            'success_count' => $success,
+            'failure_count' => $failure,
+        ]);
+
+        return back()->with('success', 'Notification sent successfully to the selected user!');
+    } catch (\Throwable $e) {
+        Log::error('Single user FCM send error: '.$e->getMessage(), [
+            'user_id' => $validated['user_id'],
+        ]);
+
+        $notification->update(['status' => 'failed']);
+
+        // Reopen modal with same context + old inputs
+        return back()
+            ->withInput()
+            ->with([
+                'error' => 'Failed to send notification. '.$e->getMessage(),
+                'open_send_modal' => true,
+                'open_user_id'    => $validated['user_id'],
+                'open_user_name'  => $request->input('context_user_name', 'User'),
+                'open_order_id'   => $request->input('context_order_id', '-'),
+                'open_end'        => $request->input('context_end_date', '-'),
+            ]);
+    }
+}
 }

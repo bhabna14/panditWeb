@@ -71,12 +71,28 @@
         </div>
     </div>
 
-    <!-- Flash messages -->
+    <!-- Flash / validation messages -->
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>There were some problems:</strong>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     @if (session('success'))
         <div id="Message" class="alert alert-success">{{ session('success') }}</div>
     @endif
-    @if (session('danger'))
-        <div id="Message" class="alert alert-danger">{{ session('danger') }}</div>
+    @if (session('error'))
+        <div id="Message" class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+    @if (session('warning'))
+        <div id="Message" class="alert alert-warning">{{ session('warning') }}</div>
+    @endif
+    @if (session('info'))
+        <div id="Message" class="alert alert-info">{{ session('info') }}</div>
     @endif
 
     @php
@@ -284,19 +300,21 @@
                                 <span class="chip" id="chipEnd"><i class="bi bi-calendar2-event"></i> End</span>
                             </div>
                         </div>
-                        <div class="form-hint">
-                            This will send a push notification to this user only.
-                        </div>
+                        <div class="form-hint">This will send a push notification to this user only.</div>
                     </div>
                     <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
                     <input type="hidden" name="user_id" id="notif_user_id" value="">
+                    <!-- to re-open correctly after redirect -->
+                    <input type="hidden" name="context_user_name" id="context_user_name" value="">
+                    <input type="hidden" name="context_order_id" id="context_order_id" value="">
+                    <input type="hidden" name="context_end_date" id="context_end_date" value="">
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Title</label>
-                        <input type="text" name="title" id="notif_title" class="form-control form-control-lg" maxlength="255" required placeholder="e.g. Your subscription ends soon">
+                        <input type="text" name="title" id="notif_title" class="form-control form-control-lg" maxlength="255" required placeholder="e.g. Your subscription ends soon" value="{{ old('title') }}">
                         <div class="d-flex justify-content-between">
                             <div class="form-hint">A short, catchy title works best.</div>
                             <div class="counter" id="count_title">0/255</div>
@@ -305,7 +323,7 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description</label>
-                        <textarea name="description" id="notif_desc" class="form-control" rows="4" maxlength="1000" required placeholder="Add a short message with clear next steps…"></textarea>
+                        <textarea name="description" id="notif_desc" class="form-control" rows="4" maxlength="1000" required placeholder="Add a short message with clear next steps…">{{ old('description') }}</textarea>
                         <div class="d-flex justify-content-between">
                             <div class="form-hint">Keep it helpful and action-oriented.</div>
                             <div class="counter" id="count_desc">0/1000</div>
@@ -354,8 +372,7 @@
     <script>
         // Hide flash after 3s
         setTimeout(function() {
-            const m = document.getElementById('Message');
-            if (m) m.style.display = 'none';
+            document.querySelectorAll('#Message').forEach(el => el.style.display = 'none');
         }, 3000);
 
         // DataTable init
@@ -398,6 +415,11 @@
         const imgPrev   = document.getElementById('notif_preview');
         const form      = document.getElementById('sendNotifForm');
 
+        // Extra hidden context fields (so we can reopen with the same user/order after redirect)
+        const ctxUserName = document.getElementById('context_user_name');
+        const ctxOrderId  = document.getElementById('context_order_id');
+        const ctxEndDate  = document.getElementById('context_end_date');
+
         function updateCounter(el, out, max) {
             const len = el.value.length;
             out.textContent = `${len}/${max}`;
@@ -414,9 +436,11 @@
             imgPrev.classList.remove('d-none');
         });
 
+        // Fill modal when opened from a row button
         sendModal.addEventListener('show.bs.modal', (evt) => {
-            // Button clicked
             const btn = evt.relatedTarget;
+            if (!btn) return;
+
             const userId   = btn.getAttribute('data-userid') || '';
             const userName = btn.getAttribute('data-username') || 'User';
             const orderId  = btn.getAttribute('data-orderid') || '-';
@@ -433,9 +457,37 @@
             chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${orderId}`;
             chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${endDate}`;
 
+            // Store context for round-trip
+            ctxUserName.value = userName;
+            ctxOrderId.value  = orderId;
+            ctxEndDate.value  = endDate;
+
             // Reset counters
             updateCounter(titleEl, countT, 255);
             updateCounter(descEl,  countD, 1000);
         });
+
+        // If backend told us to reopen the modal (validation error, no tokens, etc.)
+        @if (session('open_send_modal'))
+            (function reopenFromServer(){
+                const modal = new bootstrap.Modal(sendModal);
+
+                // Restore fields from old() + session context
+                userField.value = @json(session('open_user_id', ''));
+                chipUser.innerHTML  = `<i class="bi bi-person"></i> {{ session('open_user_name','User') }}`;
+                chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order {{ session('open_order_id','-') }}`;
+                chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends {{ session('open_end','-') }}`;
+
+                ctxUserName.value = @json(session('open_user_name','User'));
+                ctxOrderId.value  = @json(session('open_order_id','-'));
+                ctxEndDate.value  = @json(session('open_end','-'));
+
+                // Title/description already restored via old()
+                updateCounter(titleEl, countT, 255);
+                updateCounter(descEl,  countD, 1000);
+
+                modal.show();
+            })();
+        @endif
     </script>
 @endsection
