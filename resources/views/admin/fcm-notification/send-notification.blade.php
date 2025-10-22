@@ -155,6 +155,7 @@
                                 @endforeach
                             </select>
 
+
                             <div class="form-hint">Searchable multi-select. Start typing a name, email, or number.</div>
                         </div>
 
@@ -212,66 +213,90 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Title</th>
-                                    <th>Status</th>
-                                    <th>Success</th>
-                                    <th>Fail</th>
-                                    <th>Image</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
+                            <thead>
+                                <tr class="text-nowrap">
+                                    <th>#</th>
+                                    <th>User</th>
+                                    <th>Mobile</th>
+                                    <th>Duration</th>
+                                    <th>Type</th>
+                                    <th>Amount (Due)</th>
+                                    <th>Since</th>
+                                    <th>Notify</th> {{-- 👈 NEW --}}
+                                    <th>Collect</th>
                                 </tr>
                             </thead>
-                            <tbody id="notifTable">
-                                @foreach ($notifications as $notification)
-                                    <tr>
-                                        <td>{{ $notification->id }}</td>
+                            <tbody>
+                                @forelse($pendingPayments as $i => $row)
+                                    @php
+                                        $start = $row->start_date ? Carbon::parse($row->start_date) : null;
+                                        $end = $row->end_date ? Carbon::parse($row->end_date) : null;
+                                        $durationDays = $start && $end ? $start->diffInDays($end) + 1 : 0;
+                                        $since = $row->latest_pending_since
+                                            ? Carbon::parse($row->latest_pending_since)
+                                            : null;
+                                    @endphp
+                                    <tr data-row-id="{{ $row->latest_payment_row_id }}">
+                                        <td class="text-muted">{{ $pendingPayments->firstItem() + $i }}</td>
                                         <td>
-                                            <div class="fw-semibold">{{ $notification->title }}</div>
-                                            <div class="text-muted small">{{ Str::limit($notification->description, 80) }}
-                                            </div>
+                                            <div class="fw-semibold">{{ $row->user_name }}</div>
+                                            <div class="text-muted small">Sub #{{ $row->subscription_id ?? '—' }}</div>
                                         </td>
+                                        <td>{{ $row->mobile_number }}</td>
                                         <td>
-                                            @php $s = strtolower($notification->status ?? 'queued'); @endphp
-                                            @if ($s === 'sent')
-                                                <span class="badge-status badge-sent">Sent</span>
-                                            @elseif($s === 'partial')
-                                                <span class="badge-status badge-partial">Partial</span>
-                                            @elseif($s === 'failed')
-                                                <span class="badge-status badge-failed">Failed</span>
-                                            @else
-                                                <span class="badge-status badge-queued">Queued</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $notification->success_count ?? '-' }}</td>
-                                        <td>{{ $notification->failure_count ?? '-' }}</td>
-                                        <td>
-                                            @if ($notification->image)
-                                                <img src="{{ asset('storage/' . $notification->image) }}" width="40"
-                                                    class="rounded border">
+                                            @if ($start && $end)
+                                                {{ $start->format('d M Y') }} — {{ $end->format('d M Y') }}
+                                                <span class="text-muted small">({{ $durationDays }}d)</span>
                                             @else
                                                 —
                                             @endif
                                         </td>
-                                        <td>{{ $notification->created_at?->format('d M Y, h:i A') }}</td>
-                                        <td class="text-nowrap">
-                                            <form action="{{ route('admin.notifications.delete', $notification->id) }}"
-                                                method="POST" class="d-inline"
-                                                onsubmit="return confirm('Delete this notification?');">
-                                                @csrf @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                            </form>
-                                            <form id="resend-form-{{ $notification->id }}"
-                                                action="{{ route('admin.notifications.resend', $notification->id) }}"
-                                                method="POST" class="d-none">@csrf</form>
-                                            <button class="btn btn-sm btn-outline-primary"
-                                                onclick="resendNotification({{ $notification->id }})">Resend</button>
+                                        <td>
+                                            {{ $row->product_category ?? '—' }}
+                                            @if ($row->product_name)
+                                                <span class="text-muted small">({{ $row->product_name }})</span>
+                                            @endif
+                                        </td>
+                                        <td class="fw-bold amount-cell">₹ {{ number_format($row->due_amount ?? 0, 2) }}
+                                        </td>
+                                        <td>
+                                            @if ($since)
+                                                <span
+                                                    class="badge bg-warning text-dark">{{ $since->diffForHumans() }}</span>
+                                            @else
+                                                —
+                                            @endif
+                                        </td>
+
+                                        {{-- 👇 NEW: Notify button (deep-link with ?user=userid) --}}
+                                        <td>
+                                            <a href="{{ route('admin.notification.create', ['user' => $row->user_id]) }}"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="Send notification to {{ $row->user_name }}">
+                                                Notify
+                                            </a>
+                                        </td>
+
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-success btn-collect"
+                                                data-id="{{ $row->latest_payment_row_id }}"
+                                                data-order="{{ $row->latest_order_id }}"
+                                                data-user="{{ $row->user_name }}"
+                                                data-amount="{{ $row->due_amount ?? 0 }}"
+                                                data-method="{{ $row->payment_method ?? '' }}"
+                                                data-url="{{ route('payment.collection.collect', $row->latest_payment_row_id) }}"
+                                                data-bs-toggle="modal" data-bs-target="#collectModal">
+                                                Collect
+                                            </button>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="9" class="text-center py-4">No pending payments 🎉</td>
+                                    </tr>
+                                @endforelse
                             </tbody>
+
                         </table>
                     </div>
                 </div>
@@ -279,21 +304,25 @@
         </div>
     </div>
 @endsection
-
 @section('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        // Select2
-        $('#users').select2({
+        // =========================
+        // Select2 (single init)
+        // =========================
+        const $usersSel = $('#users').select2({
             placeholder: 'Search users…',
             width: '100%'
         });
 
+        // =========================
         // Audience toggles
-        const usersWrap = document.getElementById('usersWrap');
+        // =========================
+        const usersWrap    = document.getElementById('usersWrap');
         const platformWrap = document.getElementById('platformWrap');
         document.querySelectorAll('input[name="audience"]').forEach(r => {
             r.addEventListener('change', e => {
@@ -302,41 +331,90 @@
             });
         });
 
+        // =========================
+        // Prefill single user (from ?user=USERID)
+        // Requires: window.__PREFILL_USER_ID__ set in the Blade (see controller)
+        // =========================
+        (function prefillSingleUser() {
+            const prefill = window.__PREFILL_USER_ID__;
+            if (!prefill) return;
+
+            // flip radio to "users"
+            const radioUsers = document.getElementById('audUsers');
+            if (radioUsers) radioUsers.checked = true;
+
+            // show/hide sections
+            usersWrap.classList.remove('d-none');
+            platformWrap.classList.add('d-none');
+
+            // set Select2 value
+            const exists = Array.from(document.querySelectorAll('#users option')).some(o => o.value === prefill);
+            if (exists) {
+                $usersSel.val([prefill]).trigger('change');
+            } else {
+                // add temp option if not present
+                const newOpt = new Option(prefill, prefill, true, true);
+                $usersSel.append(newOpt).trigger('change');
+            }
+
+            // toast
+            try {
+                Swal.fire({
+                    toast: true, position: 'top-end', timer: 1400, showConfirmButton: false,
+                    icon: 'info', title: 'User preselected from Payment Collection'
+                });
+            } catch (e) {}
+        })();
+
+        // =========================
         // Counters
+        // =========================
         const titleEl = document.getElementById('title');
-        const descEl = document.getElementById('description');
-        const tCnt = document.getElementById('titleCount');
-        const dCnt = document.getElementById('descCount');
-        const bindCounter = (el, out) => el.addEventListener('input', () => out.textContent = el.value.length);
+        const descEl  = document.getElementById('description');
+        const tCnt    = document.getElementById('titleCount');
+        const dCnt    = document.getElementById('descCount');
+        const bindCounter = (el, out) => el && out && el.addEventListener('input', () => out.textContent = el.value.length);
         bindCounter(titleEl, tCnt);
         bindCounter(descEl, dCnt);
 
+        // =========================
         // Image preview
-        const img = document.getElementById('image');
+        // =========================
+        const img  = document.getElementById('image');
         const prev = document.getElementById('imgPreview');
-        img.addEventListener('change', e => {
-            const f = e.target.files[0];
-            if (!f) {
-                prev.classList.add('d-none');
-                return;
-            }
-            const url = URL.createObjectURL(f);
-            prev.src = url;
-            prev.classList.remove('d-none');
-        });
-
-        // Preview dialog
-        document.getElementById('previewBtn').addEventListener('click', () => {
-            Swal.fire({
-                title: titleEl.value || '(No title)',
-                html: `<div style="text-align:left"><p>${(descEl.value||'(No description)').replace(/\n/g,'<br>')}</p></div>`,
-                imageUrl: prev.src && !prev.classList.contains('d-none') ? prev.src : undefined,
-                imageWidth: 300,
-                confirmButtonText: 'Looks Good'
+        if (img && prev) {
+            img.addEventListener('change', e => {
+                const f = e.target.files[0];
+                if (!f) {
+                    prev.classList.add('d-none');
+                    prev.removeAttribute('src');
+                    return;
+                }
+                const url = URL.createObjectURL(f);
+                prev.src = url;
+                prev.classList.remove('d-none');
             });
-        });
+        }
 
+        // =========================
+        // Preview dialog
+        // =========================
+        const previewBtn = document.getElementById('previewBtn');
+        if (previewBtn) {
+            previewBtn.addEventListener('click', () => {
+                Swal.fire({
+                    title: (titleEl?.value || '(No title)'),
+                    html: `<div style="text-align:left"><p>${(descEl?.value || '(No description)').replace(/\n/g,'<br>')}</p></div>`,
+                    imageUrl: (prev && !prev.classList.contains('d-none')) ? prev.src : undefined,
+                    imageWidth: 300,
+                    confirmButtonText: 'Looks Good'
+                });
+            });
+        }
+
+        // =========================
         // Resend confirm
+        // =========================
         function resendNotification(id) {
             Swal.fire({
                 title: 'Resend this notification?',
@@ -349,12 +427,17 @@
         }
         window.resendNotification = resendNotification;
 
+        // =========================
         // Table search
-        document.getElementById('tableSearch').addEventListener('input', function() {
-            const q = this.value.toLowerCase();
-            document.querySelectorAll('#notifTable tr').forEach(tr => {
-                tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+        // =========================
+        const tableSearch = document.getElementById('tableSearch');
+        if (tableSearch) {
+            tableSearch.addEventListener('input', function() {
+                const q = this.value.toLowerCase();
+                document.querySelectorAll('#notifTable tr').forEach(tr => {
+                    tr.style.display = tr.innerText.toLowerCase().includes(q) ? '' : 'none';
+                });
             });
-        });
+        }
     </script>
 @endsection

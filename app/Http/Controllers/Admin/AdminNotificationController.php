@@ -14,14 +14,20 @@ use App\Services\Msg91WhatsappService;
 
 class AdminNotificationController extends Controller
 {
-    public function create()
-    {
-        $notifications = FCMNotification::orderBy('created_at', 'desc')->get();
-        $platforms = ['android', 'ios', 'web'];
-        $users = User::orderBy('name')->select('userid','name','mobile_number','email')->get();
+ public function create(Request $request)
+{
+    $notifications = FCMNotification::orderBy('created_at', 'desc')->get();
+    $platforms     = ['android', 'ios', 'web'];
+    $users         = User::orderBy('name')->select('userid','name','mobile_number','email')->get();
 
-        return view('admin.fcm-notification.send-notification', compact('notifications','platforms','users'));
-    }
+    // 👇 NEW: preselect single user via query (?user=USER123)
+    $prefillUserId = $request->query('user'); // string like "USER30382" (users.userid)
+
+    return view('admin.fcm-notification.send-notification', compact(
+        'notifications', 'platforms', 'users', 'prefillUserId'
+    ));
+}
+
 
     public function whatsappcreate()
     {
@@ -29,7 +35,7 @@ class AdminNotificationController extends Controller
         return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
     }
 
- public function send(Request $request)
+public function send(Request $request)
 {
     // Strict, conditional validation based on selected audience
     $validated = $request->validate([
