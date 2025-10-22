@@ -513,6 +513,7 @@
             </form>
         </div>
     </div>
+
 @endsection
 
 @section('scripts')
@@ -570,8 +571,14 @@
                 table.search(this.value).draw();
             });
         }
+    </script>
+    <script>
+        // Hide flash after 3s
+        setTimeout(() => {
+            document.querySelectorAll('#Message').forEach(el => el.style.display = 'none');
+        }, 3000);
 
-        // ====== SEND NOTIFICATION MODAL (belt & suspenders) ======
+        // ====== SEND NOTIFICATION MODAL ======
         const sendModal = document.getElementById('sendNotifModal');
         const form = document.getElementById('sendNotifForm');
 
@@ -596,6 +603,7 @@
         }
         titleEl.addEventListener('input', () => updateCounter(titleEl, countT, 255));
         descEl.addEventListener('input', () => updateCounter(descEl, countD, 1000));
+
         imgInput.addEventListener('change', e => {
             const f = e.target.files[0];
             if (!f) {
@@ -607,10 +615,10 @@
             imgPrev.classList.remove('d-none');
         });
 
-        // Keep last clicked context globally
+        // Remember last clicked context (helps if DOM redraws)
         window.__lastNotifCtx = null;
 
-        // 1) Event delegation: capture clicks on any current/future ".js-open-send-modal"
+        // Delegated click: works across DataTables redraws
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.js-open-send-modal');
             if (!btn) return;
@@ -623,7 +631,7 @@
             };
             window.__lastNotifCtx = ctx;
 
-            // Pre-fill immediately (helps if modal auto-submits fast)
+            // Pre-fill hidden fields + chips
             userField.value = ctx.uid;
             document.getElementById('context_user_name').value = ctx.uname;
             document.getElementById('context_order_id').value = ctx.oid;
@@ -635,12 +643,11 @@
             inlineUidError.style.display = ctx.uid ? 'none' : 'block';
         }, true);
 
-        // 2) Also fill on modal show (covers keyboard open / programmatic open)
+        // Also fill when modal is shown via keyboard/programmatic open
         sendModal.addEventListener('show.bs.modal', (ev) => {
             const btn = ev.relatedTarget && ev.relatedTarget.classList && ev.relatedTarget.classList.contains(
                     'js-open-send-modal') ?
-                ev.relatedTarget :
-                null;
+                ev.relatedTarget : null;
 
             if (btn) {
                 const ctx = {
@@ -666,7 +673,7 @@
             updateCounter(descEl, countD, 1000);
         });
 
-        // 3) Hard guard before submit; if empty, backfill from last ctx
+        // Guard before submit; backfill from last ctx if needed
         form.addEventListener('submit', function(e) {
             if (!userField.value && window.__lastNotifCtx && window.__lastNotifCtx.uid) {
                 userField.value = window.__lastNotifCtx.uid;
@@ -679,7 +686,7 @@
             }
         });
 
-        // 4) Auto-reopen after server-side validation / no-token case
+        // Auto-reopen after server validation / token errors
         @if (session('open_send_modal'))
             (function reopenModal() {
                 const modal = new bootstrap.Modal(sendModal);
