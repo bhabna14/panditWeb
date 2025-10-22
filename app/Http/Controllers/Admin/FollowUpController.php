@@ -28,7 +28,6 @@ class FollowUpController extends Controller
                 'user',
                 'address.localityDetails',
                 'flowerProduct',
-                // Include followups for the “View Notes” modal
                 'marketingFollowUps'
             ])
             ->whereHas('subscription', function ($query) {
@@ -63,10 +62,9 @@ class FollowUpController extends Controller
     /**
      * ★ NEW: Send a push notification (FCM) to a single user (by users.userid).
      */
-
 public function sendUserNotification(Request $request)
 {
-    // Validate (user_id is a string like USER77499)
+    // NOTE: user_id is alphanumeric like USER77499, so it's a string.
     $validated = $request->validate([
         'user_id'     => 'required|string',
         'title'       => 'required|string|max:255',
@@ -90,7 +88,7 @@ public function sendUserNotification(Request $request)
         'failure_count' => 0,
     ]);
 
-    // Find device tokens for this user_id (string)
+    // Fetch tokens for this exact user_id (string)
     $tokens = UserDevice::query()
         ->where('user_id', $validated['user_id'])
         ->whereNotNull('device_id')

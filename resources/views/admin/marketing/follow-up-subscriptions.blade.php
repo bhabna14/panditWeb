@@ -1,6 +1,7 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
+    <!-- DataTables CSS -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
@@ -27,13 +28,10 @@
         .metric-card:hover{box-shadow:0 12px 26px rgba(16,24,40,.06);transform:translateY(-2px)}
         .metric-card .value{font-size:1.25rem;font-weight:700}
         .metric-card .label{font-size:.8rem;color:#64748b}
-        .badge-status{font-size:.78rem}
 
+        /* Modal styling */
         .send-modal .modal-content{border-radius:14px;overflow:hidden}
-        .send-modal .modal-header{
-            background:linear-gradient(180deg,#f8fafc 0%, #ffffff 100%);
-            border-bottom:1px solid #eef2f7;
-        }
+        .send-modal .modal-header{background:linear-gradient(180deg,#f8fafc 0%, #ffffff 100%);border-bottom:1px solid #eef2f7}
         .chip{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .6rem;border-radius:999px;border:1px solid #e2e8f0;background:#f8fafc;font-size:.78rem;font-weight:600;color:#334155}
         .img-preview{display:block;max-height:110px;border:1px dashed #cbd5e1;border-radius:12px;padding:6px;background:#f8fafc}
         .form-hint{font-size:.8rem;color:#64748b}
@@ -41,6 +39,8 @@
         .counter.ok{color:#059669}.counter.warn{color:#b45309}.counter.bad{color:#b91c1c}
         .btn-gradient{background:linear-gradient(135deg,#22c55e 0%, #3b82f6 100%);border:0;color:#fff}
         .btn-gradient:hover{opacity:.95;color:#fff}
+        .inline-error{display:none;color:#b91c1c;font-size:.85rem;margin-top:.25rem}
+        .is-invalid{border-color:#dc3545}
     </style>
 @endsection
 
@@ -153,6 +153,7 @@
                                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#followUpModal-{{ $order->id }}"><i class="bi bi-journal-plus"></i> Add Note</button>
                                             <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#viewNotesModal-{{ $order->id }}"><i class="bi bi-eye"></i> View Notes</button>
 
+                                            <!-- Send Notification -->
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-warning js-open-send-modal"
@@ -257,35 +258,39 @@
                 </div>
 
                 <div class="modal-body">
-                    {{-- user_id default from old()/session in case JS doesn’t run --}}
+                    {{-- Fallbacks: keep old/session values if validation failed previously --}}
                     <input type="hidden" name="user_id" id="notif_user_id" value="{{ old('user_id', session('open_user_id')) }}">
                     <input type="hidden" name="context_user_name" id="context_user_name" value="{{ old('context_user_name', session('open_user_name')) }}">
                     <input type="hidden" name="context_order_id"  id="context_order_id"  value="{{ old('context_order_id',  session('open_order_id')) }}">
                     <input type="hidden" name="context_end_date"  id="context_end_date"  value="{{ old('context_end_date',  session('open_end')) }}">
+                    <div id="inlineUidError" class="inline-error">User is missing. Close and click “Send Notification” again.</div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Title</label>
-                        <input type="text" name="title" id="notif_title" class="form-control form-control-lg" maxlength="255" required placeholder="e.g. Your subscription ends soon" value="{{ old('title') }}">
+                        <input type="text" name="title" id="notif_title" class="form-control form-control-lg @error('title') is-invalid @enderror" maxlength="255" required placeholder="e.g. Your subscription ends soon" value="{{ old('title') }}">
                         <div class="d-flex justify-content-between">
                             <div class="form-hint">A short, catchy title works best.</div>
                             <div class="counter" id="count_title">0/255</div>
                         </div>
+                        @error('title')<div class="inline-error" style="display:block">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Description</label>
-                        <textarea name="description" id="notif_desc" class="form-control" rows="4" maxlength="1000" required placeholder="Add a short message with clear next steps…">{{ old('description') }}</textarea>
+                        <textarea name="description" id="notif_desc" class="form-control @error('description') is-invalid @enderror" rows="4" maxlength="1000" required placeholder="Add a short message with clear next steps…">{{ old('description') }}</textarea>
                         <div class="d-flex justify-content-between">
                             <div class="form-hint">Keep it helpful and action-oriented.</div>
                             <div class="counter" id="count_desc">0/1000</div>
                         </div>
+                        @error('description')<div class="inline-error" style="display:block">{{ $message }}</div>@enderror
                     </div>
 
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <label class="form-label fw-semibold">Image (optional)</label>
-                            <input type="file" name="image" id="notif_image" class="form-control" accept="image/*">
+                            <input type="file" name="image" id="notif_image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
                             <div class="form-hint mt-1">Square images (1:1) look best in push.</div>
+                            @error('image')<div class="inline-error" style="display:block">{{ $message }}</div>@enderror
                         </div>
                         <div class="col-12 col-md-6 d-flex align-items-end">
                             <img id="notif_preview" class="img-preview d-none w-100" />
@@ -318,31 +323,27 @@
     <script src="{{ asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
-
     <script>
         // Hide flash after 3s
-        setTimeout(function() {
-            document.querySelectorAll('#Message').forEach(el => el.style.display = 'none');
-        }, 3000);
+        setTimeout(function(){ document.querySelectorAll('#Message').forEach(el => el.style.display='none'); }, 3000);
 
         // DataTable
         const table = new DataTable('#ending-table', {
-            responsive: true, stateSave: true, pageLength: 25,
-            lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
-            order: [[2,'asc']],
-            dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
-            buttons: [
-                { extend:'copyHtml5',  title:'Subscriptions Ending Soon' },
-                { extend:'csvHtml5',   title:'subscriptions_ending' },
-                { extend:'excelHtml5', title:'subscriptions_ending' },
-                { extend:'pdfHtml5',   title:'Subscriptions Ending Soon', orientation:'landscape', pageSize:'A4' },
-                { extend:'print',      title:'Subscriptions Ending Soon' },
-                { extend:'colvis',     text:'Columns' }
+            responsive:true, stateSave:true, pageLength:25,
+            lengthMenu:[[10,25,50,100,-1],[10,25,50,100,'All']],
+            order:[[2,'asc']],
+            dom:'<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
+            buttons:[
+                {extend:'copyHtml5', title:'Subscriptions Ending Soon'},
+                {extend:'csvHtml5', title:'subscriptions_ending'},
+                {extend:'excelHtml5', title:'subscriptions_ending'},
+                {extend:'pdfHtml5', title:'Subscriptions Ending Soon', orientation:'landscape', pageSize:'A4'},
+                {extend:'print', title:'Subscriptions Ending Soon'},
+                {extend:'colvis', text:'Columns'}
             ],
         });
-
-        const searchInput = document.getElementById('tableSearch');
-        if (searchInput) searchInput.addEventListener('keyup', function(){ table.search(this.value).draw(); });
+        const searchInput=document.getElementById('tableSearch');
+        if(searchInput){ searchInput.addEventListener('keyup', function(){ table.search(this.value).draw(); }); }
 
         // Modal logic
         const sendModal = document.getElementById('sendNotifModal');
@@ -357,87 +358,72 @@
         const countD    = document.getElementById('count_desc');
         const imgInput  = document.getElementById('notif_image');
         const imgPrev   = document.getElementById('notif_preview');
+        const inlineUidError = document.getElementById('inlineUidError');
 
-        const ctxUserName = document.getElementById('context_user_name');
-        const ctxOrderId  = document.getElementById('context_order_id');
-        const ctxEndDate  = document.getElementById('context_end_date');
-
-        let currentUserId = userField.value || ''; // persist across opens
-
-        function updateCounter(el, out, max) {
-            const len = el.value.length;
+        function updateCounter(el, out, max){
+            const len=el.value.length;
             out.textContent = `${len}/${max}`;
             out.className = 'counter ' + (len <= max*0.7 ? 'ok' : (len <= max ? 'warn' : 'bad'));
         }
         titleEl.addEventListener('input', () => updateCounter(titleEl, countT, 255));
-        descEl.addEventListener('input',  () => updateCounter(descEl,  countD, 1000));
+        descEl .addEventListener('input', () => updateCounter(descEl , countD, 1000));
 
         imgInput.addEventListener('change', e => {
-            const f = e.target.files[0];
-            if (!f) { imgPrev.classList.add('d-none'); imgPrev.src=''; return; }
+            const f=e.target.files[0];
+            if(!f){ imgPrev.classList.add('d-none'); imgPrev.src=''; return; }
             imgPrev.src = URL.createObjectURL(f);
             imgPrev.classList.remove('d-none');
         });
 
-        // Fill when opened from a row
-        sendModal.addEventListener('show.bs.modal', (evt) => {
-            const btn = evt.relatedTarget;
-            if (!btn) return;
-            const userId   = btn.getAttribute('data-userid') || '';
-            const userName = btn.getAttribute('data-username') || 'User';
-            const orderId  = btn.getAttribute('data-orderid') || '-';
-            const endDate  = btn.getAttribute('data-end') || '-';
+        // 1) RIGHT WHEN BUTTON IS CLICKED — set user_id BEFORE modal opens
+        document.querySelectorAll('.js-open-send-modal').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                const uid = btn.getAttribute('data-userid') || '';
+                const uname = btn.getAttribute('data-username') || 'User';
+                const oid = btn.getAttribute('data-orderid') || '-';
+                const end = btn.getAttribute('data-end') || '-';
 
-            form.reset();
-            imgPrev.classList.add('d-none'); imgPrev.src = '';
+                userField.value = uid; // critical
+                inlineUidError.style.display = uid ? 'none' : 'block';
 
-            currentUserId     = userId;
-            userField.value   = userId;
-            chipUser.innerHTML  = `<i class="bi bi-person"></i> ${userName}`;
-            chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${orderId}`;
-            chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${endDate}`;
-
-            ctxUserName.value = userName;
-            ctxOrderId.value  = orderId;
-            ctxEndDate.value  = endDate;
-
-            // restore old() values if present (already in the DOM), then update counters
-            updateCounter(titleEl, countT, 255);
-            updateCounter(descEl,  countD, 1000);
+                chipUser.innerHTML  = `<i class="bi bi-person"></i> ${uname}`;
+                chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${oid}`;
+                chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${end}`;
+            });
         });
 
-        // Failsafe: ensure user_id is set just before submit
+        // 2) On modal show — DO NOT reset the form (it can wipe hidden inputs)
+        sendModal.addEventListener('show.bs.modal', ()=>{
+            // just update counters; don’t .reset()
+            updateCounter(titleEl, countT, 255);
+            updateCounter(descEl , countD, 1000);
+        });
+
+        // 3) Right before submit — hard guard
         form.addEventListener('submit', function(e){
-            if (!userField.value && currentUserId) {
-                userField.value = currentUserId;
+            if(!userField.value){
+                e.preventDefault();
+                inlineUidError.style.display = 'block';
+                // keep the modal open
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(sendModal);
+                modalInstance.show();
+                return false;
             }
         });
 
-        // Re-open after server-side error/validation
+        // Auto-reopen after server-side validation with preserved session data
         @if (session('open_send_modal'))
-            (function reopenFromServer(){
+            (function reopenModal(){
                 const modal = new bootstrap.Modal(sendModal);
-
-                // Fill UI chips from session
-                const sessUser = @json(session('open_user_name','User'));
-                const sessOrder= @json(session('open_order_id','-'));
-                const sessEnd  = @json(session('open_end','-'));
-                const sessId   = @json(session('open_user_id',''));
-
-                currentUserId   = sessId;
-                userField.value = sessId;
-
-                chipUser.innerHTML  = `<i class="bi bi-person"></i> ${sessUser}`;
-                chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${sessOrder}`;
-                chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${sessEnd}`;
-
-                ctxUserName.value = sessUser;
-                ctxOrderId.value  = sessOrder;
-                ctxEndDate.value  = sessEnd;
-
+                // chips
+                chipUser.innerHTML  = `<i class="bi bi-person"></i> {{ session('open_user_name','User') }}`;
+                chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order {{ session('open_order_id','-') }}`;
+                chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends {{ session('open_end','-') }}`;
+                // ensure user_id is present
+                userField.value = `{{ session('open_user_id','') }}`;
+                inlineUidError.style.display = userField.value ? 'none' : 'block';
                 updateCounter(titleEl, countT, 255);
-                updateCounter(descEl,  countD, 1000);
-
+                updateCounter(descEl , countD, 1000);
                 modal.show();
             })();
         @endif
