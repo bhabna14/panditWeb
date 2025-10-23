@@ -112,178 +112,176 @@ class NewUserOrderController extends Controller
         ]);
     }
 
-public function saveNewUserOrder(Request $request)
-{
-    // ---- Validation rules (branch by user/address modes) ----
-    $baseRules = [
-        // product + subscription
-        'product_id'     => ['required'],
-        'start_date'     => ['required','date'],
-        'end_date'       => ['nullable','date','after_or_equal:start_date'],
-        'duration'       => ['required','integer', Rule::in([1,3,6])],
+    public function saveNewUserOrder(Request $request)
+    {
+        // ---- Validation rules (branch by user/address modes) ----
+        $baseRules = [
+            // product + subscription
+            'product_id'     => ['required'],
+            'start_date'     => ['required','date'],
+            'end_date'       => ['nullable','date','after_or_equal:start_date'],
+            'duration'       => ['required','integer', Rule::in([1,3,6])],
 
-        // payment
-        'paid_amount'    => ['required','numeric','min:0'],
-        'payment_method' => ['required', Rule::in(['cash','upi','Razorpay'])],
+            // payment
+            'paid_amount'    => ['required','numeric','min:0'],
+            'payment_method' => ['required', Rule::in(['cash','upi','Razorpay'])],
 
-        // status
-        'status'         => ['nullable', Rule::in(['active','pending','expired'])],
-        'payment_status' => ['nullable', Rule::in(['paid','pending'])],
+            // status
+            'status'         => ['nullable', Rule::in(['active','pending','expired'])],
+            'payment_status' => ['nullable', Rule::in(['paid','pending'])],
 
-        // user mode
-        'user_select'    => ['required'],
-    ];
-
-    // If NEW user: need name + 10-digit mobile
-    if ($request->input('user_select') === 'NEW') {
-        $userRules = [
-            'name'          => ['required','string','max:150'],
-            'mobile_number' => ['required','digits:10', Rule::unique('users','mobile_number')],
-            'user_type'     => ['nullable', Rule::in(['normal','vip'])],
+            // user mode
+            'user_select'    => ['required'],
         ];
-    } else {
-        // Existing user must be supplied; allow optional updates
-        $userRules = [
-            'existing_user_id' => ['required','exists:users,userid'],
-            'name'             => ['nullable','string','max:150'],
-            'mobile_number'    => ['nullable','digits:10', Rule::unique('users','mobile_number')->ignore($request->input('existing_user_id'), 'userid')],
-            'user_type'        => ['nullable', Rule::in(['normal','vip'])],
-        ];
-    }
 
-    // Address rules
-    if ($request->input('address_mode') === 'existing') {
-        $addressRules = [
-            'existing_address_id' => ['required','integer','exists:user_addresses,id'],
-        ];
-    } else {
-        $addressRules = [
-            'state'               => ['required','string','max:100'],
-            'city'                => ['required','string','max:120'],
-            'pincode'             => ['required','string','max:10'],
-            'locality'            => ['required','string'],     // unique_code
-            'apartment_name'      => ['nullable','string','max:150'],
-            'place_category'      => ['required', Rule::in(['Individual','Apartment','Business','Temple'])],
-            'apartment_flat_plot' => ['required','string','max:150'],
-            'landmark'            => ['nullable','string','max:150'],
-            'address_type'        => ['nullable', Rule::in(['Home','Work','Other'])],
-        ];
-    }
-
-    // This will redirect back with $errors on failure (our Blade shows a SweetAlert modal)
-    $validated = $request->validate($baseRules + $userRules + $addressRules);
-
-    DB::beginTransaction();
-    try {
-        // -------- Resolve/Create user --------
+        // If NEW user: need name + 10-digit mobile
         if ($request->input('user_select') === 'NEW') {
-            $userCode = 'USER' . random_int(10000, 99999);
-            $user = User::create([
-                'userid'        => $userCode,
-                'user_type'     => $validated['user_type'] ?? 'normal',
-                'name'          => $validated['name'],
-                // NOTE: If you store +91, keep validation/uniqueness consistent in DB.
-                'mobile_number' => '+91' . $validated['mobile_number'],
-            ]);
+            $userRules = [
+                'name'          => ['required','string','max:150'],
+                'mobile_number' => ['required','digits:10', Rule::unique('users','mobile_number')],
+                'user_type'     => ['nullable', Rule::in(['normal','vip'])],
+            ];
         } else {
-            $user = User::where('userid', $validated['existing_user_id'])->firstOrFail();
-
-            $updates = [];
-            if (!empty($validated['name']))          $updates['name']          = $validated['name'];
-            if (!empty($validated['mobile_number'])) $updates['mobile_number'] = '+91' . $validated['mobile_number'];
-            if (!empty($validated['user_type']))     $updates['user_type']     = $validated['user_type'];
-
-            if (!empty($updates)) $user->update($updates);
+            // Existing user must be supplied; allow optional updates
+            $userRules = [
+                'existing_user_id' => ['required','exists:users,userid'],
+                'name'             => ['nullable','string','max:150'],
+                'mobile_number'    => ['nullable','digits:10', Rule::unique('users','mobile_number')->ignore($request->input('existing_user_id'), 'userid')],
+                'user_type'        => ['nullable', Rule::in(['normal','vip'])],
+            ];
         }
 
-        // -------- Resolve/Create address --------
+        // Address rules
         if ($request->input('address_mode') === 'existing') {
-            $address = UserAddress::where('id', $validated['existing_address_id'])
-                ->where('user_id', $user->userid)
-                ->firstOrFail();
+            $addressRules = [
+                'existing_address_id' => ['required','integer','exists:user_addresses,id'],
+            ];
         } else {
-            $address = UserAddress::create([
-                'user_id'             => $user->userid, // you use 'userid' as FK
-                'state'               => $validated['state'],
-                'city'                => $validated['city'],
-                'pincode'             => $validated['pincode'],
-                'locality'            => $validated['locality'], // unique_code
-                'apartment_name'      => $validated['apartment_name'] ?? null,
-                'place_category'      => $validated['place_category'],
-                'apartment_flat_plot' => $validated['apartment_flat_plot'],
-                'landmark'            => $validated['landmark'] ?? null,
-                'address_type'        => $validated['address_type'] ?? 'Other',
-                'country'             => 'India',
-                'default'             => 1,
-            ]);
-            $address->setAsDefault();
+            $addressRules = [
+                'state'               => ['required','string','max:100'],
+                'city'                => ['required','string','max:120'],
+                'pincode'             => ['required','string','max:10'],
+                'locality'            => ['required','string'],     // unique_code
+                'apartment_name'      => ['nullable','string','max:150'],
+                'place_category'      => ['required', Rule::in(['Individual','Apartment','Business','Temple'])],
+                'apartment_flat_plot' => ['required','string','max:150'],
+                'landmark'            => ['nullable','string','max:150'],
+                'address_type'        => ['nullable', Rule::in(['Home','Work','Other'])],
+            ];
         }
 
-        // -------- Dates --------
-        $start = Carbon::parse($validated['start_date'])->startOfDay();
-        $end = !empty($validated['end_date'])
-            ? Carbon::parse($validated['end_date'])->endOfDay()
-            : (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
+        // This will redirect back with $errors on failure (our Blade shows a SweetAlert modal)
+        $validated = $request->validate($baseRules + $userRules + $addressRules);
 
-        // -------- Order --------
-        $orderId = 'ORD-' . strtoupper(Str::random(12));
-        $order = Order::create([
-            'user_id'     => $user->userid,
-            'order_id'    => $orderId,
-            'product_id'  => $validated['product_id'],
-            'quantity'    => 1,
-            'start_date'  => $start,
-            'address_id'  => $address->id,
-            'total_price' => $validated['paid_amount'],
-        ]);
+        DB::beginTransaction();
+        try {
+            // -------- Resolve/Create user --------
+            if ($request->input('user_select') === 'NEW') {
+                $userCode = 'USER' . random_int(10000, 99999);
+                $user = User::create([
+                    'userid'        => $userCode,
+                    'user_type'     => $validated['user_type'] ?? 'normal',
+                    'name'          => $validated['name'],
+                    // NOTE: If you store +91, keep validation/uniqueness consistent in DB.
+                    'mobile_number' => '+91' . $validated['mobile_number'],
+                ]);
+            } else {
+                $user = User::where('userid', $validated['existing_user_id'])->firstOrFail();
 
-        // -------- Subscription --------
-        $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
-        Subscription::create([
-            'subscription_id' => $subscriptionId,
-            'user_id'         => $user->userid,
-            'order_id'        => $order->order_id,
-            'product_id'      => $validated['product_id'],
-            'start_date'      => $start,
-            'end_date'        => $end,
-            'status'          => $validated['status'] ?? 'active',
-        ]);
+                $updates = [];
+                if (!empty($validated['name']))          $updates['name']          = $validated['name'];
+                if (!empty($validated['mobile_number'])) $updates['mobile_number'] = '+91' . $validated['mobile_number'];
+                if (!empty($validated['user_type']))     $updates['user_type']     = $validated['user_type'];
 
-        // -------- Payment --------
-        FlowerPayment::create([
-            'order_id'       => $order->order_id,
-            'payment_id'     => null,
-            'user_id'        => $user->userid,
-            'payment_method' => $validated['payment_method'],
-            'paid_amount'    => $validated['paid_amount'],
-            'payment_status' => $validated['payment_status'],
-        ]);
+                if (!empty($updates)) $user->update($updates);
+            }
 
-        DB::commit();
+            // -------- Resolve/Create address --------
+            if ($request->input('address_mode') === 'existing') {
+                $address = UserAddress::where('id', $validated['existing_address_id'])
+                    ->where('user_id', $user->userid)
+                    ->firstOrFail();
+            } else {
+                $address = UserAddress::create([
+                    'user_id'             => $user->userid, // you use 'userid' as FK
+                    'state'               => $validated['state'],
+                    'city'                => $validated['city'],
+                    'pincode'             => $validated['pincode'],
+                    'locality'            => $validated['locality'], // unique_code
+                    'apartment_name'      => $validated['apartment_name'] ?? null,
+                    'place_category'      => $validated['place_category'],
+                    'apartment_flat_plot' => $validated['apartment_flat_plot'],
+                    'landmark'            => $validated['landmark'] ?? null,
+                    'address_type'        => $validated['address_type'] ?? 'Other',
+                    'country'             => 'India',
+                    'default'             => 1,
+                ]);
+                $address->setAsDefault();
+            }
 
-        return back()->with('success', $request->input('user_select') === 'NEW'
-            ? 'New user added successfully!'
-            : 'Order saved for existing user!');
-    } catch (\Throwable $e) {
-        DB::rollBack();
+            // -------- Dates --------
+            $start = Carbon::parse($validated['start_date'])->startOfDay();
+            $end = !empty($validated['end_date'])
+                ? Carbon::parse($validated['end_date'])->endOfDay()
+                : (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
 
-        // Build a safe, modal-friendly error list.
-        $messages = ['Something went wrong while saving the order. Please try again.'];
-        if (config('app.debug')) {
-            // In debug, surface the exception message to help you fix quickly.
-            $messages[] = $e->getMessage();
-        }
-
-        return back()
-            ->withInput()
-            ->with([
-                'error_modal'    => true,
-                'error_title'    => 'Save failed',
-                'error_messages' => $messages,
+            // -------- Order --------
+            $orderId = 'ORD-' . strtoupper(Str::random(12));
+            $order = Order::create([
+                'user_id'     => $user->userid,
+                'order_id'    => $orderId,
+                'product_id'  => $validated['product_id'],
+                'quantity'    => 1,
+                'start_date'  => $start,
+                'address_id'  => $address->id,
+                'total_price' => $validated['paid_amount'],
             ]);
+
+            // -------- Subscription --------
+            $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+            Subscription::create([
+                'subscription_id' => $subscriptionId,
+                'user_id'         => $user->userid,
+                'order_id'        => $order->order_id,
+                'product_id'      => $validated['product_id'],
+                'start_date'      => $start,
+                'end_date'        => $end,
+                'status'          => $validated['status'] ?? 'active',
+            ]);
+
+            // -------- Payment --------
+            FlowerPayment::create([
+                'order_id'       => $order->order_id,
+                'payment_id'     => null,
+                'user_id'        => $user->userid,
+                'payment_method' => $validated['payment_method'],
+                'paid_amount'    => $validated['paid_amount'],
+                'payment_status' => $validated['payment_status'],
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', $request->input('user_select') === 'NEW'
+                ? 'New user added successfully!'
+                : 'Order saved for existing user!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            // Build a safe, modal-friendly error list.
+            $messages = ['Something went wrong while saving the order. Please try again.'];
+            if (config('app.debug')) {
+                // In debug, surface the exception message to help you fix quickly.
+                $messages[] = $e->getMessage();
+            }
+
+            return back()
+                ->withInput()
+                ->with([
+                    'error_modal'    => true,
+                    'error_title'    => 'Save failed',
+                    'error_messages' => $messages,
+                ]);
+        }
     }
-}
-
-
 
 }

@@ -74,52 +74,52 @@ public function flowerDashboard()
     $tmr          = Carbon::tomorrow($tz)->startOfDay();
     $excludeStats = ['expired', 'dead'];
 
-// ✅ Count of subscriptions that will be ACTIVE tomorrow
- $today = Carbon::today($tz);
+    // ✅ Count of subscriptions that will be ACTIVE tomorrow
+    $today = Carbon::today($tz);
 
-// same "pending, starts today, unpaid" hide rule as index()
-$shouldHide = function ($sub) use ($today) {
-    if (strtolower($sub->status ?? '') !== 'pending') return false;
+    // same "pending, starts today, unpaid" hide rule as index()
+    $shouldHide = function ($sub) use ($today) {
+        if (strtolower($sub->status ?? '') !== 'pending') return false;
 
-    $startsToday = $sub->start_date ? Carbon::parse($sub->start_date)->isSameDay($today) : false;
-    if (!$startsToday) return false;
+        $startsToday = $sub->start_date ? Carbon::parse($sub->start_date)->isSameDay($today) : false;
+        if (!$startsToday) return false;
 
-    // paid?
-    $hasPaid = !empty($sub->latestPaidPayment);
-    if (!$hasPaid && $sub->relationLoaded('flowerPayments')) {
-        $hasPaid = $sub->flowerPayments->contains(function ($p) {
-            $ps = strtolower((string)($p->payment_status ?? ''));
-            $s  = strtolower((string)($p->status ?? ''));
-            return $ps === 'paid' || $s === 'paid';
-        });
-    }
-    return !$hasPaid;
-};
-
-// === FIXED COUNT: build the same set then count ===
-$activeTomorrowCount = Subscription::with([
-        'latestPaidPayment',
-        'flowerPayments',
-    ])
-    ->whereNotIn('status', $excludeStats)
-    ->where(function ($q) {
-        $q->whereIn('status', ['active', 'paused', 'pending'])
-          ->orWhere('is_active', 1);
-    })
-    ->whereDate('start_date', '<=', $tmr->toDateString())
-    ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tmr->toDateString())
-    ->get()
-    ->filter(function ($s) use ($tmr) {
-        // exclude if paused on that day (same as index())
-        if ($s->pause_start_date && $s->pause_end_date) {
-            $ps = \Carbon\Carbon::parse($s->pause_start_date)->startOfDay();
-            $pe = \Carbon\Carbon::parse($s->pause_end_date)->endOfDay();
-            if ($ps->lte($tmr) && $pe->gte($tmr)) return false;
+        // paid?
+        $hasPaid = !empty($sub->latestPaidPayment);
+        if (!$hasPaid && $sub->relationLoaded('flowerPayments')) {
+            $hasPaid = $sub->flowerPayments->contains(function ($p) {
+                $ps = strtolower((string)($p->payment_status ?? ''));
+                $s  = strtolower((string)($p->status ?? ''));
+                return $ps === 'paid' || $s === 'paid';
+            });
         }
-        return true;
-    })
-    ->reject($shouldHide)
-    ->count();
+        return !$hasPaid;
+    };
+
+    // === FIXED COUNT: build the same set then count ===
+    $activeTomorrowCount = Subscription::with([
+            'latestPaidPayment',
+            'flowerPayments',
+        ])
+        ->whereNotIn('status', $excludeStats)
+        ->where(function ($q) {
+            $q->whereIn('status', ['active', 'paused', 'pending'])
+            ->orWhere('is_active', 1);
+        })
+        ->whereDate('start_date', '<=', $tmr->toDateString())
+        ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tmr->toDateString())
+        ->get()
+        ->filter(function ($s) use ($tmr) {
+            // exclude if paused on that day (same as index())
+            if ($s->pause_start_date && $s->pause_end_date) {
+                $ps = \Carbon\Carbon::parse($s->pause_start_date)->startOfDay();
+                $pe = \Carbon\Carbon::parse($s->pause_end_date)->endOfDay();
+                if ($ps->lte($tmr) && $pe->gte($tmr)) return false;
+            }
+            return true;
+        })
+        ->reject($shouldHide)
+        ->count();
 
     // (Optional) keep this if you also want the “starts tomorrow” metric elsewhere:
     $startingTomorrow = Subscription::query()
@@ -181,19 +181,31 @@ $activeTomorrowCount = Subscription::with([
         ->where('delivery_status', 'delivered')->count();
     $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
 
-    $newUserSubscription = Subscription::where('status', 'pending')
-        ->whereDate('created_at', Carbon::today($tz))
-        ->groupBy('user_id')
-        ->selectRaw('MIN(order_id) as order_id, user_id')
-        ->get()
-        ->filter(fn ($subscription) => Subscription::where('user_id', $subscription->user_id)->count() === 1)
-        ->count();
+    $todayStrs = Carbon::today($tz)->toDateString();
 
-    $renewSubscription = Subscription::whereDate('created_at', Carbon::today($tz))
-        ->whereIn('order_id', function ($query) {
-            $query->select('order_id')->from('subscriptions')
-                ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
-        })->count();
+
+   $newUserSubscription = DB::table('subscriptions as s')
+    ->join(DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
+                     FROM subscriptions
+                     GROUP BY user_id) firsts'),
+        function ($join) {
+            $join->on('s.user_id', '=', 'firsts.user_id')
+                 ->on('s.created_at', '=', 'firsts.first_created_at');
+        })
+    ->whereDate('s.created_at', $todayStrs)
+    ->distinct()
+    ->count('s.user_id');
+
+
+    $renewSubscription = DB::table('subscriptions as s')
+    ->whereDate('s.created_at', $todayStrs)
+    ->whereExists(function ($q) use ($todayStrs) {
+        $q->select(DB::raw(1))
+          ->from('subscriptions as prev')
+          ->whereColumn('prev.user_id', 's.user_id')
+          ->whereDate('prev.created_at', '<', $todayStrs);
+    })
+    ->count();
 
     $todayEndSubscription = Subscription::where(function ($query) use ($tz) {
             $query->where(function ($subQuery) use ($tz) {
