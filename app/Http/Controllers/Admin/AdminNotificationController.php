@@ -36,105 +36,116 @@ public function create(Request $request)
         return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
     }
 
-public function send(Request $request)
-{
-    // Strict, conditional validation based on selected audience
-    $validated = $request->validate([
-        'title'        => 'required|string|max:255',
-        'description'  => 'required|string|max:1000',
-        'image'        => 'nullable|image|max:2048',
-        'audience'     => 'required|in:all,users,platform',
+    public function send(Request $request)
+    {
+        // Strict validation based on audience
+        $validated = $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'required|string|max:1000',
+            'image'       => 'nullable|image|max:2048',
+            'audience'    => 'required|in:all,users,platform',
 
-        // 👉 When targeting users, we accept userid STRINGS like "USER30382"
-        'users'        => 'required_if:audience,users|array|min:1',
-        'users.*'      => 'required_if:audience,users|string',
+            // when audience=users, accept userid strings like "USER30382"
+            'users'       => 'required_if:audience,users|array|min:1',
+            'users.*'     => 'required_if:audience,users|string',
 
-        // When targeting platform(s), platform[] must be present & valid
-        'platform'     => 'required_if:audience,platform|array|min:1',
-        'platform.*'   => 'required_if:audience,platform|in:android,ios,web',
+            // when audience=platform, platform[] must be a subset of these
+            'platform'    => 'required_if:audience,platform|array|min:1',
+            'platform.*'  => 'required_if:audience,platform|in:android,ios,web',
 
-        'dry_run'      => 'nullable|boolean',
-    ]);
+            'dry_run'     => 'nullable|boolean',
+        ]);
 
-    $imagePath = $request->hasFile('image')
-        ? $request->file('image')->store('notifications', 'public')
-        : null;
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('notifications', 'public')
+            : null;
 
-    $notification = FCMNotification::create([
-        'title'         => $validated['title'],
-        'description'   => $validated['description'],
-        'image'         => $imagePath,
-        'status'        => 'queued',
-        'success_count' => 0,
-        'failure_count' => 0,
-    ]);
+        // Prepare audience metadata we want to persist on the record
+        $audience = $validated['audience'];
+        $userIds  = null;
+        $platforms = null;
 
-    // Base token query
-    $tokensQuery = UserDevice::query()
-        ->authorized()
-        ->whereNotNull('device_id');
+        if ($audience === 'all') {
+            // special marker to indicate "everyone"
+            $userIds = ['ALL'];
+        } elseif ($audience === 'users') {
+            // clean user ids
+            $userIds = collect($validated['users'])
+                ->map(fn ($v) => is_string($v) ? trim($v) : (string) $v)
+                ->filter(fn ($v) => $v !== '')
+                ->values()
+                ->all();
 
-    if ($validated['audience'] === 'users') {
-        // 👉 We received userid codes (strings). Clean them up and filter.
-        $userCodes = array_values(array_filter(
-            array_map(function ($v) {
-                $v = is_string($v) ? trim($v) : (string) $v;
-                return $v !== '' ? $v : null;
-            }, $validated['users'])
-        ));
-
-        if (empty($userCodes)) {
-            // prevent accidental send-to-all
-            $notification->update(['status' => 'failed']);
-            return back()->withErrors(['users' => 'Please select at least one valid user.']);
+            if (empty($userIds)) {
+                return back()->withErrors(['users' => 'Please select at least one valid user.']);
+            }
+        } else { // platform
+            $platforms = array_values(array_unique($validated['platform']));
         }
 
-        // 🔑 UserDevice.user_id stores the users.userid string (e.g., "USER30382")
-        $tokensQuery->whereIn('user_id', $userCodes);
-    } elseif ($validated['audience'] === 'platform') {
-        $tokensQuery->whereIn('platform', $validated['platform']);
-    }
-    // audience === 'all' => no additional filter
-
-    $deviceTokens = $tokensQuery->distinct()->pluck('device_id')->toArray();
-
-    if (empty($deviceTokens)) {
-        \Log::warning('No device tokens found for the selected audience.', [
-            'audience' => $validated['audience'],
-            'users'    => $validated['users'] ?? null,
-            'platform' => $validated['platform'] ?? null,
-        ]);
-        $notification->update(['status' => 'failed']);
-        return back()->with('error', 'No valid device tokens found for the selected audience.');
-    }
-
-    try {
-        $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-        $resp = $notificationService->sendBulkNotifications(
-            $deviceTokens,
-            $notification->title,
-            $notification->description,
-            ['image' => $notification->image ? asset('storage/' . $notification->image) : '']
-        );
-
-        $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
-        $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
-
-        $notification->update([
-            'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
-            'success_count' => $success,
-            'failure_count' => $failure,
+        // Create record with audience snapshot
+        $notification = FCMNotification::create([
+            'title'         => $validated['title'],
+            'description'   => $validated['description'],
+            'image'         => $imagePath,
+            'audience'      => $audience,
+            'user_ids'      => $userIds,     // ["ALL"] | [user ids] | null
+            'platforms'     => $platforms,   // ['android','ios'] | null
+            'status'        => 'queued',
+            'success_count' => 0,
+            'failure_count' => 0,
         ]);
 
-        return back()->with('success', 'App notification sent to the selected audience successfully!');
-    } catch (\Throwable $e) {
-        \Log::error('FCM send error: '.$e->getMessage());
-        $notification->update(['status' => 'failed']);
-        return back()->with('error', 'Failed to send notification. '.$e->getMessage());
+        // Build token query
+        $tokensQuery = UserDevice::query()
+            ->authorized()
+            ->whereNotNull('device_id');
+
+        if ($audience === 'users') {
+            // UserDevice.user_id holds the string code (e.g. "USER30382")
+            $tokensQuery->whereIn('user_id', $userIds);
+        } elseif ($audience === 'platform') {
+            $tokensQuery->whereIn('platform', $platforms);
+        }
+        // 'all' => no extra filter
+
+        $deviceTokens = $tokensQuery->distinct()->pluck('device_id')->toArray();
+
+        if (empty($deviceTokens)) {
+            \Log::warning('No device tokens found for the selected audience.', [
+                'audience' => $audience,
+                'users'    => $userIds,
+                'platform' => $platforms,
+            ]);
+            $notification->update(['status' => 'failed']);
+            return back()->with('error', 'No valid device tokens found for the selected audience.');
+        }
+
+        try {
+            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+            $resp = $notificationService->sendBulkNotifications(
+                $deviceTokens,
+                $notification->title,
+                $notification->description,
+                ['image' => $notification->image ? asset('storage/'.$notification->image) : '']
+            );
+
+            $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
+            $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
+
+            $notification->update([
+                'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
+                'success_count' => $success,
+                'failure_count' => $failure,
+            ]);
+
+            return back()->with('success', 'App notification sent to the selected audience successfully!');
+        } catch (\Throwable $e) {
+            \Log::error('FCM send error: '.$e->getMessage());
+            $notification->update(['status' => 'failed']);
+            return back()->with('error', 'Failed to send notification. '.$e->getMessage());
+        }
     }
-}
-
-
     public function delete($id)
     {
         FCMNotification::findOrFail($id)->delete();
