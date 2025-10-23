@@ -248,7 +248,7 @@ Route::middleware('auth:sanctum')->post('/product-subscription', [ProductApiCont
 Route::middleware('auth:sanctum')->post('/product-requests', [ProductApiController::class, 'productRequest']);
 Route::middleware('auth:sanctum')->post('/make-request-payment/{id}', [ProductApiController::class, 'makeRequestPayment']);
 Route::middleware('auth:sanctum')->get('/product-orders-list', [ProductApiController::class, 'ProductOrdersList']);
-Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAllNotifications']);
+Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getMyNotifications']);
 Route::get('/manage-promotion', [PromotionControllerApi::class, 'managePromotion']);
 Route::middleware('auth:sanctum')->post('/referrals/claim', [FlowerReferalController::class, 'claim']);
 Route::middleware('auth:sanctum')->get('/referrals/stats', [FlowerReferalController::class, 'stats']);
