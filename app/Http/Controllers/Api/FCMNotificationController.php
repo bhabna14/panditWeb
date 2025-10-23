@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class FCMNotificationController extends Controller
 {
@@ -66,28 +67,31 @@ class FCMNotificationController extends Controller
             $notifications = $q->orderBy('created_at', 'desc')->get();
 
             // Map clean response & explain why user received it (target_type)
-            $data = $notifications->map(function ($n) use ($userid, $platform) {
-                $targetType = 'all';
-                if ($n->audience === 'users') {
-                    $targetType = 'user';
-                } elseif ($n->audience === 'platform') {
-                    $targetType = 'platform';
+                $data = $notifications->map(function ($n) {
+                $image = null;
+                if ($n->image) {
+                    // absolute URL if already http(s), else use storage public URL
+                    $image = preg_match('#^https?://#i', $n->image)
+                        ? $n->image
+                        : Storage::disk('public')->url($n->image);
                 }
 
                 return [
                     'id'          => $n->id,
                     'title'       => $n->title,
                     'description' => $n->description,
-                    'image'       => $n->image ? asset('storage/'.$n->image) : null,
-                    'audience'    => $n->audience,           // 'all' | 'users' | 'platform'
-                    'user_ids'    => $n->user_ids,           // may be ["ALL"] or a list or null
-                    'platforms'   => $n->platforms,          // list or null
-                    'target_type' => $targetType,            // 'all' | 'user' | 'platform'
-                    'created_at'  => $n->created_at?->toDateTimeString(),
-                    'updated_at'  => $n->updated_at?->toDateTimeString(),
+                    'image'       => $image,               // full absolute URL or null
+                    'audience'    => $n->audience,
+                    'user_ids'    => $n->user_ids,
+                    'platforms'   => $n->platforms,
+                    'status'      => $n->status,
+                    'success_count'=> $n->success_count,
+                    'failure_count'=> $n->failure_count,
+                    'created_at'  => optional($n->created_at)->toDateTimeString(),
+                    'updated_at'  => optional($n->updated_at)->toDateTimeString(),
                 ];
             });
-
+            
             return response()->json([
                 'status'  => 200,
                 'message' => 'Notifications retrieved successfully!',

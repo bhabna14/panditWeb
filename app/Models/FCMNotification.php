@@ -26,4 +26,23 @@ class FCMNotification extends Model
         'user_ids'  => 'array',
         'platforms' => 'array',
     ];
+
+      // Expose computed field in JSON
+    protected $appends = ['image_url'];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // If already absolute (e.g., you stored a CDN URL), return as-is
+        if (preg_match('#^https?://#i', $this->image)) {
+            return $this->image;
+        }
+
+        // Otherwise, build a public URL from storage ("public" disk)
+        // Requires the file to be stored via ->store('notifications','public')
+        return Storage::disk('public')->url($this->image);
+    }
 }
