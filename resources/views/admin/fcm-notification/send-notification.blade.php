@@ -130,7 +130,7 @@
                                 </label>
                                 <label class="form-check d-flex align-items-center gap-2">
                                     <input class="form-check-input" type="radio" name="audience" id="audPlatform" value="platform">
-                                    <span>Platforms (Android / iOS / Web)</span>
+                                    <span>Platforms</span>
                                 </label>
                             </div>
                             <div class="form-hint mt-1">Target everyone, specific users, or specific platforms.</div>
