@@ -9,28 +9,38 @@ class OfficeLedger extends Model
 {
     use HasFactory;
 
+    protected $table = 'office_ledgers'; // make sure this matches your table name
+
     protected $fillable = [
-        'entry_date',
-        'category',
-        'direction',
-        'source_type',
-        'source_id',
-        'amount',
-        'mode_of_payment',
-        'paid_by',
-        'received_by',
-        'description',
-        'status',
+        'entry_date',     // date
+        'category',       // string (nullable allowed)
+        'direction',      // 'in' | 'out'
+        'source_type',    // 'fund' | 'transaction'
+        'source_id',      // int
+        'amount',         // numeric
+        'mode_of_payment',// 'cash' | 'upi' | ...
+        'paid_by',        // string
+        'received_by',    // string|null
+        'description',    // text|null
+        'status',         // 'active' | 'deleted'
     ];
 
-    // Quick helpers
-    public function scopeActive($q)
+    protected $casts = [
+        'entry_date' => 'date:Y-m-d',
+        'amount'     => 'decimal:2',
+    ];
+
+    /** Scope only active rows (if 'status' exists). */
+    public function scopeActive($query)
     {
-        return $q->when($this->isFillable('status'), fn($qq) => $qq->where('status', 'active'), fn($qq) => $qq);
+        $hasStatus = (new static)->isFillable('status');
+        return $hasStatus ? $query->where('status', 'active') : $query;
     }
 
+    /** Convenience accessor */
     public function getSignedAmountAttribute(): float
     {
-        return $this->direction === 'out' ? -1 * (float)$this->amount : (float)$this->amount;
+        $amt = (float) $this->amount;
+        return $this->direction === 'out' ? -1 * $amt : $amt;
     }
 }

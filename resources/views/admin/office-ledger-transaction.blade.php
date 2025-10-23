@@ -1,261 +1,130 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
-    <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
-    <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
-    <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <style>
-        :root {
-            --brand: #4f46e5;
-            --brand-2: #06b6d4;
-            --ink: #0f172a;
-            --muted: #64748b;
-            --line: #eef2f7;
-            --success-bg: #ecfdf5;
-            --success-fg: #065f46;
-            --success-br: #a7f3d0;
-            --danger-bg: #fff1f2;
-            --danger-fg: #9f1239;
-            --danger-br: #fecdd3;
-        }
-
-        .metric {
-            border-radius: 14px;
-            padding: 14px 16px;
-            background: #fff;
-            border: 1px solid var(--line);
-            box-shadow: 0 10px 24px rgba(15, 23, 42, .06)
-        }
-
-        .metric .label {
-            color: var(--muted);
-            font-weight: 600
-        }
-
-        .metric .value {
-            color: var(--ink);
-            font-weight: 800
-        }
-
-        .badge-soft {
-            background: #eef3ff;
-            color: var(--brand);
-            border: 1px solid rgba(79, 70, 229, .25);
-            border-radius: 999px;
-            padding: .25rem .5rem;
-            font-weight: 600
-        }
-
-        .section-title {
-            font-weight: 700;
-            color: var(--ink)
-        }
-
-        .cat-card {
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            overflow: hidden;
-            background: #fff
-        }
-
-        .cat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 16px;
-            background: linear-gradient(180deg, #f9fbff, #f6f8fe);
-            cursor: pointer
-        }
-
-        .cat-header .title {
-            font-weight: 700
-        }
-
-        .chip {
-            border-radius: 999px;
-            padding: 4px 10px;
-            border: 1px solid var(--line);
-            font-weight: 700
-        }
-
-        .chip-net-pos {
-            background: var(--success-bg);
-            color: var(--success-fg);
-            border-color: var(--success-br)
-        }
-
-        .chip-net-neg {
-            background: var(--danger-bg);
-            color: var(--danger-fg);
-            border-color: var(--danger-br)
-        }
-
-        .cat-body {
-            padding: 14px 16px;
-            display: none
-        }
-
-        .table-premium {
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            overflow: hidden
-        }
-
-        .table-premium thead th {
-            position: sticky;
-            top: 0;
-            z-index: 2;
-            background: linear-gradient(180deg, #f9fbff, #f6f8fe);
-            font-weight: 700;
-            border-bottom: 1px solid var(--line) !important
-        }
-
-        .text-cap {
-            text-transform: capitalize
-        }
-
-        .btn-brand {
-            background: linear-gradient(135deg, var(--brand), var(--brand-2));
-            border: none;
-            color: #fff;
-            box-shadow: 0 10px 20px rgba(79, 70, 229, .25)
-        }
-
-        .btn-brand:hover {
-            opacity: .95
-        }
-
-        .caret {
-            transition: transform .2s ease
-        }
-
-        .rot-90 {
-            transform: rotate(90deg)
-        }
-
-        .muted {
-            color: var(--muted)
-        }
-
-        .mono {
-            font-variant-numeric: tabular-nums
-        }
+        :root { --brand:#4f46e5; --brand-2:#06b6d4; --ink:#0f172a; --muted:#64748b; --line:#eef2f7;
+                --success-bg:#ecfdf5; --success-fg:#065f46; --success-br:#a7f3d0;
+                --danger-bg:#fff1f2;  --danger-fg:#9f1239;  --danger-br:#fecdd3; }
+        .metric{border-radius:14px;padding:14px 16px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 24px rgba(15,23,42,.06)}
+        .metric .label{color:var(--muted);font-weight:600} .metric .value{color:var(--ink);font-weight:800}
+        .badge-soft{background:#eef3ff;color:var(--brand);border:1px solid rgba(79,70,229,.25);border-radius:999px;padding:.25rem .5rem;font-weight:600}
+        .section-title{font-weight:700;color:var(--ink)}
+        .cat-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+        .cat-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,#f9fbff,#f6f8fe);cursor:pointer}
+        .cat-header .title{font-weight:700}
+        .chip{border-radius:999px;padding:4px 10px;border:1px solid var(--line);font-weight:700}
+        .chip-net-pos{background:var(--success-bg);color:var(--success-fg);border-color:var(--success-br)}
+        .chip-net-neg{background:var(--danger-bg);color:var(--danger-fg);border-color:var(--danger-br)}
+        .cat-body{padding:14px 16px;display:none}
+        .table-premium{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+        .table-premium thead th{position:sticky;top:0;z-index:2;background:linear-gradient(180deg,#f9fbff,#f6f8fe);font-weight:700;border-bottom:1px solid var(--line)!important}
+        .text-cap{text-transform:capitalize}
+        .btn-brand{background:linear-gradient(135deg,var(--brand),var(--brand-2));border:none;color:#fff;box-shadow:0 10px 20px rgba(79,70,229,.25)}
+        .btn-brand:hover{opacity:.95}
+        .caret{transition:transform .2s ease} .rot-90{transform:rotate(90deg)}
+        .muted{color:var(--muted)} .mono{font-variant-numeric:tabular-nums}
     </style>
 @endsection
 
 @section('content')
-    <div class="row row-sm">
-        <div class="col-lg-12">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h4 class="mb-0">Office Ledger — Category View</h4>
-                <a href="{{ url()->previous() }}" class="btn btn-light">Back</a>
-            </div>
+<div class="row row-sm">
+    <div class="col-lg-12">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h4 class="mb-0">Office Ledger — Category View</h4>
+            <a href="{{ url()->previous() }}" class="btn btn-light">Back</a>
+        </div>
 
-            {{-- Filters --}}
-            <div class="card custom-card mb-3">
-                <div class="card-body">
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">From Date</label>
-                            <input type="date" id="from_date" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">To Date</label>
-                            <input type="date" id="to_date" class="form-control">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Category (quick filter)</label>
-                            <select id="ledger_category" class="form-select">
-                                <option value="">All</option>
-                                <option value="rent">Rent</option>
-                                <option value="rider_salary">Rider Salary</option>
-                                <option value="vendor_payment">Vendor Payment</option>
-                                <option value="fuel">Fuel</option>
-                                <option value="package">Package</option>
-                                <option value="bus_fare">Bus Fare</option>
-                                <option value="miscellaneous">Miscellaneous</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 d-flex gap-2">
-                            <button id="searchBtn" class="btn btn-brand w-100">Search</button>
-                            <button id="resetBtn" class="btn btn-outline-secondary">Reset</button>
-                        </div>
+        {{-- Filters --}}
+        <div class="card custom-card mb-3">
+            <div class="card-body">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">From Date</label>
+                        <input type="date" id="from_date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">To Date</label>
+                        <input type="date" id="to_date" class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Category (quick filter)</label>
+                        <select id="ledger_category" class="form-select">
+                            <option value="">All</option>
+                            <option value="rent">Rent</option>
+                            <option value="rider_salary">Rider Salary</option>
+                            <option value="vendor_payment">Vendor Payment</option>
+                            <option value="fuel">Fuel</option>
+                            <option value="package">Package</option>
+                            <option value="bus_fare">Bus Fare</option>
+                            <option value="miscellaneous">Miscellaneous</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex gap-2">
+                        <button id="searchBtn" class="btn btn-brand w-100">Search</button>
+                        <button id="resetBtn" class="btn btn-outline-secondary">Reset</button>
                     </div>
                 </div>
-            </div>
-
-            {{-- Global metrics --}}
-            <div class="row g-3 mb-3">
-                <div class="col-md-4">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="label">Total Received (Range)</div>
-                            <div class="value h4 mb-0 mono" id="ledgerIn">₹0.00</div>
-                        </div>
-                        <span class="badge-soft">All Categories</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="label">Total Paid (Range)</div>
-                            <div class="value h4 mb-0 mono" id="ledgerOut">₹0.00</div>
-                        </div>
-                        <span class="badge-soft">All Categories</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div>
-                            <div class="label">Available (Range)</div>
-                            <div class="value h4 mb-0 mono" id="ledgerNet">₹0.00</div>
-                        </div>
-                        <span class="badge-soft">All Categories</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Category sections --}}
-            <div id="categoryContainer" class="d-flex flex-column gap-3">
-                <div class="muted">Use the filters above and click <strong>Search</strong>.</div>
             </div>
         </div>
+
+        {{-- Global metrics --}}
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="metric d-flex align-items-center justify-content-between">
+                    <div><div class="label">Total Received (Range)</div><div class="value h4 mb-0 mono" id="ledgerIn">₹0.00</div></div>
+                    <span class="badge-soft">All Categories</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric d-flex align-items-center justify-content-between">
+                    <div><div class="label">Total Paid (Range)</div><div class="value h4 mb-0 mono" id="ledgerOut">₹0.00</div></div>
+                    <span class="badge-soft">All Categories</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric d-flex align-items-center justify-content-between">
+                    <div><div class="label">Available (Range)</div><div class="value h4 mb-0 mono" id="ledgerNet">₹0.00</div></div>
+                    <span class="badge-soft">All Categories</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Category sections --}}
+        <div id="categoryContainer" class="d-flex flex-column gap-3">
+            <div class="muted">Use the filters above and click <strong>Search</strong>.</div>
+        </div>
     </div>
+</div>
 @endsection
 
 @section('scripts')
-    <script>
-        (function() {
-            // Helpers
-            const toNumber = v => {
-                if (v === null || v === undefined) return 0;
-                const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
-                return Number.isFinite(n) ? n : 0;
-            };
-            const fmtINR = n => new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                maximumFractionDigits: 2
-            }).format(toNumber(n));
-            const cap = s => (s || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
+<script>
+(function () {
+    const toNumber = v => {
+        if (v === null || v === undefined) return 0;
+        const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
+        return Number.isFinite(n) ? n : 0;
+    };
+    const fmtINR = n => new Intl.NumberFormat('en-IN', {style:'currency', currency:'INR', maximumFractionDigits:2}).format(toNumber(n));
+    const cap = s => (s || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
 
-            const container = document.getElementById('categoryContainer');
-            const inEl = document.getElementById('ledgerIn');
-            const outEl = document.getElementById('ledgerOut');
-            const netEl = document.getElementById('ledgerNet');
+    const container = document.getElementById('categoryContainer');
+    const inEl  = document.getElementById('ledgerIn');
+    const outEl = document.getElementById('ledgerOut');
+    const netEl = document.getElementById('ledgerNet');
 
-            const params = new URLSearchParams(location.search);
-            const fromEl = document.getElementById('from_date');
-            const toEl = document.getElementById('to_date');
-            const catEl = document.getElementById('ledger_category');
-            if (params.get('from_date')) fromEl.value = params.get('from_date');
-            if (params.get('to_date')) toEl.value = params.get('to_date');
-            if (params.get('category')) catEl.value = params.get('category');
+    const params = new URLSearchParams(location.search);
+    const fromEl = document.getElementById('from_date');
+    const toEl   = document.getElementById('to_date');
+    const catEl  = document.getElementById('ledger_category');
+    if (params.get('from_date')) fromEl.value = params.get('from_date');
+    if (params.get('to_date'))   toEl.value   = params.get('to_date');
+    if (params.get('category'))  catEl.value  = params.get('category');
 
-            function sectionTemplate(key, group, expand = false) {
-                const net = toNumber(group.received_total) - toNumber(group.paid_total);
-                const pos = net >= 0;
-                return `
+    function sectionTemplate(key, group, expand=false) {
+        const net = toNumber(group.received_total) - toNumber(group.paid_total);
+        const pos = net >= 0;
+        return `
         <div class="cat-card" data-cat="${key}">
             <div class="cat-header" data-toggle="cat" role="button">
                 <div class="d-flex align-items-center gap-2">
@@ -281,15 +150,15 @@
                                     </thead>
                                     <tbody>
                                         ${ (group.received||[]).map(r => `
-                                                <tr>
-                                                    <td>${r.date ?? ''}</td>
-                                                    <td class="text-end mono">${fmtINR(r.amount)}</td>
-                                                    <td class="text-cap">${r.mode||''}</td>
-                                                    <td class="text-cap">${r.paid_by||''}</td>
-                                                    <td class="text-cap">${r.received_by||''}</td>
-                                                    <td>${r.description||''}</td>
-                                                </tr>
-                                            `).join('') || `<tr><td colspan="6" class="text-center text-muted">No records</td></tr>`}
+                                            <tr>
+                                                <td>${r.date ?? ''}</td>
+                                                <td class="text-end mono">${fmtINR(r.amount)}</td>
+                                                <td class="text-cap">${r.mode||''}</td>
+                                                <td class="text-cap">${r.paid_by||''}</td>
+                                                <td class="text-cap">${r.received_by||''}</td>
+                                                <td>${r.description||''}</td>
+                                            </tr>
+                                        `).join('') || `<tr><td colspan="6" class="text-center text-muted">No records</td></tr>`}
                                     </tbody>
                                     <tfoot class="table-light">
                                         <tr><th class="text-end">Total:</th><th class="text-end mono">${fmtINR(group.received_total)}</th><th colspan="4"></th></tr>
@@ -309,14 +178,14 @@
                                     </thead>
                                     <tbody>
                                         ${ (group.paid||[]).map(r => `
-                                                <tr>
-                                                    <td>${r.date ?? ''}</td>
-                                                    <td class="text-end mono">${fmtINR(r.amount)}</td>
-                                                    <td class="text-cap">${r.mode||''}</td>
-                                                    <td class="text-cap">${r.paid_by||''}</td>
-                                                    <td>${r.description||''}</td>
-                                                </tr>
-                                            `).join('') || `<tr><td colspan="5" class="text-center text-muted">No records</td></tr>`}
+                                            <tr>
+                                                <td>${r.date ?? ''}</td>
+                                                <td class="text-end mono">${fmtINR(r.amount)}</td>
+                                                <td class="text-cap">${r.mode||''}</td>
+                                                <td class="text-cap">${r.paid_by||''}</td>
+                                                <td>${r.description||''}</td>
+                                            </tr>
+                                        `).join('') || `<tr><td colspan="5" class="text-center text-muted">No records</td></tr>`}
                                     </tbody>
                                     <tfoot class="table-light">
                                         <tr><th class="text-end">Total:</th><th class="text-end mono">${fmtINR(group.paid_total)}</th><th colspan="3"></th></tr>
@@ -329,83 +198,70 @@
                 </div>
             </div>
         </div>`;
+    }
+
+    function bindToggles() {
+        container.querySelectorAll('[data-toggle="cat"]').forEach(h => {
+            h.onclick = () => {
+                const body = h.parentElement.querySelector('.cat-body');
+                const caret = h.querySelector('.caret');
+                const visible = body.style.display === 'block';
+                body.style.display = visible ? 'none' : 'block';
+                caret.classList.toggle('rot-90', !visible);
+            };
+        });
+    }
+
+    async function load() {
+        const qs = new URLSearchParams();
+        if (fromEl.value) qs.append('from_date', fromEl.value);
+        if (toEl.value)   qs.append('to_date', toEl.value);
+        if (catEl.value)  qs.append('category', catEl.value);
+
+        // IMPORTANT: new route name:
+        const url = `{{ route('officeLedger.category.filter') }}` + (qs.toString() ? `?${qs.toString()}` : '');
+
+        container.innerHTML = `<div class="muted">Loading…</div>`;
+
+        try {
+            const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+            const data = await res.json();
+            if (!data?.success) throw new Error(data?.message || 'Failed');
+
+            inEl.textContent  = fmtINR(data.in_total || 0);
+            outEl.textContent = fmtINR(data.out_total || 0);
+            netEl.textContent = fmtINR((data.in_total||0) - (data.out_total||0));
+
+            const cats = Array.isArray(data.categories) ? data.categories : [];
+            const groups = data.groups || {};
+
+            if (!cats.length) {
+                container.innerHTML = `<div class="muted">No records for the selected range.</div>`;
+                return;
             }
 
-            function bindToggles() {
-                container.querySelectorAll('[data-toggle="cat"]').forEach(h => {
-                    h.onclick = () => {
-                        const body = h.parentElement.querySelector('.cat-body');
-                        const caret = h.querySelector('.caret');
-                        const visible = body.style.display === 'block';
-                        body.style.display = visible ? 'none' : 'block';
-                        caret.classList.toggle('rot-90', !visible);
-                    };
-                });
-            }
-
-            async function load() {
-                const qs = new URLSearchParams();
-                if (fromEl.value) qs.append('from_date', fromEl.value);
-                if (toEl.value) qs.append('to_date', toEl.value);
-                if (catEl.value) qs.append('category', catEl.value);
-                const url = `{{ route('officeLedger.filter') }}` + (qs.toString() ? `?${qs.toString()}` : '');
-
-                container.innerHTML = `<div class="muted">Loading…</div>`;
-
-                try {
-                    const res = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    const data = await res.json();
-                    if (!data?.success) throw new Error(data?.message || 'Failed');
-
-                    inEl.textContent = fmtINR(data.in_total || 0);
-                    outEl.textContent = fmtINR(data.out_total || 0);
-                    netEl.textContent = fmtINR((data.in_total || 0) - (data.out_total || 0));
-
-                    const cats = Array.isArray(data.categories) ? data.categories : [];
-                    const groups = data.groups || {};
-
-                    // If there is no data *at all*
-                    if (!cats.length) {
-                        container.innerHTML = `<div class="muted">No records for the selected range.</div>`;
-                        return;
-                    }
-
-                    // Render categories (first one expanded)
-                    let html = '';
-                    cats.forEach((key, idx) => {
-                        const g = groups[key] || {
-                            label: key,
-                            received: [],
-                            paid: [],
-                            received_total: 0,
-                            paid_total: 0
-                        };
-                        html += sectionTemplate(key, g, idx === 0);
-                    });
-                    container.innerHTML = html;
-                    bindToggles();
-                } catch (e) {
-                    console.error(e);
-                    container.innerHTML = `<div class="text-danger">Error loading data. Please try again.</div>`;
-                    inEl.textContent = outEl.textContent = netEl.textContent = fmtINR(0);
-                }
-            }
-
-            document.getElementById('searchBtn').addEventListener('click', load);
-            document.getElementById('resetBtn').addEventListener('click', () => {
-                fromEl.value = '';
-                toEl.value = '';
-                catEl.value = '';
-                history.replaceState(null, '', location.pathname);
-                load();
+            let html = '';
+            cats.forEach((key, idx) => {
+                const g = groups[key] || {label:key, received:[], paid:[], received_total:0, paid_total:0};
+                html += sectionTemplate(key, g, idx === 0); // first expanded
             });
+            container.innerHTML = html;
+            bindToggles();
+        } catch (e) {
+            console.error(e);
+            container.innerHTML = `<div class="text-danger">Error loading data. Please try again.</div>`;
+            inEl.textContent = outEl.textContent = netEl.textContent = fmtINR(0);
+        }
+    }
 
-            // Initial load
-            load();
-        })();
-    </script>
+    document.getElementById('searchBtn').addEventListener('click', load);
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        fromEl.value = ''; toEl.value = ''; catEl.value = '';
+        history.replaceState(null, '', location.pathname);
+        load();
+    });
+
+    load();
+})();
+</script>
 @endsection
