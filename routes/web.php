@@ -884,8 +884,10 @@ Route::controller(OfficeTransactionController::class)->group(function () {
         ->name('officeLedger.filter');
 });
 
-Route::get('/office-ledger', [OfficeLedgerController::class, 'index'])
-    ->name('officeLedger.index');
+    Route::get('/office-ledger', [OfficeLedgerController::class, 'index'])
+        ->name('officeLedger.category.index');
+    Route::get('/office-ledger/category/filter', [OfficeLedgerController::class, 'filter'])
+        ->name('officeLedger.category.filter');
 
 Route::controller(ReferController::class)->group(function() {
     Route::get('/offer-create','offerCreate')->name('refer.offerCreate');
