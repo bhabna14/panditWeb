@@ -12,7 +12,7 @@ class OfficeLedgerController extends Controller
 {
     public function index()
     {
-        return view('admin.office-ledger-transaction-category'); // <-- NEW blade
+        return view('admin.office-ledger-transaction'); // <-- NEW blade
     }
 
     public function filter(Request $request)
