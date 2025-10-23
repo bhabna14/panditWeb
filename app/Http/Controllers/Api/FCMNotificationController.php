@@ -12,13 +12,7 @@ use Illuminate\Support\Facades\Storage;
 
 class FCMNotificationController extends Controller
 {
-    /**
-     * Public endpoint:
-     * - If NOT authenticated: returns only broadcasts (audience="all" or user_ids contains "ALL")
-     * - If authenticated (Sanctum): returns broadcasts + user-targeted (+ optional platform-targeted)
-     *
-     * Optional platform can be provided via query ?platform=android|ios|web or header "X-Platform".
-     */
+
     public function getNotifications(Request $request)
     {
         try {
