@@ -24,6 +24,7 @@
         .chip-in  { background: var(--success-bg); color: var(--success-fg); border:1px solid var(--success-br); }
         .chip-out { background: var(--danger-bg);  color: var(--danger-fg);  border:1px solid var(--danger-br); }
         .toolbar .btn { border-radius:999px; }
+        .section-title { font-weight:700; color: var(--ink); }
     </style>
 @endsection
 
@@ -68,7 +69,7 @@
             </div>
         </div>
 
-        {{-- Metrics --}}
+        {{-- Top Metrics --}}
         <div class="row g-3 mb-2">
             <div class="col-md-4">
                 <div class="metric d-flex align-items-center justify-content-between">
@@ -117,6 +118,76 @@
                         <div class="value h4 mb-0" id="upiNet">₹0.00</div>
                     </div>
                     <span class="badge-soft" id="upiTotals">In ₹0 • Out ₹0</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Category-wise summary --}}
+        <div class="card custom-card mb-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="section-title">Category-wise Summary</div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-nowrap" id="cat-table">
+                        <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th class="text-end">Received</th>
+                            <th class="text-end">Spent</th>
+                            <th class="text-end">Net</th>
+                        </tr>
+                        </thead>
+                        <tbody id="catBody">
+                        <tr><td colspan="4" class="text-center text-muted">No data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- Fund & Payer breakdown --}}
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <div class="card custom-card h-100">
+                    <div class="card-body">
+                        <div class="section-title mb-2">Fund (Received By)</div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle text-nowrap" id="fund-table">
+                                <thead>
+                                <tr>
+                                    <th>Received By</th>
+                                    <th class="text-end">Total Received</th>
+                                </tr>
+                                </thead>
+                                <tbody id="fundBody">
+                                <tr><td colspan="2" class="text-center text-muted">No data</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-muted small">Shows which fund (by receiver) collected how much in this range.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card custom-card h-100">
+                    <div class="card-body">
+                        <div class="section-title mb-2">Payments (Paid By)</div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle text-nowrap" id="payer-table">
+                                <thead>
+                                <tr>
+                                    <th>Paid By</th>
+                                    <th class="text-end">Total Spent</th>
+                                </tr>
+                                </thead>
+                                <tbody id="payerBody">
+                                <tr><td colspan="2" class="text-center text-muted">No data</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-muted small">Totals by payer for the period.</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -182,7 +253,16 @@
 
     <script>
         (function () {
-            const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
+            // ===== Helpers (robust/NaN-proof) =====
+            const toNumber = (v) => {
+                if (v === null || v === undefined) return 0;
+                const s = String(v).replace(/[₹,\s]/g, '');
+                const n = parseFloat(s);
+                return Number.isFinite(n) ? n : 0;
+            };
+            const fmtINR = n => new Intl.NumberFormat('en-IN', {
+                style: 'currency', currency: 'INR', maximumFractionDigits: 2
+            }).format(toNumber(n));
 
             // Pre-fill inputs from query params
             const params = new URLSearchParams(location.search);
@@ -203,6 +283,12 @@
             const upiNetEl         = document.getElementById('upiNet');
             const cashTotalsEl     = document.getElementById('cashTotals');
             const upiTotalsEl      = document.getElementById('upiTotals');
+
+            // New tables
+            const catBody  = document.getElementById('catBody');
+            const fundBody = document.getElementById('fundBody');
+            const payerBody= document.getElementById('payerBody');
+
             let ledgerDT = null;
 
             function initLedgerDT() {
@@ -229,9 +315,8 @@
             function computeLedgerShownTotal() {
                 let sum = 0;
                 ledgerDT.rows({ page: 'current' }).every(function () {
-                    const td = $(this.node()).find('td').eq(4).text().trim();
-                    const num = parseFloat(String(td).replace(/[^\d.-]/g, ''));
-                    if (!isNaN(num)) sum += num;
+                    const tdText = $(this.node()).find('td').eq(4).text().trim();
+                    sum += toNumber(tdText);
                 });
                 ledgerShownTotal.textContent = fmtINR(sum);
             }
@@ -240,36 +325,90 @@
                 const typeChip = r.direction === 'in'
                     ? '<span class="badge-soft chip-in px-2 py-1">In</span>'
                     : '<span class="badge-soft chip-out px-2 py-1">Out</span>';
+
+                // Display as signed money but always feed numbers to formatter
+                const signed = (r.direction === 'out' ? -1 : 1) * toNumber(r.amount);
+
                 const src = r.source === 'fund' ? 'Fund' : 'Payment';
-                const amountSigned = (r.direction === 'out' ? '-' : '') + r.amount;
                 return `
                     <tr data-direction="${r.direction}">
                         <td>${r.sl}</td>
                         <td>${r.date}</td>
-                        <td class="text-capitalize">${(r.category || '').replace(/_/g,' ')}</td>
+                        <td class="text-capitalize">${((r.category || 'uncategorized')).replace(/_/g,' ')}</td>
                         <td>${typeChip}</td>
-                        <td class="text-end">${fmtINR(amountSigned)}</td>
-                        <td class="text-capitalize">${r.mode || ''}</td>
-                        <td class="text-capitalize">${r.paid_by || ''}</td>
-                        <td class="text-capitalize">${r.received_by || ''}</td>
+                        <td class="text-end">${fmtINR(signed)}</td>
+                        <td class="text-capitalize">${r.mode ? String(r.mode).toLowerCase() : ''}</td>
+                        <td class="text-capitalize">${r.paid_by ? String(r.paid_by).toLowerCase() : ''}</td>
+                        <td class="text-capitalize">${r.received_by ? String(r.received_by).toLowerCase() : ''}</td>
                         <td>${r.description ? String(r.description) : ''}</td>
                         <td>${src} #${r.source_id}</td>
                     </tr>
                 `;
             }
 
-            function computeModeSplits(list) {
-                const sum = { cashIn: 0, cashOut: 0, upiIn: 0, upiOut: 0 };
-                list.forEach(r => {
-                    const amt = Number(r.amount || 0);
-                    const mode = (r.mode || '').toLowerCase();
-                    if (mode === 'cash') { if (r.direction === 'in') sum.cashIn += amt; else sum.cashOut += amt; }
-                    if (mode === 'upi')  { if (r.direction === 'in') sum.upiIn  += amt; else sum.upiOut  += amt; }
-                });
-                cashNetEl.textContent    = fmtINR(sum.cashIn - sum.cashOut);
-                upiNetEl.textContent     = fmtINR(sum.upiIn  - sum.upiOut);
-                cashTotalsEl.textContent = `In ${fmtINR(sum.cashIn)} • Out ${fmtINR(sum.cashOut)}`;
-                upiTotalsEl.textContent  = `In ${fmtINR(sum.upiIn)} • Out ${fmtINR(sum.upiOut)}`;
+            function renderCategoryAgg(categoryAgg) {
+                const keys = Object.keys(categoryAgg || {});
+                if (!keys.length) {
+                    catBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No data</td></tr>`;
+                    return;
+                }
+                const rows = keys.sort().map(k => {
+                    const label = k === 'uncategorized' ? 'Uncategorized' : k.replace(/_/g,' ');
+                    const rec = toNumber(categoryAgg[k].received);
+                    const spt = toNumber(categoryAgg[k].spent);
+                    const net = rec - spt;
+                    return `
+                        <tr>
+                            <td class="text-capitalize">${label}</td>
+                            <td class="text-end">${fmtINR(rec)}</td>
+                            <td class="text-end">${fmtINR(spt)}</td>
+                            <td class="text-end">${fmtINR(net)}</td>
+                        </tr>
+                    `;
+                }).join('');
+                catBody.innerHTML = rows;
+            }
+
+            function renderFundAgg(fundAgg) {
+                const keys = Object.keys(fundAgg || {});
+                if (!keys.length) {
+                    fundBody.innerHTML = `<tr><td colspan="2" class="text-center text-muted">No data</td></tr>`;
+                    return;
+                }
+                const rows = keys.sort().map(k => `
+                    <tr>
+                        <td class="text-capitalize">${k || 'unknown'}</td>
+                        <td class="text-end">${fmtINR(toNumber(fundAgg[k]))}</td>
+                    </tr>
+                `).join('');
+                fundBody.innerHTML = rows;
+            }
+
+            function renderPayerAgg(payerAgg) {
+                const keys = Object.keys(payerAgg || {});
+                if (!keys.length) {
+                    payerBody.innerHTML = `<tr><td colspan="2" class="text-center text-muted">No data</td></tr>`;
+                    return;
+                }
+                const rows = keys.sort().map(k => `
+                    <tr>
+                        <td class="text-capitalize">${k || 'unknown'}</td>
+                        <td class="text-end">${fmtINR(toNumber(payerAgg[k]))}</td>
+                    </tr>
+                `).join('');
+                payerBody.innerHTML = rows;
+            }
+
+            function applyModeSplits(modeAgg) {
+                const cashIn  = toNumber(modeAgg?.cash_in);
+                const cashOut = toNumber(modeAgg?.cash_out);
+                const upiIn   = toNumber(modeAgg?.upi_in);
+                const upiOut  = toNumber(modeAgg?.upi_out);
+
+                cashNetEl.textContent     = fmtINR(cashIn - cashOut);
+                upiNetEl.textContent      = fmtINR(upiIn - upiOut);
+                cashTotalsEl.textContent  = `In ${fmtINR(cashIn)} • Out ${fmtINR(cashOut)}`;
+                upiTotalsEl.textContent   = `In ${fmtINR(upiIn)} • Out ${fmtINR(upiOut)}`;
             }
 
             async function loadLedger() {
@@ -286,13 +425,21 @@
                     const data = await res.json();
                     if (!data || !data.success) throw new Error('Failed');
 
-                    ledgerInEl.textContent  = fmtINR(data.in_total  || 0);
-                    ledgerOutEl.textContent = fmtINR(data.out_total || 0);
-                    ledgerNetEl.textContent = fmtINR(data.net_total || 0);
+                    // Top metrics
+                    ledgerInEl.textContent  = fmtINR(toNumber(data.in_total));
+                    ledgerOutEl.textContent = fmtINR(toNumber(data.out_total));
+                    ledgerNetEl.textContent = fmtINR(toNumber(data.net_total));
 
+                    // Cash/UPI splits
+                    applyModeSplits(data.modeAgg);
+
+                    // Category / Fund / Payer sections
+                    renderCategoryAgg(data.categoryAgg);
+                    renderFundAgg(data.fundAgg);
+                    renderPayerAgg(data.payerAgg);
+
+                    // Ledger table
                     const list = Array.isArray(data.ledger) ? data.ledger : [];
-                    computeModeSplits(list);
-
                     const html = list.map(ledgerRowHTML).join('') || `<tr><td colspan="10" class="text-center text-muted">No records</td></tr>`;
 
                     if ($.fn.dataTable.isDataTable(ledgerTableEl)) ledgerTableEl.DataTable().clear().destroy();
@@ -308,13 +455,15 @@
                     if ($.fn.dataTable.isDataTable(ledgerTableEl)) ledgerTableEl.DataTable().clear().destroy();
                     ledgerBody.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Error loading ledger</td></tr>`;
                     initLedgerDT();
+
+                    // Reset metrics on error
                     ledgerInEl.textContent  = fmtINR(0);
                     ledgerOutEl.textContent = fmtINR(0);
                     ledgerNetEl.textContent = fmtINR(0);
-                    cashNetEl.textContent   = fmtINR(0);
-                    upiNetEl.textContent    = fmtINR(0);
-                    cashTotalsEl.textContent = `In ${fmtINR(0)} • Out ${fmtINR(0)}`;
-                    upiTotalsEl.textContent  = `In ${fmtINR(0)} • Out ${fmtINR(0)}`;
+                    applyModeSplits({cash_in:0,cash_out:0,upi_in:0,upi_out:0});
+                    renderCategoryAgg({});
+                    renderFundAgg({});
+                    renderPayerAgg({});
                 }
             }
 
@@ -323,7 +472,7 @@
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = ''; toEl.value = ''; catEl.value = '';
                 loadLedger();
-                history.replaceState(null, '', location.pathname); // clear query params
+                history.replaceState(null, '', location.pathname);
             });
 
             // Toolbar filter
