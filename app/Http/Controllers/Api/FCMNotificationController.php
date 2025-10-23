@@ -12,17 +12,33 @@ use Illuminate\Support\Facades\Storage;
 
 class FCMNotificationController extends Controller
 {
+    /**
+     * Backwards-compat method name to avoid BadMethodCallException.
+     * Simply proxies to getNotifications().
+     */
+    public function getMyNotifications(Request $request)
+    {
+        return $this->getNotifications($request);
+    }
 
+    /**
+     * Public endpoint:
+     * - If NOT authenticated: returns only broadcasts (audience="all" OR user_ids contains "ALL")
+     * - If authenticated: broadcasts + user-targeted (+ optional platform-targeted)
+     *
+     * Optional platform via ?platform=android|ios|web or header "X-Platform".
+     * Images returned as absolute URLs.
+     */
     public function getNotifications(Request $request)
     {
         try {
             $authUser = Auth::guard('sanctum')->user(); // optional
-            $userid   = $authUser ? (string) $authUser->userid : null; // e.g., "USER30382"
-            $platform = strtolower((string)($request->input('platform') ?: $request->header('X-Platform', ''))); // optional
+            $userid   = $authUser ? (string) $authUser->userid : null;
+            $platform = strtolower((string)($request->input('platform') ?: $request->header('X-Platform', '')));
 
             $driver = DB::connection()->getDriverName();
 
-            // Helpers: JSON contains with fallback
+            // Helper: JSON contains with graceful fallback
             $whereJsonContains = function ($q, string $column, string $value) use ($driver) {
                 try {
                     $q->whereJsonContains($column, $value);
@@ -41,9 +57,7 @@ class FCMNotificationController extends Controller
 
             $q = FCMNotification::query();
 
-            // Always include BROADCASTS:
-            // - audience = 'all'
-            // - OR user_ids contains "ALL" (historical compatibility)
+            // Always include broadcasts
             $q->where(function ($w) use ($whereJsonContains) {
                 $w->where('audience', 'all')
                   ->orWhere(function ($wALL) use ($whereJsonContains) {
@@ -54,10 +68,9 @@ class FCMNotificationController extends Controller
                   });
             });
 
-            // If authenticated, also include:
-            //   - audience = 'users' & user_ids contains $userid
-            //   - audience = 'platform' & platforms contains $platform (if given)
+            // If authenticated, include targeted
             if ($userid) {
+                // User-targeted
                 $q->orWhere(function ($wUser) use ($whereJsonContains, $userid) {
                     $wUser->where('audience', 'users')
                           ->where(function ($sub) use ($whereJsonContains, $userid) {
@@ -65,6 +78,7 @@ class FCMNotificationController extends Controller
                           });
                 });
 
+                // Platform-targeted (only when client declares platform)
                 if (in_array($platform, ['android','ios','web'], true)) {
                     $q->orWhere(function ($wPlat) use ($whereJsonContains, $platform) {
                         $wPlat->where('audience', 'platform')
@@ -75,11 +89,10 @@ class FCMNotificationController extends Controller
                 }
             }
 
-            // Latest first
             $notifications = $q->orderBy('created_at', 'desc')->get();
 
-            // Map payload with absolute image URL
             $data = $notifications->map(function ($n) {
+                // Build absolute image URL (supports already-absolute values)
                 $image = null;
                 if ($n->image) {
                     $image = preg_match('#^https?://#i', $n->image)
@@ -91,10 +104,10 @@ class FCMNotificationController extends Controller
                     'id'            => $n->id,
                     'title'         => $n->title,
                     'description'   => $n->description,
-                    'image'         => $image,               // full absolute URL or null
-                    'audience'      => $n->audience,         // 'all' | 'users' | 'platform'
-                    'user_ids'      => $n->user_ids,         // ["ALL"] or ["USER..."] or null
-                    'platforms'     => $n->platforms,        // ['android', ...] or null
+                    'image'         => $image,
+                    'audience'      => $n->audience,     // 'all' | 'users' | 'platform'
+                    'user_ids'      => $n->user_ids,     // ["ALL"] | ["USER..."] | null
+                    'platforms'     => $n->platforms,    // ['android','ios','web'] | null
                     'status'        => $n->status,
                     'success_count' => $n->success_count,
                     'failure_count' => $n->failure_count,
