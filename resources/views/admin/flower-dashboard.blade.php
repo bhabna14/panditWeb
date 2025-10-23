@@ -87,7 +87,7 @@
         }
 
         /* ========= NEW: background blink using a pseudo-element =========
-                                   This wins against gradients and !important backgrounds */
+                                       This wins against gradients and !important backgrounds */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
@@ -257,9 +257,9 @@
             <h4 class="card-title-custom mb-4" style="font-size: 14px">Todays Rider Details</h4>
             <div class="row">
                 @foreach ($ridersData as $data)
-                    <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4"> <a
-                            href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}"
-                            target="_blank" class="text-decoration-none">
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
+                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
+                            class="text-decoration-none">
                             <div class="sales-card"
                                 style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgb(186,185,185);">
                                 <div class="row">
@@ -267,17 +267,21 @@
                                         <div class="ps-4 pt-4 pe-3 pb-4">
                                             <h6 class="mb-2 text-dark">{{ $data['rider']->rider_name }}</h6>
                                             <div class="d-flex flex-column">
-                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2"> Delivery Assigned:
-                                                    {{ $data['totalAssignedOrders'] }} </h4>
-                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0"> Delivered:
-                                                    {{ $data['totalDeliveredToday'] }} </h4>
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">
+                                                    Delivery Assigned: {{ $data['totalAssignedOrders'] }}
+                                                </h4>
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">
+                                                    Delivered: {{ $data['totalDeliveredToday'] }}
+                                                </h4>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </a> </div>
+                        </a>
+                    </div>
                 @endforeach
+
             </div>
         </div>
     </div> <!-- row closed -->

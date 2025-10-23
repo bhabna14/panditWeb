@@ -156,11 +156,26 @@ public function flowerDashboard()
     $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today($tz))->sum('total_price');
 
     $riders = RiderDetails::where('status', 'active')->get();
+   $assignedRiderIds = Order::query()
+    ->whereNotNull('rider_id')
+    ->whereHas('subscription', function ($q) {
+        // keep your current intent: count only orders tied to an ACTIVE subscription
+        $q->where('status', 'active');
+    })
+    ->distinct()
+    ->pluck('rider_id');
+
+    $riders = RiderDetails::where('status', 'active')
+        ->whereIn('rider_id', $assignedRiderIds)
+        ->get();
+
     $ridersData = $riders->map(function ($rider) use ($tz) {
+        // total assigned orders (only those tied to ACTIVE subscription)
         $totalAssignedOrders = Order::where('rider_id', $rider->rider_id)
-            ->whereHas('subscription', fn($q) => $q->where('status', 'active'))
+            ->whereHas('subscription', fn ($q) => $q->where('status', 'active'))
             ->count();
 
+        // delivered today by this rider
         $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today($tz))
             ->where('rider_id', $rider->rider_id)
             ->where('delivery_status', 'delivered')
@@ -171,7 +186,7 @@ public function flowerDashboard()
             'totalAssignedOrders' => $totalAssignedOrders,
             'totalDeliveredToday' => $totalDeliveredToday,
         ];
-    });
+    })->values();
 
     $totalRiders = RiderDetails::where('status', 'active')->count();
     $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::today($tz)->toDateString())
