@@ -643,7 +643,7 @@
                 if (fromEl.value) params.append('from_date', fromEl.value);
                 if (toEl.value)   params.append('to_date', toEl.value);
                 if (document.getElementById('ledger_category').value) params.append('category', document.getElementById('ledger_category').value);
-                const url = `{{ route('officeLedger.index') }}${params.toString() ? '?' + params.toString() : ''}`;
+                const url = `{{ route('officeLedger.category.index') }}${params.toString() ? '?' + params.toString() : ''}`;
                 window.open(url, '_blank', 'noopener');
             });
 
