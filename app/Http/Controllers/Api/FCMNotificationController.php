@@ -26,7 +26,6 @@ class FCMNotificationController extends Controller
 
             $userid   = (string) $authUser->userid; // e.g., "USER30382"
 
-            dd($userid);
             $platform = strtolower((string)($request->input('platform') ?: $request->header('X-Platform', ''))); // optional
 
             // --- Base query: include "all" and "users" (containing userid) ---
