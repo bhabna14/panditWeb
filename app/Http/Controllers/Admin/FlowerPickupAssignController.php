@@ -70,6 +70,7 @@ class FlowerPickupAssignController extends Controller
             'flowers'     => $flowers,
             'units'       => $units,
             'prefillRows' => $prefillRows,
+            'todayDate'   => Carbon::today()->toDateString(),
         ]);
     }
 

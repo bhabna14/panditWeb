@@ -39,7 +39,7 @@
                             <label for="pickup_date" class="form-label required">Pickup Date</label>
                             <input type="date" id="pickup_date" name="pickup_date"
                                    class="form-control @error('pickup_date') is-invalid @enderror"
-                                   value="{{ old('pickup_date', $prefillDate) }}"
+                                   value="{{ old('pickup_date', $todayDate) }}"
                                    min="{{ now()->toDateString() }}" required>
                             @error('pickup_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
