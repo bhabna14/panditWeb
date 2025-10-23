@@ -75,21 +75,50 @@ public function flowerDashboard()
     $excludeStats = ['expired', 'dead'];
 
 // ✅ Count of subscriptions that will be ACTIVE tomorrow
-    $activeTomorrowCount = Subscription::query()
+ $today = Carbon::today($tz);
+
+// same "pending, starts today, unpaid" hide rule as index()
+$shouldHide = function ($sub) use ($today) {
+    if (strtolower($sub->status ?? '') !== 'pending') return false;
+
+    $startsToday = $sub->start_date ? Carbon::parse($sub->start_date)->isSameDay($today) : false;
+    if (!$startsToday) return false;
+
+    // paid?
+    $hasPaid = !empty($sub->latestPaidPayment);
+    if (!$hasPaid && $sub->relationLoaded('flowerPayments')) {
+        $hasPaid = $sub->flowerPayments->contains(function ($p) {
+            $ps = strtolower((string)($p->payment_status ?? ''));
+            $s  = strtolower((string)($p->status ?? ''));
+            return $ps === 'paid' || $s === 'paid';
+        });
+    }
+    return !$hasPaid;
+};
+
+// === FIXED COUNT: build the same set then count ===
+$activeTomorrowCount = Subscription::with([
+        'latestPaidPayment',
+        'flowerPayments',
+    ])
     ->whereNotIn('status', $excludeStats)
     ->where(function ($q) {
         $q->whereIn('status', ['active', 'paused', 'pending'])
-        ->orWhere('is_active', 1);
+          ->orWhere('is_active', 1);
     })
     ->whereDate('start_date', '<=', $tmr->toDateString())
     ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tmr->toDateString())
-    // Exclude those paused ON that day:
-    ->where(function ($q) use ($tmr) {
-        $q->whereNull('pause_start_date')
-        ->orWhereNull('pause_end_date')
-        ->orWhereDate('pause_start_date', '>', $tmr->toDateString())
-        ->orWhereDate('pause_end_date', '<', $tmr->toDateString());
+    ->get()
+    ->filter(function ($s) use ($tmr) {
+        // exclude if paused on that day (same as index())
+        if ($s->pause_start_date && $s->pause_end_date) {
+            $ps = \Carbon\Carbon::parse($s->pause_start_date)->startOfDay();
+            $pe = \Carbon\Carbon::parse($s->pause_end_date)->endOfDay();
+            if ($ps->lte($tmr) && $pe->gte($tmr)) return false;
+        }
+        return true;
     })
+    ->reject($shouldHide)
     ->count();
 
     // (Optional) keep this if you also want the “starts tomorrow” metric elsewhere:

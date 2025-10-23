@@ -256,11 +256,11 @@
                                                 data-bs-target="#viewNotesModal-{{ $order->id }}"><i
                                                     class="bi bi-eye"></i> View Notes</button>
 
-                                       <a href="{{ route('admin.notification.create', ['user' => $order->user->userid]) }}"
-                               class="btn btn-sm btn-outline-primary"
-                               title="Send notification to {{ $order->user->name }}">
-                               Notify
-                            </a>
+                                            <a href="{{ route('admin.notification.create', ['user' => $order->user->userid]) }}"
+                                                class="btn btn-sm btn-outline-primary"
+                                                title="Send notification to {{ $order->user->name }}">
+                                                Notify
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

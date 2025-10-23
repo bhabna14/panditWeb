@@ -87,7 +87,7 @@
         }
 
         /* ========= NEW: background blink using a pseudo-element =========
-                               This wins against gradients and !important backgrounds */
+                                   This wins against gradients and !important backgrounds */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
