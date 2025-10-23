@@ -54,16 +54,6 @@ class FlowerOrderController extends Controller
                 });
         }
 
-        if ($filter === 'renewed') {
-            // If you want to keep your original logic, leave this block as-is.
-            // (Better alternative is "user has >1 subs", but keeping your current behavior)
-            $query->whereBetween('created_at', [$todayStart, $todayEnd])
-                ->whereIn('order_id', function ($q) {
-                    $q->select('order_id')->from('subscriptions')
-                        ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
-                });
-        }
-
         if ($filter === 'end') {
             $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
                 $dateQuery->where(function ($sq) use ($todayStart, $todayEnd) {
@@ -104,14 +94,35 @@ class FlowerOrderController extends Controller
             })->distinct('subscription_id');
         }
 
-        if ($filter === 'new') {
-            $query->whereBetween('created_at', [$todayStart, $todayEnd])
-                ->where('status', 'pending')
-                ->whereIn('user_id', function ($sq) {
-                    $sq->select('user_id')->from('subscriptions')
-                        ->groupBy('user_id')->havingRaw('COUNT(*) = 1');
-                });
-        }
+      if ($filter === 'new') {
+    // Rows that are each user's first-ever subscription, and that first row was created today
+    $firstRowsSub = DB::table('subscriptions as s1')
+        ->join(
+            DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
+                      FROM subscriptions
+                      GROUP BY user_id) f'),
+            function ($join) {
+                $join->on('s1.user_id', '=', 'f.user_id')
+                     ->on('s1.created_at', '=', 'f.first_created_at');
+            }
+        )
+        ->whereBetween('s1.created_at', [$todayStart, $todayEnd])
+        ->select('s1.id');
+
+    $query->whereIn('id', $firstRowsSub);
+}
+
+if ($filter === 'renewed') {
+    // Rows created today for users who had any subscription before today
+    $query->whereBetween('created_at', [$todayStart, $todayEnd])
+        ->whereExists(function ($q) use ($todayStart) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as prev')
+              ->whereColumn('prev.user_id', 'subscriptions.user_id')
+              ->where('prev.created_at', '<', $todayStart);
+        });
+}
+
 
         if ($filter === 'active') {
             $query->where('status', 'active');
