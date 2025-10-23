@@ -4,7 +4,6 @@
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
-
     <style>
         :root {
             --brand: #4f46e5;
@@ -18,7 +17,6 @@
             --danger-bg: #fff1f2;
             --danger-fg: #9f1239;
             --danger-br: #fecdd3;
-            --soft: #f8fafc;
         }
 
         .metric {
@@ -221,48 +219,14 @@
             <div id="categoryContainer" class="d-flex flex-column gap-3">
                 <div class="muted">Use the filters above and click <strong>Search</strong>.</div>
             </div>
-
-            {{-- Optional: flat ledger export (hidden, filled when you need it) --}}
-            <div class="d-none">
-                <table id="export-ledger" class="table">
-                    <thead>
-                        <tr>
-                            <th>Sl</th>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Mode</th>
-                            <th>Paid By</th>
-                            <th>Received By</th>
-                            <th>Description</th>
-                            <th>Source</th>
-                        </tr>
-                    </thead>
-                    <tbody id="exportBody"></tbody>
-                </table>
-            </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/pdfmake/pdfmake.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/pdfmake/vfs_fonts.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
-
     <script>
         (function() {
-            // ---------- Helpers ----------
+            // Helpers
             const toNumber = v => {
                 if (v === null || v === undefined) return 0;
                 const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
@@ -280,7 +244,6 @@
             const outEl = document.getElementById('ledgerOut');
             const netEl = document.getElementById('ledgerNet');
 
-            // Pre-fill from query params
             const params = new URLSearchParams(location.search);
             const fromEl = document.getElementById('from_date');
             const toEl = document.getElementById('to_date');
@@ -289,82 +252,83 @@
             if (params.get('to_date')) toEl.value = params.get('to_date');
             if (params.get('category')) catEl.value = params.get('category');
 
-            function sectionTemplate(key, group) {
+            function sectionTemplate(key, group, expand = false) {
                 const net = toNumber(group.received_total) - toNumber(group.paid_total);
                 const pos = net >= 0;
                 return `
-                <div class="cat-card" data-cat="${key}">
-                    <div class="cat-header" data-toggle="cat" role="button">
-                        <div class="d-flex align-items-center gap-2">
-                            <svg width="16" height="16" class="caret ${key==='__open__'?'rot-90':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                            <span class="title">${cap(group.label)}</span>
-                            <span class="muted">•</span>
-                            <span class="muted small">Received: <strong class="mono">${fmtINR(group.received_total)}</strong></span>
-                            <span class="muted small">Paid: <strong class="mono">${fmtINR(group.paid_total)}</strong></span>
-                        </div>
-                        <div class="chip ${pos ? 'chip-net-pos':'chip-net-neg'} mono">Available: ${fmtINR(net)}</div>
-                    </div>
-                    <div class="cat-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="section-title mb-2">Funds Received</div>
-                                <div class="table-premium">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle text-nowrap mb-0">
-                                            <thead>
-                                                <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>From (Paid By)</th><th>To (Received By)</th><th>Description</th></tr>
-                                            </thead>
-                                            <tbody>
-                                                ${ (group.received||[]).map(r => `
-                                                        <tr>
-                                                            <td>${r.date}</td>
-                                                            <td class="text-end mono">${fmtINR(r.amount)}</td>
-                                                            <td class="text-cap">${r.mode||''}</td>
-                                                            <td class="text-cap">${r.paid_by||''}</td>
-                                                            <td class="text-cap">${r.received_by||''}</td>
-                                                            <td>${r.description||''}</td>
-                                                        </tr>
-                                                    `).join('') || `<tr><td colspan="6" class="text-center text-muted">No records</td></tr>`}
-                                            </tbody>
-                                            <tfoot class="table-light">
-                                                <tr><th class="text-end">Total:</th><th class="text-end mono">${fmtINR(group.received_total)}</th><th colspan="4"></th></tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
+        <div class="cat-card" data-cat="${key}">
+            <div class="cat-header" data-toggle="cat" role="button">
+                <div class="d-flex align-items-center gap-2">
+                    <svg width="16" height="16" class="caret ${expand?'rot-90':''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                    <span class="title">${cap(group.label)}</span>
+                    <span class="muted">•</span>
+                    <span class="muted small">Received: <strong class="mono">${fmtINR(group.received_total)}</strong></span>
+                    <span class="muted small">Paid: <strong class="mono">${fmtINR(group.paid_total)}</strong></span>
+                </div>
+                <div class="chip ${pos ? 'chip-net-pos':'chip-net-neg'} mono">Available: ${fmtINR(net)}</div>
+            </div>
+            <div class="cat-body" style="display:${expand?'block':'none'}">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="section-title mb-2">Funds Received</div>
+                        <div class="table-premium">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle text-nowrap mb-0">
+                                    <thead>
+                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>From (Paid By)</th><th>To (Received By)</th><th>Description</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        ${ (group.received||[]).map(r => `
+                                                <tr>
+                                                    <td>${r.date ?? ''}</td>
+                                                    <td class="text-end mono">${fmtINR(r.amount)}</td>
+                                                    <td class="text-cap">${r.mode||''}</td>
+                                                    <td class="text-cap">${r.paid_by||''}</td>
+                                                    <td class="text-cap">${r.received_by||''}</td>
+                                                    <td>${r.description||''}</td>
+                                                </tr>
+                                            `).join('') || `<tr><td colspan="6" class="text-center text-muted">No records</td></tr>`}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr><th class="text-end">Total:</th><th class="text-end mono">${fmtINR(group.received_total)}</th><th colspan="4"></th></tr>
+                                    </tfoot>
+                                </table>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="col-md-6">
-                                <div class="section-title mb-2">Payments (Spent)</div>
-                                <div class="table-premium">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle text-nowrap mb-0">
-                                            <thead>
-                                                <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid By</th><th>Description</th></tr>
-                                            </thead>
-                                            <tbody>
-                                                ${ (group.paid||[]).map(r => `
-                                                        <tr>
-                                                            <td>${r.date}</td>
-                                                            <td class="text-end mono">${fmtINR(r.amount)}</td>
-                                                            <td class="text-cap">${r.mode||''}</td>
-                                                            <td class="text-cap">${r.paid_by||''}</td>
-                                                            <td>${r.description||''}</td>
-                                                        </tr>
-                                                    `).join('') || `<tr><td colspan="5" class="text-center text-muted">No records</td></tr>`}
-                                            </tbody>
-                                            <tfoot class="table-light">
-                                                <tr><th class="text-end">Total:</th><th class="text-end mono">${fmtINR(group.paid_total)}</th><th colspan="3"></th></tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
+                    <div class="col-md-6">
+                        <div class="section-title mb-2">Payments (Spent)</div>
+                        <div class="table-premium">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle text-nowrap mb-0">
+                                    <thead>
+                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid By</th><th>Description</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        ${ (group.paid||[]).map(r => `
+                                                <tr>
+                                                    <td>${r.date ?? ''}</td>
+                                                    <td class="text-end mono">${fmtINR(r.amount)}</td>
+                                                    <td class="text-cap">${r.mode||''}</td>
+                                                    <td class="text-cap">${r.paid_by||''}</td>
+                                                    <td>${r.description||''}</td>
+                                                </tr>
+                                            `).join('') || `<tr><td colspan="5" class="text-center text-muted">No records</td></tr>`}
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr><th class="text-end">Total:</th><th class="text-end mono">${fmtINR(group.paid_total)}</th><th colspan="3"></th></tr>
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
                     </div>
-                </div>`;
+
+                </div>
+            </div>
+        </div>`;
             }
 
             function bindToggles() {
@@ -384,9 +348,10 @@
                 if (fromEl.value) qs.append('from_date', fromEl.value);
                 if (toEl.value) qs.append('to_date', toEl.value);
                 if (catEl.value) qs.append('category', catEl.value);
-                const url = `{{ route('officeLedger.filter') }}?${qs.toString()}`;
+                const url = `{{ route('officeLedger.filter') }}` + (qs.toString() ? `?${qs.toString()}` : '');
 
                 container.innerHTML = `<div class="muted">Loading…</div>`;
+
                 try {
                     const res = await fetch(url, {
                         headers: {
@@ -394,38 +359,34 @@
                         }
                     });
                     const data = await res.json();
-                    if (!data?.success) throw new Error('Failed');
+                    if (!data?.success) throw new Error(data?.message || 'Failed');
 
                     inEl.textContent = fmtINR(data.in_total || 0);
                     outEl.textContent = fmtINR(data.out_total || 0);
                     netEl.textContent = fmtINR((data.in_total || 0) - (data.out_total || 0));
 
-                    const cats = data.categories || [];
+                    const cats = Array.isArray(data.categories) ? data.categories : [];
                     const groups = data.groups || {};
+
+                    // If there is no data *at all*
                     if (!cats.length) {
                         container.innerHTML = `<div class="muted">No records for the selected range.</div>`;
                         return;
                     }
 
-                    // Build all category sections (open the first by default)
-                    const html = cats.map((key, idx) => {
+                    // Render categories (first one expanded)
+                    let html = '';
+                    cats.forEach((key, idx) => {
                         const g = groups[key] || {
+                            label: key,
                             received: [],
                             paid: [],
                             received_total: 0,
-                            paid_total: 0,
-                            label: key
+                            paid_total: 0
                         };
-                        return sectionTemplate(idx === 0 ? '__open__' : key, g);
-                    }).join('');
+                        html += sectionTemplate(key, g, idx === 0);
+                    });
                     container.innerHTML = html;
-
-                    // Show first body expanded
-                    const first = container.querySelector('.cat-card .cat-body');
-                    if (first) first.style.display = 'block';
-                    const firstCaret = container.querySelector('.cat-card .caret');
-                    if (firstCaret) firstCaret.classList.add('rot-90');
-
                     bindToggles();
                 } catch (e) {
                     console.error(e);
@@ -434,7 +395,6 @@
                 }
             }
 
-            // Controls
             document.getElementById('searchBtn').addEventListener('click', load);
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = '';

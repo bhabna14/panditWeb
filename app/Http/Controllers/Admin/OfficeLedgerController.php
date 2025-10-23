@@ -12,7 +12,8 @@ class OfficeLedgerController extends Controller
 {
     public function index()
     {
-        return view('admin.office-ledger-transaction'); // <-- NEW blade
+        // Render the category-first ledger page
+        return view('admin.office-ledger-transaction');
     }
 
     public function filter(Request $request)
@@ -22,7 +23,7 @@ class OfficeLedgerController extends Controller
             $to   = $request->query('to_date');
             $cat  = $request->query('category');
 
-            // ------- Funds (IN) via OfficeFund -------
+            // ---------- FUNDS (IN) ----------
             $fundsQ = OfficeFund::query();
             if ($from) $fundsQ->whereDate('date', '>=', $from);
             if ($to)   $fundsQ->whereDate('date', '<=', $to);
@@ -32,8 +33,11 @@ class OfficeLedgerController extends Controller
                 'id','date','amount','mode_of_payment','paid_by','received_by','description','categories',
             ]);
 
-            // ------- Payments (OUT) via OfficeTransaction -------
+            // ---------- PAYMENTS (OUT) ----------
             $payQ = OfficeTransaction::query();
+            // IMPORTANT: your model has a status field; most of your dataset uses 'active'
+            $payQ->where('status', 'active');
+
             if ($from) $payQ->whereDate('date', '>=', $from);
             if ($to)   $payQ->whereDate('date', '<=', $to);
             if ($cat)  $payQ->where('categories', $cat);
@@ -42,30 +46,38 @@ class OfficeLedgerController extends Controller
                 'id','date','amount','mode_of_payment','paid_by','description','categories',
             ]);
 
-            // Helpers
+            // ---------- Helpers ----------
             $num = function ($v) {
-                if ($v === null) return 0.0;
-                $s = str_replace(['₹',',',' '], '', (string)$v);
+                if ($v === null || $v === '') return 0.0;
+                $s = str_replace(['₹', ',', ' '], '', (string)$v);
                 $f = floatval($s);
                 return is_finite($f) ? round($f, 2) : 0.0;
             };
-            $d8 = fn($d) => Carbon::parse($d)->format('Y-m-d');
+            $d8 = fn($d) => $d ? Carbon::parse($d)->format('Y-m-d') : null;
 
-            // Gather unique categories from both sides
-            $categories = collect($funds)->pluck('categories')
-                ->merge(collect($payments)->pluck('categories'))
+            // ---------- Categories list (ensure at least one if there is data) ----------
+            $catFromFunds = collect($funds)->pluck('categories');
+            $catFromPays  = collect($payments)->pluck('categories');
+
+            $categories = $catFromFunds
+                ->merge($catFromPays)
                 ->map(fn($c) => $c ?: 'uncategorized')
                 ->unique()
                 ->values()
                 ->all();
 
-            // Build category groups: each with received[] and paid[]
+            // If there are rows but all categories were null, we still want one bucket
+            if (empty($categories) && ($funds->count() > 0 || $payments->count() > 0)) {
+                $categories = ['uncategorized'];
+            }
+
+            // ---------- Build category groups ----------
             $groups = [];
             foreach ($categories as $cKey) {
                 $groups[$cKey] = [
                     'label'          => $cKey ?: 'uncategorized',
-                    'received'       => [], // funds
-                    'paid'           => [], // payments
+                    'received'       => [],   // funds
+                    'paid'           => [],   // payments
                     'received_total' => 0.0,
                     'paid_total'     => 0.0,
                     'net'            => 0.0,
@@ -75,6 +87,18 @@ class OfficeLedgerController extends Controller
             // Fill received (Funds)
             foreach ($funds as $f) {
                 $ck = $f->categories ?: 'uncategorized';
+                // in case there were no categories earlier, initialize now
+                if (!isset($groups[$ck])) {
+                    $groups[$ck] = [
+                        'label'          => $ck,
+                        'received'       => [],
+                        'paid'           => [],
+                        'received_total' => 0.0,
+                        'paid_total'     => 0.0,
+                        'net'            => 0.0,
+                    ];
+                    $categories[] = $ck;
+                }
                 $row = [
                     'id'          => $f->id,
                     'date'        => $d8($f->date),
@@ -92,12 +116,23 @@ class OfficeLedgerController extends Controller
             // Fill paid (Payments)
             foreach ($payments as $p) {
                 $ck = $p->categories ?: 'uncategorized';
+                if (!isset($groups[$ck])) {
+                    $groups[$ck] = [
+                        'label'          => $ck,
+                        'received'       => [],
+                        'paid'           => [],
+                        'received_total' => 0.0,
+                        'paid_total'     => 0.0,
+                        'net'            => 0.0,
+                    ];
+                    $categories[] = $ck;
+                }
                 $row = [
                     'id'          => $p->id,
                     'date'        => $d8($p->date),
                     'amount'      => $num($p->amount),
                     'mode'        => $p->mode_of_payment ?? null,
-                    'paid_by'     => $p->paid_by ?? null,     // payer for the expense
+                    'paid_by'     => $p->paid_by ?? null,   // payer for the expense
                     'received_by' => null,
                     'description' => $p->description ?? '',
                     'source'      => 'payment',
@@ -106,23 +141,27 @@ class OfficeLedgerController extends Controller
                 $groups[$ck]['paid_total'] += $row['amount'];
             }
 
-            // Finalize nets and sort inner rows (date desc, id desc)
+            // ---------- Finalize + totals ----------
             $sorter = function ($a, $b) {
                 if ($a['date'] === $b['date']) return $b['id'] <=> $a['id'];
-                return strcmp($b['date'], $a['date']);
+                return strcmp($b['date'], $a['date']); // desc
             };
-            $inGrand = 0.0; $outGrand = 0.0;
+
+            $inGrand = 0.0;
+            $outGrand = 0.0;
+
             foreach ($groups as $ck => $g) {
                 usort($groups[$ck]['received'], $sorter);
                 usort($groups[$ck]['paid'], $sorter);
                 $groups[$ck]['received_total'] = round($groups[$ck]['received_total'], 2);
                 $groups[$ck]['paid_total']     = round($groups[$ck]['paid_total'], 2);
                 $groups[$ck]['net']            = round($groups[$ck]['received_total'] - $groups[$ck]['paid_total'], 2);
+
                 $inGrand  += $groups[$ck]['received_total'];
                 $outGrand += $groups[$ck]['paid_total'];
             }
 
-            // Also provide flat ledger if you still want to export later
+            // Flat ledger (optional for export)
             $ledger = [];
             $sl = 1;
             foreach ($groups as $ck => $g) {
@@ -158,21 +197,23 @@ class OfficeLedgerController extends Controller
                 }
             }
 
-            // Sort flat ledger (date desc then source_id desc)
             usort($ledger, function ($a, $b) {
                 if ($a['date'] === $b['date']) return $b['source_id'] <=> $a['source_id'];
                 return strcmp($b['date'], $a['date']);
             });
             foreach ($ledger as $i => &$r) $r['sl'] = $i + 1;
 
+            // Make sure categories is a clean unique list (preserve order)
+            $categories = array_values(array_unique($categories));
+
             return response()->json([
-                'success' => true,
-                'in_total'  => round($inGrand, 2),
-                'out_total' => round($outGrand, 2),
-                'net_total' => round($inGrand - $outGrand, 2),
-                'categories' => array_values($categories),
-                'groups'     => $groups,
-                'ledger'     => $ledger, // optional export
+                'success'     => true,
+                'in_total'    => round($inGrand, 2),
+                'out_total'   => round($outGrand, 2),
+                'net_total'   => round($inGrand - $outGrand, 2),
+                'categories'  => $categories,
+                'groups'      => $groups,
+                'ledger'      => $ledger,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
