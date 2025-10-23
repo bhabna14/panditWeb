@@ -182,7 +182,7 @@
 
         <div class="row">
             {{-- Left: Form --}}
-            <div class="col-lg-5">
+            <div class="col-lg-12 mb-4">
                 <div class="nu-card p-4 mb-4">
                     <form action="{{ route('admin.notification.send') }}" method="POST" enctype="multipart/form-data"
                         id="fcmForm">
@@ -295,7 +295,7 @@
             </div>
 
             {{-- Right: Recent Notifications --}}
-            <div class="col-lg-7">
+            <div class="col-lg-12">
                 <div class="nu-card p-4">
                     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                         <h5 class="mb-0 fw-bold">Recent Notifications</h5>
