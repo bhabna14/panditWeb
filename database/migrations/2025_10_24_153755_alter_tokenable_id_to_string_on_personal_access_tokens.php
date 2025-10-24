@@ -13,11 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('delivery_start_histories', function (Blueprint $table) {
-            $table->id();
-            $table->string('rider_id');
-            $table->timestamp('start_delivery_time');
-            $table->timestamps();
+        Schema::table('string_on_personal_access_tokens', function (Blueprint $table) {
+            //
         });
     }
 
@@ -28,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('delivery_start_histories');
+        Schema::table('string_on_personal_access_tokens', function (Blueprint $table) {
+            //
+        });
     }
 };
