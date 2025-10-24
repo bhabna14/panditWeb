@@ -133,100 +133,95 @@ class VendorOtpController extends Controller
     /**
      * Verify vendor OTP → returns a **Bearer** token (Sanctum).
      */
-    public function verify(Request $request)
-    {
-        $validated = $request->validate([
-            'phone' => ['required','string'],
-            'otp'   => ['required','digits_between:4,8'],
-        ]);
+   public function verify(Request $request)
+{
+    $validated = $request->validate([
+        'phone' => ['required','string'],
+        'otp'   => ['required','digits_between:4,8'],
+    ]);
 
-        $candidates = $this->phoneCandidates($validated['phone']);
+    $candidates = $this->phoneCandidates($validated['phone']);
 
-        $vendor = FlowerVendor::whereIn('phone_no', $candidates)->first();
+    $vendor = FlowerVendor::whereIn('phone_no', $candidates)->first();
 
-        if (!$vendor) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mobile number not registered. Please contact admin.',
-            ], 404);
-        }
-
-        // Expiry check
-        if ($this->columnExists($vendor, 'otp_expires_at') && $vendor->otp_expires_at instanceof Carbon) {
-            if (Carbon::now()->greaterThan($vendor->otp_expires_at)) {
-                $vendor->otp = null;
-                $vendor->save();
-
-                return response()->json([
-                    'success' => false,
-                    'message' => 'OTP expired. Please request a new one.',
-                ], 410);
-            }
-        }
-
-        // Attempts check
-        if ($this->columnExists($vendor, 'otp_attempts')) {
-            $maxAttempts = 5;
-            if ((int) $vendor->otp_attempts >= $maxAttempts) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Too many invalid attempts. Please request a new OTP.',
-                ], 429);
-            }
-        }
-
-        // Compare OTP
-        if ((string) $vendor->otp !== (string) $validated['otp']) {
-            if ($this->columnExists($vendor, 'otp_attempts')) {
-                $vendor->otp_attempts = (int) $vendor->otp_attempts + 1;
-                $vendor->save();
-            }
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid OTP.',
-            ], 401);
-        }
-
-        // OTP valid → clear OTP & counters first
-        $vendor->otp = null;
-        if ($this->columnExists($vendor, 'otp_attempts')) {
-            $vendor->otp_attempts = 0;
-        }
-        if ($this->columnExists($vendor, 'otp_expires_at')) {
-            $vendor->otp_expires_at = null;
-        }
-        $vendor->save();
-
-        // Block inactive vendors from getting tokens
-        if (isset($vendor->status) && $vendor->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vendor is not active. Please contact admin.',
-            ], 403);
-        }
-
-        /**
-         * ✅ Create the Bearer token
-         * You can keep your original line:
-         *   $token = $vendor->createToken('API Token')->plainTextToken;
-         * or, include an ability scope:
-         */
-        $token = $vendor->createToken('vendor-api', ['vendor'])->plainTextToken;
-
-        // Compute expiry based on Sanctum config (config/sanctum.php -> 'expiration')
-        $ttlMinutes = (int) (config('sanctum.expiration') ?? 0);
-        $expiresAt  = $ttlMinutes > 0 ? now()->addMinutes($ttlMinutes) : null;
-
+    if (!$vendor) {
         return response()->json([
-            'success'      => true,
-            'message'      => 'Vendor verified successfully.',
-            'vendor_id'    => $vendor->vendor_id,
-            'token_type'   => 'Bearer',
-            'access_token' => $token,  // <- pass this as Bearer in Authorization header
-            'expires_at'   => optional($expiresAt)->toIso8601String(),
-            'vendor'       => $vendor,
-        ], 200);
+            'success' => false,
+            'message' => 'Mobile number not registered. Please contact admin.',
+        ], 404);
     }
+
+    // Expiry check
+    if ($this->columnExists($vendor, 'otp_expires_at') && $vendor->otp_expires_at instanceof \Illuminate\Support\Carbon) {
+        if (\Illuminate\Support\Carbon::now()->greaterThan($vendor->otp_expires_at)) {
+            $vendor->otp = null;
+            $vendor->save();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'OTP expired. Please request a new one.',
+            ], 410);
+        }
+    }
+
+    // Attempts check
+    if ($this->columnExists($vendor, 'otp_attempts')) {
+        $maxAttempts = 5;
+        if ((int) $vendor->otp_attempts >= $maxAttempts) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Too many invalid attempts. Please request a new OTP.',
+            ], 429);
+        }
+    }
+
+    // Compare OTP
+    if ((string) $vendor->otp !== (string) $validated['otp']) {
+        if ($this->columnExists($vendor, 'otp_attempts')) {
+            $vendor->otp_attempts = (int) $vendor->otp_attempts + 1;
+            $vendor->save();
+        }
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid OTP.',
+        ], 401);
+    }
+
+    // OTP valid → clear OTP & counters first
+    $vendor->otp = null;
+    if ($this->columnExists($vendor, 'otp_attempts')) {
+        $vendor->otp_attempts = 0;
+    }
+    if ($this->columnExists($vendor, 'otp_expires_at')) {
+        $vendor->otp_expires_at = null;
+    }
+    $vendor->save();
+
+    // Block inactive vendors
+    if (isset($vendor->status) && $vendor->status !== 'active') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Vendor is not active. Please contact admin.',
+        ], 403);
+    }
+
+    // ✅ Create Sanctum Bearer token
+    $token = $vendor->createToken('vendor-api', ['vendor'])->plainTextToken;
+
+    $ttlMinutes = (int) (config('sanctum.expiration') ?? 0);
+    $expiresAt  = $ttlMinutes > 0 ? now()->addMinutes($ttlMinutes) : null;
+
+    return response()->json([
+        'success'      => true,
+        'message'      => 'Vendor verified successfully.',
+        'vendor_id'    => $vendor->vendor_id,
+        'token_type'   => 'Bearer',
+        'access_token' => $token,
+        'expires_at'   => optional($expiresAt)->toIso8601String(),
+        'vendor'       => $vendor,
+    ], 200);
+}
+
 
     /* ---------------- Helpers ---------------- */
 
