@@ -64,7 +64,7 @@ class VendorOtpController extends Controller
             || str_starts_with($value, '$argon2i$')
             || str_starts_with($value, '$argon2id$');
     }
-    
+
     public function sendOtp(Request $request)
     {
         $validated = $request->validate([
@@ -205,77 +205,77 @@ class VendorOtpController extends Controller
     /**
      * Verify WhatsApp OTP and mint token
      */
-    public function verifyOtp(Request $request)
-    {
-        $validated = $request->validate([
-            'phone'       => ['nullable','string'],
-            'vendor_id'   => ['nullable','string'],
-            'otp'         => ['required','digits_between:4,8'],
-            'device_name' => ['sometimes','string','max:100'],
-        ]);
+   public function verifyOtp(Request $request)
+{
+    $validated = $request->validate([
+        'phone'     => ['nullable','string'],
+        'vendor_id' => ['nullable','string'],
+        'otp'       => ['required','digits_between:4,8'],
+    ]);
 
-        if (empty($validated['phone']) && empty($validated['vendor_id'])) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Provide either phone or vendor_id.',
-            ], 422);
-        }
-
-        // Resolve vendor
-        $vendor = !empty($validated['vendor_id'])
-            ? FlowerVendor::find($validated['vendor_id'])
-            : FlowerVendor::whereIn('phone_no', $this->phoneCandidates($validated['phone']))->first();
-
-        if (!$vendor) {
-            return response()->json(['success' => false,'message' => 'Vendor not found.'], 404);
-        }
-
-        // Expiry check
-        if ($this->columnExists($vendor, 'otp_expires_at') && $vendor->otp_expires_at instanceof Carbon) {
-            if (Carbon::now()->greaterThan($vendor->otp_expires_at)) {
-                $vendor->otp = null;
-                $vendor->save();
-                return response()->json(['success' => false,'message' => 'OTP expired. Please request a new one.'], 410);
-            }
-        }
-
-        // Attempts limit
-        if ($this->columnExists($vendor, 'otp_attempts')) {
-            $maxAttempts = 5;
-            if ((int) $vendor->otp_attempts >= $maxAttempts) {
-                return response()->json(['success' => false,'message' => 'Too many invalid attempts. Please request a new OTP.'], 429);
-            }
-        }
-
-        // Compare OTP
-        if ((string) $vendor->otp !== (string) $validated['otp']) {
-            if ($this->columnExists($vendor, 'otp_attempts')) {
-                $vendor->otp_attempts = (int) $vendor->otp_attempts + 1;
-                $vendor->save();
-            }
-            return response()->json(['success' => false,'message' => 'Invalid OTP.'], 401);
-        }
-
-        // Success → clear OTP + counters
-        $vendor->otp = null;
-        if ($this->columnExists($vendor, 'otp_attempts')) $vendor->otp_attempts = 0;
-        if ($this->columnExists($vendor, 'otp_expires_at')) $vendor->otp_expires_at = null;
-        $vendor->save();
-
-        if (isset($vendor->status) && $vendor->status !== 'active') {
-            return response()->json(['success' => false,'message' => 'Account is not active.'], 423);
-        }
-
-        $device = $validated['device_name'] ?? 'vendor-api';
-        $token  = $vendor->createToken($device)->plainTextToken;
-
+    if (empty($validated['phone']) && empty($validated['vendor_id'])) {
         return response()->json([
-            'success' => true,
-            'message' => 'Vendor verified successfully.',
-            'vendor'  => $vendor,
-            'token'   => $token,
-        ], 200);
+            'success' => false,
+            'message' => 'Provide either phone or vendor_id.',
+        ], 422);
     }
+
+    // Resolve vendor
+    $vendor = !empty($validated['vendor_id'])
+        ? FlowerVendor::find($validated['vendor_id'])
+        : FlowerVendor::whereIn('phone_no', $this->phoneCandidates($validated['phone']))->first();
+
+    if (!$vendor) {
+        return response()->json(['success' => false,'message' => 'Vendor not found.'], 404);
+    }
+
+    // Expiry check
+    if ($this->columnExists($vendor, 'otp_expires_at') && $vendor->otp_expires_at instanceof \Illuminate\Support\Carbon) {
+        if (\Illuminate\Support\Carbon::now()->greaterThan($vendor->otp_expires_at)) {
+            $vendor->otp = null;
+            $vendor->save();
+            return response()->json(['success' => false,'message' => 'OTP expired. Please request a new one.'], 410);
+        }
+    }
+
+    // Attempts limit
+    if ($this->columnExists($vendor, 'otp_attempts')) {
+        $maxAttempts = 5;
+        if ((int) $vendor->otp_attempts >= $maxAttempts) {
+            return response()->json(['success' => false,'message' => 'Too many invalid attempts. Please request a new OTP.'], 429);
+        }
+    }
+
+    // Compare OTP
+    if ((string) $vendor->otp !== (string) $validated['otp']) {
+        if ($this->columnExists($vendor, 'otp_attempts')) {
+            $vendor->otp_attempts = (int) $vendor->otp_attempts + 1;
+            $vendor->save();
+        }
+        return response()->json(['success' => false,'message' => 'Invalid OTP.'], 401);
+    }
+
+    // Success → clear OTP + counters
+    $vendor->otp = null;
+    if ($this->columnExists($vendor, 'otp_attempts')) $vendor->otp_attempts = 0;
+    if ($this->columnExists($vendor, 'otp_expires_at')) $vendor->otp_expires_at = null;
+    $vendor->save();
+
+    if (isset($vendor->status) && $vendor->status !== 'active') {
+        return response()->json(['success' => false,'message' => 'Account is not active.'], 423);
+    }
+
+    // ✅ Always use fixed token name
+    $token = $vendor->createToken('vendor-api')->plainTextToken;
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Vendor verified successfully.',
+        'vendor'  => $vendor,
+        'token'   => $token,
+    ], 200);
+}
+
 
     /* ----------------- Helpers ----------------- */
 
