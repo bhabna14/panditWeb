@@ -39,7 +39,7 @@ class FlowerVendor extends Authenticatable
         'otp_expires_at' => 'datetime',
     ];
 
-    protected $hidden = ['otp'];
+    protected $hidden = ['password', 'otp'];
 
     /**
      * Since your PK is vendor_id (not "id"), this helps some auth flows.
@@ -48,6 +48,16 @@ class FlowerVendor extends Authenticatable
     public function getAuthIdentifierName()
     {
         return $this->getKeyName(); // returns "vendor_id"
+    }
+
+    public function setPasswordAttribute($value): void
+    {
+        if (!empty($value)) {
+            // Avoid double-hashing if already hashed
+            $this->attributes['password'] = Hash::needsRehash($value)
+                ? Hash::make($value)
+                : $value;
+        }
     }
 
     /* ---------- Relationships (unchanged) ---------- */

@@ -266,3 +266,4 @@ Route::get('/say-yes', [UserProfileController::class, 'sayYes']);
 
 Route::post('/vendor-send-otp',   [VendorOtpController::class, 'send'])->middleware('throttle:5,1');   // 5 req/min
 Route::post('/vendor-verify-otp', [VendorOtpController::class, 'verify'])->middleware('throttle:10,1'); // 10 req/min
+Route::post('/vendor-password-login', [VendorOtpController::class, 'loginPassword']);

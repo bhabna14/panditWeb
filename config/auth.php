@@ -66,6 +66,11 @@ return [
         'provider' => 'riders', // Matches your 'riders' provider
         'hash' => false,        // Set to true only if using hashed tokens
     ],
+
+    'sanctum' => [
+        'driver' => 'sanctum',
+        'provider' => 'vendors', // optional: tie to vendors provider
+    ],
 ],
 
 
@@ -106,6 +111,10 @@ return [
     'riders' => [
         'driver' => 'eloquent',
         'model' => App\Models\RiderDetails::class,
+    ],
+    'vendors' => [
+        'driver' => 'eloquent',
+        'model'  => App\Models\FlowerVendor::class,
     ],
 ],
 
