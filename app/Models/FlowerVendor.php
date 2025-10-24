@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens; // ✅ correct import
 
 class FlowerVendor extends Authenticatable
 {
     use HasApiTokens, HasFactory;
 
-    protected $primaryKey = 'vendor_id';   // If vendor_id is your PK
-    public $incrementing = false;          // Because it's string, not auto-increment
-    protected $keyType = 'string';
-
     protected $table = 'flower__vendor_details';
+
+    protected $primaryKey = 'vendor_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
         'vendor_id',
@@ -31,13 +31,26 @@ class FlowerVendor extends Authenticatable
         'vendor_document',
         'otp_expires_at',
         'otp_attempts',
+        'status',
     ];
 
     protected $casts = [
-    'flower_ids'     => 'array',
-    'otp_expires_at' => 'datetime',
+        'flower_ids'     => 'array',
+        'otp_expires_at' => 'datetime',
     ];
-    protected $hidden = ['otp']; // don’t leak OTPs
+
+    protected $hidden = ['otp'];
+
+    /**
+     * Since your PK is vendor_id (not "id"), this helps some auth flows.
+     * Sanctum itself uses Eloquent keys, but this makes it explicit.
+     */
+    public function getAuthIdentifierName()
+    {
+        return $this->getKeyName(); // returns "vendor_id"
+    }
+
+    /* ---------- Relationships (unchanged) ---------- */
 
     public function monthPrices()
     {
@@ -45,20 +58,18 @@ class FlowerVendor extends Authenticatable
             ->with(['product:product_id,name', 'unit:id,unit_name']);
     }
 
-    public function flowerProduct(){
-        return $this->hasMany(FlowerProduct::class,'flower_ids', 'product_id');
+    public function flowerProduct()
+    {
+        return $this->hasMany(FlowerProduct::class, 'flower_ids', 'product_id');
     }
 
     public function vendorBanks()
     {
-        return $this->hasMany(FlowerVendorBank::class, 'vendor_id', 'vendor_id'); // Adjust as necessary
+        return $this->hasMany(FlowerVendorBank::class, 'vendor_id', 'vendor_id');
     }
 
     public function pickupDetails()
     {
-        return $this->hasMany(FlowerPickupDetails::class,'vendor_id', 'vendor_id');
+        return $this->hasMany(FlowerPickupDetails::class, 'vendor_id', 'vendor_id');
     }
-
 }
-
-
