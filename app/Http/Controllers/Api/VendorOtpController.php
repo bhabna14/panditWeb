@@ -13,25 +13,23 @@ use Illuminate\Support\Carbon;
 class VendorOtpController extends Controller
 {
 
-    public function loginPassword(Request $request)
+   public function loginPassword(Request $request)
     {
         $data = $request->validate([
             'email_id' => ['required', 'string'],
-            'password' => ['required', 'string', 'min:4'],
+            'password' => ['required', 'string'],
         ]);
 
-        // Normalize and look up by email_id
         $email  = trim($data['email_id']);
         $vendor = FlowerVendor::where('email_id', $email)->first();
 
-        if (!$vendor || !$vendor->password || !\Illuminate\Support\Facades\Hash::check($data['password'], $vendor->password)) {
+        if (!$vendor || !$vendor->password || !Hash::check($data['password'], $vendor->password)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid credentials.',
             ], 401);
         }
 
-        // Optional status check
         if (isset($vendor->status) && $vendor->status !== 'active') {
             return response()->json([
                 'success' => false,
@@ -39,7 +37,6 @@ class VendorOtpController extends Controller
             ], 423);
         }
 
-        // Create a Sanctum token (default device name)
         $token = $vendor->createToken('vendor-api')->plainTextToken;
 
         return response()->json([
