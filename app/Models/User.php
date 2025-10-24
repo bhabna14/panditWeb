@@ -2,55 +2,63 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    use Notifiable;
-    /**     *
-     * @var array
-     */
-    // protected $primaryKey = 'userid'; 
     protected $fillable = [
-        'userid','name','user_type', 'mobile_number','referral_code','code_status', 'otp','email', 'order_id', 'expiry', 'hash', 'client_id', 'client_secret', 'otp_length', 'channel', 'userphoto',
+        'userid',
+        'name',
+        'user_type',
+        'mobile_number',
+        'referral_code',
+        'code_status',
+        'otp',
+        'email',
+        'order_id',
+        'expiry',
+        'hash',
+        'client_id',
+        'client_secret',
+        'otp_length',
+        'channel',
+        'userphoto',
     ];
 
-    
-    public function devices()
-    {
-        return $this->hasMany(UserDevice::class, 'user_id', 'userid');
-    }
+    protected $hidden = [
+        'client_secret',
+        'hash',
+        'otp',
+        'remember_token',
+    ];
 
+    protected $casts = [
+        'expiry' => 'datetime',
+    ];
 
     /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
+     * Sanctum / Auth identifier setup for custom key
      */
-
     public function getAuthIdentifierName()
     {
         return 'userid';
     }
 
-    protected $hidden = [
-        'client_secret', 'hash',
-    ];
+    public function getAuthIdentifier()
+    {
+        return $this->userid;
+    }
 
-    /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'expiry' => 'datetime',
-    ];
+    // 🔗 Relations
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class, 'user_id', 'userid');
+    }
 
     public function addressDetails()
     {
@@ -64,23 +72,21 @@ class User extends Authenticatable
 
     public function referrer()
     {
-        return $this->belongsTo(User::class, 'referrer_user_id'); // 'id' by default
+        return $this->belongsTo(User::class, 'referrer_user_id');
     }
 
     public function bookings()
     {
-        return $this->hasMany(Booking::class, 'user_id');
+        return $this->hasMany(Booking::class, 'user_id', 'userid');
     }
 
     public function orders()
     {
         return $this->hasMany(Order::class, 'user_id', 'userid');
     }
-    
+
     public function subscriptions()
-{
-    return $this->hasMany(Subscription::class, 'user_id', 'userid');
-}
-
-
+    {
+        return $this->hasMany(Subscription::class, 'user_id', 'userid');
+    }
 }
