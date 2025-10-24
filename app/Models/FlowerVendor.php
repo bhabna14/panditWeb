@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens; // ✅ correct import
+use Illuminate\Support\Facades\Hash; // ✅ import the facade
 
 class FlowerVendor extends Authenticatable
 {
@@ -22,6 +23,7 @@ class FlowerVendor extends Authenticatable
         'phone_no',
         'otp',
         'email_id',
+        'password',
         'vendor_category',
         'payment_type',
         'vendor_gst',
@@ -34,33 +36,38 @@ class FlowerVendor extends Authenticatable
         'status',
     ];
 
+    protected $hidden = ['password', 'otp'];
+
     protected $casts = [
         'flower_ids'     => 'array',
         'otp_expires_at' => 'datetime',
     ];
 
-    protected $hidden = ['password', 'otp'];
-
-    /**
-     * Since your PK is vendor_id (not "id"), this helps some auth flows.
-     * Sanctum itself uses Eloquent keys, but this makes it explicit.
-     */
     public function getAuthIdentifierName()
     {
-        return $this->getKeyName(); // returns "vendor_id"
+        return $this->getKeyName(); // "vendor_id"
     }
 
+    /**
+     * Auto-hash on set; avoid double-hashing.
+     */
     public function setPasswordAttribute($value): void
     {
-        if (!empty($value)) {
-            // Avoid double-hashing if already hashed
-            $this->attributes['password'] = Hash::needsRehash($value)
-                ? Hash::make($value)
-                : $value;
+        if (!is_null($value) && $value !== '') {
+            $this->attributes['password'] = self::looksHashed($value)
+                ? $value
+                : Hash::make($value); // ✅ now resolves correctly
         }
     }
 
-    /* ---------- Relationships (unchanged) ---------- */
+    private static function looksHashed(string $value): bool
+    {
+        return str_starts_with($value, '$2y$')
+            || str_starts_with($value, '$2a$')
+            || str_starts_with($value, '$2b$')
+            || str_starts_with($value, '$argon2i$')
+            || str_starts_with($value, '$argon2id$');
+    }
 
     public function monthPrices()
     {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FlowerVendor;
 use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -12,7 +13,6 @@ use Illuminate\Support\Carbon;
 
 class VendorOtpController extends Controller
 {
-
     public function loginPassword(Request $request)
     {
         $data = $request->validate([
@@ -74,17 +74,16 @@ class VendorOtpController extends Controller
 
     /**
      * Detects bcrypt/argon hashes to decide if a value is already hashed.
+     * (Kept here to avoid traiting; same logic as in model.)
      */
     private static function looksHashed(string $value): bool
     {
-        // bcrypt formats start with "$2y$" (or $2a$/2b$), argon2 with "$argon2i$"/"$argon2id$"
         return str_starts_with($value, '$2y$')
             || str_starts_with($value, '$2a$')
             || str_starts_with($value, '$2b$')
             || str_starts_with($value, '$argon2i$')
             || str_starts_with($value, '$argon2id$');
     }
-    
     public function sendOtp(Request $request)
     {
         $validated = $request->validate([
