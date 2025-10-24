@@ -72,7 +72,7 @@ return [
         'provider' => 'vendors', // optional: tie to vendors provider
     ],
 
-      'vendor-api' => [
+    'vendor-api' => [
         'driver' => 'sanctum',
         'provider' => 'vendors',
     ],
