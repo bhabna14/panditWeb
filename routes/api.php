@@ -25,6 +25,8 @@ use App\Http\Controllers\Api\FCMNotificationController;
 use App\Http\Controllers\Api\PromotionControllerApi;
 use App\Http\Controllers\Api\FlowerReferalController;
 use App\Http\Controllers\Api\ReferController;
+use App\Http\Controllers\Api\VendorOtpController;
+
 
 use App\Http\Controllers\Admin\NotificationController;
 
@@ -261,3 +263,6 @@ Route::get('/refer/offers', [ReferController::class, 'manageReferOffer'])->name(
 Route::middleware('auth:sanctum')->post('/refer/offer-claim/save', [ReferController::class, 'saveOfferClaim'])->name('api.refer.offerClaim.save');
 Route::post('/users-delet', [UserProfileController::class, 'destroyById'])->name('users.destroy');
 Route::get('/say-yes', [UserProfileController::class, 'sayYes']);
+
+Route::post('/vendor-send-otp',   [VendorOtpController::class, 'send'])->middleware('throttle:5,1');   // 5 req/min
+Route::post('/vendor-verify-otp', [VendorOtpController::class, 'verify'])->middleware('throttle:10,1'); // 10 req/min

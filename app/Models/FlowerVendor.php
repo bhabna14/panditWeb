@@ -16,24 +16,28 @@ class FlowerVendor extends Model
     protected $table = 'flower__vendor_details';
 
     protected $fillable = [
-        'vendor_id', 
-        'vendor_name', 
-        'phone_no', 
-        'email_id', 
-        'vendor_category', 
-        'payment_type', 
+        'vendor_id',
+        'vendor_name',
+        'phone_no',
+        'otp',
+        'email_id',
+        'vendor_category',
+        'payment_type',
         'vendor_gst',
         'vendor_address',
         'flower_ids',
         'date_of_joining',
-        'vendor_document'
+        'vendor_document',
+        'otp_expires_at',
+        'otp_attempts',
     ];
 
-     protected $casts = [
-        'flower_ids' => 'array',
+    protected $casts = [
+    'flower_ids'     => 'array',
+    'otp_expires_at' => 'datetime',
     ];
 
-     public function monthPrices()
+    public function monthPrices()
     {
         return $this->hasMany(MonthWiseFlowerPrice::class, 'vendor_id', 'vendor_id')
             ->with(['product:product_id,name', 'unit:id,unit_name']);
