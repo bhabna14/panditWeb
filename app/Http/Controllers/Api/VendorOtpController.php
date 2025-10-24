@@ -13,53 +13,37 @@ use Illuminate\Support\Carbon;
 
 class VendorOtpController extends Controller
 {
-    public function loginPassword(Request $request)
+   public function loginPassword(Request $request)
     {
         $data = $request->validate([
             'email_id' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        // Case-insensitive email match to avoid collation surprises
         $email  = trim($data['email_id']);
         $vendor = FlowerVendor::whereRaw('LOWER(email_id) = ?', [mb_strtolower($email)])->first();
 
         if (!$vendor || !$vendor->password) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials.',
-            ], 401);
+            return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 401);
         }
 
         $inputPassword = $data['password'];
         $stored        = (string) $vendor->password;
 
-        // If already hashed (bcrypt/argon), use Hash::check
+        // If hashed, verify; if legacy plaintext and matches, auto-migrate to hashed
         if (self::looksHashed($stored)) {
             $valid = Hash::check($inputPassword, $stored);
         } else {
-            // Legacy plaintext in DB. If it matches exactly, migrate to hashed.
-            if (hash_equals($stored, $inputPassword)) {
-                $vendor->password = $inputPassword; // model mutator will hash
-                $vendor->save();
-                $valid = true;
-            } else {
-                $valid = false;
-            }
+            $valid = hash_equals($stored, $inputPassword);
+            if ($valid) { $vendor->password = $inputPassword; $vendor->save(); }
         }
 
         if (!$valid) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid credentials.',
-            ], 401);
+            return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 401);
         }
 
         if (isset($vendor->status) && $vendor->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Account is not active.',
-            ], 423);
+            return response()->json(['success' => false, 'message' => 'Account is not active.'], 423);
         }
 
         $token = $vendor->createToken('vendor-api')->plainTextToken;
@@ -72,10 +56,6 @@ class VendorOtpController extends Controller
         ], 200);
     }
 
-    /**
-     * Detects bcrypt/argon hashes to decide if a value is already hashed.
-     * (Kept here to avoid traiting; same logic as in model.)
-     */
     private static function looksHashed(string $value): bool
     {
         return str_starts_with($value, '$2y$')
@@ -84,6 +64,7 @@ class VendorOtpController extends Controller
             || str_starts_with($value, '$argon2i$')
             || str_starts_with($value, '$argon2id$');
     }
+    
     public function sendOtp(Request $request)
     {
         $validated = $request->validate([
