@@ -13,17 +13,42 @@ use Illuminate\Support\Carbon;
 class VendorOtpController extends Controller
 {
 
-   public function loginPassword(Request $request)
+    public function loginPassword(Request $request)
     {
         $data = $request->validate([
             'email_id' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
+        // Case-insensitive email match to avoid collation surprises
         $email  = trim($data['email_id']);
-        $vendor = FlowerVendor::where('email_id', $email)->first();
+        $vendor = FlowerVendor::whereRaw('LOWER(email_id) = ?', [mb_strtolower($email)])->first();
 
-        if (!$vendor || !$vendor->password || !Hash::check($data['password'], $vendor->password)) {
+        if (!$vendor || !$vendor->password) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials.',
+            ], 401);
+        }
+
+        $inputPassword = $data['password'];
+        $stored        = (string) $vendor->password;
+
+        // If already hashed (bcrypt/argon), use Hash::check
+        if (self::looksHashed($stored)) {
+            $valid = Hash::check($inputPassword, $stored);
+        } else {
+            // Legacy plaintext in DB. If it matches exactly, migrate to hashed.
+            if (hash_equals($stored, $inputPassword)) {
+                $vendor->password = $inputPassword; // model mutator will hash
+                $vendor->save();
+                $valid = true;
+            } else {
+                $valid = false;
+            }
+        }
+
+        if (!$valid) {
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid credentials.',
@@ -47,6 +72,19 @@ class VendorOtpController extends Controller
         ], 200);
     }
 
+    /**
+     * Detects bcrypt/argon hashes to decide if a value is already hashed.
+     */
+    private static function looksHashed(string $value): bool
+    {
+        // bcrypt formats start with "$2y$" (or $2a$/2b$), argon2 with "$argon2i$"/"$argon2id$"
+        return str_starts_with($value, '$2y$')
+            || str_starts_with($value, '$2a$')
+            || str_starts_with($value, '$2b$')
+            || str_starts_with($value, '$argon2i$')
+            || str_starts_with($value, '$argon2id$');
+    }
+    
     public function sendOtp(Request $request)
     {
         $validated = $request->validate([
