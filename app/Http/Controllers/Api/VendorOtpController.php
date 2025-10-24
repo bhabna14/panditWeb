@@ -231,14 +231,6 @@ class VendorOtpController extends Controller
         ], 200);
     }
 
-    /** ---------- Helpers ---------- */
-
-    /**
-     * Build all likely representations of the phone found in your DB.
-     * Examples:
-     *  - "7749968976"     -> ["7749968976", "+917749968976", "917749968976"]
-     *  - "+917749968976"  -> ["+917749968976", "917749968976", "7749968976", "+917749968976"]
-     */
     private function phoneCandidates(string $raw): array
     {
         $raw    = trim($raw);
