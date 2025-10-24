@@ -315,7 +315,7 @@ class FlowerPickupController extends Controller
             'total_price' => 0, // Will calculate later
             'payment_method' => null,
             'payment_status' => 'pending',
-            'status' => 'Completed',
+            'status' => 'pending',
             'payment_id' => null,
         ]);
     
@@ -597,9 +597,8 @@ class FlowerPickupController extends Controller
         }
 
         // ---- 5) Done --------------------------------------------------------
-        return redirect()
-            ->route('admin.manageflowerpickupdetails')
-            ->with('success', 'Flower pickup saved successfully.');
+        return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Flower pickup saved successfully.');
+
     }
 
 }
