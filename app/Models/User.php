@@ -34,6 +34,11 @@ class User extends Authenticatable
      * @var array
      */
 
+    public function getAuthIdentifierName()
+    {
+        return 'userid';
+    }
+
     protected $hidden = [
         'client_secret', 'hash',
     ];
