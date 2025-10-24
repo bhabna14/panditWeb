@@ -72,7 +72,6 @@ class Kernel extends HttpKernel
         'superadmin' => \App\Http\Middleware\SuperadminMiddleware::class,
         'pandits' => \App\Http\Middleware\PanditMiddleware::class,
         'rider' => \App\Http\Middleware\AuthenticateRider::class,
-
     ];
 
  

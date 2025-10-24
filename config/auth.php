@@ -71,6 +71,11 @@ return [
         'driver' => 'sanctum',
         'provider' => 'vendors', // optional: tie to vendors provider
     ],
+
+      'vendor-api' => [
+        'driver' => 'sanctum',
+        'provider' => 'vendors',
+    ],
 ],
 
 
