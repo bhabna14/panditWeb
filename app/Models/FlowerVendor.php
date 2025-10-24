@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FlowerVendor extends Model
+class FlowerVendor extends Authenticatable
 {
-    use HasFactory;
+    use HasApiTokens, HasFactory;
 
     protected $primaryKey = 'vendor_id';   // If vendor_id is your PK
     public $incrementing = false;          // Because it's string, not auto-increment
@@ -36,6 +37,7 @@ class FlowerVendor extends Model
     'flower_ids'     => 'array',
     'otp_expires_at' => 'datetime',
     ];
+    protected $hidden = ['otp']; // don’t leak OTPs
 
     public function monthPrices()
     {

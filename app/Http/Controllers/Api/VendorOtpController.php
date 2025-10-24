@@ -8,7 +8,6 @@ use App\Models\FlowerVendor;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\ValidationException;
 
 class VendorOtpController extends Controller
 {
@@ -22,24 +21,24 @@ class VendorOtpController extends Controller
             'phone' => ['required', 'string'],
         ]);
 
-        $phone = $this->normalizePhone($validated['phone']);
+        // Build ALL candidate phone formats so we can match DB values reliably
+        $candidates = $this->phoneCandidates($validated['phone']);
 
-        // 1) Look up vendor by phone
-        $vendor = FlowerVendor::where('phone_no', $phone)->first();
+        // Look up vendor by any variant (your DB often stores 10-digit values)
+        $vendor = FlowerVendor::whereIn('phone_no', $candidates)->first();
 
         if (!$vendor) {
-            // ❌ No auto-create, no OTP
             return response()->json([
                 'success' => false,
                 'message' => 'Mobile number not registered. Please contact admin.',
             ], 404);
         }
 
-        // 2) Generate OTP + short token
+        // Generate OTP + short token
         $otp        = random_int(100000, 999999);
         $shortToken = Str::upper(Str::random(6));
 
-        // 3) Persist OTP with optional expiry/attempts if columns exist
+        // Persist OTP with optional expiry/attempts if columns exist
         $vendor->otp = (string) $otp;
 
         if ($this->columnExists($vendor, 'otp_expires_at')) {
@@ -50,8 +49,8 @@ class VendorOtpController extends Controller
         }
         $vendor->save();
 
-        // 4) Local/testing shortcut (still requires vendor to exist)
-        $isTest = app()->environment(['local','testing']) && $phone === '+919876543210';
+        // Local/testing shortcut (still requires vendor to exist)
+        $isTest = app()->environment(['local','testing']) && in_array('+919876543210', $candidates, true);
         if ($isTest) {
             return response()->json([
                 'success'   => true,
@@ -62,13 +61,13 @@ class VendorOtpController extends Controller
             ], 200);
         }
 
-        // 5) Send via MSG91 WhatsApp template
+        // Send via MSG91 WhatsApp (template must match your MSG91 config)
         $payload = [
             "integrated_number" => env('MSG91_WA_NUMBER'),
             "content_type"      => "template",
             "payload"           => [
                 "messaging_product" => "whatsapp",
-                "to"                => $phone,
+                "to"                => $candidates[0], // prefer +E164 if available
                 "type"              => "template",
                 "template"          => [
                     "name"       => env('MSG91_WA_TEMPLATE_VENDOR', env('MSG91_WA_TEMPLATE')),
@@ -138,7 +137,7 @@ class VendorOtpController extends Controller
     }
 
     /**
-     * Verify vendor OTP (vendor must already exist).
+     * Verify vendor OTP (time-bound; returns Sanctum Bearer token on success).
      */
     public function verify(Request $request)
     {
@@ -147,9 +146,10 @@ class VendorOtpController extends Controller
             'otp'   => ['required','digits_between:4,8'],
         ]);
 
-        $phone = $this->normalizePhone($validated['phone']);
+        // Try all likely DB-stored formats for phone_no
+        $candidates = $this->phoneCandidates($validated['phone']);
 
-        $vendor = FlowerVendor::where('phone_no', $phone)->first();
+        $vendor = FlowerVendor::whereIn('phone_no', $candidates)->first();
 
         if (!$vendor) {
             return response()->json([
@@ -158,11 +158,13 @@ class VendorOtpController extends Controller
             ], 404);
         }
 
-        // Expiry check
+        // Expiry check (if column exists & is set)
         if ($this->columnExists($vendor, 'otp_expires_at') && $vendor->otp_expires_at instanceof Carbon) {
             if (Carbon::now()->greaterThan($vendor->otp_expires_at)) {
+                // Clear expired OTP to prevent reuse
                 $vendor->otp = null;
                 $vendor->save();
+
                 return response()->json([
                     'success' => false,
                     'message' => 'OTP expired. Please request a new one.',
@@ -170,7 +172,7 @@ class VendorOtpController extends Controller
             }
         }
 
-        // Attempts check
+        // Attempts check (if column exists)
         if ($this->columnExists($vendor, 'otp_attempts')) {
             $maxAttempts = 5;
             if ((int) $vendor->otp_attempts >= $maxAttempts) {
@@ -193,7 +195,7 @@ class VendorOtpController extends Controller
             ], 401);
         }
 
-        // Success → clear OTP + counters
+        // ✅ OTP is valid — clear OTP & counters first (prevents reuse even if status blocks login)
         $vendor->otp = null;
         if ($this->columnExists($vendor, 'otp_attempts')) {
             $vendor->otp_attempts = 0;
@@ -203,27 +205,81 @@ class VendorOtpController extends Controller
         }
         $vendor->save();
 
+        // Block inactive vendors from receiving tokens
+        if (isset($vendor->status) && $vendor->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vendor is not active. Please contact admin.',
+            ], 403);
+        }
+
+        // Create Sanctum token (time-limited via config/sanctum.php 'expiration')
+        $accessToken    = $vendor->createToken('vendor-api', ['vendor']);
+        $plainTextToken = $accessToken->plainTextToken;
+
+        $ttlMinutes = (int) (config('sanctum.expiration') ?? 0);
+        $expiresAt  = $ttlMinutes > 0 ? now()->addMinutes($ttlMinutes) : null;
+
         return response()->json([
-            'success'   => true,
-            'message'   => 'Vendor verified successfully.',
-            'vendor_id' => $vendor->vendor_id,
-            'vendor'    => $vendor,
+            'success'      => true,
+            'message'      => 'Vendor verified successfully.',
+            'vendor_id'    => $vendor->vendor_id,
+            'token_type'   => 'Bearer',
+            'access_token' => $plainTextToken,
+            'expires_at'   => optional($expiresAt)->toIso8601String(), // null if no expiry configured
+            'vendor'       => $vendor,
         ], 200);
     }
 
-    /** Helpers */
-    private function normalizePhone(string $raw): string
+    /** ---------- Helpers ---------- */
+
+    /**
+     * Build all likely representations of the phone found in your DB.
+     * Examples:
+     *  - "7749968976"     -> ["7749968976", "+917749968976", "917749968976"]
+     *  - "+917749968976"  -> ["+917749968976", "917749968976", "7749968976", "+917749968976"]
+     */
+    private function phoneCandidates(string $raw): array
     {
-        $digits = preg_replace('/\D+/', '', $raw ?? '');
-        if (\Illuminate\Support\Str::startsWith($digits, '91') && strlen($digits) >= 12) {
-            return '+' . $digits;
+        $raw    = trim($raw);
+        $digits = preg_replace('/\D+/', '', $raw);
+
+        $set = [];
+
+        if ($digits === '') {
+            return [$raw];
         }
+
+        // If 10-digit Indian mobile, generate 10, +91 + 10, and 91 + 10
         if (strlen($digits) === 10) {
-            return '+91' . $digits;
+            $set[] = $digits;
+            $set[] = '+91' . $digits;
+            $set[] = '91' . $digits;
         }
-        return \Illuminate\Support\Str::startsWith($raw, '+') ? $raw : '+' . $digits;
+        // If it's 91 + 10 digits
+        elseif (Str::startsWith($digits, '91') && strlen($digits) === 12) {
+            $ten = substr($digits, -10);
+            $set[] = $digits;          // "91XXXXXXXXXX"
+            $set[] = '+' . $digits;    // "+91XXXXXXXXXX"
+            $set[] = $ten;             // "XXXXXXXXXX"
+            $set[] = '+91' . $ten;     // "+91XXXXXXXXXX"
+        } else {
+            // Fallback: try raw, digits, +digits
+            $set[] = $raw;
+            $set[] = $digits;
+            $set[] = '+' . $digits;
+        }
+
+        // Also include the raw input (in case DB stores spaces/punctuation)
+        $set[] = $raw;
+
+        // Unique + non-empty
+        return array_values(array_unique(array_filter($set, fn($v) => $v !== null && $v !== '')));
     }
 
+    /**
+     * Check if an attribute/column exists on the model/table.
+     */
     private function columnExists($model, string $column): bool
     {
         return array_key_exists($column, $model->getAttributes()) ||
