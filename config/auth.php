@@ -42,7 +42,11 @@ return [
             'driver' => 'session',
             'provider' => 'pandits',
         ],
-        
+
+        'users' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
     ],
 
     'providers' => [
