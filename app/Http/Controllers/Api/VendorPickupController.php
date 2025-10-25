@@ -15,12 +15,11 @@ use Carbon\Carbon;
 
 class VendorPickupController extends Controller
 {
-  public function getVendorPickups(Request $request)
+public function getVendorPickups(Request $request)
 {
     try {
-        // ✅ Get the logged-in vendor (via vendor-api guard)
+        // ✅ Auth (vendor-api)
         $vendor = Auth::guard('vendor-api')->user();
-
         if (!$vendor) {
             return response()->json([
                 'status'  => 401,
@@ -28,7 +27,7 @@ class VendorPickupController extends Controller
             ], 401);
         }
 
-        // ✅ Fetch pickups for this vendor
+        // ✅ Fetch pickups (with relations)
         $pickups = FlowerPickupDetails::with([
                 'flowerPickupItems.flower',
                 'flowerPickupItems.unit',
@@ -38,29 +37,29 @@ class VendorPickupController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        // Common vendor payload for success responses
-        $vendorPayload = [
-            'vendor_id'   => $vendor->vendor_id,
-            'vendor_name' => $vendor->vendor_name,
-            'phone_no'    => $vendor->phone_no,
-        ];
-
         if ($pickups->isEmpty()) {
             return response()->json([
                 'status'  => 200,
                 'message' => 'No pickup requests found for this vendor.',
-                'vendor'  => $vendorPayload,        // 👈 included
                 'data'    => [],
                 'meta'    => ['count' => 0],
             ]);
         }
 
+        // ✅ Inject vendor fields into each pickup object
+        $data = $pickups->map(function ($pickup) use ($vendor) {
+            $row = $pickup->toArray();           // keep all original fields & relations
+            $row['vendor_name'] = $vendor->vendor_name;
+            $row['phone_no']    = $vendor->phone_no;
+            // vendor_id is already present from DB as $row['vendor_id']
+            return $row;
+        });
+
         return response()->json([
             'status'  => 200,
             'message' => 'Pickup requests fetched successfully.',
-            'vendor'  => $vendorPayload,            // 👈 included
-            'data'    => $pickups,
-            'meta'    => ['count' => $pickups->count()],
+            'data'    => $data,                  // 👈 vendor_name & phone_no included per row
+            'meta'    => ['count' => $data->count()],
         ]);
     } catch (\Throwable $e) {
         return response()->json([
@@ -70,6 +69,7 @@ class VendorPickupController extends Controller
         ], 500);
     }
 }
+
 
     public function updateFlowerPrices(Request $request, $pickupId)
     {
