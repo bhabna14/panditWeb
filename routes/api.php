@@ -273,4 +273,6 @@ Route::middleware('auth:vendor-api')->group(function () {
     Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups']);
     Route::post('/update-flower-prices/{pickupId}', [VendorPickupController::class, 'updateFlowerPrices']);
     Route::get('/get-all-pickups', [VendorPickupController::class, 'getAllPickups']);
+    Route::get('/get-vendor-details', [VendorPickupController::class, 'vendorDetails']);
+
 });

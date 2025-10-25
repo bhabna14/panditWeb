@@ -159,4 +159,26 @@ class VendorPickupController extends Controller
         }
     }
 
+    public function vendorDetails()
+    {
+        $vendor = Auth::guard('vendor-api')->user();
+
+        if (!$vendor) {
+            return response()->json([
+                'status'  => 401,
+                'message' => 'Unauthorized. Vendor not logged in.',
+            ], 401);
+        }
+
+        $vendorDetails =  FlowerVendor::where('status', 'Active')
+            ->where('vendor_id', $vendor->vendor_id)
+            ->first();
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Vendor details fetched successfully.',
+            'data'    => $vendorDetails,
+        ]);
+    }
+
 }
