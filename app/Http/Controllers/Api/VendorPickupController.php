@@ -16,61 +16,52 @@ use Carbon\Carbon;
 class VendorPickupController extends Controller
 {
  public function getVendorPickups(Request $request)
-{
-    try {
-        // ✅ Auth (vendor-api)
-        $vendor = Auth::guard('vendor-api')->user();
+    {
+        try {
+            // ✅ Get the logged-in vendor (via vendor-api guard)
+            $vendor = Auth::guard('vendor-api')->user();
 
-        if (!$vendor) {
+            if (!$vendor) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Unauthorized. Vendor not logged in.',
+                ], 401);
+            }
+
+            // Optional: filter by date if needed
+            $today = now()->toDateString();
+
+            // ✅ Fetch pickups for this vendor
+            $pickups = FlowerPickupDetails::with([
+                    'flowerPickupItems.flower',
+                    'flowerPickupItems.unit',
+                    'rider'
+                ])
+                ->where('vendor_id', $vendor->vendor_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            if ($pickups->isEmpty()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'No pickup requests found for this vendor.',
+                    'data'    => [],
+                ]);
+            }
+
             return response()->json([
-                'status'  => 401,
-                'message' => 'Unauthorized. Vendor not logged in.',
-            ], 401);
+                'status'  => 200,
+                'message' => 'Pickup requests fetched successfully.',
+                'data'    => $pickups,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Something went wrong while fetching pickups.',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
-
-        // ✅ Fetch pickups for this vendor
-        $pickups = FlowerPickupDetails::with([
-                'flowerPickupItems.flower',
-                'flowerPickupItems.unit',
-                'rider',
-            ])
-            ->where('vendor_id', $vendor->vendor_id)
-            ->orderByDesc('created_at')
-            ->get();
-
-        // Build vendor payload
-        $vendorPayload = [
-            'vendor_id'   => $vendor->vendor_id,
-            'vendor_name' => $vendor->vendor_name,
-            'phone_no'    => $vendor->phone_no,
-        ];
-
-        // Always return vendor inside data; pickups array may be empty
-        $data = [
-            'vendor'  => $vendorPayload,
-            'pickups' => $pickups,
-        ];
-
-        return response()->json([
-            'status'  => 200,
-            'message' => $pickups->isEmpty()
-                ? 'No pickup requests found for this vendor.'
-                : 'Pickup requests fetched successfully.',
-            'data'    => $data,                       // 👈 vendor is now inside `data`
-            'meta'    => ['count' => $pickups->count()],
-        ]);
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status'  => 500,
-            'message' => 'Something went wrong while fetching pickups.',
-            'error'   => $e->getMessage(),
-        ], 500);
     }
-}
-
-
-
     public function updateFlowerPrices(Request $request, $pickupId)
     {
         $vendor = Auth::guard('vendor-api')->user();
