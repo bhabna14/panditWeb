@@ -271,6 +271,6 @@ Route::post('/vendor-password-login', [VendorOtpController::class, 'loginPasswor
 
 // ✅ Vendor Pickup routes (require vendor-api token)
 Route::middleware('auth:vendor-api')->group(function () {
-    Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups']);
     Route::post('/update-flower-prices/{pickupId}', [VendorPickupController::class, 'updateFlowerPrices']);
 });
+    Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups']);
