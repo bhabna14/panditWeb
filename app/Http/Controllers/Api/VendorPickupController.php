@@ -46,6 +46,10 @@ class VendorPickupController extends Controller
                     'status'  => 200,
                     'message' => 'No pickup requests found for this vendor.',
                     'data'    => [],
+                    'vendor'  => [
+                        'vendor_id'   => $vendor->vendor_id,
+                        'vendor_name' => $vendor->vendor_name,
+                ],
                 ]);
             }
 
