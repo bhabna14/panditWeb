@@ -18,11 +18,6 @@ return [
             'provider' => 'users',
         ],
 
-        'rider-api' => [
-            'driver' => 'sanctum',
-            'provider' => 'riders',
-        ],
-
         'vendor-api' => [
             'driver' => 'sanctum',
             'provider' => 'vendors',
@@ -46,6 +41,21 @@ return [
         'users' => [
         'driver' => 'session',
         'provider' => 'users',
+
+    ],
+     'superadmins' => [
+        'driver' => 'session',
+        'provider' => 'superadmins',
+    ],
+    'admins' => [
+        'driver' => 'session',
+        'provider' => 'admins',
+    ],
+
+    'rider-api' => [
+        'driver' => 'sanctum', // Ensure you are using Sanctum or Passport
+        'provider' => 'riders', // Matches your 'riders' provider
+        'hash' => false,        // Set to true only if using hashed tokens
     ],
     ],
 
