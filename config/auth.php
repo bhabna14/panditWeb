@@ -13,14 +13,24 @@ return [
             'provider' => 'users',
         ],
 
+        // ✅ Standard user API (Sanctum)
         'api' => [
             'driver' => 'sanctum',
             'provider' => 'users',
         ],
 
+        // ✅ Vendor API guard
         'vendor-api' => [
             'driver' => 'sanctum',
             'provider' => 'vendors',
+            'hash' => false,
+        ],
+
+        // ✅ Rider API guard
+        'rider-api' => [
+            'driver' => 'sanctum',
+            'provider' => 'riders',
+            'hash' => false,
         ],
 
         'admins' => [
@@ -37,26 +47,6 @@ return [
             'driver' => 'session',
             'provider' => 'pandits',
         ],
-
-        'users' => [
-        'driver' => 'session',
-        'provider' => 'users',
-
-    ],
-     'superadmins' => [
-        'driver' => 'session',
-        'provider' => 'superadmins',
-    ],
-    'admins' => [
-        'driver' => 'session',
-        'provider' => 'admins',
-    ],
-
-    'rider-api' => [
-        'driver' => 'sanctum', // Ensure you are using Sanctum or Passport
-        'provider' => 'riders', // Matches your 'riders' provider
-        'hash' => false,        // Set to true only if using hashed tokens
-    ],
     ],
 
     'providers' => [
