@@ -15,9 +15,10 @@ use Carbon\Carbon;
 
 class VendorPickupController extends Controller
 {
-  public function getVendorPickups(Request $request)
+ public function getVendorPickups(Request $request)
 {
     try {
+        // ✅ Auth (vendor-api)
         $vendor = Auth::guard('vendor-api')->user();
 
         if (!$vendor) {
@@ -27,29 +28,39 @@ class VendorPickupController extends Controller
             ], 401);
         }
 
+        // ✅ Fetch pickups for this vendor
         $pickups = FlowerPickupDetails::with([
                 'flowerPickupItems.flower',
                 'flowerPickupItems.unit',
                 'rider',
             ])
             ->where('vendor_id', $vendor->vendor_id)
-            ->orderBy('created_at', 'desc')
+            ->orderByDesc('created_at')
             ->get();
 
+        // Build vendor payload
+        $vendorPayload = [
+            'vendor_id'   => $vendor->vendor_id,
+            'vendor_name' => $vendor->vendor_name,
+            'phone_no'    => $vendor->phone_no,
+        ];
+
+        // Always return vendor inside data; pickups array may be empty
+        $data = [
+            'vendor'  => $vendorPayload,
+            'pickups' => $pickups,
+        ];
 
         return response()->json([
             'status'  => 200,
             'message' => $pickups->isEmpty()
                 ? 'No pickup requests found for this vendor.'
                 : 'Pickup requests fetched successfully.',
-            'data'    => [
-                    'vendor_id'   => $vendor->vendor_id,
-                    'vendor_name' => $vendor->vendor_name,
-                'count'   => $pickups->count(),
-                'pickups' => $pickups,
-            ],
+            'data'    => $data,                       // 👈 vendor is now inside `data`
+            'meta'    => ['count' => $pickups->count()],
         ]);
-    } catch (\Exception $e) {
+
+    } catch (\Throwable $e) {
         return response()->json([
             'status'  => 500,
             'message' => 'Something went wrong while fetching pickups.',
@@ -57,6 +68,7 @@ class VendorPickupController extends Controller
         ], 500);
     }
 }
+
 
 
     public function updateFlowerPrices(Request $request, $pickupId)
