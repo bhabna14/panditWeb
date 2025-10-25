@@ -10,13 +10,10 @@ use App\Models\FlowerPickupItems;
 
 class VendorPickupController extends Controller
 {
-    /**
-     * Get all pickups for the authenticated vendor
-     */
+    // ✅ Fetch vendor pickups
     public function getVendorPickups(Request $request)
     {
         try {
-            // ✅ Authenticated vendor
             $vendor = Auth::guard('vendor-api')->user();
 
             if (!$vendor) {
@@ -26,7 +23,6 @@ class VendorPickupController extends Controller
                 ], 401);
             }
 
-            // ✅ Fetch vendor pickups
             $pickups = FlowerPickupDetails::with([
                     'flowerPickupItems.flower',
                     'flowerPickupItems.unit',
@@ -58,9 +54,7 @@ class VendorPickupController extends Controller
         }
     }
 
-    /**
-     * Update flower prices (vendor authenticated)
-     */
+    // ✅ Update flower prices
     public function updateFlowerPrices(Request $request, $pickupId)
     {
         try {
@@ -112,6 +106,7 @@ class VendorPickupController extends Controller
                 'status' => 200,
                 'message' => 'Prices updated successfully by ' . $vendor->vendor_name,
             ], 200);
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
