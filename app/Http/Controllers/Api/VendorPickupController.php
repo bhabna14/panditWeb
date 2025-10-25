@@ -4,16 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
-use Illuminate\Support\Facades\Auth;
 
 class VendorPickupController extends Controller
 {
+    /**
+     * Get all pickups for the authenticated vendor
+     */
     public function getVendorPickups(Request $request)
     {
         try {
-            // ✅ Get the logged-in vendor (via vendor-api guard)
+            // ✅ Authenticated vendor
             $vendor = Auth::guard('vendor-api')->user();
 
             if (!$vendor) {
@@ -23,10 +26,7 @@ class VendorPickupController extends Controller
                 ], 401);
             }
 
-            // Optional: filter by date if needed
-            $today = now()->toDateString();
-
-            // ✅ Fetch pickups for this vendor
+            // ✅ Fetch vendor pickups
             $pickups = FlowerPickupDetails::with([
                     'flowerPickupItems.flower',
                     'flowerPickupItems.unit',
@@ -58,10 +58,12 @@ class VendorPickupController extends Controller
         }
     }
 
+    /**
+     * Update flower prices (vendor authenticated)
+     */
     public function updateFlowerPrices(Request $request, $pickupId)
     {
         try {
-            // ✅ Authenticate vendor
             $vendor = Auth::guard('vendor-api')->user();
 
             if (!$vendor) {
@@ -71,7 +73,6 @@ class VendorPickupController extends Controller
                 ], 401);
             }
 
-            // ✅ Validate the incoming request
             $validated = $request->validate([
                 'total_price' => 'required|numeric',
                 'flower_pickup_items' => 'required|array',
@@ -80,9 +81,8 @@ class VendorPickupController extends Controller
                 'flower_pickup_items.*.price' => 'required|numeric',
             ]);
 
-            // ✅ Find the pickup record by ID
             $pickup = FlowerPickupDetails::where('pick_up_id', $pickupId)
-                ->where('vendor_id', $vendor->vendor_id) // ensure vendor owns it
+                ->where('vendor_id', $vendor->vendor_id)
                 ->first();
 
             if (!$pickup) {
@@ -92,13 +92,11 @@ class VendorPickupController extends Controller
                 ], 404);
             }
 
-            // ✅ Update the pickup details
             $pickup->total_price = $validated['total_price'];
             $pickup->status = 'PickupCompleted';
-            $pickup->updated_by = $vendor->vendor_name; // ← record vendor who updated
+            $pickup->updated_by = $vendor->vendor_name;
             $pickup->save();
 
-            // ✅ Update each flower item price
             foreach ($validated['flower_pickup_items'] as $item) {
                 $flowerPickupItem = FlowerPickupItems::where('id', $item['id'])
                     ->where('pick_up_id', $pickupId)
@@ -114,7 +112,6 @@ class VendorPickupController extends Controller
                 'status' => 200,
                 'message' => 'Prices updated successfully by ' . $vendor->vendor_name,
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,

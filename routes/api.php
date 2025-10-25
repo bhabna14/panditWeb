@@ -269,8 +269,8 @@ Route::post('/vendor-send-otp',   [VendorOtpController::class, 'sendOtp'])->midd
 Route::post('/vendor-verify-otp', [VendorOtpController::class, 'verifyOtp'])->middleware('throttle:10,1'); // 10 req/min
 Route::post('/vendor-password-login', [VendorOtpController::class, 'loginPassword']);
 
-// Vendor Pickup route (authenticated via vendor-api)
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups'])->middleware('auth:vendor-api');
-    Route::post('/update-flower-prices/{pickupId}',[VendorPickupController::class, 'updateFlowerPrices']);
+// ✅ Vendor Pickup routes (require vendor-api token)
+Route::middleware('auth:vendor-api')->group(function () {
+    Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups']);
+    Route::post('/update-flower-prices/{pickupId}', [VendorPickupController::class, 'updateFlowerPrices']);
 });
