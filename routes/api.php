@@ -272,5 +272,5 @@ Route::post('/vendor-password-login', [VendorOtpController::class, 'loginPasswor
 // Vendor Pickup route (authenticated via vendor-api)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups'])->middleware('auth:vendor-api');
-    Route::put('/update-flower-prices/{pickupId}',[VendorPickupController::class, 'updateFlowerPrices']);
+    Route::post('/update-flower-prices/{pickupId}',[VendorPickupController::class, 'updateFlowerPrices']);
 });
