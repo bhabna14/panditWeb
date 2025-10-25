@@ -17,11 +17,14 @@ class FlowerPickupItems extends Model
         'unit_id',
         'quantity',
         'price',
+        'item_total_price',
     ];
 
     protected $casts = [
         'quantity' => 'decimal:2',
         'price'    => 'decimal:2', // <— optional, helps JSON + formatting
+        'item_total_price' => 'decimal:2', // 👈 add this
+
     ];
 
     public function flower()
