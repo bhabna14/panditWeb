@@ -32,17 +32,9 @@ class VendorPickupController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            if ($pickups->isEmpty()) {
-                return response()->json([
-                    'status'  => 200,
-                    'message' => 'No pickup requests found for this vendor.',
-                    'data'    => [],
-                ]);
-            }
-
             return response()->json([
                 'status'  => 200,
-                'message' => 'Pickup requests fetched successfully.',
+                'message' => $pickups->isEmpty() ? 'No pickup requests found.' : 'Pickup requests fetched successfully.',
                 'data'    => $pickups,
             ]);
         } catch (\Exception $e) {
@@ -86,26 +78,22 @@ class VendorPickupController extends Controller
                 ], 404);
             }
 
-            $pickup->total_price = $validated['total_price'];
-            $pickup->status = 'PickupCompleted';
-            $pickup->updated_by = $vendor->vendor_name;
-            $pickup->save();
+            $pickup->update([
+                'total_price' => $validated['total_price'],
+                'status' => 'PickupCompleted',
+                'updated_by' => $vendor->vendor_name,
+            ]);
 
             foreach ($validated['flower_pickup_items'] as $item) {
-                $flowerPickupItem = FlowerPickupItems::where('id', $item['id'])
+                FlowerPickupItems::where('id', $item['id'])
                     ->where('pick_up_id', $pickupId)
-                    ->first();
-
-                if ($flowerPickupItem) {
-                    $flowerPickupItem->price = $item['price'];
-                    $flowerPickupItem->save();
-                }
+                    ->update(['price' => $item['price']]);
             }
 
             return response()->json([
                 'status' => 200,
                 'message' => 'Prices updated successfully by ' . $vendor->vendor_name,
-            ], 200);
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
