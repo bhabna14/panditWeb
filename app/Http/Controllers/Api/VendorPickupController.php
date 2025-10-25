@@ -161,7 +161,7 @@ class VendorPickupController extends Controller
         }
     }
 
-    public function vendorDetails()
+   public function vendorDetails(Request $request)
     {
         $vendor = Auth::guard('vendor-api')->user();
 
@@ -172,14 +172,88 @@ class VendorPickupController extends Controller
             ], 401);
         }
 
-        $vendorDetails =  FlowerVendor::where('status', 'Active')
+        // Eager-load monthly prices + product & unit
+        $vendorDetails = FlowerVendor::active()
             ->where('vendor_id', $vendor->vendor_id)
+            ->with([
+                // All monthly prices (latest first)
+                'monthPrices' => fn ($q) => $q->orderByDesc('start_date')->orderByDesc('id'),
+                'monthPrices.product:product_id,name',
+                'monthPrices.unit:id,unit_name',
+            ])
             ->first();
+
+        if (!$vendorDetails) {
+            return response()->json([
+                'status'  => 404,
+                'message' => 'Vendor not found or inactive.',
+                'data'    => null,
+            ], 404);
+        }
+
+        // Derive "current" prices = valid today (start <= today <= end OR end null)
+        $today = Carbon::today();
+        $currentPrices = $vendorDetails->monthPrices
+            ->filter(function ($p) use ($today) {
+                $starts = $p->start_date ? $p->start_date->lte($today) : true;
+                $ends   = !$p->end_date || $p->end_date->gte($today);
+                return $starts && $ends;
+            })
+            ->values()
+            ->map(function ($p) {
+                return [
+                    'price_id'       => $p->id,
+                    'product_id'     => $p->product_id,
+                    'product_name'   => optional($p->product)->name,
+                    'unit_id'        => $p->unit_id,
+                    'unit_name'      => optional($p->unit)->unit_name,
+                    'quantity'       => (int) $p->quantity,
+                    'price_per_unit' => (float) $p->price_per_unit,
+                    'start_date'     => optional($p->start_date)->toDateString(),
+                    'end_date'       => optional($p->end_date)->toDateString(),
+                ];
+            });
+
+        // Map all monthly prices (for full history in UI if needed)
+        $allPrices = $vendorDetails->monthPrices
+            ->map(function ($p) {
+                return [
+                    'price_id'       => $p->id,
+                    'product_id'     => $p->product_id,
+                    'product_name'   => optional($p->product)->name,
+                    'unit_id'        => $p->unit_id,
+                    'unit_name'      => optional($p->unit)->unit_name,
+                    'quantity'       => (int) $p->quantity,
+                    'price_per_unit' => (float) $p->price_per_unit,
+                    'start_date'     => optional($p->start_date)->toDateString(),
+                    'end_date'       => optional($p->end_date)->toDateString(),
+                ];
+            });
+
+        // Shape the profile payload (hide password/otp automatically via model $hidden)
+        $profile = [
+            'vendor_id'       => $vendorDetails->vendor_id,
+            'vendor_name'     => $vendorDetails->vendor_name,
+            'phone_no'        => $vendorDetails->phone_no,
+            'email_id'        => $vendorDetails->email_id,
+            'vendor_category' => $vendorDetails->vendor_category,
+            'payment_type'    => $vendorDetails->payment_type,
+            'vendor_gst'      => $vendorDetails->vendor_gst,
+            'vendor_address'  => $vendorDetails->vendor_address,
+            'flower_ids'      => $vendorDetails->flower_ids,
+            'date_of_joining' => $vendorDetails->date_of_joining,
+            'vendor_document' => $vendorDetails->vendor_document,
+            'status'          => $vendorDetails->status,
+
+            // New bits:
+            'current_monthly_prices' => $currentPrices, // valid today
+            'all_monthly_prices'     => $allPrices,     // full list
+        ];
 
         return response()->json([
             'status'  => 200,
             'message' => 'Vendor details fetched successfully.',
-            'data'    => $vendorDetails,
+            'data'    => $profile,
         ]);
     }
 

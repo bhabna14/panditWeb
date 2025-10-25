@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Laravel\Sanctum\HasApiTokens; // ✅ correct import
-use Illuminate\Support\Facades\Hash; // ✅ import the facade
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
 
 class FlowerVendor extends Authenticatable
 {
@@ -48,6 +48,12 @@ class FlowerVendor extends Authenticatable
         return $this->getKeyName(); // "vendor_id"
     }
 
+    // Scope for active vendors
+    public function scopeActive($q)
+    {
+        return $q->where('status', 'Active');
+    }
+
     /**
      * Auto-hash on set; avoid double-hashing.
      */
@@ -56,7 +62,7 @@ class FlowerVendor extends Authenticatable
         if (!is_null($value) && $value !== '') {
             $this->attributes['password'] = self::looksHashed($value)
                 ? $value
-                : Hash::make($value); // ✅ now resolves correctly
+                : Hash::make($value);
         }
     }
 
@@ -69,17 +75,14 @@ class FlowerVendor extends Authenticatable
             || str_starts_with($value, '$argon2id$');
     }
 
+    /** Monthly prices posted by this vendor */
     public function monthPrices()
     {
         return $this->hasMany(MonthWiseFlowerPrice::class, 'vendor_id', 'vendor_id')
             ->with(['product:product_id,name', 'unit:id,unit_name']);
     }
 
-    public function flowerProduct()
-    {
-        return $this->hasMany(FlowerProduct::class, 'flower_ids', 'product_id');
-    }
-
+    /** Optional: your other relations */
     public function vendorBanks()
     {
         return $this->hasMany(FlowerVendorBank::class, 'vendor_id', 'vendor_id');
