@@ -15,11 +15,11 @@ use Carbon\Carbon;
 
 class VendorPickupController extends Controller
 {
-public function getVendorPickups(Request $request)
+  public function getVendorPickups(Request $request)
 {
     try {
-        // ✅ Auth (vendor-api)
         $vendor = Auth::guard('vendor-api')->user();
+
         if (!$vendor) {
             return response()->json([
                 'status'  => 401,
@@ -27,41 +27,31 @@ public function getVendorPickups(Request $request)
             ], 401);
         }
 
-        // ✅ Fetch pickups (with relations)
         $pickups = FlowerPickupDetails::with([
                 'flowerPickupItems.flower',
                 'flowerPickupItems.unit',
                 'rider',
             ])
             ->where('vendor_id', $vendor->vendor_id)
-            ->orderByDesc('created_at')
+            ->orderBy('created_at', 'desc')
             ->get();
 
-        if ($pickups->isEmpty()) {
-            return response()->json([
-                'status'  => 200,
-                'message' => 'No pickup requests found for this vendor.',
-                'data'    => [],
-                'meta'    => ['count' => 0],
-            ]);
-        }
-
-        // ✅ Inject vendor fields into each pickup object
-        $data = $pickups->map(function ($pickup) use ($vendor) {
-            $row = $pickup->toArray();           // keep all original fields & relations
-            $row['vendor_name'] = $vendor->vendor_name;
-            $row['phone_no']    = $vendor->phone_no;
-            // vendor_id is already present from DB as $row['vendor_id']
-            return $row;
-        });
 
         return response()->json([
             'status'  => 200,
-            'message' => 'Pickup requests fetched successfully.',
-            'data'    => $data,                  // 👈 vendor_name & phone_no included per row
-            'meta'    => ['count' => $data->count()],
+            'message' => $pickups->isEmpty()
+                ? 'No pickup requests found for this vendor.'
+                : 'Pickup requests fetched successfully.',
+            'data'    => [
+                'vendor'  => [
+                    'vendor_id'   => $vendor->vendor_id,
+                    'vendor_name' => $vendor->vendor_name,
+                ],
+                'count'   => $pickups->count(),
+                'pickups' => $pickups,
+            ],
         ]);
-    } catch (\Throwable $e) {
+    } catch (\Exception $e) {
         return response()->json([
             'status'  => 500,
             'message' => 'Something went wrong while fetching pickups.',
