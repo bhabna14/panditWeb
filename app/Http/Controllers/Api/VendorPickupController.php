@@ -43,10 +43,8 @@ class VendorPickupController extends Controller
                 ? 'No pickup requests found for this vendor.'
                 : 'Pickup requests fetched successfully.',
             'data'    => [
-                'vendor'  => [
                     'vendor_id'   => $vendor->vendor_id,
                     'vendor_name' => $vendor->vendor_name,
-                ],
                 'count'   => $pickups->count(),
                 'pickups' => $pickups,
             ],
