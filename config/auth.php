@@ -42,6 +42,11 @@ return [
             'driver' => 'session',
             'provider' => 'pandits',
         ],
+
+        'users' => [
+            'driver' => 'sanctum',
+            'provider' => 'users', // 👈 added this alias
+        ],
     ],
 
     'providers' => [
