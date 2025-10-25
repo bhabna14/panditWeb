@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\PromotionControllerApi;
 use App\Http\Controllers\Api\FlowerReferalController;
 use App\Http\Controllers\Api\ReferController;
 use App\Http\Controllers\Api\VendorOtpController;
+use App\Http\Controllers\Api\VendorPickupController;
 
 
 use App\Http\Controllers\Admin\NotificationController;
@@ -267,3 +268,11 @@ Route::get('/say-yes', [UserProfileController::class, 'sayYes']);
 Route::post('/vendor-send-otp',   [VendorOtpController::class, 'sendOtp'])->middleware('throttle:5,1');   // 5 req/min
 Route::post('/vendor-verify-otp', [VendorOtpController::class, 'verifyOtp'])->middleware('throttle:10,1'); // 10 req/min
 Route::post('/vendor-password-login', [VendorOtpController::class, 'loginPassword']);
+
+// Vendor Pickup route (authenticated via vendor-api)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/vendor-pickups', [VendorPickupController::class, 'getVendorPickups'])
+        ->middleware('auth:vendor-api');
+    Route::put('/update-flower-prices/{pickupId}',
+        [VendorPickupController::class, 'updateFlowerPrices']);
+});

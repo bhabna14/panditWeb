@@ -23,6 +23,7 @@ class FlowerPickupDetails extends Model
         'payment_status',
         'status',
         'payment_id',
+        'updated_by',
     ];
 
     public function vendor()
@@ -40,7 +41,7 @@ class FlowerPickupDetails extends Model
         return $this->hasMany(FlowerPickupItems::class, 'pick_up_id', 'pick_up_id');
     }
 
-     protected $casts = [
+    protected $casts = [
         'pickup_date'   => 'date',
         'delivery_date' => 'date',
     ];
