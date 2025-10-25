@@ -23,10 +23,11 @@ return [
             'provider' => 'riders',
         ],
 
-        'vendor-api' => [
-            'driver' => 'sanctum',
-            'provider' => 'vendors',
-        ],
+       'vendor-api' => [
+    'driver' => 'sanctum',
+    'provider' => 'vendors',
+],
+
 
         'admins' => [
             'driver' => 'session',
@@ -71,9 +72,10 @@ return [
             'model' => App\Models\RiderDetails::class,
         ],
         'vendors' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\FlowerVendor::class,
-        ],
+    'driver' => 'eloquent',
+    'model' => App\Models\FlowerVendor::class,
+],
+
     ],
 
     'passwords' => [
