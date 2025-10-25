@@ -23,11 +23,10 @@ return [
             'provider' => 'riders',
         ],
 
-       'vendor-api' => [
-    'driver' => 'sanctum',
-    'provider' => 'vendors',
-],
-
+        'vendor-api' => [
+            'driver' => 'sanctum',
+            'provider' => 'vendors',
+        ],
 
         'admins' => [
             'driver' => 'session',
@@ -43,11 +42,7 @@ return [
             'driver' => 'session',
             'provider' => 'pandits',
         ],
-
-        'users' => [
-            'driver' => 'sanctum',
-            'provider' => 'users', // 👈 added this alias
-        ],
+        
     ],
 
     'providers' => [
@@ -72,10 +67,9 @@ return [
             'model' => App\Models\RiderDetails::class,
         ],
         'vendors' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\FlowerVendor::class,
+            'driver' => 'eloquent',
+            'model' => App\Models\FlowerVendor::class,
         ],
-
     ],
 
     'passwords' => [
