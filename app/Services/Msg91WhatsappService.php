@@ -9,114 +9,99 @@ class Msg91WhatsappService
 {
     protected Client $http;
     protected string $authkey;
-    protected string $sender;
-    protected string $mode; // template|flow
-    protected ?string $namespace;
-    protected ?string $template;
-    protected ?string $flowId;
-    protected string $endpoint;
+    protected string $sender;        // E.164 (e.g. +91912...)
+    protected string $endpointBulk;  // bulk endpoint
 
     public function __construct()
     {
-        $this->http      = new Client(['timeout' => 20]);
-        $this->authkey   = (string) env('MSG91_AUTHKEY', '');
-        $this->sender    = (string) env('MSG91_WA_NUMBER', '');
-        $this->mode      = strtolower((string) env('MSG91_WA_MODE', 'template')); // template|flow
-        $this->namespace = env('MSG91_WA_NAMESPACE');
-        $this->template  = env('MSG91_WA_TEMPLATE');
-        $this->flowId    = env('MSG91_WA_FLOW_ID');
-        $this->endpoint  = (string) env('MSG91_WA_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message');
+        $this->http        = new Client(['timeout' => 25]);
+        $this->authkey     = (string) env('MSG91_AUTHKEY', '');
+        $this->sender      = (string) env('MSG91_WA_NUMBER', ''); // +<cc><number>
+        $this->endpointBulk= (string) env('MSG91_WA_BULK_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/');
     }
 
     /**
-     * @param string      $to         E.164 number (+91xxxxxxxxxx)
-     * @param array       $bodyParams Template variables in order (we’ll trim to max 10)
-     * @param string|null $mediaUrl   Publicly accessible image URL (optional)
+     * MSISDN digits form of integrated number (no '+').
+     * Priority: MSG91_WA_INTEGRATED_NUMBER (already digits) -> derived from MSG91_WA_NUMBER.
+     */
+    public function integratedNumber(): string
+    {
+        $env = (string) env('MSG91_WA_INTEGRATED_NUMBER', '');
+        if ($env !== '') {
+            return preg_replace('/\D+/', '', $env);
+        }
+        $digits = preg_replace('/\D+/', '', $this->sender);
+        return ltrim($digits, '+');
+    }
+
+    /**
+     * Send a bulk template message as per MSG91 cURL structure.
+     *
+     * @param string[] $to           MSISDNs (digits only, with country code, no '+')
+     * @param array    $components   e.g. ['body_1'=>['type'=>'text','value'=>'...'], 'button_1'=>['subtype'=>'url','type'=>'text','value'=>'...']]
+     * @param string   $templateName MSG91 approved template name
+     * @param string   $namespace    MSG91 namespace (UUID-like)
+     * @param string   $languageCode e.g. 'en_GB' / 'en_US'
+     * @param string   $integratedNumber digits only (with country code, no '+')
      * @return array{http_status:int, json?:array, body?:string}
      */
-    public function sendTemplate(string $to, array $bodyParams, ?string $mediaUrl = null): array
-    {
-        $params = array_values(array_filter(array_map('strval', $bodyParams), fn($s) => $s !== ''));
+    public function sendBulkTemplate(
+        array $to,
+        array $components,
+        ?string $templateName = null,
+        ?string $namespace = null,
+        ?string $languageCode = null,
+        ?string $integratedNumber = null
+    ): array {
+        $templateName     = $templateName     ?: (string) env('MSG91_WA_TEMPLATE', '');
+        $namespace        = $namespace        ?: (string) env('MSG91_WA_NAMESPACE', '');
+        $languageCode     = $languageCode     ?: (string) env('MSG91_WA_LANG_CODE', 'en_GB');
+        $integratedNumber = $integratedNumber ?: $this->integratedNumber();
 
-        // Cap to 10 template params (adjust if your template needs more)
-        $params = array_slice($params, 0, (int) env('MSG91_WA_BODY_PARAM_COUNT', 10));
-
-        $headers = [
-            'authkey'       => $this->authkey,
-            'Accept'        => 'application/json',
-            'Content-Type'  => 'application/json',
+        // Build JSON exactly like the docs/sample
+        $payload = [
+            'integrated_number' => $integratedNumber,
+            'content_type'      => 'template',
+            'payload'           => [
+                'messaging_product' => 'whatsapp',
+                'type'              => 'template',
+                'template'          => [
+                    'name'      => $templateName,
+                    'language'  => [
+                        'code'   => $languageCode,
+                        'policy' => 'deterministic',
+                    ],
+                    'namespace' => $namespace,
+                    'to_and_components' => [[
+                        'to'         => array_values(array_unique(array_map(fn($n) => preg_replace('/\D+/', '', $n), $to))),
+                        'components' => $components,
+                    ]],
+                ],
+            ],
         ];
 
-        // Build payload for TEMPLATE mode (namespace + name)
-        if ($this->mode === 'template') {
-            $components = [];
-
-            // Body params (text)
-            if (!empty($params)) {
-                $components[] = [
-                    'type'       => 'body',
-                    'parameters' => array_map(fn($t) => ['type' => 'text', 'text' => $t], $params),
-                ];
-            }
-
-            // Optional header image
-            if ($mediaUrl) {
-                $components[] = [
-                    'type'       => 'header',
-                    'parameters' => [[
-                        'type'  => 'image',
-                        'image' => ['link' => $mediaUrl],
-                    ]],
-                ];
-            }
-
-            $payload = [
-                'to'       => $to,
-                'from'     => $this->sender,
-                'type'     => 'template',
-                'template' => [
-                    'namespace' => $this->namespace,
-                    'name'      => $this->template,
-                    'language'  => ['policy' => 'deterministic', 'code' => env('MSG91_WA_LANG', 'en')],
-                    'components'=> $components,
-                ],
-            ];
-        }
-        // FLOW mode (if you’re using MSG91 Flow templates)
-        else {
-            $payload = [
-                'to'      => $to,
-                'from'    => $this->sender,
-                'type'    => 'flow',
-                'flow_id' => $this->flowId,
-                'params'  => $params,
-            ];
-
-            if ($mediaUrl) {
-                $payload['media'] = [
-                    'type' => 'image',
-                    'url'  => $mediaUrl,
-                ];
-            }
-        }
+        $headers = [
+            'authkey'      => $this->authkey,
+            'Accept'       => 'application/json',
+            'Content-Type' => 'application/json',
+        ];
 
         try {
-            $res = $this->http->post($this->endpoint, [
-                'headers' => $headers,
-                'json'    => $payload,
-            ]);
-
-            $status = $res->getStatusCode();
-            $body   = (string) $res->getBody();
+            $res  = $this->http->post($this->endpointBulk, ['headers'=>$headers, 'json'=>$payload]);
+            $code = $res->getStatusCode();
+            $body = (string) $res->getBody();
 
             $json = null;
-            try {
-                $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            } catch (\Throwable $e) { /* ignore */ }
+            try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
 
-            return ['http_status' => $status, 'json' => $json, 'body' => $body];
+            // Bubble server-indicated logical errors for visibility
+            if ($json && isset($json['errors'])) {
+                Log::warning('MSG91 logical errors', ['errors'=>$json['errors']]);
+            }
+
+            return ['http_status'=>$code, 'json'=>$json, 'body'=>$body];
         } catch (\Throwable $e) {
-            Log::error('MSG91 API error', ['error' => $e->getMessage()]);
+            Log::error('MSG91 bulk API error', ['error'=>$e->getMessage()]);
             throw $e;
         }
     }
