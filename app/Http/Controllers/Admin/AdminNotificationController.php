@@ -242,7 +242,7 @@ public function whatsappSend(Request $request)
     }
 
     // body mapping (1 or 2 fields)
-    $bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 2);
+$bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 0);
     if ($bodyFields >= 2) {
         $components = [
             'body_1' => ['type' => 'text', 'value' => $titleClean],
