@@ -15,9 +15,9 @@ class AppServiceProvider extends ServiceProvider
      */
    public function register(): void
 {
-    $this->app->singleton(\App\Services\Msg91WhatsappService::class, function ($app) {
-        return new \App\Services\Msg91WhatsappService();
-    });
+    // $this->app->singleton(\App\Services\Msg91WhatsappService::class, function ($app) {
+    //     return new \App\Services\Msg91WhatsappService();
+    // });
 }
 
 
