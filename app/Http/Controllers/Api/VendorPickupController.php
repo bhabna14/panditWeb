@@ -15,68 +15,69 @@ use Carbon\Carbon;
 
 class VendorPickupController extends Controller
 {
- public function getVendorPickups(Request $request)
-{
-    try {
-        // ✅ Auth via vendor-api guard
-        $vendor = Auth::guard('vendor-api')->user();
 
-        if (!$vendor) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Unauthorized. Vendor not logged in.',
-            ], 401);
-        }
+    public function getVendorPickups(Request $request)
+    {
+        try {
+            // ✅ Auth via vendor-api guard
+            $vendor = Auth::guard('vendor-api')->user();
 
-        // Optional filter: ?date=YYYY-MM-DD
-        $date = $request->query('date');
+            if (!$vendor) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Unauthorized. Vendor not logged in.',
+                ], 401);
+            }
 
-        $pickupsQuery = FlowerPickupDetails::with([
-                'flowerPickupItems.flower',
-                'flowerPickupItems.unit',
-                'rider'
-            ])
-            ->where('vendor_id', $vendor->vendor_id)
-            ->orderBy('created_at', 'desc');
+            // Optional filter: ?date=YYYY-MM-DD
+            $date = $request->query('date');
 
-        if ($date) {
-            // Match either pickup_date or created_at to the given date (adjust to your schema)
-            $pickupsQuery->whereDate('pickup_date', $date);
-        }
+            $pickupsQuery = FlowerPickupDetails::with([
+                    'flowerPickupItems.flower',
+                    'flowerPickupItems.unit',
+                    'rider'
+                ])
+                ->where('vendor_id', $vendor->vendor_id)
+                ->orderBy('created_at', 'desc');
 
-        $pickups = $pickupsQuery->get();
+            if ($date) {
+                // Match either pickup_date or created_at to the given date (adjust to your schema)
+                $pickupsQuery->whereDate('pickup_date', $date);
+            }
 
-        // Build a consistent vendor block for the payload
-        $vendorBlock = [
-            'vendor_id'   => $vendor->vendor_id,
-            'vendor_name' => $vendor->vendor_name ?? null,
-            'phone_no'    => $vendor->phone_no ?? null,
-        ];
+            $pickups = $pickupsQuery->get();
 
-        if ($pickups->isEmpty()) {
+            // Build a consistent vendor block for the payload
+            $vendorBlock = [
+                'vendor_id'   => $vendor->vendor_id,
+                'vendor_name' => $vendor->vendor_name ?? null,
+                'phone_no'    => $vendor->phone_no ?? null,
+            ];
+
+            if ($pickups->isEmpty()) {
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'No pickup requests found for this vendor.',
+                    'vendor'  => $vendorBlock,
+                    'data'    => [],
+                ], 200);
+            }
+
             return response()->json([
                 'status'  => 200,
-                'message' => 'No pickup requests found for this vendor.',
+                'message' => 'Pickup requests fetched successfully.',
                 'vendor'  => $vendorBlock,
-                'data'    => [],
+                'data'    => $pickups,
             ], 200);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Something went wrong while fetching pickups.',
+                'error'   => app()->environment('production') ? 'server_error' : $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Pickup requests fetched successfully.',
-            'vendor'  => $vendorBlock,
-            'data'    => $pickups,
-        ], 200);
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status'  => 500,
-            'message' => 'Something went wrong while fetching pickups.',
-            'error'   => app()->environment('production') ? 'server_error' : $e->getMessage(),
-        ], 500);
     }
-}
 
     public function updateFlowerPrices(Request $request, $pickupId)
     {
@@ -88,22 +89,30 @@ class VendorPickupController extends Controller
             ], 401);
         }
 
-        // ✅ 2) Validate payload (uses item_total_price per item)
+        // Strict mode by query: ?strict=1  (keeps old 422 behavior on mismatch)
+        $strict = (bool) $request->boolean('strict', false);
+
+        // --- Helpers for money (store as paise internally) ---
+        $toPaise  = fn($x) => (int) round(((float)$x) * 100);
+        $toRupees = fn($p) => round(((int)$p) / 100, 2);
+
+        // ✅ Validate
         $validated = $request->validate([
-            'total_price' => ['required','numeric','min:0'],
+            'total_price' => ['nullable','numeric','min:0'],
             'status'      => ['nullable', Rule::in(['PickupCompleted','Pending','Cancelled','InProgress'])],
-            'flower_pickup_items'                 => ['nullable','array','min:1'],
-            'flower_pickup_items.*.id'            => ['nullable','integer'],
-            'flower_pickup_items.*.flower_id'     => ['nullable','string'],
-            'flower_pickup_items.*.price'         => ['nullable','numeric','min:0'],
-            'flower_pickup_items.*.item_total_price' => ['nullable','numeric','min:0'], // 👈 new key
+
+            'flower_pickup_items'                     => ['nullable','array','min:1'],
+            'flower_pickup_items.*.id'                => ['nullable','integer'],
+            'flower_pickup_items.*.flower_id'         => ['nullable','string'],
+            'flower_pickup_items.*.price'             => ['nullable','numeric','min:0'],
+            'flower_pickup_items.*.quantity'          => ['nullable','numeric','min:0'],    // optional
+            'flower_pickup_items.*.item_total_price'  => ['nullable','numeric','min:0'],    // optional; we can compute
         ]);
 
-        $ALLOWED_DIFF = 0.01; // tiny float tolerance
-
         try {
-            $json = DB::transaction(function () use ($vendor, $pickupId, $validated, $ALLOWED_DIFF) {
-                // ✅ 3) Lock pickup and ensure vendor owns it
+            $json = DB::transaction(function () use ($vendor, $pickupId, $validated, $strict, $toPaise, $toRupees) {
+
+                // 1) Lock pickup and ensure vendor owns it
                 $pickup = \App\Models\FlowerPickupDetails::where('pick_up_id', $pickupId)
                     ->where('vendor_id', $vendor->vendor_id)
                     ->lockForUpdate()
@@ -116,69 +125,122 @@ class VendorPickupController extends Controller
                     ], 404);
                 }
 
-                // ✅ 4) Fetch all target items for this pickup
-                $itemIds = collect($validated['flower_pickup_items'])->pluck('id')->unique()->values();
-                $existing = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
-                    ->whereIn('id', $itemIds)
-                    ->get()
-                    ->keyBy('id');
+                $updatedItems   = [];
+                $sumItemPaise   = 0;
+                $hadItemsInBody = isset($validated['flower_pickup_items']) && is_array($validated['flower_pickup_items']);
 
-                $missing = $itemIds->diff($existing->keys());
-                if ($missing->isNotEmpty()) {
-                    return response()->json([
-                        'status'  => 422,
-                        'message' => 'Some items do not belong to this pickup or do not exist.',
-                        'errors'  => ['missing_item_ids' => $missing->values()],
-                    ], 422);
-                }
+                // 2) If items provided, load and update them
+                if ($hadItemsInBody) {
+                    $itemIds = collect($validated['flower_pickup_items'])
+                        ->pluck('id')->filter()->unique()->values();
 
-                // ✅ 5) Update items and compute sum(item_total_price)
-                $sumItemTotals = 0.0;
-                $updatedItems  = [];
+                    // Fetch only provided ids (if ids missing, we will error below)
+                    $existing = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
+                        ->whereIn('id', $itemIds)
+                        ->get()->keyBy('id');
 
-                foreach ($validated['flower_pickup_items'] as $row) {
-                    $it = $existing[$row['id']];
-
-                    // Ensure flower_id integrity
-                    if ((string)$it->flower_id !== (string)$row['flower_id']) {
+                    // Ensure all IDs exist and belong to this pickup
+                    $missing = $itemIds->diff($existing->keys());
+                    if ($missing->isNotEmpty()) {
                         return response()->json([
                             'status'  => 422,
-                            'message' => 'flower_id mismatch for item id '.$row['id'],
+                            'message' => 'Some items do not belong to this pickup or do not exist.',
+                            'errors'  => ['missing_item_ids' => $missing->values()],
                         ], 422);
                     }
 
-                    $it->price            = $row['price'];
-                    $it->item_total_price = $row['item_total_price']; // 👈 save to DB
-                    $it->save();
+                    foreach ($validated['flower_pickup_items'] as $row) {
+                        if (!isset($row['id'])) {
+                            return response()->json([
+                                'status'  => 422,
+                                'message' => 'Each item must include an id.',
+                            ], 422);
+                        }
 
-                    $sumItemTotals += (float) $row['item_total_price'];
+                        $it = $existing[$row['id']];
 
-                    $updatedItems[] = [
-                        'id'               => $it->id,
-                        'flower_id'        => $it->flower_id,
-                        'price'            => (float) $it->price,
-                        'item_total_price' => (float) $it->item_total_price,
-                    ];
+                        // flower_id integrity if provided
+                        if (isset($row['flower_id']) && (string)$it->flower_id !== (string)$row['flower_id']) {
+                            return response()->json([
+                                'status'  => 422,
+                                'message' => 'flower_id mismatch for item id '.$row['id'],
+                            ], 422);
+                        }
+
+                        // Price (₹) -> paise
+                        $pricePaise = isset($row['price']) ? $toPaise($row['price']) : $toPaise($it->price ?? 0);
+                        $qty        = isset($row['quantity']) ? (float)$row['quantity'] : (float)($it->quantity ?? 1);
+
+                        // Determine item_total_price (₹) if not provided: price * qty
+                        if (isset($row['item_total_price'])) {
+                            $itemTotalPaise = $toPaise($row['item_total_price']);
+                        } else {
+                            $itemTotalPaise = (int) round($pricePaise * $qty);
+                        }
+
+                        // Save back to DB in rupees format
+                        $it->price            = $toRupees($pricePaise);
+                        // Persist quantity if your schema has it
+                        if (property_exists($it, 'quantity')) {
+                            $it->quantity = $qty;
+                        }
+                        $it->item_total_price = $toRupees($itemTotalPaise);
+                        $it->save();
+
+                        $sumItemPaise += $itemTotalPaise;
+
+                        $updatedItems[] = [
+                            'id'               => $it->id,
+                            'flower_id'        => $it->flower_id,
+                            'price'            => (float) $it->price,
+                            'quantity'         => isset($it->quantity) ? (float)$it->quantity : $qty,
+                            'item_total_price' => (float) $it->item_total_price,
+                        ];
+                    }
+                } else {
+                    // If no items provided, compute current sum from DB
+                    $sumItemPaise = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
+                        ->get()
+                        ->reduce(function ($carry, $it) use ($toPaise) {
+                            return $carry + $toPaise($it->item_total_price ?? 0);
+                        }, 0);
                 }
 
-                // ✅ 6) Verify pickup total equals sum of item totals
-                $providedTotal = (float) $validated['total_price'];
-                if (abs($sumItemTotals - $providedTotal) > $ALLOWED_DIFF) {
-                    return response()->json([
-                        'status'  => 422,
-                        'message' => 'Provided total_price does not match the sum of item_total_price.',
-                        'data'    => [
-                            'provided_total_price' => round($providedTotal, 2),
-                            'sum_item_total_price' => round($sumItemTotals, 2),
-                            'difference'           => round($sumItemTotals - $providedTotal, 2),
-                        ],
-                    ], 422);
+                // 3) Decide total
+                $providedTotalPaise = isset($validated['total_price']) ? $toPaise($validated['total_price']) : null;
+
+                $totalPriceAdjusted = false;
+                $finalTotalPaise    = $sumItemPaise;
+
+                if ($providedTotalPaise !== null) {
+                    if ($strict && $providedTotalPaise !== $sumItemPaise) {
+                        // Strict mode => keep old behavior (422)
+                        return response()->json([
+                            'status'  => 422,
+                            'message' => 'Provided total_price does not match the sum of item_total_price.',
+                            'data'    => [
+                                'provided_total_price' => $toRupees($providedTotalPaise),
+                                'sum_item_total_price' => $toRupees($sumItemPaise),
+                                'difference'           => $toRupees($sumItemPaise - $providedTotalPaise),
+                            ],
+                        ], 422);
+                    }
+
+                    // Non-strict: we auto-snap to computed sum and flag it
+                    if ($providedTotalPaise !== $sumItemPaise) {
+                        $totalPriceAdjusted = true;
+                    }
                 }
 
-                // ✅ 7) Save pickup total + status + audit
-                $pickup->total_price = $providedTotal;
-                $pickup->status      = $validated['status'] ?? 'PickupCompleted';
-                $pickup->updated_by  = $vendor->vendor_name;
+                // 4) Save pickup total + status + audit
+                $pickup->total_price = $toRupees($finalTotalPaise);
+                if (isset($validated['status'])) {
+                    $pickup->status = $validated['status'];
+                } else {
+                    // Default to PickupCompleted if caller intended to close
+                    $pickup->status = $pickup->status ?? 'PickupCompleted';
+                }
+                $pickup->updated_by = $vendor->vendor_name;
                 $pickup->save();
 
                 return response()->json([
@@ -186,15 +248,17 @@ class VendorPickupController extends Controller
                     'message' => 'Prices updated successfully by '.$vendor->vendor_name,
                     'data'    => [
                         'pickup' => [
-                            'pick_up_id'   => $pickup->pick_up_id,
-                            'total_price'  => (float) $pickup->total_price,
-                            'status'       => $pickup->status,
-                            'updated_by'   => $pickup->updated_by,
-                            'updated_at'   => optional($pickup->updated_at)->toDateTimeString(),
+                            'pick_up_id'           => $pickup->pick_up_id,
+                            'total_price'          => (float) $pickup->total_price,
+                            'status'               => $pickup->status,
+                            'updated_by'           => $pickup->updated_by,
+                            'updated_at'           => optional($pickup->updated_at)->toDateTimeString(),
+                            'total_price_adjusted' => $totalPriceAdjusted,
+                            'provided_total_price' => $providedTotalPaise !== null ? $toRupees($providedTotalPaise) : null,
+                            'sum_item_total_price' => $toRupees($sumItemPaise),
                         ],
-                        'items_updated'        => count($updatedItems),
-                        'items'                => $updatedItems,
-                        'sum_item_total_price' => round($sumItemTotals, 2),
+                        'items_updated' => count($updatedItems),
+                        'items'         => $updatedItems,
                     ],
                 ], 200);
             });
@@ -205,7 +269,7 @@ class VendorPickupController extends Controller
             return response()->json([
                 'status'  => 500,
                 'message' => 'An error occurred while updating prices.',
-                'error'   => $e->getMessage(),
+                'error'   => app()->environment('production') ? 'server_error' : $e->getMessage(),
             ], 500);
         }
     }
