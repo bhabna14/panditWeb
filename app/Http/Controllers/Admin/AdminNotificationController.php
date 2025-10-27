@@ -193,14 +193,16 @@ class AdminNotificationController extends Controller
 
 public function whatsappSend(Request $request)
 {
-    $validated = $request->validate([
-        'audience'         => ['required', Rule::in(['all','selected'])],
-        'user'             => ['nullable','array'],
-        'user.*'           => ['nullable','string'],
-        'title'            => ['required','string','max:255'],
-        'description'      => ['required','string'],
-        'button_url_value' => ['nullable','string','max:2000'], // if your template has button_1 url var
-    ]);
+   $requiresParam = filter_var(env('MSG91_WA_URL_HAS_PARAM', false), FILTER_VALIDATE_BOOLEAN);
+
+$validated = $request->validate([
+    'audience'         => ['required', Rule::in(['all','selected'])],
+    'user'             => ['nullable','array'],
+    'user.*'           => ['nullable','string'],
+    'title'            => ['required','string','max:255'],
+    'description'      => ['required','string'],
+    'button_url_value' => [$requiresParam ? 'required' : 'nullable','string','max:2000'],
+]);
 
     $title       = trim($validated['title']);
     $description = trim($validated['description']);
@@ -229,31 +231,39 @@ public function whatsappSend(Request $request)
         return back()->with('error', 'No valid phone numbers found to send.')->withInput();
     }
 
-    // sanitize for bulk (MSG91 rejects \n in body values)
-    $titleClean = $this->sanitizeBodyValue($title);
-    $descClean  = $this->sanitizeBodyValue($description);
-    $buttonClean= $buttonVar ? $this->sanitizeBodyValue($buttonVar) : null;
+   $titleClean = $this->sanitizeBodyValue($title);
+$descClean  = $this->sanitizeBodyValue($description);
 
-    // decide mapping: 1 body var or 2, from env
-    $bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 1);
-    if ($bodyFields >= 2) {
-        $components = [
-            'body_1' => ['type' => 'text', 'value' => $titleClean],
-            'body_2' => ['type' => 'text', 'value' => $descClean],
-        ];
-    } else {
-        $components = [
-            'body_1' => ['type' => 'text', 'value' => $titleClean . ' — ' . $descClean],
-        ];
+$bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 1);
+if ($bodyFields >= 2) {
+    $components = [
+        'body_1' => ['type' => 'text', 'value' => $titleClean],
+        'body_2' => ['type' => 'text', 'value' => $descClean],
+    ];
+} else {
+    $components = [
+        'body_1' => ['type' => 'text', 'value' => $titleClean . ' — ' . $descClean],
+    ];
+}
+
+// URL button only if template actually has a param placeholder
+if ($requiresParam) {
+    $base   = trim((string) env('MSG91_WA_BUTTON_BASE', ''));
+    $rawVal = (string) ($validated['button_url_value'] ?? '');
+    $param  = $this->normalizeButtonParam($rawVal, $base);  // <- see helper below
+
+    if ($param === '') {
+        return back()->with('error', 'URL button requires a parameter (your template has {{1}}).')->withInput();
     }
 
-    if (!empty($buttonClean)) {
-        $components['button_1'] = [
-            'subtype' => 'url',
-            'type'    => 'text',
-            'value'   => $buttonClean,
-        ];
-    }
+    $components['button_1'] = [
+        'subtype' => 'url',
+        'type'    => 'text',
+        'value'   => $param,   // send ONLY the param for {{1}}
+    ];
+}
+// If your template uses a fixed URL WITHOUT {{1}}, do NOT add button_1 at all.
+
 
     /** @var Msg91WhatsappService $wa */
     $wa = app(Msg91WhatsappService::class);
@@ -320,11 +330,37 @@ private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
     if (strlen($digits) >= 11)                                    return $digits;        // already with CC
     return null;
 }
-
 private function sanitizeBodyValue(string $s): string
 {
     // MSG91 bulk forbids newlines in body values
-    $s = str_replace(["\r", "\n"], ' ', $s);
+    $s = str_replace(["\r", "\n"], ' ');
     return trim(preg_replace('/\s+/', ' ', $s));
 }
+
+private function normalizeButtonParam(string $input, string $base): string
+{
+    $clean = $this->sanitizeBodyValue($input);
+
+    if ($clean === '') return '';
+
+    if ($base !== '') {
+        // Make sure base has a trailing slash for consistent stripping
+        $baseNorm = rtrim($base, '/') . '/';
+        if (stripos($clean, $baseNorm) === 0) {
+            $clean = substr($clean, strlen($baseNorm));
+        }
+    }
+
+    // Remove leading slashes/spaces just in case
+    $clean = ltrim($clean, " /");
+
+    // Avoid spaces in tokens (most URLs won’t accept them). Replace spaces with '-' (or nothing).
+    $clean = preg_replace('/\s+/', '-', $clean);
+
+    // Final guard: no newlines
+    $clean = str_replace(["\r", "\n"], '', $clean);
+
+    return trim($clean);
+}
+
 }
