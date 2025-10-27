@@ -7,13 +7,13 @@
             border: 1px solid #e8ecf5;
             border-radius: 14px;
             box-shadow: 0 8px 24px rgba(17, 24, 39, .06);
-            background: #fff
+            background: #fff;
         }
 
         .nu-hero {
             background: linear-gradient(135deg, #fff7ed 0%, #e0f2fe 100%);
             border: 1px solid #fde68a;
-            border-radius: 14px
+            border-radius: 14px;
         }
 
         .img-preview {
@@ -21,12 +21,17 @@
             border: 1px dashed #cbd5e1;
             border-radius: 10px;
             padding: 6px;
-            background: #f8fafc
+            background: #f8fafc;
         }
     </style>
 @endsection
 
 @section('content')
+    @php
+        // Read env once in Blade for minor UX toggles
+        $requiresParam = filter_var(env('MSG91_WA_URL_HAS_PARAM', false), FILTER_VALIDATE_BOOLEAN);
+        $buttonBase = rtrim((string) env('MSG91_WA_BUTTON_BASE', ''), '/') . '/';
+    @endphp
     <div class="container-fluid">
         <div class="nu-hero p-4 mb-4">
             <div class="d-flex align-items-center justify-content-between">
@@ -56,21 +61,42 @@
         <div class="row">
             <div class="col-lg-6">
                 <div class="nu-card p-4 mb-4">
-                    <form action="{{ route('whatsapp-notification.send') }}" method="POST"
-                        enctype="multipart/form-data" id="waForm">
+                    <form action="{{ route('whatsapp-notification.send') }}" method="POST" enctype="multipart/form-data"
+                        id="waForm">
                         @csrf
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold d-block">Audience</label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="audience" id="audAll" value="all"
-                                    checked>
+                                    {{ old('audience', 'all') === 'all' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audAll">All users</label>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="audience" id="audSelected"
-                                    value="selected">
+                                    value="selected" {{ old('audience') === 'selected' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audSelected">Selected users / custom numbers</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Button URL parameter
+                                @if ($requiresParam)
+                                    <span class="text-danger">(required)</span>
+                                @else
+                                    <span class="text-muted">(optional)</span>
+                                @endif
+                            </label>
+                            <input type="text" name="button_url_value" class="form-control"
+                                value="{{ old('button_url_value') }}"
+                                placeholder="e.g., ABC123 or {{ $buttonBase }}ABC123"
+                                {{ $requiresParam ? 'required' : '' }}>
+                            <div class="form-text">
+                                If your button URL in MSG91 looks like
+                                <code>{{ $buttonBase }}@{{ 1 }}</code>,
+                                enter either just the token (e.g. <code>ABC123</code>) or the full URL
+                                (<code>{{ $buttonBase }}ABC123</code>). We’ll automatically send only the token for
+                                <code>@{{ 1 }}</code>.
                             </div>
                         </div>
 
@@ -78,9 +104,10 @@
                             <label class="form-label fw-semibold">Recipients (phone numbers)</label>
                             <select class="form-control" name="user[]" id="waUsers" multiple>
                                 @foreach ($users as $u)
-                                    <option value="{{ $u->mobile_number }}">
-                                        {{ $u->name }} — {{ $u->mobile_number }}
-                                        {{ $u->email ? ' (' . $u->email . ')' : '' }}
+                                    <option value="{{ $u->mobile_number }}"
+                                        {{ collect(old('user', []))->contains($u->mobile_number) ? 'selected' : '' }}>
+                                        {{ $u->name }} —
+                                        {{ $u->mobile_number }}{{ $u->email ? ' (' . $u->email . ')' : '' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -93,18 +120,23 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Title</label>
-                            <input type="text" name="title" class="form-control" required maxlength="255">
+                            <input type="text" name="title" class="form-control" required maxlength="255"
+                                value="{{ old('title') }}">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Message</label>
-                            <textarea name="description" rows="5" class="form-control" required></textarea>
+                            <textarea name="description" rows="5" class="form-control" required>{{ old('description') }}</textarea>
+                            <div class="form-text">Line breaks will be converted to spaces to satisfy MSG91 bulk API rules.
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Image (optional)</label>
                             <input type="file" name="image" id="waImage" class="form-control" accept="image/*">
                             <div class="mt-2"><img id="waPreview" class="img-preview d-none" /></div>
+                            <div class="form-text text-muted">Bulk API ignores images unless your approved template has a
+                                header image component.</div>
                         </div>
 
                         <div class="d-flex gap-2">
@@ -125,7 +157,8 @@
                     <ul class="mb-0">
                         <li>Your MSG91 sender {{ env('MSG91_WA_NUMBER') }} must be approved & verified.</li>
                         <li>Media URL uses <code>public</code> disk. Run <code>php artisan storage:link</code> once.</li>
-                        <li>Template name/namespace must match MSG91 exactly, with the same number of variables.</li>
+                        <li>Template name/namespace & language must match MSG91 exactly, with the same number/order of
+                            variables.</li>
                     </ul>
                 </div>
             </div>
