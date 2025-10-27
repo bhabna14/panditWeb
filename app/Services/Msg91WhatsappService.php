@@ -3,89 +3,121 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
-use Psr\Http\Message\ResponseInterface;
+use Illuminate\Support\Facades\Log;
 
 class Msg91WhatsappService
 {
     protected Client $http;
     protected string $authkey;
+    protected string $sender;
+    protected string $mode; // template|flow
+    protected ?string $namespace;
+    protected ?string $template;
+    protected ?string $flowId;
     protected string $endpoint;
-    protected string $integratedNumber;
-    protected string $templateName;
-    protected string $namespace;
-    protected string $language;
-    protected int $bodyParamCount;
-    protected string $headerMedia; // none|image|video|document
 
     public function __construct()
     {
-        $this->authkey          = (string) config('services.msg91.authkey');
-        $this->endpoint         = (string) config('services.msg91.endpoint');
-        $this->integratedNumber = (string) config('services.msg91.wa_number');
-        $this->templateName     = (string) config('services.msg91.template');
-        $this->namespace        = (string) config('services.msg91.namespace');
-        $this->language         = (string) config('services.msg91.language', 'en');
-        $this->bodyParamCount   = (int) config('services.msg91.body_param_count', 2);
-        $this->headerMedia      = (string) config('services.msg91.header_media', 'none');
-
-        $this->http = new Client(['timeout' => 25]);
+        $this->http      = new Client(['timeout' => 20]);
+        $this->authkey   = (string) env('MSG91_AUTHKEY', '');
+        $this->sender    = (string) env('MSG91_WA_NUMBER', '');
+        $this->mode      = strtolower((string) env('MSG91_WA_MODE', 'template')); // template|flow
+        $this->namespace = env('MSG91_WA_NAMESPACE');
+        $this->template  = env('MSG91_WA_TEMPLATE');
+        $this->flowId    = env('MSG91_WA_FLOW_ID');
+        $this->endpoint  = (string) env('MSG91_WA_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message');
     }
 
     /**
-     * Send a template message to a single WhatsApp number via MSG91.
-     *
-     * @param string $toE164  E.164-ish phone, e.g. +917008710275
-     * @param array  $bodyParams Ordered list of strings to map to template variables ({{1}}, {{2}}, ...)
-     * @param string|null $mediaUrl Public URL if template has media header (image/video/document)
-     * @return ResponseInterface
+     * @param string      $to         E.164 number (+91xxxxxxxxxx)
+     * @param array       $bodyParams Template variables in order (we’ll trim to max 10)
+     * @param string|null $mediaUrl   Publicly accessible image URL (optional)
+     * @return array{http_status:int, json?:array, body?:string}
      */
-    public function sendTemplate(string $toE164, array $bodyParams = [], ?string $mediaUrl = null): ResponseInterface
+    public function sendTemplate(string $to, array $bodyParams, ?string $mediaUrl = null): array
     {
-        // MSG91 usually wants numeric phone without '+'
-        $digits = preg_replace('/\D+/', '', $toE164);
+        $params = array_values(array_filter(array_map('strval', $bodyParams), fn($s) => $s !== ''));
 
-        // Build body params according to your template’s expected count
-        // If fewer provided, pad with empty; if more provided, trim
-        $params = array_slice(array_values($bodyParams), 0, $this->bodyParamCount);
-        while (count($params) < $this->bodyParamCount) {
-            $params[] = '';
-        }
+        // Cap to 10 template params (adjust if your template needs more)
+        $params = array_slice($params, 0, (int) env('MSG91_WA_BODY_PARAM_COUNT', 10));
 
-        $bodyParamObjects = array_map(fn($p) => ['text' => (string) $p], $params);
-
-        $payload = [
-            'integrated_number' => $this->integratedNumber,
-            'content_type'      => 'template',
-            'payload'           => [
-                'to'   => [['phone_number' => $digits]],
-                'type' => 'template',
-                'template' => [
-                    'template_name' => $this->templateName,
-                    'namespace'     => $this->namespace,
-                    'language'      => ['policy' => 'deterministic', 'code' => $this->language],
-                    'body'          => $bodyParamObjects, // matches {{1}}, {{2}}, ...
-                ],
-            ],
+        $headers = [
+            'authkey'       => $this->authkey,
+            'Accept'        => 'application/json',
+            'Content-Type'  => 'application/json',
         ];
 
-        // Attach header media only if template is defined with media AND caller provided URL
-        if ($this->headerMedia !== 'none' && $mediaUrl) {
-            $payload['payload']['template']['header'] = [
-                'type'  => 'media',
-                'media' => [
-                    'type' => $this->headerMedia, // image|video|document
-                    'url'  => $mediaUrl,
+        // Build payload for TEMPLATE mode (namespace + name)
+        if ($this->mode === 'template') {
+            $components = [];
+
+            // Body params (text)
+            if (!empty($params)) {
+                $components[] = [
+                    'type'       => 'body',
+                    'parameters' => array_map(fn($t) => ['type' => 'text', 'text' => $t], $params),
+                ];
+            }
+
+            // Optional header image
+            if ($mediaUrl) {
+                $components[] = [
+                    'type'       => 'header',
+                    'parameters' => [[
+                        'type'  => 'image',
+                        'image' => ['link' => $mediaUrl],
+                    ]],
+                ];
+            }
+
+            $payload = [
+                'to'       => $to,
+                'from'     => $this->sender,
+                'type'     => 'template',
+                'template' => [
+                    'namespace' => $this->namespace,
+                    'name'      => $this->template,
+                    'language'  => ['policy' => 'deterministic', 'code' => env('MSG91_WA_LANG', 'en')],
+                    'components'=> $components,
                 ],
             ];
         }
+        // FLOW mode (if you’re using MSG91 Flow templates)
+        else {
+            $payload = [
+                'to'      => $to,
+                'from'    => $this->sender,
+                'type'    => 'flow',
+                'flow_id' => $this->flowId,
+                'params'  => $params,
+            ];
 
-        return $this->http->post($this->endpoint, [
-            'headers' => [
-                'authkey'      => $this->authkey,
-                'Content-Type' => 'application/json',
-                'Accept'       => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+            if ($mediaUrl) {
+                $payload['media'] = [
+                    'type' => 'image',
+                    'url'  => $mediaUrl,
+                ];
+            }
+        }
+
+        try {
+            $res = $this->http->post($this->endpoint, [
+                'headers' => $headers,
+                'json'    => $payload,
+            ]);
+
+            $status = $res->getStatusCode();
+            $body   = (string) $res->getBody();
+
+            $json = null;
+            try {
+                $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Throwable $e) { /* ignore */ }
+
+            return ['http_status' => $status, 'json' => $json, 'body' => $body];
+        } catch (\Throwable $e) {
+            Log::error('MSG91 API error', ['error' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }
