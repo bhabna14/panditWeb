@@ -15,7 +15,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h3 class="mb-1 fw-bold">Send WhatsApp Notification</h3>
-                <div class="text-muted">Pick recipients by phone number. Supports bold title and optional image.</div>
+                <div class="text-muted">Send to all users or select specific phone numbers. Supports bold title and optional image.</div>
             </div>
             <a class="btn btn-outline-primary" href="{{ route('admin.notification.create') }}">
                 <i class="fe fe-bell me-1"></i> App Notification
@@ -37,8 +37,20 @@
                     @csrf
 
                     <div class="mb-3">
+                        <label class="form-label fw-semibold d-block">Audience</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="audience" id="audAll" value="all" checked>
+                            <label class="form-check-label" for="audAll">All users ({{ number_format($users->count()) }}+ cached)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="audience" id="audSelected" value="selected">
+                            <label class="form-check-label" for="audSelected">Selected users / custom numbers</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
                         <label class="form-label fw-semibold">Recipients (phone numbers)</label>
-                        <select class="form-control" name="user[]" id="waUsers" multiple required>
+                        <select class="form-control" name="user[]" id="waUsers" multiple>
                             @foreach($users as $u)
                                 {{-- VALUE is the phone number now --}}
                                 <option value="{{ $u->mobile_number }}">
@@ -47,7 +59,8 @@
                             @endforeach
                         </select>
                         <div class="form-text">
-                            You can also type and add numbers directly (press Enter). Use E.164 (e.g. +91XXXXXXXXXX) or local 10-digit numbers.
+                            When “Selected users” is chosen, you can also type and add numbers directly (press Enter).
+                            Use E.164 (e.g. +91XXXXXXXXXX) or local 10-digit numbers.
                         </div>
                     </div>
 
@@ -65,7 +78,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Message</label>
                         <textarea name="description" rows="5" class="form-control" required></textarea>
-                        <div class="form-text">Title will be sent bolded like <code>*Title*</code>.</div>
+                        <div class="form-text">Title will be sent bolded like <code>*Title*</code> by most WhatsApp template layouts.</div>
                     </div>
 
                     <div class="mb-3">
@@ -90,9 +103,9 @@
             <div class="nu-card p-4">
                 <h5 class="fw-bold mb-3">Tips</h5>
                 <ul class="mb-0">
-                    <li>Ensure your Twilio WhatsApp sender is approved and verified.</li>
-                    <li>Media URL is public (we use <code>asset('storage/...')</code>).</li>
-                    <li>If your account requires templates, use preapproved templates.</li>
+                    <li>Ensure your MSG91 WhatsApp sender is approved and verified.</li>
+                    <li>Media URL must be public (this page uses <code>Storage::disk('public')</code> → <code>storage:link</code> required).</li>
+                    <li>If your account requires templates/flows, configure the correct IDs/names in <code>.env</code>.</li>
                 </ul>
             </div>
         </div>
@@ -104,23 +117,35 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // Allow free tagging of numbers in Select2 (press Enter to add any number)
-    $('#waUsers').select2({
+    // Select2 with free tagging for custom numbers (when "Selected users")
+    const $waUsers = $('#waUsers').select2({
         placeholder: 'Pick or type numbers…',
         width: '100%',
-        tags: true,            // <-- enables free entry
+        tags: true,
         tokenSeparators: [',',' ',';']
     });
 
+    // Enable/disable the multi-select depending on audience
+    const setAudienceState = () => {
+        const mode = document.querySelector('input[name="audience"]:checked')?.value;
+        const disabled = (mode !== 'selected');
+        $('#waUsers').prop('disabled', disabled);
+        if (disabled) { $waUsers.val(null).trigger('change'); }
+    };
+    document.querySelectorAll('input[name="audience"]').forEach(el => el.addEventListener('change', setAudienceState));
+    setAudienceState();
+
+    // Image preview
     const waImg = document.getElementById('waImage');
     const waPrev = document.getElementById('waPreview');
     waImg.addEventListener('change', e => {
         const f = e.target.files[0];
-        if (!f) { waPrev.classList.add('d-none'); return; }
+        if (!f) { waPrev.classList.add('d-none'); waPrev.removeAttribute('src'); return; }
         waPrev.src = URL.createObjectURL(f);
         waPrev.classList.remove('d-none');
     });
 
+    // Sweet preview
     document.getElementById('waPreviewBtn').addEventListener('click', () => {
         const title = document.querySelector('[name="title"]').value || '(No title)';
         const desc  = document.querySelector('[name="description"]').value || '(No message)';
