@@ -14,15 +14,15 @@ class Msg91WhatsappService
 
     public function __construct()
     {
-        $this->http        = new Client(['timeout' => 25]);
-        $this->authkey     = (string) env('MSG91_AUTHKEY', '');
-        $this->sender      = (string) env('MSG91_WA_NUMBER', ''); // +<cc><number>
-        $this->endpointBulk= (string) env('MSG91_WA_BULK_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/');
+        $this->http         = new Client(['timeout' => 25]);
+        $this->authkey      = (string) env('MSG91_AUTHKEY', '');
+        $this->sender       = (string) env('MSG91_WA_NUMBER', ''); // +<cc><number>
+        $this->endpointBulk = (string) env('MSG91_WA_BULK_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/');
     }
 
     /**
-     * MSISDN digits form of integrated number (no '+').
-     * Priority: MSG91_WA_INTEGRATED_NUMBER (already digits) -> derived from MSG91_WA_NUMBER.
+     * Integrated number in MSISDN (digits only, no '+').
+     * Priority: MSG91_WA_INTEGRATED_NUMBER -> derived from MSG91_WA_NUMBER.
      */
     public function integratedNumber(): string
     {
@@ -35,14 +35,14 @@ class Msg91WhatsappService
     }
 
     /**
-     * Send a bulk template message as per MSG91 cURL structure.
+     * Send bulk template as per MSG91 docs.
      *
-     * @param string[] $to           MSISDNs (digits only, with country code, no '+')
-     * @param array    $components   e.g. ['body_1'=>['type'=>'text','value'=>'...'], 'button_1'=>['subtype'=>'url','type'=>'text','value'=>'...']]
-     * @param string   $templateName MSG91 approved template name
-     * @param string   $namespace    MSG91 namespace (UUID-like)
-     * @param string   $languageCode e.g. 'en_GB' / 'en_US'
-     * @param string   $integratedNumber digits only (with country code, no '+')
+     * @param string[] $to MSISDNs (digits only, with country code, no '+')
+     * @param array    $components e.g. ['body_1'=>['type'=>'text','value'=>'...'], 'button_1'=>['subtype'=>'url','type'=>'text','value'=>'...']]
+     * @param string   $templateName
+     * @param string   $namespace
+     * @param string   $languageCode e.g. en_GB / en_US
+     * @param string   $integratedNumber digits only
      * @return array{http_status:int, json?:array, body?:string}
      */
     public function sendBulkTemplate(
@@ -58,7 +58,10 @@ class Msg91WhatsappService
         $languageCode     = $languageCode     ?: (string) env('MSG91_WA_LANG_CODE', 'en_GB');
         $integratedNumber = $integratedNumber ?: $this->integratedNumber();
 
-        // Build JSON exactly like the docs/sample
+        if ($templateName === '' || $namespace === '' || $integratedNumber === '') {
+            throw new \RuntimeException('MSG91 config missing: template/namespace/integrated number.');
+        }
+
         $payload = [
             'integrated_number' => $integratedNumber,
             'content_type'      => 'template',
@@ -73,7 +76,9 @@ class Msg91WhatsappService
                     ],
                     'namespace' => $namespace,
                     'to_and_components' => [[
-                        'to'         => array_values(array_unique(array_map(fn($n) => preg_replace('/\D+/', '', $n), $to))),
+                        'to'         => array_values(array_unique(array_map(
+                            fn($n) => preg_replace('/\D+/', '', $n), $to
+                        ))),
                         'components' => $components,
                     ]],
                 ],
@@ -94,7 +99,6 @@ class Msg91WhatsappService
             $json = null;
             try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
 
-            // Bubble server-indicated logical errors for visibility
             if ($json && isset($json['errors'])) {
                 Log::warning('MSG91 logical errors', ['errors'=>$json['errors']]);
             }
