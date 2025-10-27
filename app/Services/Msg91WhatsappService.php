@@ -20,31 +20,14 @@ class Msg91WhatsappService
         $this->endpointBulk = (string) env('MSG91_WA_BULK_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/');
     }
 
-    /**
-     * Integrated number in MSISDN (digits only, no '+').
-     * Priority: MSG91_WA_INTEGRATED_NUMBER -> derived from MSG91_WA_NUMBER.
-     */
     public function integratedNumber(): string
     {
         $env = (string) env('MSG91_WA_INTEGRATED_NUMBER', '');
-        if ($env !== '') {
-            return preg_replace('/\D+/', '', $env);
-        }
+        if ($env !== '') return preg_replace('/\D+/', '', $env);
         $digits = preg_replace('/\D+/', '', $this->sender);
         return ltrim($digits, '+');
     }
 
-    /**
-     * Send bulk template as per MSG91 docs.
-     *
-     * @param string[] $to MSISDNs (digits only, with country code, no '+')
-     * @param array    $components e.g. ['body_1'=>['type'=>'text','value'=>'...'], 'button_1'=>['subtype'=>'url','type'=>'text','value'=>'...']]
-     * @param string   $templateName
-     * @param string   $namespace
-     * @param string   $languageCode e.g. en_GB / en_US
-     * @param string   $integratedNumber digits only
-     * @return array{http_status:int, json?:array, body?:string}
-     */
     public function sendBulkTemplate(
         array $to,
         array $components,
@@ -53,7 +36,7 @@ class Msg91WhatsappService
         ?string $languageCode = null,
         ?string $integratedNumber = null
     ): array {
-        $templateName     = $templateName     ?: (string) env('MSG91_WA_TEMPLATE', '');
+        $templateName     = $templateName     ?: (string) env('MSG91_WA_TEMPLATES', '');
         $namespace        = $namespace        ?: (string) env('MSG91_WA_NAMESPACE', '');
         $languageCode     = $languageCode     ?: (string) env('MSG91_WA_LANG_CODE', 'en_GB');
         $integratedNumber = $integratedNumber ?: $this->integratedNumber();
@@ -76,9 +59,7 @@ class Msg91WhatsappService
                     ],
                     'namespace' => $namespace,
                     'to_and_components' => [[
-                        'to'         => array_values(array_unique(array_map(
-                            fn($n) => preg_replace('/\D+/', '', $n), $to
-                        ))),
+                        'to'         => array_values(array_unique(array_map(fn($n) => preg_replace('/\D+/', '', $n), $to))),
                         'components' => $components,
                     ]],
                 ],

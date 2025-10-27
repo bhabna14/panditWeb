@@ -178,8 +178,7 @@ class AdminNotificationController extends Controller
             return back()->with('error', 'Failed to resend notification. Please try again later.');
         }
     }
-   
-public function whatsappcreate(Request $request)
+   public function whatsappcreate(Request $request)
 {
     $users = User::query()
         ->select('id','name','email','mobile_number')
@@ -236,8 +235,14 @@ public function whatsappSend(Request $request)
     $titleClean = $this->sanitizeBodyValue($title);
     $descClean  = $this->sanitizeBodyValue($description);
 
+    // optional: shield 4–8 digit runs to avoid WhatsApp "Copy code"
+    if (filter_var(env('OTP_SHIELD', false), FILTER_VALIDATE_BOOLEAN)) {
+        $titleClean = $this->shieldDigits($titleClean);
+        $descClean  = $this->shieldDigits($descClean);
+    }
+
     // body mapping (1 or 2 fields)
-    $bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 1);
+    $bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 2);
     if ($bodyFields >= 2) {
         $components = [
             'body_1' => ['type' => 'text', 'value' => $titleClean],
@@ -273,7 +278,7 @@ public function whatsappSend(Request $request)
         $resp = $wa->sendBulkTemplate(
             to: $toMsisdns,
             components: $components,
-            templateName: env('MSG91_WA_TEMPLATE', '33_crores_flowerdelivery'),
+            templateName: env('MSG91_WA_TEMPLATES', 'BROADCAST_GENERIC'),
             namespace: env('MSG91_WA_NAMESPACE'),
             languageCode: env('MSG91_WA_LANG_CODE', 'en_GB'),
             integratedNumber: $wa->integratedNumber()
@@ -331,17 +336,27 @@ private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
     if (strlen($digits) >= 11)                                    return $digits;                 // already with CC
     return null;
 }
-// ---------- helpers ----------
 
 private function sanitizeBodyValue(string $s): string
 {
-    // MSG91 bulk forbids newlines in body values
-    // Replace \r and \n with a single space, then collapse multiple spaces.
-    $s = str_replace(["\r", "\n"], ' ', $s);                 // <-- 3 arguments
-    return trim(preg_replace('/\s+/u', ' ', $s));            // collapse whitespace
+    // Bulk forbids \n
+    $s = str_replace(["\r", "\n"], ' ', $s);
+    return trim(preg_replace('/\s+/u', ' ', $s));
 }
 
-
+/**
+ * Prevent WhatsApp "Copy code" UI by breaking 4–8 digit runs:
+ * turns 123456 -> 123&#8201;456 (thin space)
+ */
+private function shieldDigits(string $s): string
+{
+    return preg_replace_callback('/(?<!\d)(\d{4,8})(?!\d)/', function ($m) {
+        $digits = $m[1];
+        // insert thin space (\u2009) in the middle
+        $mid = intdiv(strlen($digits), 2);
+        return substr($digits, 0, $mid) . " " . substr($digits, $mid);
+    }, $s);
+}
 
 private function normalizeButtonParam(string $input, string $base): string
 {
@@ -351,12 +366,12 @@ private function normalizeButtonParam(string $input, string $base): string
     if ($base !== '') {
         $baseNorm = rtrim($base, '/') . '/';
         if (stripos($clean, $baseNorm) === 0) {
-            $clean = substr($clean, strlen($baseNorm));   // strip the base, keep only token for {{1}}
+            $clean = substr($clean, strlen($baseNorm));   // keep only token for {{1}}
         }
     }
 
-    $clean = ltrim($clean, " /");                // no leading slash
-    $clean = preg_replace('/\s+/', '-', $clean); // no spaces in token
+    $clean = ltrim($clean, " /");
+    $clean = preg_replace('/\s+/', '-', $clean);
     return trim(str_replace(["\r", "\n"], '', $clean));
 }
 
