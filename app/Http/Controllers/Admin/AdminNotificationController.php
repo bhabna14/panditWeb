@@ -331,18 +331,18 @@ private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
     if (strlen($digits) >= 11)                                    return $digits;                 // already with CC
     return null;
 }
+// ---------- helpers ----------
 
 private function sanitizeBodyValue(string $s): string
 {
     // MSG91 bulk forbids newlines in body values
-    $s = str_replace(["\r", "\n"], ' ');
-    return trim(preg_replace('/\s+/', ' ', $s));
+    // Replace \r and \n with a single space, then collapse multiple spaces.
+    $s = str_replace(["\r", "\n"], ' ', $s);                 // <-- 3 arguments
+    return trim(preg_replace('/\s+/u', ' ', $s));            // collapse whitespace
 }
 
-/**
- * If user pasted a full URL, strip the known base to produce only the {{1}} token.
- * Example: base=https://your.site/track/, input=https://your.site/track/ABC123 -> ABC123
- */
+
+
 private function normalizeButtonParam(string $input, string $base): string
 {
     $clean = $this->sanitizeBodyValue($input);
@@ -351,15 +351,13 @@ private function normalizeButtonParam(string $input, string $base): string
     if ($base !== '') {
         $baseNorm = rtrim($base, '/') . '/';
         if (stripos($clean, $baseNorm) === 0) {
-            $clean = substr($clean, strlen($baseNorm));
+            $clean = substr($clean, strlen($baseNorm));   // strip the base, keep only token for {{1}}
         }
     }
 
-    $clean = ltrim($clean, " /");           // no leading slash
+    $clean = ltrim($clean, " /");                // no leading slash
     $clean = preg_replace('/\s+/', '-', $clean); // no spaces in token
-    $clean = str_replace(["\r", "\n"], '', $clean);
-
-    return trim($clean);
+    return trim(str_replace(["\r", "\n"], '', $clean));
 }
 
 }
