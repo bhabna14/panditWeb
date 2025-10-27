@@ -243,11 +243,13 @@ public function whatsappSend(Request $request)
 
     // body mapping (1 or 2 fields)
 $bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 0);
-    if ($bodyFields >= 2) {
-        $components = [
-            'body_1' => ['type' => 'text', 'value' => $titleClean],
-            'body_2' => ['type' => 'text', 'value' => $descClean],
-        ];
+$components = [];
+
+    if ($bodyFields === 2) {
+        $components['body_1'] = ['type' => 'text', 'value' => $titleClean];
+        $components['body_2'] = ['type' => 'text', 'value' => $descClean];
+    } elseif ($bodyFields === 1) {
+        $components['body_1'] = ['type' => 'text', 'value' => $titleClean . ' — ' . $descClean];
     } else {
         $components = [
             'body_1' => ['type' => 'text', 'value' => $titleClean . ' — ' . $descClean],
