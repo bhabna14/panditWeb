@@ -56,7 +56,7 @@
         <div class="row">
             <div class="col-lg-6">
                 <div class="nu-card p-4 mb-4">
-                    <form action="{{ route('admin.whatsapp-notification.send') }}" method="POST"
+                    <form action="{{ route('whatsapp-notification.send') }}" method="POST"
                         enctype="multipart/form-data" id="waForm">
                         @csrf
 
