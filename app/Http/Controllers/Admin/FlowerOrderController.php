@@ -437,7 +437,9 @@ class FlowerOrderController extends Controller
         }
 
         // Metrics
-        $totalOrders   = Subscription::where('user_id', $userid)->count();
+        $totalOrders = Subscription::where('user_id', $userid)
+            ->whereNotIn('status', ['dead', 'cancelled'])
+            ->count();
         $ongoingOrders = Subscription::where('user_id', $userid)->where('status', 'active')->count();
         $totalSpend    = FlowerPayment::where('user_id', $userid)->sum('paid_amount');
 
