@@ -115,7 +115,7 @@
         .chip.active {
             background: linear-gradient(90deg, var(--indigo), var(--cyan));
             border-color: transparent;
-            color: #fff;
+            color: #0e0e0e;
             box-shadow: 0 6px 16px rgba(14, 197, 215, .25);
         }
 
