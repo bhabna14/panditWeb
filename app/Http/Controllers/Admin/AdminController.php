@@ -530,68 +530,87 @@ class AdminController extends Controller
         return view('admin/add-career');
     }
 
-    public function manageuser()
-    {
-        // Eager-load subscriptions (as you already had)
-        $users = User::with('subscriptions')->latest('id')->get();
+   public function manageuser()
+{
+    // Subqueries to fetch latest authorized device data per user (business key = users.userid)
+    $lastLoginSub = UserDevice::authorized()
+        ->select('last_login_time')
+        ->whereColumn('user_devices.user_id', 'users.userid')
+        ->orderByDesc('last_login_time')
+        ->limit(1);
 
-        // ---- Total Customers ----
-        $totalCustomer = User::count();
+    $lastDeviceModelSub = UserDevice::authorized()
+        ->select('device_model')
+        ->whereColumn('user_devices.user_id', 'users.userid')
+        ->orderByDesc('last_login_time')
+        ->limit(1);
 
-        // ---- Subscriptions Taken (Active or Paused) ----
-        $totalSubscriptionTaken = Subscription::query()
-            ->whereIn('status', ['active', 'paused', 'expired', 'dead'])
-            ->distinct('user_id')
-            ->count('user_id');
+    // Eager-load subscriptions + add latest device fields; newest users first
+    $users = User::with(['subscriptions'])
+        ->addSelect([
+            'last_login_time'  => $lastLoginSub,
+            'last_device_model'=> $lastDeviceModelSub,
+        ])
+        ->orderByDesc('id')   // latest users first
+        ->get();
 
-        $twoMonthsAgo = Carbon::now()->subMonths(2);
-        $liveStatuses = ['active', 'paused', 'resume'];
+    // ---- Total Customers ----
+    $totalCustomer = User::count();
 
-        $discontinuedCustomer = Subscription::query()
-            ->where('status', 'expired')
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
-                  ->from('subscriptions as s2')
-                  ->whereColumn('s2.user_id', 'subscriptions.user_id')
-                  ->whereIn('s2.status', $liveStatuses);
-            })
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
-                  ->from('subscriptions as s3')
-                  ->whereColumn('s3.order_id', 'subscriptions.order_id')
-                  ->whereIn('s3.status', $liveStatuses);
-            })
-            ->where(function ($q) use ($twoMonthsAgo) {
-                $q->whereNull('end_date')
-                  ->orWhere('end_date', '<', $twoMonthsAgo);
-            })
-            ->whereIn('id', function ($sub) {
-                $sub->select(DB::raw('MAX(id)'))
-                    ->from('subscriptions')
-                    ->groupBy('user_id');
-            })
-            ->distinct('user_id')
-            ->count('user_id');
+    // ---- Subscriptions Taken (Active or Paused etc.) ----
+    $totalSubscriptionTaken = Subscription::query()
+        ->whereIn('status', ['active', 'paused', 'expired', 'dead'])
+        ->distinct('user_id')
+        ->count('user_id');
 
-        // ---- Payment Pending (distinct users) ----
-        $paymentPending = FlowerPayment::query()
-            ->where('payment_status', 'pending')
-            ->whereExists(function ($q) {
-                $q->select(DB::raw(1))
-                  ->from('subscriptions as s')
-                  ->whereColumn('s.user_id', 'flower_payments.user_id');
-            })
-            ->distinct('user_id')
-            ->count('user_id');
+    $twoMonthsAgo = Carbon::now()->subMonths(2);
+    $liveStatuses = ['active', 'paused', 'resume'];
 
-        return view('admin.manageuser', compact(
-            'users',
-            'totalCustomer',
-            'totalSubscriptionTaken',
-            'discontinuedCustomer',
-            'paymentPending'
-        ));
-    }
+    $discontinuedCustomer = Subscription::query()
+        ->where('status', 'expired')
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s2')
+              ->whereColumn('s2.user_id', 'subscriptions.user_id')
+              ->whereIn('s2.status', $liveStatuses);
+        })
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s3')
+              ->whereColumn('s3.order_id', 'subscriptions.order_id')
+              ->whereIn('s3.status', $liveStatuses);
+        })
+        ->where(function ($q) use ($twoMonthsAgo) {
+            $q->whereNull('end_date')
+              ->orWhere('end_date', '<', $twoMonthsAgo);
+        })
+        ->whereIn('id', function ($sub) {
+            $sub->select(DB::raw('MAX(id)'))
+                ->from('subscriptions')
+                ->groupBy('user_id');
+        })
+        ->distinct('user_id')
+        ->count('user_id');
+
+    // ---- Payment Pending (distinct users) ----
+    $paymentPending = FlowerPayment::query()
+        ->where('payment_status', 'pending')
+        ->whereExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s')
+              ->whereColumn('s.user_id', 'flower_payments.user_id');
+        })
+        ->distinct('user_id')
+        ->count('user_id');
+
+    return view('admin.manageuser', compact(
+        'users',
+        'totalCustomer',
+        'totalSubscriptionTaken',
+        'discontinuedCustomer',
+        'paymentPending'
+    ));
+}
 
     public function updateUserData(Request $request, User $user)
     {

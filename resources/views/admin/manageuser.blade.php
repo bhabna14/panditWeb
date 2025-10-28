@@ -177,10 +177,13 @@
                             <th>User</th>
                             <th>Phone</th>
                             <th>Registered</th>
+                            <th>Last Login</th> {{-- NEW --}}
+                            <th>Device</th> {{-- NEW --}}
                             <th>Subscription</th>
                             <th class="text-center">Action</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @foreach ($users as $user)
                             <tr>
@@ -199,7 +202,22 @@
                                     </div>
                                 </td>
                                 <td>{{ $user->mobile_number }}</td>
-                                <td>{{ $user->created_at->format('d M, Y') }}</td>
+                                <td>{{ optional($user->created_at)->format('d M, Y') }}</td>
+
+                                {{-- NEW: Last Login --}}
+                                <td>
+                                    @php
+                                        $tz = config('app.timezone', 'Asia/Kolkata');
+                                        $ll = $user->last_login_time
+                                            ? \Carbon\Carbon::parse($user->last_login_time)->timezone($tz)
+                                            : null;
+                                    @endphp
+                                    {{ $ll ? $ll->format('d M, Y h:i A') : '—' }}
+                                </td>
+
+                                {{-- NEW: Device Model --}}
+                                <td>{{ $user->last_device_model ?: '—' }}</td>
+
                                 <td>
                                     @if ($user->subscriptions->count() > 0)
                                         <span class="badge bg-success">Yes</span>
@@ -209,13 +227,11 @@
                                 </td>
 
                                 <td class="text-center action-icons">
-
                                     <a class="btn btn-warning btn-sm text-center"
                                         href="{{ route('showCustomerDetails', $user->userid) }}">
                                         View Details
                                     </a>
 
-                                    {{-- EDIT BUTTON -> opens modal --}}
                                     <button type="button" class="btn btn-sm btn-primary editUserBtn" title="Edit"
                                         data-bs-toggle="modal" data-bs-target="#editUserModal"
                                         data-id="{{ $user->id }}" data-name="{{ $user->name }}"
@@ -224,12 +240,11 @@
                                         data-userphoto="{{ $user->userphoto ? asset('storage/' . $user->userphoto) : asset('front-assets/img/images.jfif') }}">
                                         <i class="fas fa-edit me-1"></i> Edit
                                     </button>
-
                                 </td>
-
                             </tr>
                         @endforeach
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -237,63 +252,67 @@
 @endsection
 <!-- Edit User Modal -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content border-0">
-      <div class="modal-header bg-light">
-        <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <form id="editUserForm" method="POST" enctype="multipart/form-data">
-        @csrf
-        @method('PUT')
-        <div class="modal-body">
-          <input type="hidden" id="editUserId" name="id">
-
-          <div class="row g-3">
-            <div class="col-md-8">
-              <div class="mb-3">
-                <label class="form-label">Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" name="name" id="editName" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="email" id="editEmail">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Phone</label>
-                <input type="text" class="form-control" name="mobile_number" id="editPhone">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">User Type</label>
-                <input type="text" class="form-control" name="user_type" id="editUserType" placeholder="e.g. customer, admin">
-              </div>
-              <div class="mb-3">
-                <label class="form-label">Profile Photo</label>
-                <input type="file" class="form-control" name="userphoto" id="editPhoto" accept="image/*">
-                <small class="text-muted">JPG/PNG/WebP up to 2MB.</small>
-              </div>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="col-md-4">
-              <label class="form-label d-block">Preview</label>
-              <img id="editPhotoPreview" src="" alt="Preview" class="img-fluid rounded shadow-sm border" style="max-height: 220px; object-fit: cover;">
-            </div>
-          </div>
-        </div>
+            <form id="editUserForm" method="POST" enctype="multipart/form-data">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <input type="hidden" id="editUserId" name="id">
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">
-            <span class="me-2" id="editSubmitSpinner" style="display:none;">
-              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            </span>
-            Save Changes
-          </button>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="name" id="editName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" id="editEmail">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" class="form-control" name="mobile_number" id="editPhone">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">User Type</label>
+                                <input type="text" class="form-control" name="user_type" id="editUserType"
+                                    placeholder="e.g. customer, admin">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Profile Photo</label>
+                                <input type="file" class="form-control" name="userphoto" id="editPhoto"
+                                    accept="image/*">
+                                <small class="text-muted">JPG/PNG/WebP up to 2MB.</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label d-block">Preview</label>
+                            <img id="editPhotoPreview" src="" alt="Preview"
+                                class="img-fluid rounded shadow-sm border"
+                                style="max-height: 220px; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="me-2" id="editSubmitSpinner" style="display:none;">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        </span>
+                        Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
-      </form>
     </div>
-  </div>
 </div>
 
 @section('scripts')
@@ -313,76 +332,75 @@
     <script src="{{ asset('assets/js/table-data.js') }}"></script>
 
     {{-- SweetAlert2 --}}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-(function(){
-    // route template: we'll replace :id at runtime
-    const updateRouteTemplate = @json(route('admin.users.update', ':id'));
+    <script>
+        (function() {
+            // route template: we'll replace :id at runtime
+            const updateRouteTemplate = @json(route('admin.users.update', ':id'));
 
-    // Open modal and populate
-    document.querySelectorAll('.editUserBtn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const id        = this.dataset.id;
-            const name      = this.dataset.name || '';
-            const email     = this.dataset.email || '';
-            const phone     = this.dataset.phone || '';
-            const user_type = this.dataset.user_type || '';
-            const photoUrl  = this.dataset.userphoto || '';
+            // Open modal and populate
+            document.querySelectorAll('.editUserBtn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id;
+                    const name = this.dataset.name || '';
+                    const email = this.dataset.email || '';
+                    const phone = this.dataset.phone || '';
+                    const user_type = this.dataset.user_type || '';
+                    const photoUrl = this.dataset.userphoto || '';
 
-            // Fill fields
-            document.getElementById('editUserId').value = id;
-            document.getElementById('editName').value = name;
-            document.getElementById('editEmail').value = email;
-            document.getElementById('editPhone').value = phone;
-            document.getElementById('editUserType').value = user_type;
-            document.getElementById('editPhotoPreview').src = photoUrl;
+                    // Fill fields
+                    document.getElementById('editUserId').value = id;
+                    document.getElementById('editName').value = name;
+                    document.getElementById('editEmail').value = email;
+                    document.getElementById('editPhone').value = phone;
+                    document.getElementById('editUserType').value = user_type;
+                    document.getElementById('editPhotoPreview').src = photoUrl;
 
-            // Set form action
-            const action = updateRouteTemplate.replace(':id', id);
-            document.getElementById('editUserForm').setAttribute('action', action);
-        });
-    });
+                    // Set form action
+                    const action = updateRouteTemplate.replace(':id', id);
+                    document.getElementById('editUserForm').setAttribute('action', action);
+                });
+            });
 
-    // Live preview on file change
-    const photoInput = document.getElementById('editPhoto');
-    if (photoInput) {
-        photoInput.addEventListener('change', function(e){
-            const file = e.target.files && e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(evt){
-                document.getElementById('editPhotoPreview').src = evt.target.result;
-            };
-            reader.readAsDataURL(file);
-        });
-    }
+            // Live preview on file change
+            const photoInput = document.getElementById('editPhoto');
+            if (photoInput) {
+                photoInput.addEventListener('change', function(e) {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        document.getElementById('editPhotoPreview').src = evt.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
 
-    // Show spinner on submit
-    const form = document.getElementById('editUserForm');
-    form.addEventListener('submit', function(){
-        document.getElementById('editSubmitSpinner').style.display = 'inline-block';
-    });
+            // Show spinner on submit
+            const form = document.getElementById('editUserForm');
+            form.addEventListener('submit', function() {
+                document.getElementById('editSubmitSpinner').style.display = 'inline-block';
+            });
 
-    // Flash messages (success/error) -> SweetAlert2
-    @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: @json(session('success')),
-            timer: 1800,
-            showConfirmButton: false
-        });
-    @endif
+            // Flash messages (success/error) -> SweetAlert2
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: @json(session('success')),
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            @endif
 
-    @if ($errors->any())
-        Swal.fire({
-            icon: 'error',
-            title: 'Validation error',
-            html: `{!! implode('<br>', $errors->all()) !!}`
-        });
-    @endif
-})();
-</script>
-
+            @if ($errors->any())
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation error',
+                    html: `{!! implode('<br>', $errors->all()) !!}`
+                });
+            @endif
+        })();
+    </script>
 @endsection
