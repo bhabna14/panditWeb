@@ -546,14 +546,13 @@ class AdminController extends Controller
         ->limit(1);
 
     // Eager-load subscriptions + add latest device fields; newest users first
-    $users = User::with(['subscriptions'])
-        ->addSelect([
-            'last_login_time'  => $lastLoginSub,
-            'last_device_model'=> $lastDeviceModelSub,
-        ])
-        ->orderByAsc('id')   // latest users first
-        ->get();
-
+  $users = User::with(['subscriptions'])
+    ->addSelect([
+        'last_login_time'   => $lastLoginSub,
+        'last_device_model' => $lastDeviceModelSub,
+    ])
+    ->orderByDesc('id')   // latest users first ✅
+    ->get();
     // ---- Total Customers ----
     $totalCustomer = User::count();
 
