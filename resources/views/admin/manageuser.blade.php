@@ -232,7 +232,7 @@
                                         View 
                                     </a>
 
-                                    <button type="button" class="btn btn-sm btn-primary editUserBtn" title="Edit"
+                                    <button type="button" class="btn btn-sm btn-primary text-center editUserBtn" title="Edit"
                                         data-bs-toggle="modal" data-bs-target="#editUserModal"
                                         data-id="{{ $user->id }}" data-name="{{ $user->name }}"
                                         data-email="{{ $user->email }}" data-phone="{{ $user->mobile_number }}"
