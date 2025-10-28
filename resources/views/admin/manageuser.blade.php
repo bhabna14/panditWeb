@@ -250,7 +250,7 @@
         </div>
     </div>
 @endsection
-<!-- Edit User Modal -->
+
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0">
