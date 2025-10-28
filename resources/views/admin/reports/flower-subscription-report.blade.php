@@ -293,7 +293,7 @@
                                 <th style="min-width:280px">Customer</th>
                                 <th>Purchase Period</th>
                                 <th>Duration</th>
-                                <th>Payment Method</th> {{-- NEW --}}
+                                <th>Payment Method</th>
                                 <th class="text-end">Price</th>
                                 <th class="text-center">Status</th>
                             </tr>
@@ -382,7 +382,6 @@
                         d.range = $('.range-quick.active').data('range');
                     },
                     dataSrc: function(json) {
-                        // Update KPIs (these now ALWAYS satisfy: total = new + renew)
                         const total = parseFloat(json.total_price || 0);
                         const renewTotal = parseFloat(json.renew_user_price || 0);
                         const newUserTotal = parseFloat(json.new_user_price || 0);
@@ -409,50 +408,50 @@
                             const userId = user.userid ?? null;
 
                             const tooltip = `
-                        <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
-                        <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
-                    `.trim();
+                                <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
+                                <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
+                            `.trim();
 
                             const modalId =
                                 `addressModal${userId || Math.random().toString(36).slice(2)}`;
 
                             const viewBtn = userId ?
                                 `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm" title="View Customer">
-                                <i class="fas fa-eye"></i>
-                           </a>` :
+                                        <i class="fas fa-eye"></i>
+                                   </a>` :
                                 '';
 
                             const addressHtml = `
-                        <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog"><div class="modal-content">
-                                <div class="modal-header text-white" style="background: var(--pf-primary);">
-                                    <h5 class="modal-title"><i class="fas fa-home me-2"></i>Address Details</h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog"><div class="modal-content">
+                                        <div class="modal-header text-white" style="background: var(--pf-primary);">
+                                            <h5 class="modal-title"><i class="fas fa-home me-2"></i>Address Details</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="mb-1"><strong>Address:</strong> ${(address.apartment_flat_plot || '')}, ${(address.apartment_name || '')}, ${(address.locality || '')}</p>
+                                            <p class="mb-1"><strong>Landmark:</strong> ${(address.landmark || '')}</p>
+                                            <p class="mb-1"><strong>Pin Code:</strong> ${(address.pincode || '')}</p>
+                                            <p class="mb-1"><strong>City:</strong> ${(address.city || '')}</p>
+                                            <p class="mb-0"><strong>State:</strong> ${(address.state || '')}</p>
+                                        </div>
+                                    </div></div>
                                 </div>
-                                <div class="modal-body">
-                                    <p class="mb-1"><strong>Address:</strong> ${(address.apartment_flat_plot || '')}, ${(address.apartment_name || '')}, ${(address.locality || '')}</p>
-                                    <p class="mb-1"><strong>Landmark:</strong> ${(address.landmark || '')}</p>
-                                    <p class="mb-1"><strong>Pin Code:</strong> ${(address.pincode || '')}</p>
-                                    <p class="mb-1"><strong>City:</strong> ${(address.city || '')}</p>
-                                    <p class="mb-0"><strong>State:</strong> ${(address.state || '')}</p>
-                                </div>
-                            </div></div>
-                        </div>
-                    `;
+                            `;
 
                             return `
-                        <div class="customer-meta" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
-                            <div class="fw-semibold">${user.name || 'N/A'}</div>
-                            <small><i class="bi bi-telephone me-1"></i>${user.mobile_number || 'N/A'}</small>
-                            <div class="mt-2 d-flex gap-2 action-btns">
-                                ${viewBtn}
-                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Show Address">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        ${addressHtml}
-                    `;
+                                <div class="customer-meta" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
+                                    <div class="fw-semibold">${user.name || 'N/A'}</div>
+                                    <small><i class="bi bi-telephone me-1"></i>${user.mobile_number || 'N/A'}</small>
+                                    <div class="mt-2 d-flex gap-2 action-btns">
+                                        ${viewBtn}
+                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Show Address">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                ${addressHtml}
+                            `;
                         }
                     },
                     {
