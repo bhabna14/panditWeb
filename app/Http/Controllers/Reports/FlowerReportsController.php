@@ -265,6 +265,7 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
+
 public function flowerPickUp(Request $request)
 {
     $fromDate = $request->input('from_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
@@ -274,42 +275,60 @@ public function flowerPickUp(Request $request)
         ->orderBy('vendor_name')
         ->get();
 
-    $query = \App\Models\FlowerPickupDetails::with([
-            // IMPORTANT: use product_id (owner key) — not id
+    // Build a BASE query that always applies date + category + payment filters
+    $base = \App\Models\FlowerPickupDetails::with([
             'flowerPickupItems.flower:product_id,name,category',
             'flowerPickupItems.unit:id,unit_name',
             'vendor:vendor_id,vendor_name',
             'rider:rider_id,rider_name',
         ])
         ->whereDate('pickup_date', '>=', $fromDate)
-        ->whereDate('pickup_date', '<=', $toDate);
+        ->whereDate('pickup_date', '<=', $toDate)
+        ->whereHas('flowerPickupItems.flower', function ($q) {
+            $q->where('category', 'Flower');
+        });
 
-    // Only include items where the product category is "Flower" (case-sensitive).
-    $query->whereHas('flowerPickupItems.flower', function ($q) {
-        $q->where('category', 'Flower');
-    });
-
-    if ($request->filled('vendor_id')) {
-        $query->where('vendor_id', $request->vendor_id);
-    }
     if ($request->filled('payment_mode')) {
-        // UI says "Mode of Payment", DB column is payment_method
-        $query->where('payment_method', $request->payment_mode);
+        $base->where('payment_method', $request->payment_mode);
     }
 
-    $reportData = $query->get();
+    // Clone for filtered listing
+    $filtered = (clone $base);
+    if ($request->filled('vendor_id')) {
+        $filtered->where('vendor_id', $request->vendor_id);
+    }
+
+    $reportData = $filtered->get();
 
     $totalPrice = (float) $reportData->sum('total_price');
     $todayPrice = (float) $reportData
         ->filter(fn ($row) => \Carbon\Carbon::parse($row->pickup_date)->isToday())
         ->sum('total_price');
 
-    // Build vendor card summaries from the (already filtered) dataset
-    $vendorSummaries = $reportData
+    // === Summaries ===
+    // All vendors (ignore vendor filter, respect date+payment+category)
+    $vendorSummariesAll = (clone $base)->get()
         ->groupBy('vendor_id')
         ->map(function ($rows) {
             $first = $rows->first();
-            $lastPickup = $rows->max('pickup_date'); // Carbon (pickup_date is cast)
+            $lastPickup = $rows->max('pickup_date');
+            return [
+                'vendor_id'     => $first->vendor->vendor_id ?? $first->vendor_id,
+                'vendor_name'   => $first->vendor->vendor_name ?? '—',
+                'total_amount'  => (float) $rows->sum('total_price'),
+                'pickups_count' => (int) $rows->count(),
+                'last_pickup'   => $lastPickup ? \Carbon\Carbon::parse($lastPickup)->format('Y-m-d') : null,
+            ];
+        })
+        ->sortByDesc('total_amount')
+        ->values();
+
+    // Filtered vendors (kept in response for completeness)
+    $vendorSummariesFiltered = $reportData
+        ->groupBy('vendor_id')
+        ->map(function ($rows) {
+            $first = $rows->first();
+            $lastPickup = $rows->max('pickup_date');
             return [
                 'vendor_id'     => $first->vendor->vendor_id ?? $first->vendor_id,
                 'vendor_name'   => $first->vendor->vendor_name ?? '—',
@@ -323,25 +342,29 @@ public function flowerPickUp(Request $request)
 
     if ($request->ajax()) {
         return response()->json([
-            'data'             => $reportData,
-            'total_price'      => $totalPrice,
-            'today_price'      => $todayPrice,
-            'from_date'        => $fromDate,
-            'to_date'          => $toDate,
-            'vendor_summaries' => $vendorSummaries,
+            'data'                      => $reportData,
+            'total_price'               => $totalPrice,
+            'today_price'               => $todayPrice,
+            'from_date'                 => $fromDate,
+            'to_date'                   => $toDate,
+            // IMPORTANT: always send the "ALL vendors" summaries for the cards
+            'vendor_summaries_all'      => $vendorSummariesAll,
+            'vendor_summaries_filtered' => $vendorSummariesFiltered,
         ]);
     }
 
     return view('admin.reports.flower-pick-up-reports', [
-        'reportData'       => $reportData,
-        'total_price'      => $totalPrice,
-        'today_price'      => $todayPrice,
-        'fromDate'         => $fromDate,
-        'toDate'           => $toDate,
-        'vendors'          => $vendors,
-        'vendorSummaries'  => $vendorSummaries,
+        'reportData'             => $reportData,
+        'total_price'            => $totalPrice,
+        'today_price'            => $todayPrice,
+        'fromDate'               => $fromDate,
+        'toDate'                 => $toDate,
+        'vendors'                => $vendors,
+        // Render cards from ALL vendors on initial load too
+        'vendorSummariesAll'     => $vendorSummariesAll,
     ]);
 }
+
 
 
 }

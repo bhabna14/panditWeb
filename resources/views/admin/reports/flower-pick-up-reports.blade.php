@@ -13,7 +13,7 @@
     <style>
         :root {
             --bg-subtle: #F5F7FC;
-            --surface: #FFFFFF;
+            --surface: #FFF;
             --border: #E7EAF3;
             --text: #0F172A;
             --muted: #6B7280;
@@ -23,15 +23,13 @@
             --accent-red: #F24B5B;
             --accent-red-2: #E34050;
             --sh-sm: 0 2px 10px rgba(15, 23, 42, .06);
-            --sh-md: 0 12px 28px rgba(2, 6, 23, .10);
+            --sh-md: 0 12px 28px rgba(2, 6, 23, .10)
         }
 
         body {
             font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif !important;
             color: var(--text);
-            background: radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%),
-                radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%),
-                var(--bg-subtle);
+            background: radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%), var(--bg-subtle)
         }
 
         .stats-card {
@@ -40,22 +38,22 @@
             background: linear-gradient(180deg, #fff, #FAFBFF);
             box-shadow: var(--sh-md);
             border: 1px solid var(--border);
-            transition: transform .18s ease, box-shadow .18s ease;
+            transition: transform .18s ease, box-shadow .18s ease
         }
 
         .stats-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 18px 36px rgba(2, 6, 23, .12);
+            box-shadow: 0 18px 36px rgba(2, 6, 23, .12)
         }
 
         .stats-card .card-title {
             color: var(--muted);
             font-weight: 600;
-            letter-spacing: .2px;
+            letter-spacing: .2px
         }
 
         .stats-card .fw-bold {
-            font-weight: 800 !important;
+            font-weight: 800 !important
         }
 
         .filter-wrap {
@@ -63,33 +61,33 @@
             border: 1px solid var(--border);
             background: var(--surface);
             box-shadow: var(--sh-sm);
-            padding: 16px;
+            padding: 16px
         }
 
         .form-label {
             color: var(--muted);
-            font-weight: 600;
+            font-weight: 600
         }
 
         .form-control,
         .form-select {
             border-radius: 12px;
-            border-color: var(--border);
+            border-color: var(--border)
         }
 
         .select2-container .select2-selection--single {
             height: 38px;
             border-radius: 12px;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border)
         }
 
         .select2-selection__rendered {
             line-height: 36px !important;
-            padding-left: 12px !important;
+            padding-left: 12px !important
         }
 
         .select2-selection__arrow {
-            height: 36px !important;
+            height: 36px !important
         }
 
         .chip {
@@ -104,19 +102,19 @@
             font-weight: 700;
             font-size: .85rem;
             cursor: pointer;
-            transition: all .15s ease;
+            transition: all .15s ease
         }
 
         .chip:hover {
             border-color: var(--indigo);
-            color: var(--indigo);
+            color: var(--indigo)
         }
 
         .chip.active {
             background: linear-gradient(90deg, var(--indigo), var(--cyan));
             border-color: transparent;
             color: #0e0e0e;
-            box-shadow: 0 6px 16px rgba(14, 197, 215, .25);
+            box-shadow: 0 6px 16px rgba(14, 197, 215, .25)
         }
 
         .btn-grad {
@@ -126,20 +124,20 @@
             letter-spacing: .2px;
             background-image: linear-gradient(90deg, var(--indigo), var(--cyan));
             border-radius: 999px;
-            box-shadow: 0 6px 18px rgba(14, 197, 215, .25);
+            box-shadow: 0 6px 18px rgba(14, 197, 215, .25)
         }
 
         .btn-grad:hover {
-            filter: brightness(.96);
+            filter: brightness(.96)
         }
 
         .btn-reset {
             color: #6b7280;
-            font-weight: 700;
+            font-weight: 700
         }
 
         .btn-reset:hover {
-            color: #374151;
+            color: #374151
         }
 
         .vendor-card {
@@ -151,27 +149,27 @@
             box-shadow: var(--sh-sm);
             height: 100%;
             transition: transform .15s ease, box-shadow .15s ease;
-            cursor: pointer;
+            cursor: pointer
         }
 
         .vendor-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 16px 32px rgba(2, 6, 23, .10);
+            box-shadow: 0 16px 32px rgba(2, 6, 23, .10)
         }
 
         .vendor-title {
             font-weight: 800;
-            margin-bottom: .4rem;
+            margin-bottom: .4rem
         }
 
         .vendor-sub {
             color: var(--muted);
-            font-size: .85rem;
+            font-size: .85rem
         }
 
         .vendor-amount {
             font-size: 1.25rem;
-            font-weight: 900;
+            font-weight: 900
         }
 
         .vendor-chip {
@@ -182,26 +180,26 @@
             border: 1px dashed var(--border);
             font-size: .75rem;
             font-weight: 700;
-            color: #334155;
+            color: #334155
         }
 
         .export-table .dataTables_wrapper .dt-buttons .btn {
-            margin-left: .4rem;
+            margin-left: .4rem
         }
 
         .table {
-            border-color: var(--border) !important;
+            border-color: var(--border) !important
         }
 
         .table thead th {
             background: #F3F6FF !important;
             border-bottom: 1px solid var(--border) !important;
             color: #0F172A;
-            font-weight: 800;
+            font-weight: 800
         }
 
         .table-hover tbody tr:hover {
-            background: #F8FBFF;
+            background: #F8FBFF
         }
 
         .status-badge {
@@ -211,42 +209,41 @@
             font-size: .78rem;
             color: #fff;
             border: 1px solid transparent;
-            display: inline-block;
+            display: inline-block
         }
 
         .status-badge--success {
             background: #0E9F6E;
-            border-color: #0A6B4B;
+            border-color: #0A6B4B
         }
 
         .status-badge--warning {
             background: #D97706;
-            border-color: #B65F04;
+            border-color: #B65F04
         }
 
         .status-badge--danger {
             background: #DC2626;
-            border-color: #A51B1B;
+            border-color: #A51B1B
         }
 
         .status-badge--info {
             background: #1D4ED8;
-            border-color: #153AA3;
+            border-color: #153AA3
         }
 
         .status-badge--neutral {
             background: #334155;
-            border-color: #1F2937;
+            border-color: #1F2937
         }
 
-        /* clickable vendor in table */
         .link-vendor {
             font-weight: 700;
-            text-decoration: none;
+            text-decoration: none
         }
 
         .link-vendor:hover {
-            text-decoration: underline;
+            text-decoration: underline
         }
     </style>
 @endsection
@@ -285,8 +282,6 @@
                 <label for="to_date" class="form-label">To Date</label>
                 <input type="date" id="to_date" class="form-control" value="{{ $toDate }}">
             </div>
-
-            {{-- ⬇️ This is the section you referenced --}}
             <div class="col-md-3">
                 <label for="vendor_id" class="form-label">Vendor Name</label>
                 <select id="vendor_id" class="form-select select2">
@@ -296,7 +291,6 @@
                     @endforeach
                 </select>
             </div>
-
             <div class="col-md-3">
                 <label for="payment_mode" class="form-label">Mode of Payment</label>
                 <select id="payment_mode" class="form-select">
@@ -326,13 +320,12 @@
         </div>
     </div>
 
-    {{-- Vendor Cards --}}
+    {{-- Vendor Cards (ALWAYS show ALL vendors for the current date/payment filter) --}}
     <div class="mb-3">
         <h6 class="mb-2" style="font-weight:800;">Vendors</h6>
         <div class="row g-3" id="vendorCards">
-            @foreach ($vendorSummaries ?? [] as $v)
+            @foreach ($vendorSummariesAll ?? [] as $v)
                 <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
-                    {{-- ⬇️ make whole card clickable; includes vendor id --}}
                     <div class="vendor-card" data-vendor-id="{{ $v['vendor_id'] }}">
                         <div class="vendor-title">{{ $v['vendor_name'] }}</div>
                         <div class="d-flex justify-content-between align-items-center">
@@ -351,7 +344,7 @@
                     </div>
                 </div>
             @endforeach
-            @if (empty($vendorSummaries) || count($vendorSummaries) === 0)
+            @if (empty($vendorSummariesAll) || count($vendorSummariesAll) === 0)
                 <div class="col-12">
                     <div class="vendor-card text-center">
                         <span class="vendor-sub">No data available for current filters.</span>
@@ -379,8 +372,6 @@
                 @foreach ($reportData as $item)
                     <tr>
                         <td>{{ \Carbon\Carbon::parse($item->pickup_date)->format('d M Y') }}</td>
-
-                        {{-- ⬇️ Vendor cell clickable with vendor_id --}}
                         <td>
                             @php
                                 $vId = $item->vendor_id;
@@ -393,14 +384,12 @@
                                 —
                             @endif
                         </td>
-
                         <td>{{ $item->rider->rider_name ?? '—' }}</td>
                         <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
                         <td>
                             @forelse ($item->flowerPickupItems as $f)
-                                {{-- Name — ₹price (qty unit). Name comes from FlowerProduct.name --}}
-                                {{ $f->flower?->name ?? '—' }}
-                                — ₹{{ rtrim(rtrim(number_format((float) ($f->price ?? 0), 2), '0'), '.') }}
+                                {{ $f->flower?->name ?? '—' }} —
+                                ₹{{ rtrim(rtrim(number_format((float) ($f->price ?? 0), 2), '0'), '.') }}
                                 ({{ rtrim(rtrim(number_format((float) $f->quantity, 2), '0'), '.') }}
                                 {{ $f->unit?->unit_name ?? '—' }})
                                 <br>
@@ -409,8 +398,7 @@
                             @endforelse
                         </td>
                         <td>
-                            @php $s = strtolower($item->status ?? ''); @endphp
-                            @php
+                            @php$s = strtolower($item->status ?? '');
                                 $cls = 'status-badge--info';
                                 if (
                                     in_array($s, [
@@ -500,7 +488,6 @@
                 const today = moment().startOf('day');
                 let start = today.clone(),
                     end = today.clone();
-
                 switch (key) {
                     case 'today':
                         break;
@@ -520,7 +507,7 @@
                         start = moment().subtract(29, 'days').startOf('day');
                         end = today.clone();
                         break;
-                    case 'fy': {
+                    case 'fy':
                         const y = moment().year();
                         const fyStart = moment({
                             year: (moment().month() >= 3 ? y : y - 1),
@@ -531,9 +518,7 @@
                         start = fyStart;
                         end = fyEnd;
                         break;
-                    }
                 }
-
                 $('#from_date').val(start.format('YYYY-MM-DD'));
                 $('#to_date').val(end.format('YYYY-MM-DD'));
             }
@@ -566,7 +551,7 @@
                 if (!vendorSummaries || vendorSummaries.length === 0) {
                     $wrap.append(
                         `<div class="col-12"><div class="vendor-card text-center"><span class="vendor-sub">No data available for current filters.</span></div></div>`
-                    );
+                        );
                     return;
                 }
                 vendorSummaries.forEach(v => {
@@ -594,7 +579,7 @@
                 });
             }
 
-            // click-to-filter on vendor cards
+            // Click-to-filter on vendor cards
             $(document).on('click', '.vendor-card', function() {
                 const id = $(this).data('vendor-id');
                 setVendorFilter(id);
@@ -639,7 +624,7 @@
                 }]
             });
 
-            // click-to-filter on vendor name inside the table
+            // Click-to-filter on vendor name inside the table
             $(document).on('click', 'a.link-vendor', function(e) {
                 e.preventDefault();
                 const id = $(this).data('vendor-id');
@@ -651,6 +636,7 @@
                     toDate = $to.val(),
                     vendorId = $('#vendor_id').val(),
                     paymentMode = $('#payment_mode').val();
+
                 if (!fromDate || !toDate) {
                     Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
                     return;
@@ -695,7 +681,6 @@
                             else if (['new', 'created', 'open'].includes(t)) cls =
                                 'status-badge--neutral';
 
-                            // ⬇️ clickable vendor cell; prefer nested vendor id, else fallback to item.vendor_id
                             const vId = (item.vendor && item.vendor.vendor_id) ? item
                                 .vendor.vendor_id : item.vendor_id;
                             const vName = (item.vendor && item.vendor.vendor_name) ?
@@ -720,9 +705,12 @@
 
                         table.draw(false);
 
+                        // KPIs always reflect the filtered list
                         $('#totalPrice').text(money(response.total_price));
                         $('#todayPrice').text(money(response.today_price));
-                        renderVendorCards(response.vendor_summaries || []);
+
+                        // ALWAYS render vendor cards from ALL vendors (for current date/payment filter)
+                        renderVendorCards(response.vendor_summaries_all || []);
                     },
                     error: function() {
                         Swal.fire('Error', 'Unable to fetch data.', 'error');
