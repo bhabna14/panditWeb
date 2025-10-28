@@ -244,7 +244,7 @@
         <div class="col-md-6">
             <div class="stats-card">
                 <div class="card-body text-center py-2">
-                    <h6 class="card-title mb-1">Total Customize Total Price</h6>
+                    <h6 class="card-title mb-1">Total Customize Order Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
                 </div>
             </div>
