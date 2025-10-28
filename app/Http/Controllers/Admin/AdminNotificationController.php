@@ -241,9 +241,9 @@ public function whatsappSend(Request $request)
         $descClean  = $this->shieldDigits($descClean);
     }
 
-    // body mapping (1 or 2 fields)
-$bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 0);
-$components = [];
+        // body mapping (1 or 2 fields)
+    $bodyFields = (int) env('MSG91_WA_BODY_FIELDS', 0);
+    $components = [];
 
     if ($bodyFields === 2) {
         $components['body_1'] = ['type' => 'text', 'value' => $titleClean];

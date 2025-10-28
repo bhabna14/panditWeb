@@ -48,7 +48,7 @@ class FlowerOrderController extends Controller
         $filter = $request->query('filter');
 
         if ($filter === 'rider') {
-            $query->where('status', 'active') // ✅ ensure only active
+            $query->where('status', 'active')
                 ->whereHas('order', function ($q) {
                     $q->whereNull('rider_id')->orWhere('rider_id', '');
                 });
@@ -66,7 +66,6 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'fivedays') {
-            $tz         = config('app.timezone');
             $winStart   = Carbon::today($tz)->startOfDay();
             $winEnd     = (clone $winStart)->addDays(4)->endOfDay();
 
@@ -75,17 +74,12 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'tomorrowOrder') {
-            $tomorrow = Carbon::tomorrow()->toDateString();
-        $query->where('status', 'pending')
-        ->whereDate('start_date', $tomorrow);
-
+            $tomorrow = Carbon::tomorrow($tz)->toDateString();
+            $query->where('status', 'pending')
+                ->whereDate('start_date', $tomorrow);
         }
 
         if ($filter === 'todayrequest') {
-            $tz         = config('app.timezone');
-            $todayStart = Carbon::today($tz)->startOfDay();
-            $todayEnd   = (clone $todayStart)->endOfDay();
-
             $query->whereIn('subscription_id', function ($sub) use ($todayStart, $todayEnd) {
                 $sub->select('subscription_id')
                     ->from('subscription_pause_resume_logs')
@@ -94,61 +88,44 @@ class FlowerOrderController extends Controller
             })->distinct('subscription_id');
         }
 
-      if ($filter === 'new') {
-    // Rows that are each user's first-ever subscription, and that first row was created today
-    $firstRowsSub = DB::table('subscriptions as s1')
-        ->join(
-            DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
-                      FROM subscriptions
-                      GROUP BY user_id) f'),
-            function ($join) {
-                $join->on('s1.user_id', '=', 'f.user_id')
-                     ->on('s1.created_at', '=', 'f.first_created_at');
-            }
-        )
-        ->whereBetween('s1.created_at', [$todayStart, $todayEnd])
-        ->select('s1.id');
+        if ($filter === 'new') {
+            // first-ever subscription for a user created today
+            $firstRowsSub = DB::table('subscriptions as s1')
+                ->join(
+                    DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
+                            FROM subscriptions
+                            GROUP BY user_id) f'),
+                    function ($join) {
+                        $join->on('s1.user_id', '=', 'f.user_id')
+                            ->on('s1.created_at', '=', 'f.first_created_at');
+                    }
+                )
+                ->whereBetween('s1.created_at', [$todayStart, $todayEnd])
+                ->select('s1.id');
 
-    $query->whereIn('id', $firstRowsSub);
-}
+            $query->whereIn('id', $firstRowsSub);
+        }
 
-if ($filter === 'renewed') {
-    // Rows created today for users who had any subscription before today
-    $query->whereBetween('created_at', [$todayStart, $todayEnd])
-        ->whereExists(function ($q) use ($todayStart) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as prev')
-              ->whereColumn('prev.user_id', 'subscriptions.user_id')
-              ->where('prev.created_at', '<', $todayStart);
-        });
-}
-
+        if ($filter === 'renewed') {
+            // created today for users who had any subscription before today
+            $query->whereBetween('created_at', [$todayStart, $todayEnd])
+                ->whereExists(function ($q) use ($todayStart) {
+                    $q->select(DB::raw(1))
+                        ->from('subscriptions as prev')
+                        ->whereColumn('prev.user_id', 'subscriptions.user_id')
+                        ->where('prev.created_at', '<', $todayStart);
+                });
+        }
 
         if ($filter === 'active') {
             $query->where('status', 'active');
         }
 
-        // if ($filter === 'expired') {
-        // // Window: from the start of 2 months ago through the end of the current month
-        //     $windowStart = Carbon::now()->subMonthsNoOverflow(2)->startOfMonth();
-        //     $windowEnd   = Carbon::now()->endOfMonth();
-
-        //     // Subquery: latest subscription row per user (by highest id)
-        //     $latestPerUserIds = DB::table('subscriptions as s1')
-        //         ->selectRaw('MAX(s1.id) as id')
-        //         ->groupBy('s1.user_id');
-
-        //     // Keep only the latest row per user, status expired, and end_date in the window
-        //     $query->whereIn('id', $latestPerUserIds)
-        //         ->where('status', 'expired')
-        //     ->whereBetween('end_date', [$windowStart, $windowEnd]);
-        // }
-
         if ($filter === 'expired') {
-            $monthStart = \Carbon\Carbon::now($tz)->startOfMonth();
-            $monthEnd   = \Carbon\Carbon::now($tz)->endOfMonth();
+            $monthStart = Carbon::now($tz)->startOfMonth();
+            $monthEnd   = Carbon::now($tz)->endOfMonth();
 
-            $latestPerUserIds = \DB::table('subscriptions as s1')
+            $latestPerUserIds = DB::table('subscriptions as s1')
                 ->selectRaw('MAX(s1.id) as id')
                 ->groupBy('s1.user_id');
 
@@ -158,33 +135,32 @@ if ($filter === 'renewed') {
                 ->whereBetween('end_date', [$monthStart, $monthEnd]);
         }
 
-
         if ($filter === 'discontinued') {
-        $twoMonthsAgo = Carbon::now()->subMonths(2);
-        $liveStatuses = ['active', 'paused', 'resume'];
+            $twoMonthsAgo = Carbon::now($tz)->subMonths(2);
+            $liveStatuses = ['active', 'paused', 'resume'];
 
-        $query->where('status', 'expired')
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
-                ->from('subscriptions as s2')
-                ->whereColumn('s2.user_id', 'subscriptions.user_id')
-                ->whereIn('s2.status', $liveStatuses);
-            })
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
-                ->from('subscriptions as s3')
-                ->whereColumn('s3.order_id', 'subscriptions.order_id')
-                ->whereIn('s3.status', $liveStatuses);
-            })
-            ->where(function ($q) use ($twoMonthsAgo) {
-                $q->whereNull('end_date')
-                ->orWhere('end_date', '<', $twoMonthsAgo);
-            })
-            ->whereIn('id', function ($sub) {
-                $sub->select(DB::raw('MAX(id)'))
-                    ->from('subscriptions')
-                    ->groupBy('user_id'); // ensures one latest row per user
-            });
+            $query->where('status', 'expired')
+                ->whereNotExists(function ($q) use ($liveStatuses) {
+                    $q->select(DB::raw(1))
+                    ->from('subscriptions as s2')
+                    ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                    ->whereIn('s2.status', $liveStatuses);
+                })
+                ->whereNotExists(function ($q) use ($liveStatuses) {
+                    $q->select(DB::raw(1))
+                    ->from('subscriptions as s3')
+                    ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                    ->whereIn('s3.status', $liveStatuses);
+                })
+                ->where(function ($q) use ($twoMonthsAgo) {
+                    $q->whereNull('end_date')
+                    ->orWhere('end_date', '<', $twoMonthsAgo);
+                })
+                ->whereIn('id', function ($sub) {
+                    $sub->select(DB::raw('MAX(id)'))
+                        ->from('subscriptions')
+                        ->groupBy('user_id'); // one latest row per user
+                });
         }
 
         if ($filter === 'paused') {
@@ -208,7 +184,7 @@ if ($filter === 'renewed') {
         if ($request->filled('customer_name')) {
             $name = $request->customer_name;
             $query->whereHas('users', fn($q) => $q->where('name', $name));
-            // for partial: ->where('name','LIKE',"%{$name}%")
+            // for partial match: ->where('name', 'LIKE', "%{$name}%")
         }
 
         if ($request->filled('mobile_number')) {
@@ -237,8 +213,22 @@ if ($filter === 'renewed') {
         $ordersRequestedToday = Subscription::whereBetween('created_at', [$todayStart, $todayEnd])->count();
         $riders               = RiderDetails::where('status', 'active')->get();
 
-        $users     = User::select('name', 'mobile_number')->distinct()->get();
-        $addresses = \App\Models\UserAddress::select('apartment_name', 'apartment_flat_plot')->distinct()->get();
+        $users = User::select('name', 'mobile_number')->distinct()->orderBy('name')->get();
+
+        // ✅ Distinct dropdown data (trimmed, non-null/non-empty, sorted)
+        $apartmentNames = UserAddress::query()
+            ->whereNotNull('apartment_name')
+            ->where('apartment_name', '!=', '')
+            ->selectRaw('DISTINCT TRIM(apartment_name) AS apartment_name')
+            ->orderBy('apartment_name')
+            ->pluck('apartment_name');
+
+        $apartmentNumbers = UserAddress::query()
+            ->whereNotNull('apartment_flat_plot')
+            ->where('apartment_flat_plot', '!=', '')
+            ->selectRaw('DISTINCT TRIM(apartment_flat_plot) AS apartment_flat_plot')
+            ->orderBy('apartment_flat_plot')
+            ->pluck('apartment_flat_plot');
 
         return view('admin.flower-order.manage-flower-orders', compact(
             'riders',
@@ -246,7 +236,8 @@ if ($filter === 'renewed') {
             'pausedSubscriptions',
             'ordersRequestedToday',
             'users',
-            'addresses'
+            'apartmentNames',
+            'apartmentNumbers'
         ));
     }
 

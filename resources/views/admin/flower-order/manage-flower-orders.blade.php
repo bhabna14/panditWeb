@@ -299,6 +299,7 @@
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="col-md-3">
                             <label class="form-label">Mobile Number</label>
                             <select class="form-select" name="mobile_number" id="mobile_number">
@@ -308,25 +309,27 @@
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="col-md-3">
                             <label class="form-label">Apartment Name</label>
                             <select class="form-select" name="apartment_name" id="apartment_name">
                                 <option value="">All</option>
-                                @foreach ($addresses as $addr)
-                                    <option value="{{ $addr->apartment_name }}">{{ $addr->apartment_name }}</option>
+                                @foreach ($apartmentNames as $name)
+                                    <option value="{{ $name }}">{{ $name }}</option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="col-md-3">
                             <label class="form-label">Apartment Number</label>
                             <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
                                 <option value="">All</option>
-                                @foreach ($addresses as $addr)
-                                    <option value="{{ $addr->apartment_flat_plot }}">{{ $addr->apartment_flat_plot }}
-                                    </option>
+                                @foreach ($apartmentNumbers as $num)
+                                    <option value="{{ $num }}">{{ $num }}</option>
                                 @endforeach
                             </select>
                         </div>
+
                         <div class="col-md-2">
                             <button type="button" id="search-btn" class="btn btn-primary w-100">
                                 <i class="fas fa-search"></i> Search
@@ -734,7 +737,7 @@
                             if (r.status === 'paused')
                                 btn +=
                                 ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
-                                
+
                             return btn;
                         }
                     }

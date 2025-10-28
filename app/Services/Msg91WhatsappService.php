@@ -36,7 +36,7 @@ class Msg91WhatsappService
         ?string $languageCode = null,
         ?string $integratedNumber = null
     ): array {
-        $templateName     = $templateName     ?: (string) env('MSG91_WA_TEMPLATES', '');
+        $templateName     = $templateName     ?: (string) env('MSG91_WA_TEMPLATE', '');
         $namespace        = $namespace        ?: (string) env('MSG91_WA_NAMESPACE', '');
         $languageCode     = $languageCode     ?: (string) env('MSG91_WA_LANG_CODE', 'en_GB');
         $integratedNumber = $integratedNumber ?: $this->integratedNumber();
