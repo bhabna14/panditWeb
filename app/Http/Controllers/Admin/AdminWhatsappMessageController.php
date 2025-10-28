@@ -7,25 +7,27 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Client as HttpClient; // make sure Guzzle is used (composer require guzzlehttp/guzzle)
+use GuzzleHttp\Client as HttpClient; // composer require guzzlehttp/guzzle
 
 class AdminWhatsappMessageController extends Controller
 {
-     private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
+    // === HARD-CODED CONFIG (NO .env) ===
+    private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
     private const INTEGRATED_NUMBER   = '919124420330'; // digits only (no +)
     private const TEMPLATE_NAME       = 'flower_wp_message';
     private const TEMPLATE_NAMESPACE  = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
     private const LANGUAGE_CODE       = 'en_US';
     private const ENDPOINT_BULK       = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // Template knobs (match your MSG91 approval exactly)
-    private const BODY_FIELDS         = 0;      // ✅ your template body has 0 params
-    private const REQUIRES_URL_PARAM  = true;   // ✅ button index 0 is URL and requires {{1}}
-    private const DEFAULT_CC          = '91';   // for 10-digit local numbers
+    // Template knobs (match MSG91 approval)
+    private const BODY_FIELDS         = 0;     // your template body has 0 params
+    private const REQUIRES_URL_PARAM  = true;  // button index 0 is URL and requires {{1}}
+    private const DEFAULT_CC          = '91';  // for 10-digit local numbers
 
-    // Optional: if your button URL is something like https://example.com/p/@{{1}}
-    // set this to 'https://example.com/p/' and we will strip it; otherwise leave ''.
-    private const BUTTON_BASE         = '';
+    // Flow control to mitigate 131049 blocks
+    private const BATCH_SIZE          = 50;    // small batches
+    private const SLEEP_BASE_MS       = 500;   // base delay between batches
+    private const SLEEP_JITTER_MS     = 400;   // +/- jitter
 
     public function whatsappcreate(Request $request)
     {
@@ -46,8 +48,10 @@ class AdminWhatsappMessageController extends Controller
             'audience'         => ['required', Rule::in(['all','selected'])],
             'user'             => ['nullable','array'],
             'user.*'           => ['nullable','string'],
-            'title'            => ['required','string','max:255'],     // collected but not sent to body
-            'description'      => ['required','string'],               // collected but not sent to body
+            // collected by UI but NOT sent to body (BODY_FIELDS=0)
+            'title'            => ['required','string','max:255'],
+            'description'      => ['required','string'],
+            // required because your template button has {{1}}
             'button_url_value' => [self::REQUIRES_URL_PARAM ? 'required' : 'nullable','string','max:2000'],
         ]);
 
@@ -62,101 +66,121 @@ class AdminWhatsappMessageController extends Controller
             $rawNumbers = array_unique(array_map('trim', $validated['user'] ?? []));
         }
 
-        // Normalize to MSISDN (digits)
-        $toMsisdns = [];
+        // Normalize to MSISDN (digits) + de-dupe
+        $toMsisdnsSet = [];
         foreach ($rawNumbers as $raw) {
             $msisdn = $this->toMsisdn($raw, self::DEFAULT_CC);
-            if ($msisdn !== null) $toMsisdns[] = $msisdn;
+            if ($msisdn) $toMsisdnsSet[$msisdn] = true;
         }
-        $toMsisdns = array_values(array_unique($toMsisdns));
+        $toMsisdns = array_keys($toMsisdnsSet);
+
         if (!$toMsisdns) {
             return back()->with('error', 'No valid phone numbers found to send.')->withInput();
         }
 
-        // Build components EXACTLY as per template approval
+        // Build components (no body_* because BODY_FIELDS=0)
         $components = [];
-
-        // DO NOT send body_* because BODY_FIELDS = 0
-        if (self::BODY_FIELDS === 1) {
-            $components['body_1'] = ['type' => 'text', 'value' => $this->oneLine((string)$validated['title'])];
-        } elseif (self::BODY_FIELDS === 2) {
-            $components['body_1'] = ['type' => 'text', 'value' => $this->oneLine((string)$validated['title'])];
-            $components['body_2'] = ['type' => 'text', 'value' => $this->oneLine((string)$validated['description'])];
-        }
-
-        // ✅ URL button with required {{1}}
         if (self::REQUIRES_URL_PARAM) {
-            $token = $this->normalizeButtonParam((string)($validated['button_url_value'] ?? ''), self::BUTTON_BASE);
+            $token = $this->normalizeButtonParam((string)($validated['button_url_value'] ?? ''));
             if ($token === '') {
                 return back()->with('error', 'URL button requires a parameter (template has {{1}}).')->withInput();
             }
             $components['button_1'] = [
                 'subtype' => 'url',
                 'type'    => 'text',
-                'value'   => $token,         // MSG91 expects ONLY the token for {{1}}
+                'value'   => $token, // only the token for {{1}}
             ];
         }
 
-        // MSG91 bulk payload
-        $payload = [
-            'integrated_number' => self::INTEGRATED_NUMBER,
-            'content_type'      => 'template',
-            'payload'           => [
-                'messaging_product' => 'whatsapp',
-                'type'              => 'template',
-                'template'          => [
-                    'name'      => self::TEMPLATE_NAME,
-                    'language'  => [
-                        'code'   => self::LANGUAGE_CODE,
-                        'policy' => 'deterministic',
-                    ],
-                    'namespace' => self::TEMPLATE_NAMESPACE,
-                    'to_and_components' => [[
-                        'to'         => array_map(fn($n) => preg_replace('/\D+/', '', $n), $toMsisdns),
-                        'components' => $components, // includes button_1 with token
-                    ]],
-                ],
-            ],
+        $client  = new HttpClient(['timeout'=>25]);
+        $headers = [
+            'authkey'      => self::MSG91_AUTHKEY,
+            'Accept'       => 'application/json',
+            'Content-Type' => 'application/json',
         ];
 
-        try {
-            $client  = new HttpClient(['timeout'=>25]);
-            $headers = [
-                'authkey'      => self::MSG91_AUTHKEY,
-                'Accept'       => 'application/json',
-                'Content-Type' => 'application/json',
+        $total    = count($toMsisdns);
+        $queued   = 0;
+        $batches  = array_chunk($toMsisdns, self::BATCH_SIZE);
+        $failures = [];
+
+        foreach ($batches as $i => $chunk) {
+            $payload = [
+                'integrated_number' => self::INTEGRATED_NUMBER,
+                'content_type'      => 'template',
+                'payload'           => [
+                    'messaging_product' => 'whatsapp',
+                    'type'              => 'template',
+                    'template'          => [
+                        'name'      => self::TEMPLATE_NAME,
+                        'language'  => [
+                            'code'   => self::LANGUAGE_CODE,
+                            'policy' => 'deterministic',
+                        ],
+                        'namespace' => self::TEMPLATE_NAMESPACE,
+                        'to_and_components' => [[
+                            'to'         => array_map(fn($n) => preg_replace('/\D+/', '', $n), $chunk),
+                            'components' => $components,
+                        ]],
+                    ],
+                ],
             ];
 
-            $res   = $client->post(self::ENDPOINT_BULK, ['headers'=>$headers, 'json'=>$payload]);
-            $code  = $res->getStatusCode();
-            $body  = (string) $res->getBody();
-            $json  = null; try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
+            try {
+                $res  = $client->post(self::ENDPOINT_BULK, ['headers'=>$headers, 'json'=>$payload]);
+                $code = $res->getStatusCode();
+                $body = (string) $res->getBody();
 
-            $okHttp = ($code >= 200 && $code < 300);
-            $okJson = false;
-            $reason = null;
-            if ($json) {
-                $statusField = strtolower((string)($json['status'] ?? $json['type'] ?? ''));
-                $okJson = in_array($statusField, ['success','queued','accepted'], true)
-                       || ($json['success'] ?? false) === true;
-                $reason = $json['message']
-                    ?? ($json['error']['message'] ?? null)
-                    ?? ($json['errors'][0]['message'] ?? null)
-                    ?? ($json['errors'][0] ?? null)
-                    ?? null;
+                $json = null;
+                try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
+
+                $okHttp = ($code >= 200 && $code < 300);
+                $okJson = false;
+                $reason = null;
+
+                if ($json) {
+                    $statusField = strtolower((string)($json['status'] ?? $json['type'] ?? ''));
+                    $okJson = in_array($statusField, ['success','queued','accepted'], true)
+                           || ($json['success'] ?? false) === true;
+                    $reason = $json['message']
+                        ?? ($json['error']['message'] ?? null)
+                        ?? ($json['errors'][0]['message'] ?? null)
+                        ?? ($json['errors'][0] ?? null)
+                        ?? null;
+                }
+
+                if ($okHttp && (!$json || $okJson)) {
+                    $queued += count($chunk);
+                } else {
+                    $failures[] = ['batch'=>$i+1, 'http'=>$code, 'reason'=>$reason ?: 'send_failed', 'resp'=>$json ?? $body];
+                    Log::warning('MSG91 WA batch failed', end($failures));
+                }
+            } catch (\Throwable $e) {
+                $failures[] = ['batch'=>$i+1, 'http'=>0, 'reason'=>$e->getMessage()];
+                Log::error('MSG91 WA exception', ['batch'=>$i+1, 'error'=>$e->getMessage()]);
             }
 
-            if ($okHttp && (!$json || $okJson)) {
-                return back()->with('success', 'WhatsApp notifications queued to '.count($toMsisdns).' recipient(s).');
+            // anti-burst: small randomized gap between batches
+            if ($i < count($batches)-1) {
+                $sleepMs = self::SLEEP_BASE_MS + random_int(-self::SLEEP_JITTER_MS, self::SLEEP_JITTER_MS);
+                usleep(max(0, $sleepMs) * 1000);
             }
-
-            Log::error('MSG91 bulk WA failed', ['http_status'=>$code, 'json'=>$json, 'body'=>$body]);
-            return back()->with('error', 'MSG91 bulk send failed: ' . ($reason ?: 'send_failed'));
-
-        } catch (\Throwable $e) {
-            Log::error('MSG91 bulk WA exception', ['error'=>$e->getMessage()]);
-            return back()->with('error', 'MSG91 bulk send error: '.$e->getMessage());
         }
+
+        if (empty($failures)) {
+            return back()->with('success', "WhatsApp queued to $queued / $total recipients.");
+        }
+
+        // Summarize top failure reasons (often includes 131049)
+        $reasonCounts = [];
+        foreach ($failures as $f) {
+            $key = (string)($f['reason'] ?? 'send_failed');
+            $reasonCounts[$key] = ($reasonCounts[$key] ?? 0) + 1;
+        }
+        arsort($reasonCounts);
+        $top = array_slice(array_map(fn($k,$v)=>"$k ($v)", array_keys($reasonCounts), $reasonCounts), 0, 3);
+
+        return back()->with('error', "Queued $queued / $total. Some batches failed: ".implode('; ', $top).". Check logs for details.");
     }
 
     /* ===== Helpers ===== */
@@ -178,25 +202,14 @@ class AdminWhatsappMessageController extends Controller
         return trim(preg_replace('/\s+/u',' ', $s));
     }
 
-    private function normalizeButtonParam(string $input, string $base): string
+    private function normalizeButtonParam(string $input): string
     {
-        // Accepts either the token (ABC123) or a full URL (https://.../ABC123).
-        // Returns ONLY the token for MSG91 {{1}}.
+        // Accepts either token (ABC123) or full URL (https://.../ABC123) and returns ONLY the token for {{1}}
         $clean = $this->oneLine($input);
         if ($clean === '') return '';
-
-        if ($base !== '') {
-            $baseNorm = rtrim($base, '/') . '/';
-            if (stripos($clean, $baseNorm) === 0) {
-                $clean = substr($clean, strlen($baseNorm));
-            }
-        } else {
-            // try to strip any trailing path if a full URL is given
-            if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) {
-                $clean = $m[1];
-            }
+        if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) {
+            $clean = $m[1];
         }
-
         $clean = ltrim($clean, " /");
         $clean = preg_replace('/\s+/', '-', $clean);
         return trim($clean);
