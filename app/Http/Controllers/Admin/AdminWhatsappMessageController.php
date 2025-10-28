@@ -4,42 +4,56 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
-use GuzzleHttp\Client as HttpClient; // composer require guzzlehttp/guzzle
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Queue;
+use GuzzleHttp\Client as HttpClient;
+use App\Models\User;
+use App\Jobs\SendWhatsappTemplateJob;
 
 class AdminWhatsappMessageController extends Controller
 {
     // === HARD-CODED CONFIG (NO .env) ===
-    private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
-    private const INTEGRATED_NUMBER   = '919124420330'; // digits only (no +)
-    private const TEMPLATE_NAME       = 'flower_wp_message';
+    private const MSG91_AUTHKEY       = 'REPLACE_WITH_YOUR_AUTHKEY';
+    private const INTEGRATED_NUMBER   = '919124420330'; // digits only
+    private const TEMPLATE_NAME       = 'flower_wp_message';          // Marketing
     private const TEMPLATE_NAMESPACE  = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
     private const LANGUAGE_CODE       = 'en_US';
     private const ENDPOINT_BULK       = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // === Template knobs (match MSG91 approval) ===
-    private const BODY_FIELDS         = 0;     // your template body has 0 params
-    private const REQUIRES_URL_PARAM  = true;  // button at index 0 is URL and requires {{1}}
-    private const DEFAULT_CC          = '91';  // for 10-digit local numbers
+    // If you also have a Utility template (not frequency-capped), set it here:
+    private const UTILITY_TEMPLATE_NAME = 'flower_utility_update';    // Optional
+    private const USE_UTILITY_FALLBACK  = false;                      // true to fallback
 
-    // === Warmup / Anti-burst controls (reduce 131049) ===
-    private const MAX_PER_RUN         = 50;    // hard cap per submission (warm-up). Increase gradually.
-    private const BATCH_SIZE          = 1;     // send 1 user per call (safest). Change to 5–20 after warming up.
-    private const SLEEP_MIN_MS        = 2000;  // 2s min gap
-    private const SLEEP_MAX_MS        = 6000;  // 6s max gap
-    private const STOP_AFTER_131049   = 5;     // if we see 5 "131049" in a row, pause further sends
+    // Template knobs (match MSG91 approval)
+    private const BODY_FIELDS         = 0;     // body has no variables
+    private const URL_BUTTON_HAS_VAR  = true;  // button has {{1}} param
+    private const DEFAULT_CC          = '91';
+
+    // Send hygiene
+    private const MAX_PER_RUN         = 50;    // warm up
+    private const BATCH_SIZE          = 1;
+    private const SLEEP_MIN_MS        = 2000;
+    private const SLEEP_MAX_MS        = 6000;
+
+    // 131049 handling
+    private const CODE_131049                 = '131049';
+    private const STOP_AFTER_CONSEC_131049    = 5;
+    private const INITIAL_BACKOFF_HOURS       = 6;   // 6h, then 12h, then 24h...
+    private const BACKOFF_MULTIPLIER          = 2.0;
+    private const BACKOFF_MAX_HOURS           = 24;
+
+    // Cache keys
+    private static function cooldownKey(string $msisdn): string { return "wa:cooldown:$msisdn"; }
+    private static function backoffKey(string $msisdn): string  { return "wa:backoff:$msisdn"; }
 
     public function whatsappcreate(Request $request)
     {
         $users = User::query()
             ->select('id','name','email','mobile_number')
-            ->whereNotNull('mobile_number')
-            ->where('mobile_number','!=','')
-            ->orderBy('name')
-            ->limit(1000)
-            ->get();
+            ->whereNotNull('mobile_number')->where('mobile_number','!=','')
+            ->orderBy('name')->limit(1000)->get();
 
         return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
     }
@@ -50,50 +64,55 @@ class AdminWhatsappMessageController extends Controller
             'audience'         => ['required', Rule::in(['all','selected'])],
             'user'             => ['nullable','array'],
             'user.*'           => ['nullable','string'],
-            // collected by UI but NOT sent to body (BODY_FIELDS=0)
             'title'            => ['required','string','max:255'],
             'description'      => ['required','string'],
-            // required because your template button has {{1}}
-            'button_url_value' => [self::REQUIRES_URL_PARAM ? 'required' : 'nullable','string','max:2000'],
+            'button_url_value' => [self::URL_BUTTON_HAS_VAR ? 'required' : 'nullable','string','max:2000'],
+            // optional switch if you want to force Utility for this send
+            'message_type'     => ['nullable', Rule::in(['marketing','utility'])],
         ]);
 
         // Resolve recipients
-        if ($validated['audience'] === 'all') {
-            $rawNumbers = User::query()
-                ->whereNotNull('mobile_number')
-                ->where('mobile_number','!=','')
-                ->pluck('mobile_number')
-                ->all();
-        } else {
-            $rawNumbers = array_unique(array_map('trim', $validated['user'] ?? []));
-        }
+        $rawNumbers = $validated['audience'] === 'all'
+            ? User::query()->whereNotNull('mobile_number')->where('mobile_number','!=','')->pluck('mobile_number')->all()
+            : array_unique(array_map('trim', $validated['user'] ?? []));
 
-        // Normalize to MSISDN, de-dupe, hard cap, and randomize order
+        // Normalize E.164-ish and de-dupe
         $set = [];
         foreach ($rawNumbers as $raw) {
             $msisdn = $this->toMsisdn($raw, self::DEFAULT_CC);
             if ($msisdn) $set[$msisdn] = true;
         }
         $toMsisdns = array_keys($set);
-        if (!$toMsisdns) {
-            return back()->with('error', 'No valid phone numbers found to send.')->withInput();
-        }
-        shuffle($toMsisdns); // randomize to avoid patterns Meta dislikes
+        if (!$toMsisdns) return back()->with('error', 'No valid phone numbers found to send.')->withInput();
+
+        shuffle($toMsisdns);
         $toMsisdns = array_slice($toMsisdns, 0, self::MAX_PER_RUN);
 
-        // Build components (no body_* because BODY_FIELDS=0)
+        // Build components (button param uses "text", not "value")
         $components = [];
-        if (self::REQUIRES_URL_PARAM) {
+        if (self::URL_BUTTON_HAS_VAR) {
             $token = $this->normalizeButtonParam((string)($validated['button_url_value'] ?? ''));
-            if ($token === '') {
-                return back()->with('error', 'URL button requires a parameter (template has {{1}}).')->withInput();
-            }
+            if ($token === '') return back()->with('error', 'URL button requires a parameter (template has {{1}}).')->withInput();
+
             $components['button_1'] = [
                 'subtype' => 'url',
                 'type'    => 'text',
-                'value'   => $token, // only the token for {{1}}
+                'text'    => $token,  // <<<<<<<<<< IMPORTANT (not "value")
             ];
         }
+
+        // Decide template: marketing or utility
+        $forceType = $validated['message_type'] ?? 'marketing';
+        $tplName   = ($forceType === 'utility')
+            ? (self::UTILITY_TEMPLATE_NAME ?: self::TEMPLATE_NAME)
+            : self::TEMPLATE_NAME;
+
+        // Filter out numbers currently in cooldown (due to earlier 131049)
+        $toSend = [];
+        foreach ($toMsisdns as $n) {
+            if (!Cache::has(self::cooldownKey($n))) $toSend[] = $n;
+        }
+        if (!$toSend) return back()->with('error', 'All selected recipients are cooling down due to previous 131049 throttles. Try later.')->withInput();
 
         $client  = new HttpClient(['timeout'=>25]);
         $headers = [
@@ -102,13 +121,12 @@ class AdminWhatsappMessageController extends Controller
             'Content-Type' => 'application/json',
         ];
 
-        $total         = count($toMsisdns);
+        $total         = count($toSend);
         $queued        = 0;
         $failures      = [];
         $consec131049  = 0;
 
-        // send in small batches (default 1 user/batch)
-        foreach (array_chunk($toMsisdns, self::BATCH_SIZE) as $i => $chunk) {
+        foreach (array_chunk($toSend, self::BATCH_SIZE) as $i => $chunk) {
             $payload = [
                 'integrated_number' => self::INTEGRATED_NUMBER,
                 'content_type'      => 'template',
@@ -116,15 +134,12 @@ class AdminWhatsappMessageController extends Controller
                     'messaging_product' => 'whatsapp',
                     'type'              => 'template',
                     'template'          => [
-                        'name'      => self::TEMPLATE_NAME,
-                        'language'  => [
-                            'code'   => self::LANGUAGE_CODE,
-                            'policy' => 'deterministic',
-                        ],
+                        'name'      => $tplName,
+                        'language'  => ['code'=> self::LANGUAGE_CODE, 'policy'=> 'deterministic'],
                         'namespace' => self::TEMPLATE_NAMESPACE,
                         'to_and_components' => [[
                             'to'         => array_map(fn($n) => preg_replace('/\D+/', '', $n), $chunk),
-                            'components' => $components,
+                            'components' => $components, // ok even when empty
                         ]],
                     ],
                 ],
@@ -134,15 +149,13 @@ class AdminWhatsappMessageController extends Controller
                 $res  = $client->post(self::ENDPOINT_BULK, ['headers'=>$headers, 'json'=>$payload]);
                 $code = $res->getStatusCode();
                 $body = (string) $res->getBody();
-
-                $json = null;
-                try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
+                $json = json_decode($body, true);
 
                 $okHttp = ($code >= 200 && $code < 300);
                 $okJson = false;
                 $reason = null;
 
-                if ($json) {
+                if (is_array($json)) {
                     $statusField = strtolower((string)($json['status'] ?? $json['type'] ?? ''));
                     $okJson = in_array($statusField, ['success','queued','accepted'], true)
                            || ($json['success'] ?? false) === true;
@@ -153,12 +166,17 @@ class AdminWhatsappMessageController extends Controller
                         ?? null;
                 }
 
-                // track 131049 specifically if MSG91 bubbles it up in "message"/"errors"
                 $reasonStr = (string)($reason ?? '');
-                if (strpos($reasonStr, '131049') !== false) {
+                $has131049 = (strpos($reasonStr, self::CODE_131049) !== false);
+
+                if ($has131049) {
                     $consec131049++;
+                    // Put all recipients of this batch into cooldown and schedule a retry job
+                    foreach ($chunk as $msisdn) {
+                        $this->applyCooldownAndRetry($msisdn, $tplName, $components, $forceType);
+                    }
                 } else {
-                    $consec131049 = 0; // reset streak on any non-131049 response
+                    $consec131049 = 0;
                 }
 
                 if ($okHttp && (!$json || $okJson)) {
@@ -174,13 +192,12 @@ class AdminWhatsappMessageController extends Controller
                     Log::warning('MSG91 WA batch failed', end($failures));
                 }
             } catch (\Throwable $e) {
-                $consec131049 = 0; // network/other error is not a quality throttle
+                $consec131049 = 0;
                 $failures[] = ['batch'=>$i+1, 'http'=>0, 'reason'=>$e->getMessage(), 'to'=>$chunk];
                 Log::error('MSG91 WA exception', ['batch'=>$i+1, 'error'=>$e->getMessage(), 'to'=>$chunk]);
             }
 
-            // If we hit repeated quality throttles, stop early to protect sender rating
-            if ($consec131049 >= self::STOP_AFTER_131049) {
+            if ($consec131049 >= self::STOP_AFTER_CONSEC_131049) {
                 Log::warning('Stopping early due to repeated 131049 throttles', [
                     'consecutive_131049' => $consec131049,
                     'batches_sent'       => $i+1,
@@ -188,7 +205,6 @@ class AdminWhatsappMessageController extends Controller
                 break;
             }
 
-            // anti-burst: small randomized gap between batches
             if ($i < ceil($total / self::BATCH_SIZE) - 1) {
                 $sleepMs = random_int(self::SLEEP_MIN_MS, self::SLEEP_MAX_MS);
                 usleep($sleepMs * 1000);
@@ -199,7 +215,7 @@ class AdminWhatsappMessageController extends Controller
             return back()->with('success', "WhatsApp queued to $queued / $total recipients.");
         }
 
-        // Summarize top failure reasons (will likely include 131049)
+        // Summarize top failure reasons
         $reasonCounts = [];
         foreach ($failures as $f) {
             $k = (string)($f['reason'] ?? 'send_failed');
@@ -211,16 +227,41 @@ class AdminWhatsappMessageController extends Controller
         return back()->with('error', "Queued $queued / $total. Some sends were throttled: ".implode('; ', $top).". Check logs for details.");
     }
 
-    /* ===== Helpers ===== */
+    /* ===== 131049 helpers ===== */
+
+    private function applyCooldownAndRetry(string $msisdn, string $tplName, array $components, string $forceType): void
+    {
+        // backoff hours (6 -> 12 -> 24 -> 24...)
+        $prev   = (int) (Cache::get(self::backoffKey($msisdn)) ?? 0);
+        $hours  = $prev > 0 ? min((int)ceil($prev * self::BACKOFF_MULTIPLIER), self::BACKOFF_MAX_HOURS) : self::INITIAL_BACKOFF_HOURS;
+
+        Cache::put(self::cooldownKey($msisdn), now()->addHours($hours)->timestamp, now()->addHours($hours));
+        Cache::put(self::backoffKey($msisdn),  $hours, now()->addDays(2));
+
+        // schedule a retry via queue
+        SendWhatsappTemplateJob::dispatch(
+            $msisdn,
+            $tplName,
+            $components,
+            $forceType,
+            self::MSG91_AUTHKEY,
+            self::INTEGRATED_NUMBER,
+            self::TEMPLATE_NAMESPACE,
+            self::LANGUAGE_CODE,
+            self::ENDPOINT_BULK
+        )->delay(now()->addHours($hours));
+    }
+
+    /* ===== Utils ===== */
 
     private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
     {
         $raw    = (string) $raw;
         $digits = preg_replace('/\D+/', '', $raw);
-        if ($raw !== '' && $raw[0] === '+' && strlen($digits) >= 11) return $digits;                 // +CC########
-        if (strlen($digits) === 10)                                   return $defaultCcDigits.$digits; // local 10
+        if ($raw !== '' && $raw[0] === '+' && strlen($digits) >= 11) return $digits;
+        if (strlen($digits) === 10)                                   return $defaultCcDigits.$digits;
         if (strlen($digits) === 11 && $digits[0] === '0')             return $defaultCcDigits.substr($digits,1);
-        if (strlen($digits) >= 11)                                    return $digits;                  // already CC
+        if (strlen($digits) >= 11)                                    return $digits;
         return null;
     }
 
@@ -232,7 +273,7 @@ class AdminWhatsappMessageController extends Controller
 
     private function normalizeButtonParam(string $input): string
     {
-        // Accepts either token (ABC123) or full URL (https://.../ABC123); returns ONLY the token for {{1}}
+        // Accept either the token (ABC123) or full URL (.../ABC123); return ONLY the token for {{1}}
         $clean = $this->oneLine($input);
         if ($clean === '') return '';
         if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) {
