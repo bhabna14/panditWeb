@@ -19,15 +19,17 @@ class AdminWhatsappMessageController extends Controller
     private const LANGUAGE_CODE       = 'en_US';
     private const ENDPOINT_BULK       = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // Template knobs (match MSG91 approval)
+    // === Template knobs (match MSG91 approval) ===
     private const BODY_FIELDS         = 0;     // your template body has 0 params
-    private const REQUIRES_URL_PARAM  = true;  // button index 0 is URL and requires {{1}}
+    private const REQUIRES_URL_PARAM  = true;  // button at index 0 is URL and requires {{1}}
     private const DEFAULT_CC          = '91';  // for 10-digit local numbers
 
-    // Flow control to mitigate 131049 blocks
-    private const BATCH_SIZE          = 50;    // small batches
-    private const SLEEP_BASE_MS       = 500;   // base delay between batches
-    private const SLEEP_JITTER_MS     = 400;   // +/- jitter
+    // === Warmup / Anti-burst controls (reduce 131049) ===
+    private const MAX_PER_RUN         = 50;    // hard cap per submission (warm-up). Increase gradually.
+    private const BATCH_SIZE          = 1;     // send 1 user per call (safest). Change to 5–20 after warming up.
+    private const SLEEP_MIN_MS        = 2000;  // 2s min gap
+    private const SLEEP_MAX_MS        = 6000;  // 6s max gap
+    private const STOP_AFTER_131049   = 5;     // if we see 5 "131049" in a row, pause further sends
 
     public function whatsappcreate(Request $request)
     {
@@ -66,17 +68,18 @@ class AdminWhatsappMessageController extends Controller
             $rawNumbers = array_unique(array_map('trim', $validated['user'] ?? []));
         }
 
-        // Normalize to MSISDN (digits) + de-dupe
-        $toMsisdnsSet = [];
+        // Normalize to MSISDN, de-dupe, hard cap, and randomize order
+        $set = [];
         foreach ($rawNumbers as $raw) {
             $msisdn = $this->toMsisdn($raw, self::DEFAULT_CC);
-            if ($msisdn) $toMsisdnsSet[$msisdn] = true;
+            if ($msisdn) $set[$msisdn] = true;
         }
-        $toMsisdns = array_keys($toMsisdnsSet);
-
+        $toMsisdns = array_keys($set);
         if (!$toMsisdns) {
             return back()->with('error', 'No valid phone numbers found to send.')->withInput();
         }
+        shuffle($toMsisdns); // randomize to avoid patterns Meta dislikes
+        $toMsisdns = array_slice($toMsisdns, 0, self::MAX_PER_RUN);
 
         // Build components (no body_* because BODY_FIELDS=0)
         $components = [];
@@ -99,12 +102,13 @@ class AdminWhatsappMessageController extends Controller
             'Content-Type' => 'application/json',
         ];
 
-        $total    = count($toMsisdns);
-        $queued   = 0;
-        $batches  = array_chunk($toMsisdns, self::BATCH_SIZE);
-        $failures = [];
+        $total         = count($toMsisdns);
+        $queued        = 0;
+        $failures      = [];
+        $consec131049  = 0;
 
-        foreach ($batches as $i => $chunk) {
+        // send in small batches (default 1 user/batch)
+        foreach (array_chunk($toMsisdns, self::BATCH_SIZE) as $i => $chunk) {
             $payload = [
                 'integrated_number' => self::INTEGRATED_NUMBER,
                 'content_type'      => 'template',
@@ -149,21 +153,45 @@ class AdminWhatsappMessageController extends Controller
                         ?? null;
                 }
 
+                // track 131049 specifically if MSG91 bubbles it up in "message"/"errors"
+                $reasonStr = (string)($reason ?? '');
+                if (strpos($reasonStr, '131049') !== false) {
+                    $consec131049++;
+                } else {
+                    $consec131049 = 0; // reset streak on any non-131049 response
+                }
+
                 if ($okHttp && (!$json || $okJson)) {
                     $queued += count($chunk);
                 } else {
-                    $failures[] = ['batch'=>$i+1, 'http'=>$code, 'reason'=>$reason ?: 'send_failed', 'resp'=>$json ?? $body];
+                    $failures[] = [
+                        'batch'  => $i+1,
+                        'http'   => $code,
+                        'reason' => $reasonStr !== '' ? $reasonStr : 'send_failed',
+                        'resp'   => $json ?? $body,
+                        'to'     => $chunk,
+                    ];
                     Log::warning('MSG91 WA batch failed', end($failures));
                 }
             } catch (\Throwable $e) {
-                $failures[] = ['batch'=>$i+1, 'http'=>0, 'reason'=>$e->getMessage()];
-                Log::error('MSG91 WA exception', ['batch'=>$i+1, 'error'=>$e->getMessage()]);
+                $consec131049 = 0; // network/other error is not a quality throttle
+                $failures[] = ['batch'=>$i+1, 'http'=>0, 'reason'=>$e->getMessage(), 'to'=>$chunk];
+                Log::error('MSG91 WA exception', ['batch'=>$i+1, 'error'=>$e->getMessage(), 'to'=>$chunk]);
+            }
+
+            // If we hit repeated quality throttles, stop early to protect sender rating
+            if ($consec131049 >= self::STOP_AFTER_131049) {
+                Log::warning('Stopping early due to repeated 131049 throttles', [
+                    'consecutive_131049' => $consec131049,
+                    'batches_sent'       => $i+1,
+                ]);
+                break;
             }
 
             // anti-burst: small randomized gap between batches
-            if ($i < count($batches)-1) {
-                $sleepMs = self::SLEEP_BASE_MS + random_int(-self::SLEEP_JITTER_MS, self::SLEEP_JITTER_MS);
-                usleep(max(0, $sleepMs) * 1000);
+            if ($i < ceil($total / self::BATCH_SIZE) - 1) {
+                $sleepMs = random_int(self::SLEEP_MIN_MS, self::SLEEP_MAX_MS);
+                usleep($sleepMs * 1000);
             }
         }
 
@@ -171,16 +199,16 @@ class AdminWhatsappMessageController extends Controller
             return back()->with('success', "WhatsApp queued to $queued / $total recipients.");
         }
 
-        // Summarize top failure reasons (often includes 131049)
+        // Summarize top failure reasons (will likely include 131049)
         $reasonCounts = [];
         foreach ($failures as $f) {
-            $key = (string)($f['reason'] ?? 'send_failed');
-            $reasonCounts[$key] = ($reasonCounts[$key] ?? 0) + 1;
+            $k = (string)($f['reason'] ?? 'send_failed');
+            $reasonCounts[$k] = ($reasonCounts[$k] ?? 0) + 1;
         }
         arsort($reasonCounts);
         $top = array_slice(array_map(fn($k,$v)=>"$k ($v)", array_keys($reasonCounts), $reasonCounts), 0, 3);
 
-        return back()->with('error', "Queued $queued / $total. Some batches failed: ".implode('; ', $top).". Check logs for details.");
+        return back()->with('error', "Queued $queued / $total. Some sends were throttled: ".implode('; ', $top).". Check logs for details.");
     }
 
     /* ===== Helpers ===== */
@@ -204,7 +232,7 @@ class AdminWhatsappMessageController extends Controller
 
     private function normalizeButtonParam(string $input): string
     {
-        // Accepts either token (ABC123) or full URL (https://.../ABC123) and returns ONLY the token for {{1}}
+        // Accepts either token (ABC123) or full URL (https://.../ABC123); returns ONLY the token for {{1}}
         $clean = $this->oneLine($input);
         if ($clean === '') return '';
         if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) {
