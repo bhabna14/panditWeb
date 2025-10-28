@@ -265,8 +265,6 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
-
-
 public function flowerPickUp(Request $request)
 {
     $fromDate = $request->input('from_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
@@ -287,7 +285,6 @@ public function flowerPickUp(Request $request)
         ->whereDate('pickup_date', '<=', $toDate);
 
     // Only include items where the product category is "Flower" (case-sensitive).
-    // If you want case-insensitive, replace with whereRaw('LOWER(category)=?', ['flower'])
     $query->whereHas('flowerPickupItems.flower', function ($q) {
         $q->where('category', 'Flower');
     });

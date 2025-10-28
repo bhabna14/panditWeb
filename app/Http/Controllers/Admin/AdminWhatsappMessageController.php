@@ -7,126 +7,149 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Carbon;
 use GuzzleHttp\Client as HttpClient;
 use App\Models\User;
 use App\Jobs\SendWhatsappTemplateJob;
 
 class AdminWhatsappMessageController extends Controller
 {
-    // === HARD-CODED CONFIG (NO .env) ===
-    private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
+    // ==== CONFIG (put real keys) ====
+    private const MSG91_AUTHKEY       = 'PASTE_YOUR_REAL_MSG91_AUTHKEY';
     private const INTEGRATED_NUMBER   = '919124420330'; // digits only
-    private const TEMPLATE_NAME       = 'flower_wp_message';          // Marketing
+
     private const TEMPLATE_NAMESPACE  = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
     private const LANGUAGE_CODE       = 'en_US';
-    private const ENDPOINT_BULK       = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
+    private const ENDPOINT_BULK       = 'https://control.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // If you also have a Utility template (not frequency-capped), set it here:
-    private const UTILITY_TEMPLATE_NAME = 'flower_utility_update';    // Optional
-    private const USE_UTILITY_FALLBACK  = false;                      // true to fallback
+    // Approved template names
+    private const TEMPLATE_MARKETING  = 'flower_wp_message';
+    private const TEMPLATE_UTILITY    = 'flower_utility_update'; // set an approved utility template or leave empty
 
-    // Template knobs (match MSG91 approval)
-    private const BODY_FIELDS         = 0;     // body has no variables
-    private const URL_BUTTON_HAS_VAR  = true;  // button has {{1}} param
-    private const DEFAULT_CC          = '91';
-
-    // Send hygiene
-    private const MAX_PER_RUN         = 50;    // warm up
-    private const BATCH_SIZE          = 1;
-    private const SLEEP_MIN_MS        = 2000;
-    private const SLEEP_MAX_MS        = 6000;
+    // Business rules
+    private const MARKETING_COOLDOWN_DAYS = 7;   // per-user cadence
+    private const DEFAULT_CC              = '91';
+    private const URL_BUTTON_HAS_VAR      = true; // {{1}} exists
+    private const BATCH_SIZE              = 1;
+    private const MAX_PER_RUN             = 50;
+    private const SLEEP_MIN_MS            = 2000;
+    private const SLEEP_MAX_MS            = 6000;
 
     // 131049 handling
-    private const CODE_131049                 = '131049';
-    private const STOP_AFTER_CONSEC_131049    = 5;
-    private const INITIAL_BACKOFF_HOURS       = 6;   // 6h, then 12h, then 24h...
-    private const BACKOFF_MULTIPLIER          = 2.0;
-    private const BACKOFF_MAX_HOURS           = 24;
+    private const CODE_131049               = '131049';
+    private const STOP_AFTER_CONSEC_131049  = 5;
+    private const INITIAL_BACKOFF_HOURS     = 6;
+    private const BACKOFF_MULTIPLIER        = 2.0;
+    private const BACKOFF_MAX_HOURS         = 24;
 
-    // Cache keys
     private static function cooldownKey(string $msisdn): string { return "wa:cooldown:$msisdn"; }
     private static function backoffKey(string $msisdn): string  { return "wa:backoff:$msisdn"; }
 
-    public function whatsappcreate(Request $request)
-    {
-        $users = User::query()
-            ->select('id','name','email','mobile_number')
-            ->whereNotNull('mobile_number')->where('mobile_number','!=','')
-            ->orderBy('name')->limit(1000)->get();
-
-        return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
-    }
-
     public function whatsappSend(Request $request)
     {
-        $validated = $request->validate([
+        // guardrails
+        if (!is_string(self::MSG91_AUTHKEY) || strlen(trim(self::MSG91_AUTHKEY)) < 20) {
+            return back()->with('error', 'MSG91 Authkey not configured.')->withInput();
+        }
+
+        $v = $request->validate([
             'audience'         => ['required', Rule::in(['all','selected'])],
             'user'             => ['nullable','array'],
             'user.*'           => ['nullable','string'],
             'title'            => ['required','string','max:255'],
             'description'      => ['required','string'],
             'button_url_value' => [self::URL_BUTTON_HAS_VAR ? 'required' : 'nullable','string','max:2000'],
-            // optional switch if you want to force Utility for this send
             'message_type'     => ['nullable', Rule::in(['marketing','utility'])],
         ]);
 
-        // Resolve recipients
-        $rawNumbers = $validated['audience'] === 'all'
-            ? User::query()->whereNotNull('mobile_number')->where('mobile_number','!=','')->pluck('mobile_number')->all()
-            : array_unique(array_map('trim', $validated['user'] ?? []));
+        // recipients
+        $raw = $v['audience'] === 'all'
+            ? User::query()
+                ->whereNotNull('mobile_number')
+                ->where('mobile_number','!=','')
+                ->where('opted_out_whatsapp', false)
+                ->pluck('mobile_number','id')->all()
+            : collect($v['user'] ?? [])->filter()->unique()->values()->all();
 
-        // Normalize E.164-ish and de-dupe
-        $set = [];
-        foreach ($rawNumbers as $raw) {
-            $msisdn = $this->toMsisdn($raw, self::DEFAULT_CC);
-            if ($msisdn) $set[$msisdn] = true;
+        // normalize
+        $idByMsisdn = [];
+        if ($v['audience'] === 'all') {
+            // $raw is [id => mobile]; keep mapping
+            foreach ($raw as $uid => $num) {
+                $msisdn = $this->toMsisdn($num, self::DEFAULT_CC);
+                if ($msisdn) $idByMsisdn[$msisdn] = (string)$uid;
+            }
+        } else {
+            // no id mapping here; best-effort without user IDs
+            foreach ($raw as $num) {
+                $msisdn = $this->toMsisdn($num, self::DEFAULT_CC);
+                if ($msisdn) $idByMsisdn[$msisdn] = null;
+            }
         }
-        $toMsisdns = array_keys($set);
-        if (!$toMsisdns) return back()->with('error', 'No valid phone numbers found to send.')->withInput();
 
-        shuffle($toMsisdns);
-        $toMsisdns = array_slice($toMsisdns, 0, self::MAX_PER_RUN);
+        $msisdns = array_keys($idByMsisdn);
+        if (!$msisdns) return back()->with('error', 'No valid phone numbers found.')->withInput();
 
-        // Build components (button param uses "text", not "value")
+        shuffle($msisdns);
+        $msisdns = array_slice($msisdns, 0, self::MAX_PER_RUN);
+
+        // Build components
         $components = [];
         if (self::URL_BUTTON_HAS_VAR) {
-            $token = $this->normalizeButtonParam((string)($validated['button_url_value'] ?? ''));
+            $token = $this->normalizeButtonParam((string)($v['button_url_value'] ?? ''));
             if ($token === '') return back()->with('error', 'URL button requires a parameter (template has {{1}}).')->withInput();
-
-            $components['button_1'] = [
-                'subtype' => 'url',
-                'type'    => 'text',
-                'text'    => $token,  // <<<<<<<<<< IMPORTANT (not "value")
-            ];
+            $components['button_1'] = ['subtype'=>'url','type'=>'text','text'=>$token];
         }
 
-        // Decide template: marketing or utility
-        $forceType = $validated['message_type'] ?? 'marketing';
-        $tplName   = ($forceType === 'utility')
-            ? (self::UTILITY_TEMPLATE_NAME ?: self::TEMPLATE_NAME)
-            : self::TEMPLATE_NAME;
+        // Which template?
+        $type    = $v['message_type'] ?? 'marketing'; // default
+        $tplName = $type === 'utility' && self::TEMPLATE_UTILITY ? self::TEMPLATE_UTILITY : self::TEMPLATE_MARKETING;
 
-        // Filter out numbers currently in cooldown (due to earlier 131049)
-        $toSend = [];
-        foreach ($toMsisdns as $n) {
-            if (!Cache::has(self::cooldownKey($n))) $toSend[] = $n;
+        // Apply business targeting rules BEFORE calling API
+        $eligible = [];
+        $suppressed = [];
+
+        if ($v['audience'] === 'all') {
+            $users = User::query()->whereIn('id', array_filter(array_values($idByMsisdn)))->get(['id','wa_last_marketing_at','wa_last_inbound_at','opted_out_whatsapp','mobile_number']);
+            $byId  = $users->keyBy('id');
+            foreach ($msisdns as $n) {
+                $uid = $idByMsisdn[$n] ?? null;
+                $cooling = Cache::has(self::cooldownKey($n));
+                if ($cooling) { $suppressed[] = [$n,'cooldown']; continue; }
+
+                if ($type === 'marketing' && $uid && $byId->has($uid)) {
+                    $u = $byId[$uid];
+                    // enforce 7-day cadence
+                    $okByCadence = !$u->wa_last_marketing_at || Carbon::parse($u->wa_last_marketing_at)->lt(now()->subDays(self::MARKETING_COOLDOWN_DAYS));
+                    if (!$okByCadence) { $suppressed[] = [$n,'cadence']; continue; }
+
+                    // bonus filter: if you want only engaged (inbound in last 30d)
+                    // $engaged = $u->wa_last_inbound_at && Carbon::parse($u->wa_last_inbound_at)->gt(now()->subDays(30));
+                    // if (!$engaged) { $suppressed[] = [$n,'not_engaged']; continue; }
+                }
+
+                $eligible[] = $n;
+            }
+        } else {
+            foreach ($msisdns as $n) {
+                if (Cache::has(self::cooldownKey($n))) { $suppressed[] = [$n,'cooldown']; continue; }
+                $eligible[] = $n;
+            }
         }
-        if (!$toSend) return back()->with('error', 'All selected recipients are cooling down due to previous 131049 throttles. Try later.')->withInput();
+
+        if (!$eligible) {
+            $why = collect($suppressed)->groupBy(1)->map->count()->map(fn($c,$k)=>"$k:$c")->values()->implode(', ');
+            return back()->with('error', "No recipients eligible (suppressed: $why).")->withInput();
+        }
 
         $client  = new HttpClient(['timeout'=>25]);
-        $headers = [
-            'authkey'      => self::MSG91_AUTHKEY,
-            'Accept'       => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
+        $headers = ['authkey'=> self::MSG91_AUTHKEY, 'Accept'=>'application/json', 'Content-Type'=>'application/json'];
 
-        $total         = count($toSend);
         $queued        = 0;
         $failures      = [];
         $consec131049  = 0;
 
-        foreach (array_chunk($toSend, self::BATCH_SIZE) as $i => $chunk) {
+        foreach (array_chunk($eligible, self::BATCH_SIZE) as $i => $chunk) {
             $payload = [
                 'integrated_number' => self::INTEGRATED_NUMBER,
                 'content_type'      => 'template',
@@ -139,7 +162,7 @@ class AdminWhatsappMessageController extends Controller
                         'namespace' => self::TEMPLATE_NAMESPACE,
                         'to_and_components' => [[
                             'to'         => array_map(fn($n) => preg_replace('/\D+/', '', $n), $chunk),
-                            'components' => $components, // ok even when empty
+                            'components' => $components,
                         ]],
                     ],
                 ],
@@ -171,9 +194,8 @@ class AdminWhatsappMessageController extends Controller
 
                 if ($has131049) {
                     $consec131049++;
-                    // Put all recipients of this batch into cooldown and schedule a retry job
                     foreach ($chunk as $msisdn) {
-                        $this->applyCooldownAndRetry($msisdn, $tplName, $components, $forceType);
+                        $this->applyCooldownAndRetry($msisdn, $tplName, $components, $type);
                     }
                 } else {
                     $consec131049 = 0;
@@ -181,6 +203,17 @@ class AdminWhatsappMessageController extends Controller
 
                 if ($okHttp && (!$json || $okJson)) {
                     $queued += count($chunk);
+
+                    // Mark marketing send timestamp for cadence
+                    if ($type === 'marketing') {
+                        // If we know a user id, set wa_last_marketing_at
+                        foreach ($chunk as $msisdn) {
+                            $uid = $idByMsisdn[$msisdn] ?? null;
+                            if ($uid) {
+                                User::where('id', $uid)->update(['wa_last_marketing_at' => now()]);
+                            }
+                        }
+                    }
                 } else {
                     $failures[] = [
                         'batch'  => $i+1,
@@ -198,24 +231,20 @@ class AdminWhatsappMessageController extends Controller
             }
 
             if ($consec131049 >= self::STOP_AFTER_CONSEC_131049) {
-                Log::warning('Stopping early due to repeated 131049 throttles', [
-                    'consecutive_131049' => $consec131049,
-                    'batches_sent'       => $i+1,
-                ]);
+                Log::warning('Stopping due to repeated 131049', ['consecutive_131049'=>$consec131049, 'batches_sent'=>$i+1]);
                 break;
             }
 
-            if ($i < ceil($total / self::BATCH_SIZE) - 1) {
-                $sleepMs = random_int(self::SLEEP_MIN_MS, self::SLEEP_MAX_MS);
-                usleep($sleepMs * 1000);
+            if ($i < ceil(count($eligible) / self::BATCH_SIZE) - 1) {
+                usleep(random_int(self::SLEEP_MIN_MS, self::SLEEP_MAX_MS) * 1000);
             }
         }
 
         if (empty($failures)) {
-            return back()->with('success', "WhatsApp queued to $queued / $total recipients.");
+            return back()->with('success', "WhatsApp queued to $queued / ".count($eligible)." eligible recipients. Suppressed: ".count($suppressed));
         }
 
-        // Summarize top failure reasons
+        // summarize
         $reasonCounts = [];
         foreach ($failures as $f) {
             $k = (string)($f['reason'] ?? 'send_failed');
@@ -224,26 +253,22 @@ class AdminWhatsappMessageController extends Controller
         arsort($reasonCounts);
         $top = array_slice(array_map(fn($k,$v)=>"$k ($v)", array_keys($reasonCounts), $reasonCounts), 0, 3);
 
-        return back()->with('error', "Queued $queued / $total. Some sends were throttled: ".implode('; ', $top).". Check logs for details.");
+        return back()->with('error', "Queued $queued / ".count($eligible).". Suppressed: ".count($suppressed).". Issues: ".implode('; ', $top).". Check logs.");
     }
 
-    /* ===== 131049 helpers ===== */
-
-    private function applyCooldownAndRetry(string $msisdn, string $tplName, array $components, string $forceType): void
+    private function applyCooldownAndRetry(string $msisdn, string $tplName, array $components, string $messageType): void
     {
-        // backoff hours (6 -> 12 -> 24 -> 24...)
         $prev   = (int) (Cache::get(self::backoffKey($msisdn)) ?? 0);
         $hours  = $prev > 0 ? min((int)ceil($prev * self::BACKOFF_MULTIPLIER), self::BACKOFF_MAX_HOURS) : self::INITIAL_BACKOFF_HOURS;
 
         Cache::put(self::cooldownKey($msisdn), now()->addHours($hours)->timestamp, now()->addHours($hours));
         Cache::put(self::backoffKey($msisdn),  $hours, now()->addDays(2));
 
-        // schedule a retry via queue
         SendWhatsappTemplateJob::dispatch(
             $msisdn,
             $tplName,
             $components,
-            $forceType,
+            $messageType,
             self::MSG91_AUTHKEY,
             self::INTEGRATED_NUMBER,
             self::TEMPLATE_NAMESPACE,
@@ -252,8 +277,7 @@ class AdminWhatsappMessageController extends Controller
         )->delay(now()->addHours($hours));
     }
 
-    /* ===== Utils ===== */
-
+    // utils
     private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
     {
         $raw    = (string) $raw;
@@ -264,21 +288,16 @@ class AdminWhatsappMessageController extends Controller
         if (strlen($digits) >= 11)                                    return $digits;
         return null;
     }
-
     private function oneLine(string $s): string
     {
         $s = str_replace(["\r","\n"], ' ', $s);
         return trim(preg_replace('/\s+/u',' ', $s));
     }
-
     private function normalizeButtonParam(string $input): string
     {
-        // Accept either the token (ABC123) or full URL (.../ABC123); return ONLY the token for {{1}}
         $clean = $this->oneLine($input);
         if ($clean === '') return '';
-        if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) {
-            $clean = $m[1];
-        }
+        if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) $clean = $m[1];
         $clean = ltrim($clean, " /");
         $clean = preg_replace('/\s+/', '-', $clean);
         return trim($clean);
