@@ -398,43 +398,50 @@
                             @endforelse
                         </td>
                         <td>
-                            @php$s = strtolower($item->status ?? '');
-                                $cls = 'status-badge--info';
-                                if (
-                                    in_array($s, [
-                                        'success',
-                                        'completed',
-                                        'complete',
-                                        'active',
-                                        'ok',
-                                        'paid',
-                                        'delivered',
-                                        'resume',
-                                    ])
-                                ) {
-                                    $cls = 'status-badge--success';
-                                } elseif (
-                                    in_array($s, [
-                                        'pending',
-                                        'processing',
-                                        'in-progress',
-                                        'on hold',
-                                        'hold',
-                                        'awaiting',
-                                    ])
-                                ) {
-                                    $cls = 'status-badge--warning';
-                                } elseif (
-                                    in_array($s, ['cancel', 'cancelled', 'failed', 'rejected', 'expired', 'unpaid'])
-                                ) {
-                                    $cls = 'status-badge--danger';
-                                } elseif (in_array($s, ['new', 'created', 'open'])) {
-                                    $cls = 'status-badge--neutral';
-                                }
-                            @endphp
-                            <span
-                                class="status-badge {{ $cls }}">{{ $item->status ? ucfirst($item->status) : '—' }}</span>
-                        </td>
+    @php
+        $s = strtolower($item->status ?? '');
+        $map = [
+            // success-ish
+            'success'   => 'status-badge--success',
+            'completed' => 'status-badge--success',
+            'complete'  => 'status-badge--success',
+            'active'    => 'status-badge--success',
+            'ok'        => 'status-badge--success',
+            'paid'      => 'status-badge--success',
+            'delivered' => 'status-badge--success',
+            'resume'    => 'status-badge--success',
+
+            // warning-ish
+            'pending'     => 'status-badge--warning',
+            'processing'  => 'status-badge--warning',
+            'in-progress' => 'status-badge--warning',
+            'on hold'     => 'status-badge--warning',
+            'hold'        => 'status-badge--warning',
+            'awaiting'    => 'status-badge--warning',
+
+            // danger-ish
+            'cancel'   => 'status-badge--danger',
+            'cancelled'=> 'status-badge--danger',
+            'failed'   => 'status-badge--danger',
+            'rejected' => 'status-badge--danger',
+            'expired'  => 'status-badge--danger',
+            'unpaid'   => 'status-badge--danger',
+        ];
+
+        if (isset($map[$s])) {
+            $badgeClass = $map[$s];
+        } elseif (in_array($s, ['new', 'created', 'open'])) {
+            $badgeClass = 'status-badge--neutral';
+        } else {
+            $badgeClass = 'status-badge--info';
+        }
+    @endphp
+
+    <span class="status-badge {{ $badgeClass }}">
+        {{ $item->status ? ucfirst($item->status) : '—' }}
+    </span>
+</td>
+
                         <td class="text-end">₹{{ number_format((float) $item->total_price, 2) }}</td>
                     </tr>
                 @endforeach
