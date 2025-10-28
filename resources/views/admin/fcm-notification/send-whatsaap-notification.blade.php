@@ -29,8 +29,8 @@
 @section('content')
     @php
         // Hard-coded UX flags (no .env)
-        $requiresParam = false; // set TRUE if your template has a URL button {{ 1 }}
-        $buttonBase = ''; // e.g. 'https://example.com/open/'
+        $requiresParam = true; // ✅ required by your template
+        $buttonBase = ''; // set if you want to show base in help text
         $senderLabel = '+919124420330';
     @endphp
 
@@ -91,8 +91,8 @@
                             </label>
                             <input type="text" name="button_url_value" class="form-control"
                                 value="{{ old('button_url_value') }}"
-                                placeholder="e.g., ABC123{{ $buttonBase ? ' or ' . $buttonBase . 'ABC123' : '' }}"
-                                {{ $requiresParam ? 'required' : '' }}>
+                                placeholder="e.g., ABC123{{ $buttonBase ? ' or ' . $buttonBase . 'ABC123' : '' }}" required>
+
                             @if ($buttonBase)
                                 <div class="form-text">
                                     If your button URL in MSG91 looks like

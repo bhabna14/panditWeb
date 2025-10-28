@@ -11,18 +11,21 @@ use GuzzleHttp\Client as HttpClient; // make sure Guzzle is used (composer requi
 
 class AdminWhatsappMessageController extends Controller
 {
-    // === HARD-CODED CONFIG (NO .env) ===
-    private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
+     private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
     private const INTEGRATED_NUMBER   = '919124420330'; // digits only (no +)
     private const TEMPLATE_NAME       = 'flower_wp_message';
     private const TEMPLATE_NAMESPACE  = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
     private const LANGUAGE_CODE       = 'en_US';
     private const ENDPOINT_BULK       = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // Template knobs (set according to the approval in MSG91)
-    private const BODY_FIELDS         = 0;     // ✅ your template expects 0 body params
-    private const REQUIRES_URL_PARAM  = false; // set true ONLY if your button has {{1}} param
-    private const DEFAULT_CC          = '91';  // CC to prepend to 10-digit numbers
+    // Template knobs (match your MSG91 approval exactly)
+    private const BODY_FIELDS         = 0;      // ✅ your template body has 0 params
+    private const REQUIRES_URL_PARAM  = true;   // ✅ button index 0 is URL and requires {{1}}
+    private const DEFAULT_CC          = '91';   // for 10-digit local numbers
+
+    // Optional: if your button URL is something like https://example.com/p/@{{1}}
+    // set this to 'https://example.com/p/' and we will strip it; otherwise leave ''.
+    private const BUTTON_BASE         = '';
 
     public function whatsappcreate(Request $request)
     {
@@ -43,9 +46,8 @@ class AdminWhatsappMessageController extends Controller
             'audience'         => ['required', Rule::in(['all','selected'])],
             'user'             => ['nullable','array'],
             'user.*'           => ['nullable','string'],
-            // title/description are still collected by your form, but will NOT be sent as body params
-            'title'            => ['required','string','max:255'],
-            'description'      => ['required','string'],
+            'title'            => ['required','string','max:255'],     // collected but not sent to body
+            'description'      => ['required','string'],               // collected but not sent to body
             'button_url_value' => [self::REQUIRES_URL_PARAM ? 'required' : 'nullable','string','max:2000'],
         ]);
 
@@ -74,29 +76,24 @@ class AdminWhatsappMessageController extends Controller
         // Build components EXACTLY as per template approval
         $components = [];
 
-        // Do NOT push body_* components because template has 0 localizable params
+        // DO NOT send body_* because BODY_FIELDS = 0
         if (self::BODY_FIELDS === 1) {
-            $titleClean = $this->oneLine((string)$validated['title']);
-            $descClean  = $this->oneLine((string)$validated['description']);
-            $components['body_1'] = ['type' => 'text', 'value' => $titleClean . ' — ' . $descClean];
+            $components['body_1'] = ['type' => 'text', 'value' => $this->oneLine((string)$validated['title'])];
         } elseif (self::BODY_FIELDS === 2) {
-            $titleClean = $this->oneLine((string)$validated['title']);
-            $descClean  = $this->oneLine((string)$validated['description']);
-            $components['body_1'] = ['type' => 'text', 'value' => $titleClean];
-            $components['body_2'] = ['type' => 'text', 'value' => $descClean];
+            $components['body_1'] = ['type' => 'text', 'value' => $this->oneLine((string)$validated['title'])];
+            $components['body_2'] = ['type' => 'text', 'value' => $this->oneLine((string)$validated['description'])];
         }
-        // else BODY_FIELDS === 0 => leave components empty
 
-        // Optional button parameter {{1}} (only if your template has it)
+        // ✅ URL button with required {{1}}
         if (self::REQUIRES_URL_PARAM) {
-            $param = $this->normalizeButtonParam((string)($validated['button_url_value'] ?? ''), '');
-            if ($param === '') {
+            $token = $this->normalizeButtonParam((string)($validated['button_url_value'] ?? ''), self::BUTTON_BASE);
+            if ($token === '') {
                 return back()->with('error', 'URL button requires a parameter (template has {{1}}).')->withInput();
             }
             $components['button_1'] = [
                 'subtype' => 'url',
                 'type'    => 'text',
-                'value'   => $param,
+                'value'   => $token,         // MSG91 expects ONLY the token for {{1}}
             ];
         }
 
@@ -116,7 +113,7 @@ class AdminWhatsappMessageController extends Controller
                     'namespace' => self::TEMPLATE_NAMESPACE,
                     'to_and_components' => [[
                         'to'         => array_map(fn($n) => preg_replace('/\D+/', '', $n), $toMsisdns),
-                        'components' => $components, // will be [] if body/buttons not used
+                        'components' => $components, // includes button_1 with token
                     ]],
                 ],
             ],
@@ -183,14 +180,23 @@ class AdminWhatsappMessageController extends Controller
 
     private function normalizeButtonParam(string $input, string $base): string
     {
+        // Accepts either the token (ABC123) or a full URL (https://.../ABC123).
+        // Returns ONLY the token for MSG91 {{1}}.
         $clean = $this->oneLine($input);
         if ($clean === '') return '';
+
         if ($base !== '') {
             $baseNorm = rtrim($base, '/') . '/';
             if (stripos($clean, $baseNorm) === 0) {
                 $clean = substr($clean, strlen($baseNorm));
             }
+        } else {
+            // try to strip any trailing path if a full URL is given
+            if (preg_match('~^https?://[^/]+/(.+)$~i', $clean, $m)) {
+                $clean = $m[1];
+            }
         }
+
         $clean = ltrim($clean, " /");
         $clean = preg_replace('/\s+/', '-', $clean);
         return trim($clean);
