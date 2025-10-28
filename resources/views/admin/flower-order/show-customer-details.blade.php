@@ -240,7 +240,6 @@
 @endsection
 
 @section('content')
-   
     <!-- Profile Header -->
     <div class="row mt-4 mb-3">
         <div class="col-12">
@@ -291,6 +290,14 @@
                                         : 'NA' }}
                                 </span>
                             </span>
+                            <span class="rowline">
+                                <i class="bi bi-clock-history"></i>
+                                <strong>Last Login:</strong>
+                                <span class="ms-1">
+                                    {{ $lastLogin ? $lastLogin->format('M j, Y, h:i A') : 'NA' }}
+                                </span>
+                            </span>
+
                         </div>
                     </div>
                 </div>

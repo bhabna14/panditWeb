@@ -23,6 +23,7 @@ use Yajra\DataTables\Facades\DataTables; // ✅ Correct import
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Models\UserDevice; // ✅ add this
 
 
 class FlowerOrderController extends Controller
@@ -396,7 +397,7 @@ class FlowerOrderController extends Controller
         return view('admin.layouts.components.app-header', compact('notifications'));
     }
         
-    public function showCustomerDetails($userid)
+   public function showCustomerDetails($userid)
     {
         // User by business key `userid`
         $user = User::where('userid', $userid)->firstOrFail();
@@ -423,12 +424,11 @@ class FlowerOrderController extends Controller
                 'flowerProduct',
                 'user',
                 'address',
-                'flowerRequestItems',   // IMPORTANT for garland details
+                'flowerRequestItems',
             ])
             ->orderBy('id', 'desc')
             ->get();
 
-        // Attach the order (if exists) for each request to show price fields
         foreach ($pendingRequests as $request) {
             $request->setRelation(
                 'order',
@@ -441,12 +441,23 @@ class FlowerOrderController extends Controller
         $ongoingOrders = Subscription::where('user_id', $userid)->where('status', 'active')->count();
         $totalSpend    = FlowerPayment::where('user_id', $userid)->sum('paid_amount');
 
-        // NEW: Total Refer (number of distinct users who claimed this user's offer)
+        // Total Refer (distinct users who claimed this user's offer)
         $totalRefer = ReferOfferClaim::whereHas('offer', function ($q) use ($userid) {
-                $q->where('user_id', $userid); // the offer belongs to this user (referrer)
+                $q->where('user_id', $userid);
             })
             ->distinct('user_id')
             ->count('user_id');
+
+        // ✅ Last Login Time (authorized devices only), using business key `userid`
+        $lastLoginRaw = UserDevice::authorized()
+            ->where('user_id', $userid)
+            ->max('last_login_time'); // could be null
+
+        // Normalize to app timezone string (for easy formatting in Blade)
+        $tz = config('app.timezone', 'Asia/Kolkata');
+        $lastLogin = $lastLoginRaw
+            ? Carbon::parse($lastLoginRaw)->timezone($tz)
+            : null;
 
         return view(
             'admin.flower-order.show-customer-details',
@@ -458,7 +469,8 @@ class FlowerOrderController extends Controller
                 'totalOrders',
                 'ongoingOrders',
                 'totalSpend',
-                'totalRefer'
+                'totalRefer',
+                'lastLogin' // ✅ pass to view
             )
         );
     }
