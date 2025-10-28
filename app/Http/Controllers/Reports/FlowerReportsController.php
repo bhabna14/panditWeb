@@ -23,49 +23,119 @@ class FlowerReportsController extends Controller
 {
 public function subscriptionReport(Request $request)
 {
-    if ($request->ajax()) {
-        // Main Query
-        $query = Subscription::with([
+    // CSV export flag
+    $wantsCsv = $request->boolean('export') && $request->get('export') === 'csv';
+
+    if ($request->ajax() || $wantsCsv) {
+        // ---------- DATE FILTER (single source of truth) ----------
+        $from = $request->filled('from_date')
+            ? Carbon::parse($request->from_date)->startOfDay()
+            : Carbon::now()->startOfMonth();
+
+        $to = $request->filled('to_date')
+            ? Carbon::parse($request->to_date)->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        // ---------- BASE QUERY FOR TABLE (filter by purchase period = start_date) ----------
+        $baseQuery = Subscription::with([
             'order.address.localityDetails',
             'flowerPayments',
             'users.addressDetails',
             'flowerProducts',
-            'latestPayment',       // fallback
-            'latestPaidPayment',   // preferred
-        ])->orderBy('id', 'desc');
+            'latestPayment',
+            'latestPaidPayment',
+        ])
+        ->whereBetween('start_date', [$from, $to])
+        ->orderBy('id', 'desc');
 
-        $from = $request->filled('from_date') ? Carbon::parse($request->from_date)->startOfDay() : Carbon::now()->startOfMonth();
-        $to   = $request->filled('to_date')   ? Carbon::parse($request->to_date)->endOfDay()   : Carbon::now()->endOfMonth();
+        // We also need the actual rows now to compute KPIs consistently with the table
+        // (Do NOT mutate $baseQuery; clone it for materialization)
+        $subscriptions = (clone $baseQuery)->get();
 
-        $query->whereBetween('start_date', [$from, $to]);
+        // ---------- MAP: user_id => first-ever subscription id ----------
+        // This is stable and cheap (one grouped query).
+        $firstIds = Subscription::select('user_id', DB::raw('MIN(id) as first_id'))
+            ->groupBy('user_id')
+            ->pluck('first_id', 'user_id'); // [user_id => first_id]
 
-        $subscriptions = $query->get();
+        // ---------- KPI COMPUTATION (guaranteed add up) ----------
+        $totalPrice = 0.0;
+        $newUserPrice = 0.0;    // first-ever subs falling in the filtered range
+        $renewUserPrice = 0.0;  // all other subs falling in the filtered range
 
-        // Total Price
-        $totalPrice = $subscriptions->sum(fn($sub) => $sub->order->total_price ?? 0);
+        foreach ($subscriptions as $sub) {
+            $price = (float) ($sub->order->total_price ?? 0);
+            $totalPrice += $price;
 
-        // New User Subscriptions (within date range)
-        $newUserPrice = Subscription::whereBetween('created_at', [$from, $to])
-            ->whereIn('user_id', function ($subQuery) {
-                $subQuery->select('user_id')
-                    ->from('subscriptions')
-                    ->groupBy('user_id')
-                    ->havingRaw('COUNT(*) = 1');
-            })
-            ->where('status', '!=', 'expired')
-            ->get()
-            ->sum(fn($sub) => $sub->order->total_price ?? 0);
+            $isFirstEver = isset($firstIds[$sub->user_id]) && ((int)$firstIds[$sub->user_id] === (int)$sub->id);
+            if ($isFirstEver) {
+                $newUserPrice += $price;
+            } else {
+                $renewUserPrice += $price;
+            }
+        }
 
-        // Renewed Users (within date range)
-        $renewPrice = Subscription::whereBetween('created_at', [$from, $to])
-            ->whereIn('order_id', function ($q) {
-                $q->select('order_id')->from('subscriptions')->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
-            })
-            ->get()
-            ->sum(fn($sub) => $sub->order->total_price ?? 0);
+        // ---------- OPTIONAL: CSV EXPORT FOR THE SAME FILTER ----------
+        if ($wantsCsv) {
+            $filename = 'subscription-report-' . $from->toDateString() . '_to_' . $to->toDateString() . '.csv';
 
-        // DataTable response
-        $dataTable = DataTables::of($query)
+            $headers = [
+                'Content-Type'        => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
+
+            $callback = function () use ($subscriptions, $firstIds, $totalPrice, $newUserPrice, $renewUserPrice) {
+                $out = fopen('php://output', 'w');
+
+                // Header rows with KPIs
+                fputcsv($out, ['Total Subscription Revenue', number_format($totalPrice, 2, '.', '')]);
+                fputcsv($out, ['Renew Customers Revenue', number_format($renewUserPrice, 2, '.', '')]);
+                fputcsv($out, ['New Subscriptions Revenue', number_format($newUserPrice, 2, '.', '')]);
+                fputcsv($out, []); // blank line
+
+                // Table header
+                fputcsv($out, [
+                    'Customer Name', 'Mobile', 'Apartment/Flat No', 'Apartment Name', 'Locality',
+                    'Purchase Start', 'Purchase End', 'Duration (days, inclusive)',
+                    'Payment Method', 'Price', 'Status', 'Type (NEW/RENEW)'
+                ]);
+
+                foreach ($subscriptions as $row) {
+                    $user   = $row->users;
+                    $addr   = $user?->addressDetails;
+                    $start  = $row->start_date ? Carbon::parse($row->start_date) : null;
+                    $end    = $row->end_date ? Carbon::parse($row->end_date) : null;
+                    $days   = ($start && $end) ? $start->diffInDays($end) + 1 : 0;
+                    $method = $row->latestPaidPayment->payment_method
+                              ?? $row->latestPayment->payment_method
+                              ?? null;
+                    $price  = (float) ($row->order->total_price ?? 0);
+                    $type   = (isset($firstIds[$row->user_id]) && ((int)$firstIds[$row->user_id] === (int)$row->id)) ? 'NEW' : 'RENEW';
+
+                    fputcsv($out, [
+                        $user->name ?? 'N/A',
+                        $user->mobile_number ?? 'N/A',
+                        $addr->apartment_flat_plot ?? '',
+                        $addr->apartment_name ?? '',
+                        $addr->locality ?? '',
+                        $start?->format('Y-m-d') ?? '',
+                        $end?->format('Y-m-d') ?? '',
+                        $days,
+                        $method ?: '',
+                        number_format($price, 2, '.', ''),
+                        ucfirst($row->status ?? ''),
+                        $type,
+                    ]);
+                }
+
+                fclose($out);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        // ---------- DATATABLES (serverSide) ----------
+        $dataTable = DataTables::of($baseQuery)
             ->addColumn('user', function ($row) {
                 $user = $row->users;
                 return [
@@ -87,26 +157,28 @@ public function subscriptionReport(Request $request)
                 'start' => $row->start_date,
                 'end'   => $row->end_date
             ])
-            // Inclusive duration (+1 day)
-            ->addColumn('duration', fn($row) => Carbon::parse($row->start_date)->diffInDays(Carbon::parse($row->end_date)) + 1)
-            ->addColumn('price', fn($row) => $row->order->total_price ?? 0)
-            // NEW: Payment method (prefer latest paid, else latest)
+            ->addColumn('duration', fn($row) =>
+                Carbon::parse($row->start_date)->diffInDays(Carbon::parse($row->end_date)) + 1
+            )
+            ->addColumn('price', fn($row) => (float)($row->order->total_price ?? 0))
             ->addColumn('payment_method', function ($row) {
                 return $row->latestPaidPayment->payment_method
-                       ?? $row->latestPayment->payment_method
-                       ?? null;
+                    ?? $row->latestPayment->payment_method
+                    ?? null;
             })
             ->addColumn('status', fn($row) => ucfirst($row->status))
             ->make(true);
 
+        // Inject KPIs that now ALWAYS add up
         $json = $dataTable->getData(true);
-        $json['total_price']     = $totalPrice;
-        $json['new_user_price']  = $newUserPrice;
-        $json['renew_user_price']= $renewPrice;
+        $json['total_price']       = round($totalPrice, 2);
+        $json['new_user_price']    = round($newUserPrice, 2);
+        $json['renew_user_price']  = round($renewUserPrice, 2);
 
         return response()->json($json);
     }
 
+    // Initial page (Blade)
     return view('admin.reports.flower-subscription-report');
 }
 
