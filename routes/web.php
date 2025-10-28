@@ -58,6 +58,7 @@ use App\Http\Controllers\Admin\SubscriptionPackageEstimateController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\TomorrowSubscriptionsController;
 use App\Http\Controllers\Admin\WeeklyReportController;
+use App\Http\Controllers\Admin\AdminWhatsappMessageController;
 use App\Http\Controllers\Admin\FlowerDetailsController;
 use App\Http\Controllers\Admin\OfficeLedgerController; // Optional if you created a separate ledger page
 
@@ -609,8 +610,8 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
     Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
     Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
     Route::post('/notifications/resend/{id}', [AdminNotificationController::class, 'resend'])->name('admin.notifications.resend');
-    Route::get('/whatsapp-notification', [AdminNotificationController::class, 'whatsappcreate'])->name('whatsapp-notification.create');
-    Route::post('/whatsapp-notification/send', [AdminNotificationController::class, 'whatsappSend'])->name('whatsapp-notification.send');
+    Route::get('/whatsapp-notification', [AdminWhatsappMessageController::class, 'whatsappcreate'])->name('whatsapp-notification.create');
+    Route::post('/whatsapp-notification/send', [AdminWhatsappMessageController::class, 'whatsappSend'])->name('whatsapp-notification.send');
             
 
     Route::controller(YoutubeController::class)->group(function() {
