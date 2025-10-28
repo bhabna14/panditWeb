@@ -43,48 +43,211 @@
             transition: transform .18s ease, box-shadow .18s ease;
         }
 
-        .stats-card:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(2, 6, 23, .12); }
-        .stats-card .card-title { color: var(--muted); font-weight: 600; letter-spacing: .2px; }
-        .stats-card .fw-bold { font-weight: 800 !important; }
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(2, 6, 23, .12);
+        }
 
-        .filter-wrap { border-radius: 16px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--sh-sm); padding: 16px; }
-        .form-label { color: var(--muted); font-weight: 600; }
-        .form-control, .form-select { border-radius: 12px; border-color: var(--border); }
-        .select2-container .select2-selection--single { height: 38px; border-radius: 12px; border: 1px solid var(--border); }
-        .select2-selection__rendered { line-height: 36px !important; padding-left: 12px !important; }
-        .select2-selection__arrow { height: 36px !important; }
+        .stats-card .card-title {
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: .2px;
+        }
 
-        .chip { display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .8rem; border-radius: 999px; background: #fff; border: 1px dashed var(--border); color: #334155; font-weight: 700; font-size: .85rem; cursor: pointer; transition: all .15s ease; }
-        .chip:hover { border-color: var(--indigo); color: var(--indigo); }
-        .chip.active { background: linear-gradient(90deg, var(--indigo), var(--cyan)); border-color: transparent; color: #0e0e0e; box-shadow: 0 6px 16px rgba(14, 197, 215, .25); }
+        .stats-card .fw-bold {
+            font-weight: 800 !important;
+        }
 
-        .btn-grad { border: none; color: #fff; font-weight: 800; letter-spacing: .2px; background-image: linear-gradient(90deg, var(--indigo), var(--cyan)); border-radius: 999px; box-shadow: 0 6px 18px rgba(14, 197, 215, .25); }
-        .btn-grad:hover { filter: brightness(.96); }
-        .btn-reset { color: #6b7280; font-weight: 700; }
-        .btn-reset:hover { color: #374151; }
+        .filter-wrap {
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            box-shadow: var(--sh-sm);
+            padding: 16px;
+        }
 
-        .vendor-card { position: relative; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--sh-sm); height: 100%; transition: transform .15s ease, box-shadow .15s ease; cursor: pointer; }
-        .vendor-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(2, 6, 23, .10); }
-        .vendor-title { font-weight: 800; margin-bottom: .4rem; }
-        .vendor-sub { color: var(--muted); font-size: .85rem; }
-        .vendor-amount { font-size: 1.25rem; font-weight: 900; }
-        .vendor-chip { display: inline-block; padding: .25rem .6rem; border-radius: 999px; background: #F3F6FF; border: 1px dashed var(--border); font-size: .75rem; font-weight: 700; color: #334155; }
+        .form-label {
+            color: var(--muted);
+            font-weight: 600;
+        }
 
-        .export-table .dataTables_wrapper .dt-buttons .btn { margin-left: .4rem; }
-        .table { border-color: var(--border) !important; }
-        .table thead th { background: #F3F6FF !important; border-bottom: 1px solid var(--border) !important; color: #0F172A; font-weight: 800; }
-        .table-hover tbody tr:hover { background: #F8FBFF; }
+        .form-control,
+        .form-select {
+            border-radius: 12px;
+            border-color: var(--border);
+        }
 
-        .status-badge { padding: .38rem .68rem; border-radius: 999px; font-weight: 800; font-size: .78rem; color: #fff; border: 1px solid transparent; display: inline-block; }
-        .status-badge--success { background: #0E9F6E; border-color: #0A6B4B; }
-        .status-badge--warning { background: #D97706; border-color: #B65F04; }
-        .status-badge--danger  { background: #DC2626; border-color: #A51B1B; }
-        .status-badge--info    { background: #1D4ED8; border-color: #153AA3; }
-        .status-badge--neutral { background: #334155; border-color: #1F2937; }
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .select2-selection__rendered {
+            line-height: 36px !important;
+            padding-left: 12px !important;
+        }
+
+        .select2-selection__arrow {
+            height: 36px !important;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .45rem .8rem;
+            border-radius: 999px;
+            background: #fff;
+            border: 1px dashed var(--border);
+            color: #334155;
+            font-weight: 700;
+            font-size: .85rem;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+        .chip:hover {
+            border-color: var(--indigo);
+            color: var(--indigo);
+        }
+
+        .chip.active {
+            background: linear-gradient(90deg, var(--indigo), var(--cyan));
+            border-color: transparent;
+            color: #0e0e0e;
+            box-shadow: 0 6px 16px rgba(14, 197, 215, .25);
+        }
+
+        .btn-grad {
+            border: none;
+            color: #fff;
+            font-weight: 800;
+            letter-spacing: .2px;
+            background-image: linear-gradient(90deg, var(--indigo), var(--cyan));
+            border-radius: 999px;
+            box-shadow: 0 6px 18px rgba(14, 197, 215, .25);
+        }
+
+        .btn-grad:hover {
+            filter: brightness(.96);
+        }
+
+        .btn-reset {
+            color: #6b7280;
+            font-weight: 700;
+        }
+
+        .btn-reset:hover {
+            color: #374151;
+        }
+
+        .vendor-card {
+            position: relative;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--sh-sm);
+            height: 100%;
+            transition: transform .15s ease, box-shadow .15s ease;
+            cursor: pointer;
+        }
+
+        .vendor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(2, 6, 23, .10);
+        }
+
+        .vendor-title {
+            font-weight: 800;
+            margin-bottom: .4rem;
+        }
+
+        .vendor-sub {
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        .vendor-amount {
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+
+        .vendor-chip {
+            display: inline-block;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            background: #F3F6FF;
+            border: 1px dashed var(--border);
+            font-size: .75rem;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        .export-table .dataTables_wrapper .dt-buttons .btn {
+            margin-left: .4rem;
+        }
+
+        .table {
+            border-color: var(--border) !important;
+        }
+
+        .table thead th {
+            background: #F3F6FF !important;
+            border-bottom: 1px solid var(--border) !important;
+            color: #0F172A;
+            font-weight: 800;
+        }
+
+        .table-hover tbody tr:hover {
+            background: #F8FBFF;
+        }
+
+        .status-badge {
+            padding: .38rem .68rem;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: .78rem;
+            color: #fff;
+            border: 1px solid transparent;
+            display: inline-block;
+        }
+
+        .status-badge--success {
+            background: #0E9F6E;
+            border-color: #0A6B4B;
+        }
+
+        .status-badge--warning {
+            background: #D97706;
+            border-color: #B65F04;
+        }
+
+        .status-badge--danger {
+            background: #DC2626;
+            border-color: #A51B1B;
+        }
+
+        .status-badge--info {
+            background: #1D4ED8;
+            border-color: #153AA3;
+        }
+
+        .status-badge--neutral {
+            background: #334155;
+            border-color: #1F2937;
+        }
 
         /* clickable vendor in table */
-        .link-vendor { font-weight: 700; text-decoration: none; }
-        .link-vendor:hover { text-decoration: underline; }
+        .link-vendor {
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .link-vendor:hover {
+            text-decoration: underline;
+        }
     </style>
 @endsection
 
@@ -224,7 +387,8 @@
                                 $vName = $item->vendor->vendor_name ?? '—';
                             @endphp
                             @if ($vId && $vName !== '—')
-                                <a href="#" class="link-vendor" data-vendor-id="{{ $vId }}">{{ $vName }}</a>
+                                <a href="#" class="link-vendor"
+                                    data-vendor-id="{{ $vId }}">{{ $vName }}</a>
                             @else
                                 —
                             @endif
@@ -248,17 +412,40 @@
                             @php $s = strtolower($item->status ?? ''); @endphp
                             @php
                                 $cls = 'status-badge--info';
-                                if (in_array($s, ['success','completed','complete','active','ok','paid','delivered','resume'])) {
+                                if (
+                                    in_array($s, [
+                                        'success',
+                                        'completed',
+                                        'complete',
+                                        'active',
+                                        'ok',
+                                        'paid',
+                                        'delivered',
+                                        'resume',
+                                    ])
+                                ) {
                                     $cls = 'status-badge--success';
-                                } elseif (in_array($s, ['pending','processing','in-progress','on hold','hold','awaiting'])) {
+                                } elseif (
+                                    in_array($s, [
+                                        'pending',
+                                        'processing',
+                                        'in-progress',
+                                        'on hold',
+                                        'hold',
+                                        'awaiting',
+                                    ])
+                                ) {
                                     $cls = 'status-badge--warning';
-                                } elseif (in_array($s, ['cancel','cancelled','failed','rejected','expired','unpaid'])) {
+                                } elseif (
+                                    in_array($s, ['cancel', 'cancelled', 'failed', 'rejected', 'expired', 'unpaid'])
+                                ) {
                                     $cls = 'status-badge--danger';
-                                } elseif (in_array($s, ['new','created','open'])) {
+                                } elseif (in_array($s, ['new', 'created', 'open'])) {
                                     $cls = 'status-badge--neutral';
                                 }
                             @endphp
-                            <span class="status-badge {{ $cls }}">{{ $item->status ? ucfirst($item->status) : '—' }}</span>
+                            <span
+                                class="status-badge {{ $cls }}">{{ $item->status ? ucfirst($item->status) : '—' }}</span>
                         </td>
                         <td class="text-end">₹{{ number_format((float) $item->total_price, 2) }}</td>
                     </tr>
@@ -288,30 +475,62 @@
     <script>
         $.fn.dataTable.ext.errMode = 'none';
 
-        function capFirst(str) { return (!str ? '—' : (str.charAt(0).toUpperCase() + str.slice(1))); }
-        function money(n) { n = parseFloat(n || 0); return '₹' + n.toFixed(2); }
-        function trim2(n) { return (parseFloat(n || 0)).toFixed(2).replace(/\.?0+$/, ''); }
+        function capFirst(str) {
+            return (!str ? '—' : (str.charAt(0).toUpperCase() + str.slice(1)));
+        }
+
+        function money(n) {
+            n = parseFloat(n || 0);
+            return '₹' + n.toFixed(2);
+        }
+
+        function trim2(n) {
+            return (parseFloat(n || 0)).toFixed(2).replace(/\.?0+$/, '');
+        }
 
         $(function() {
-            $('.select2').select2({ width: '100%' });
+            $('.select2').select2({
+                width: '100%'
+            });
 
-            const $from = $('#from_date'), $to = $('#to_date');
+            const $from = $('#from_date'),
+                $to = $('#to_date');
 
             function applyRange(key) {
                 const today = moment().startOf('day');
-                let start = today.clone(), end = today.clone();
+                let start = today.clone(),
+                    end = today.clone();
 
                 switch (key) {
-                    case 'today': break;
-                    case 'yesterday': start = today.clone().subtract(1,'day'); end = today.clone().subtract(1,'day'); break;
-                    case 'week': start = moment().startOf('isoWeek'); end = moment().endOf('isoWeek'); break;
-                    case 'month': start = moment().startOf('month'); end = moment().endOf('month'); break;
-                    case 'last30': start = moment().subtract(29,'days').startOf('day'); end = today.clone(); break;
+                    case 'today':
+                        break;
+                    case 'yesterday':
+                        start = today.clone().subtract(1, 'day');
+                        end = today.clone().subtract(1, 'day');
+                        break;
+                    case 'week':
+                        start = moment().startOf('isoWeek');
+                        end = moment().endOf('isoWeek');
+                        break;
+                    case 'month':
+                        start = moment().startOf('month');
+                        end = moment().endOf('month');
+                        break;
+                    case 'last30':
+                        start = moment().subtract(29, 'days').startOf('day');
+                        end = today.clone();
+                        break;
                     case 'fy': {
                         const y = moment().year();
-                        const fyStart = moment({ year: (moment().month() >= 3 ? y : y - 1), month: 3, date: 1 }).startOf('day');
-                        const fyEnd = fyStart.clone().add(1,'year').subtract(1,'day').endOf('day');
-                        start = fyStart; end = fyEnd; break;
+                        const fyStart = moment({
+                            year: (moment().month() >= 3 ? y : y - 1),
+                            month: 3,
+                            date: 1
+                        }).startOf('day');
+                        const fyEnd = fyStart.clone().add(1, 'year').subtract(1, 'day').endOf('day');
+                        start = fyStart;
+                        end = fyEnd;
+                        break;
                     }
                 }
 
@@ -327,7 +546,8 @@
             });
 
             $('#resetBtn').on('click', function() {
-                $from.val(''); $to.val('');
+                $from.val('');
+                $to.val('');
                 $('#vendor_id').val('').trigger('change');
                 $('#payment_mode').val('');
                 $('.chip').removeClass('active');
@@ -351,9 +571,9 @@
                 }
                 vendorSummaries.forEach(v => {
                     const name = v.vendor_name || '—',
-                          total = money(v.total_amount || 0),
-                          count = v.pickups_count || 0,
-                          last  = v.last_pickup ? moment(v.last_pickup).format('DD MMM YYYY') : '';
+                        total = money(v.total_amount || 0),
+                        count = v.pickups_count || 0,
+                        last = v.last_pickup ? moment(v.last_pickup).format('DD MMM YYYY') : '';
                     $wrap.append(`
                         <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
                             <div class="vendor-card" data-vendor-id="${v.vendor_id || ''}">
@@ -386,15 +606,37 @@
                 paging: true,
                 info: true,
                 dom: "<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" + "<'row'<'col-12'tr>>" +
-                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                buttons: [
-                    { extend: 'copyHtml5',  text: 'Copy',  className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'csvHtml5',   text: 'CSV',   className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'pdfHtml5',   text: 'PDF',   className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'print',      text: 'Print', className: 'btn btn-outline-secondary btn-sm' }
+                    "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                buttons: [{
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        className: 'btn btn-outline-secondary btn-sm'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        className: 'btn btn-outline-secondary btn-sm'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        className: 'btn btn-outline-secondary btn-sm'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        className: 'btn btn-outline-secondary btn-sm'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'btn btn-outline-secondary btn-sm'
+                    }
                 ],
-                columnDefs: [{ targets: 6, className: 'text-end' }]
+                columnDefs: [{
+                    targets: 6,
+                    className: 'text-end'
+                }]
             });
 
             // click-to-filter on vendor name inside the table
@@ -405,10 +647,10 @@
             });
 
             $('#searchBtn').on('click', function() {
-                const fromDate   = $from.val(),
-                      toDate     = $to.val(),
-                      vendorId   = $('#vendor_id').val(),
-                      paymentMode= $('#payment_mode').val();
+                const fromDate = $from.val(),
+                    toDate = $to.val(),
+                    vendorId = $('#vendor_id').val(),
+                    paymentMode = $('#payment_mode').val();
                 if (!fromDate || !toDate) {
                     Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
                     return;
@@ -429,31 +671,46 @@
 
                         (response.data || []).forEach(item => {
                             const items = (item.flower_pickup_items || []).map(i => {
-                                const name  = (i.flower && i.flower.name) ? i.flower.name : '—';
-                                const unit  = (i.unit && i.unit.unit_name) ? i.unit.unit_name : '';
-                                const qty   = trim2(i.quantity);
+                                const name = (i.flower && i.flower.name) ? i
+                                    .flower.name : '—';
+                                const unit = (i.unit && i.unit.unit_name) ? i
+                                    .unit.unit_name : '';
+                                const qty = trim2(i.quantity);
                                 const price = trim2(i.price || 0);
                                 return `${name} — ₹${price} (${qty} ${unit})`;
                             }).join('<br>');
 
-                            const t = (item.status || '').toString().trim().toLowerCase();
+                            const t = (item.status || '').toString().trim()
+                            .toLowerCase();
                             let cls = 'status-badge--info';
-                            if (['success','completed','complete','active','ok','paid','delivered','resume'].includes(t)) cls = 'status-badge--success';
-                            else if (['pending','processing','in-progress','on hold','hold','awaiting'].includes(t)) cls = 'status-badge--warning';
-                            else if (['cancel','cancelled','failed','rejected','expired','unpaid'].includes(t)) cls = 'status-badge--danger';
-                            else if (['new','created','open'].includes(t)) cls = 'status-badge--neutral';
+                            if (['success', 'completed', 'complete', 'active', 'ok',
+                                    'paid', 'delivered', 'resume'
+                                ].includes(t)) cls = 'status-badge--success';
+                            else if (['pending', 'processing', 'in-progress', 'on hold',
+                                    'hold', 'awaiting'
+                                ].includes(t)) cls = 'status-badge--warning';
+                            else if (['cancel', 'cancelled', 'failed', 'rejected',
+                                    'expired', 'unpaid'
+                                ].includes(t)) cls = 'status-badge--danger';
+                            else if (['new', 'created', 'open'].includes(t)) cls =
+                                'status-badge--neutral';
 
                             // ⬇️ clickable vendor cell; prefer nested vendor id, else fallback to item.vendor_id
-                            const vId   = (item.vendor && item.vendor.vendor_id) ? item.vendor.vendor_id : item.vendor_id;
-                            const vName = (item.vendor && item.vendor.vendor_name) ? item.vendor.vendor_name : null;
-                            const vendorCell = (vId && vName)
-                              ? `<a href="#" class="link-vendor" data-vendor-id="${vId}">${vName}</a>`
-                              : '—';
+                            const vId = (item.vendor && item.vendor.vendor_id) ? item
+                                .vendor.vendor_id : item.vendor_id;
+                            const vName = (item.vendor && item.vendor.vendor_name) ?
+                                item.vendor.vendor_name : null;
+                            const vendorCell = (vId && vName) ?
+                                `<a href="#" class="link-vendor" data-vendor-id="${vId}">${vName}</a>` :
+                                '—';
 
                             table.row.add([
-                                moment(item.pickup_date).isValid() ? moment(item.pickup_date).format('DD MMM YYYY') : (item.pickup_date || '—'),
+                                moment(item.pickup_date).isValid() ? moment(item
+                                    .pickup_date).format('DD MMM YYYY') : (item
+                                    .pickup_date || '—'),
                                 vendorCell,
-                                (item.rider && item.rider.rider_name) ? item.rider.rider_name : '—',
+                                (item.rider && item.rider.rider_name) ? item
+                                .rider.rider_name : '—',
                                 capFirst(item.paid_by),
                                 items || '—',
                                 `<span class="status-badge ${cls}">${capFirst(item.status || '—')}</span>`,
