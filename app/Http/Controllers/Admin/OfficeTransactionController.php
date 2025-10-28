@@ -19,9 +19,8 @@ class OfficeTransactionController extends Controller
         return view('admin.office-transaction-details'); // your blade file
     }
 
-    public function manageOfficeTransaction()
+      public function manageOfficeTransaction()
     {
-        // Default timezone safety
         $tz = config('app.timezone', 'Asia/Kolkata');
 
         $transactions = OfficeTransaction::query()
@@ -29,16 +28,13 @@ class OfficeTransactionController extends Controller
             ->orderByDesc('date')
             ->get(['id','date','categories','amount','mode_of_payment','paid_by','description']);
 
-        // All-time total (active)
         $rangeTotal = (float) OfficeTransaction::where('status','active')->sum('amount');
 
-        // Today’s total
         $today = Carbon::today($tz)->toDateString();
         $todayTotal = (float) OfficeTransaction::where('status','active')
             ->whereDate('date', $today)
             ->sum('amount');
 
-        // If you don’t have ledger totals yet, keep them zero to avoid Blade errors
         $ledgerInTotal  = 0.0;
         $ledgerOutTotal = 0.0;
         $ledgerNetTotal = 0.0;
@@ -56,7 +52,6 @@ class OfficeTransactionController extends Controller
     public function filter(Request $request)
     {
         try {
-            // Validate query params
             $v = Validator::make($request->query(), [
                 'from_date' => ['nullable','date_format:Y-m-d'],
                 'to_date'   => ['nullable','date_format:Y-m-d'],
@@ -75,7 +70,7 @@ class OfficeTransactionController extends Controller
 
             $from = $request->query('from_date');
             $to   = $request->query('to_date');
-            $cat  = $request->query('category'); // from the “Ledger Category” dropdown
+            $cat  = $request->query('category');
 
             if ($from && $to && $from > $to) {
                 return response()->json([
@@ -85,7 +80,6 @@ class OfficeTransactionController extends Controller
             }
 
             $q = OfficeTransaction::query()->where('status', 'active');
-
             if ($from) $q->whereDate('date', '>=', $from);
             if ($to)   $q->whereDate('date', '<=', $to);
             if ($cat)  $q->where('categories', $cat);
@@ -94,16 +88,13 @@ class OfficeTransactionController extends Controller
                 'id','date','categories','amount','mode_of_payment','paid_by','description'
             ]);
 
-            // Range total = sum of filtered rows
             $rangeTotal = (float) $transactions->sum('amount');
 
-            // Today total uses app timezone
             $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
             $todayTotal = (float) OfficeTransaction::where('status','active')
                 ->whereDate('date', $today)
                 ->sum('amount');
 
-            // Shape rows
             $list = $transactions->map(function ($t) {
                 return [
                     'id'              => $t->id,
@@ -116,7 +107,6 @@ class OfficeTransactionController extends Controller
                 ];
             })->values();
 
-            // Always success (even if empty)
             return response()->json([
                 'success'      => true,
                 'today_total'  => round($todayTotal, 2),
@@ -124,7 +114,6 @@ class OfficeTransactionController extends Controller
                 'transactions' => $list,
             ]);
         } catch (\Throwable $e) {
-            // Bubble up a clear message for the UI to show
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: '.$e->getMessage(),

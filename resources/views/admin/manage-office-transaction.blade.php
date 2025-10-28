@@ -384,61 +384,70 @@
                     {{-- ======= TRANSACTIONS TABLE ======= --}}
                     <div class="table-premium mb-5">
                         <div class="px-3 pt-3 note-muted">Payments (expenses going out)</div>
-                        <div class="table-responsive">
-                            <table id="file-datatable" class="table table-hover align-middle text-nowrap mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Sl No.</th>
-                                        <th>Date</th>
-                                        <th>Categories</th>
-                                        <th class="text-end">Amount</th>
-                                        <th>Mode</th>
-                                        <th>Paid By</th>
-                                        <th>Description</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="transactionsBody">
-                                    @foreach ($transactions as $transaction)
+
+                        <div id="tableWrap" class="position-relative">
+                            <!-- loader overlay -->
+                            <div id="tableLoading" class="position-absolute top-0 start-0 w-100 h-100 d-none"
+                                style="background: rgba(255,255,255,.7); z-index: 5;">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <div class="spinner-border" role="status" aria-hidden="true"></div>
+                                    <span class="ms-2">Loading…</span>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="file-datatable" class="table table-hover align-middle text-nowrap mb-0">
+                                    <thead>
                                         <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
-                                            <td><span
-                                                    class="badge-soft text-capitalize">{{ str_replace('_', ' ', $transaction->categories) }}</span>
-                                            </td>
-                                            <td class="text-end">₹{{ number_format($transaction->amount, 2) }}</td>
-                                            <td class="text-capitalize">{{ $transaction->mode_of_payment }}</td>
-                                            <td class="text-capitalize">{{ $transaction->paid_by }}</td>
-                                            <td>{{ $transaction->description }}</td>
-                                            <td class="d-flex gap-2">
-                                                <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
-                                                    data-bs-toggle="modal" data-bs-target="#editModal"
-                                                    data-id="{{ $transaction->id }}"
-                                                    data-date="{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}"
-                                                    data-categories="{{ $transaction->categories }}"
-                                                    data-amount="{{ $transaction->amount }}"
-                                                    data-mode_of_payment="{{ $transaction->mode_of_payment }}"
-                                                    data-paid_by="{{ $transaction->paid_by }}"
-                                                    data-description="{{ $transaction->description }}">
-                                                    Edit
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                                    data-id="{{ $transaction->id }}">
-                                                    Delete
-                                                </button>
-                                            </td>
+                                            <th>Sl No.</th>
+                                            <th>Date</th>
+                                            <th>Categories</th>
+                                            <th class="text-end">Amount</th>
+                                            <th>Mode</th>
+                                            <th>Paid By</th>
+                                            <th>Description</th>
+                                            <th>Action</th>
                                         </tr>
-                                    @endforeach
-                                </tbody>
-                                <tfoot class="table-light">
-                                    <tr>
-                                        <th colspan="3" class="text-end">Total (shown):</th>
-                                        <th class="text-end" id="tableShownTotal">—</th>
-                                        <th colspan="4"></th>
-                                    </tr>
-                                </tfoot>
-                            </table>
+                                    </thead>
+                                    <tbody id="transactionsBody">
+                                        @foreach ($transactions as $transaction)
+                                            <tr>
+                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
+                                                <td><span
+                                                        class="badge-soft text-capitalize">{{ str_replace('_', ' ', $transaction->categories) }}</span>
+                                                </td>
+                                                <td class="text-end">₹{{ number_format($transaction->amount, 2) }}</td>
+                                                <td class="text-capitalize">{{ $transaction->mode_of_payment }}</td>
+                                                <td class="text-capitalize">{{ $transaction->paid_by }}</td>
+                                                <td>{{ $transaction->description }}</td>
+                                                <td class="d-flex gap-2">
+                                                    <!-- buttons unchanged -->
+                                                    <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
+                                                        data-bs-toggle="modal" data-bs-target="#editModal"
+                                                        data-id="{{ $transaction->id }}"
+                                                        data-date="{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}"
+                                                        data-categories="{{ $transaction->categories }}"
+                                                        data-amount="{{ $transaction->amount }}"
+                                                        data-mode_of_payment="{{ $transaction->mode_of_payment }}"
+                                                        data-paid_by="{{ $transaction->paid_by }}"
+                                                        data-description="{{ $transaction->description }}">Edit</button>
+                                                    <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                        data-id="{{ $transaction->id }}">Delete</button>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <th colspan="3" class="text-end">Total (shown):</th>
+                                            <th class="text-end" id="tableShownTotal">—</th>
+                                            <th colspan="4"></th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
                         </div>
                     </div>
 
@@ -571,7 +580,6 @@
 
     <script>
         (function() {
-            // ===== Helpers =====
             const fmtINR = n => new Intl.NumberFormat('en-IN', {
                 style: 'currency',
                 currency: 'INR',
@@ -584,10 +592,10 @@
                 return x;
             };
 
-            // ===== Quick ranges =====
             const fromEl = document.getElementById('from_date');
             const toEl = document.getElementById('to_date');
             const catEl = document.getElementById('ledger_category');
+
             const today = new Date();
             const fyStart = () => {
                 const y = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
@@ -639,8 +647,13 @@
                 doSearch();
             });
 
-            // ===== DataTable init (Transactions) =====
             const tableEl = $('#file-datatable');
+            const body = document.getElementById('transactionsBody');
+            const todayCard = document.getElementById('todayPayment');
+            const rangeCard = document.getElementById('totalPaymentByDateRange');
+            const wrap = document.getElementById('tableWrap');
+            const loading = document.getElementById('tableLoading');
+
             let dt = null;
 
             function initDT() {
@@ -653,13 +666,15 @@
                         [1, 'desc']
                     ],
                     columnDefs: [{
-                        targets: [3],
-                        className: 'text-end'
-                    }, {
-                        targets: [7],
-                        orderable: false,
-                        searchable: false
-                    }],
+                            targets: [3],
+                            className: 'text-end'
+                        },
+                        {
+                            targets: [7],
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
                     dom: "<'row align-items-center mb-2'<'col-md-6'l><'col-md-6 text-end'B>>" +
                         "<'row'<'col-sm-12'tr>>" +
                         "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
@@ -688,13 +703,19 @@
                             className: 'btn btn-outline-brand',
                             title: 'Office Transactions'
                         }
-                    ]
+                    ],
+                    processing: true,
+                    language: {
+                        emptyTable: 'No records',
+                        processing: ''
+                    }
                 });
                 computeShownTotal();
                 dt.on('draw', computeShownTotal);
             }
 
             function computeShownTotal() {
+                if (!dt) return;
                 let sum = 0;
                 dt.rows({
                     page: 'current'
@@ -707,26 +728,25 @@
             }
             initDT();
 
-            // ===== Edit/Delete modal handlers =====
             document.body.addEventListener('click', function(e) {
                 const editBtn = e.target.closest('.btn-edit');
                 if (editBtn) {
                     const id = editBtn.getAttribute('data-id');
                     const date = editBtn.getAttribute('data-date');
-                    const categories = editBtn.getAttribute('data-categories');
+                    const cats = editBtn.getAttribute('data-categories');
                     const amount = editBtn.getAttribute('data-amount');
                     const mode = editBtn.getAttribute('data-mode_of_payment');
                     const paidBy = editBtn.getAttribute('data-paid_by');
-                    const description = editBtn.getAttribute('data-description') || '';
+                    const desc = editBtn.getAttribute('data-description') || '';
                     const editForm = document.getElementById('editForm');
                     editForm.action = "{{ route('officeTransactions.update', ['id' => '__ID__']) }}".replace(
                         '__ID__', id);
                     document.getElementById('edit_date').value = date;
-                    $('#edit_categories').val(categories).trigger('change');
+                    $('#edit_categories').val(cats).trigger('change');
                     document.getElementById('edit_amount').value = amount;
                     $('#edit_mode_of_payment').val((mode || '').toLowerCase()).trigger('change');
                     $('#edit_paid_by').val((paidBy || '').toLowerCase()).trigger('change');
-                    document.getElementById('edit_description').value = description;
+                    document.getElementById('edit_description').value = desc;
                 }
                 const delBtn = e.target.closest('.btn-delete');
                 if (delBtn) {
@@ -740,27 +760,13 @@
                 dropdownParent: $('#editModal')
             });
 
-            // ===== AJAX Filter (Transactions) =====
-            const btn = document.getElementById('searchBtn');
-            const body = document.getElementById('transactionsBody');
-            const todayCard = document.getElementById('todayPayment');
-            const rangeCard = document.getElementById('totalPaymentByDateRange');
-
-            function setLoadingState(loading) {
-                if (loading) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching…';
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    loading.classList.remove('d-none');
                     todayCard.classList.add('skeleton');
                     rangeCard.classList.add('skeleton');
-                    body.innerHTML = `<tr><td colspan="8">
-                        <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                        <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                        <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                        <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                    </td></tr>`;
                 } else {
-                    btn.disabled = false;
-                    btn.textContent = 'Search';
+                    loading.classList.add('d-none');
                     todayCard.classList.remove('skeleton');
                     rangeCard.classList.remove('skeleton');
                 }
@@ -770,40 +776,40 @@
                 const amountPretty = fmtINR(row.amount);
                 const catPretty = (row.categories || '').replace(/_/g, ' ');
                 return `
-                    <tr>
-                        <td>${sl}</td>
-                        <td>${row.date}</td>
-                        <td><span class="badge-soft text-capitalize">${catPretty}</span></td>
-                        <td class="text-end">${amountPretty}</td>
-                        <td class="text-capitalize">${row.mode_of_payment}</td>
-                        <td class="text-capitalize">${row.paid_by}</td>
-                        <td>${row.description ?? ''}</td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
-                                    data-bs-toggle="modal" data-bs-target="#editModal"
-                                    data-id="${row.id}"
-                                    data-date="${row.date}"
-                                    data-categories="${row.categories}"
-                                    data-amount="${row.amount}"
-                                    data-mode_of_payment="${(row.mode_of_payment||'')}"
-                                    data-paid_by="${(row.paid_by||'')}"
-                                    data-description="${row.description ? String(row.description).replace(/"/g,'&quot;') : ''}">
-                                    Edit
-                                </button>
-                                <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                    data-id="${row.id}">Delete</button>
-                            </div>
-                        </td>
-                    </tr>`;
+            <tr>
+                <td>${sl}</td>
+                <td>${row.date}</td>
+                <td><span class="badge-soft text-capitalize">${catPretty}</span></td>
+                <td class="text-end">${amountPretty}</td>
+                <td class="text-capitalize">${row.mode_of_payment}</td>
+                <td class="text-capitalize">${row.paid_by}</td>
+                <td>${row.description ?? ''}</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
+                            data-bs-toggle="modal" data-bs-target="#editModal"
+                            data-id="${row.id}"
+                            data-date="${row.date}"
+                            data-categories="${row.categories}"
+                            data-amount="${row.amount}"
+                            data-mode_of_payment="${(row.mode_of_payment||'')}"
+                            data-paid_by="${(row.paid_by||'')}"
+                            data-description="${row.description ? String(row.description).replace(/"/g,'&quot;') : ''}">
+                            Edit
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger btn-delete"
+                            data-bs-toggle="modal" data-bs-target="#deleteModal"
+                            data-id="${row.id}">Delete</button>
+                    </div>
+                </td>
+            </tr>`;
             }
 
             async function doSearch() {
                 const params = new URLSearchParams();
                 if (fromEl.value) params.append('from_date', fromEl.value);
                 if (toEl.value) params.append('to_date', toEl.value);
-                const ledgerCat = document.getElementById('ledger_category').value;
+                const ledgerCat = catEl.value;
                 if (ledgerCat) params.append('category', ledgerCat);
 
                 const url = `{{ route('officeTransactions.filter') }}?${params.toString()}`;
@@ -828,10 +834,14 @@
                     const list = Array.isArray(data.transactions) ? data.transactions : [];
                     const html = list.map((row, i) => rowHTML(row, i + 1)).join('');
 
-                    if ($.fn.dataTable.isDataTable(tableEl)) tableEl.DataTable().clear().destroy();
+                    // IMPORTANT: never keep a DT instance while rewriting tbody with raw HTML
+                    if ($.fn.dataTable.isDataTable(tableEl)) {
+                        tableEl.DataTable().destroy();
+                    }
 
-                    body.innerHTML = html ||
-                        `<tr><td colspan="8" class="text-center text-muted">No records</td></tr>`;
+                    // Replace tbody with either real rows or empty (no colspan!)
+                    body.innerHTML = html; // if empty => DataTables will show "emptyTable"
+
                     initDT();
                 } catch (err) {
                     console.error(err);
@@ -842,8 +852,10 @@
                         text: msg
                     });
 
-                    if ($.fn.dataTable.isDataTable(tableEl)) tableEl.DataTable().clear().destroy();
-                    body.innerHTML = `<tr><td colspan="8" class="text-center text-danger">${msg}</td></tr>`;
+                    if ($.fn.dataTable.isDataTable(tableEl)) {
+                        tableEl.DataTable().destroy();
+                    }
+                    body.innerHTML = ''; // leave empty, let DT show "No records"
                     initDT();
 
                     todayCard.textContent = fmtINR(0);
@@ -855,19 +867,16 @@
 
             document.getElementById('searchBtn').addEventListener('click', doSearch);
 
-            // ===== Open Ledger in new tab (carry filters via query params) =====
             document.getElementById('openLedgerBtn').addEventListener('click', function(e) {
                 e.preventDefault();
                 const params = new URLSearchParams();
                 if (fromEl.value) params.append('from_date', fromEl.value);
                 if (toEl.value) params.append('to_date', toEl.value);
-                if (document.getElementById('ledger_category').value) params.append('category', document
-                    .getElementById('ledger_category').value);
+                if (catEl.value) params.append('category', catEl.value);
                 const url =
                     `{{ route('officeLedger.category.index') }}${params.toString() ? '?' + params.toString() : ''}`;
                 window.open(url, '_blank', 'noopener');
             });
-
         })();
     </script>
 @endsection
