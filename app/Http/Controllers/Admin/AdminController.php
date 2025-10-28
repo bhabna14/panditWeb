@@ -551,7 +551,6 @@ class AdminController extends Controller
         'last_login_time'   => $lastLoginSub,
         'last_device_model' => $lastDeviceModelSub,
     ])
-    ->orderByDesc('id')   // latest users first ✅
     ->get();
     // ---- Total Customers ----
     $totalCustomer = User::count();
