@@ -9,18 +9,23 @@ class Msg91WhatsappService
 {
     protected Client $http;
     protected string $authkey;
-    protected string $endpointBulk;   // bulk endpoint
-    protected string $integratedNumber; // digits, e.g. 91912...
+    protected string $sender;        // E.164 (e.g. +91912...)
+    protected string $endpointBulk;  // bulk endpoint
 
-    public function __construct(
-        string $authkey,
-        string $integratedNumber,
-        string $endpointBulk = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/'
-    ) {
-        $this->http             = new Client(['timeout' => 25]);
-        $this->authkey          = $authkey;
-        $this->integratedNumber = preg_replace('/\D+/', '', $integratedNumber);
-        $this->endpointBulk     = $endpointBulk;
+    public function __construct()
+    {
+        $this->http         = new Client(['timeout' => 25]);
+        $this->authkey      = (string) env('MSG91_AUTHKEY', '');
+        $this->sender       = (string) env('MSG91_WA_NUMBER', ''); // +<cc><number>
+        $this->endpointBulk = (string) env('MSG91_WA_BULK_ENDPOINT', 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/');
+    }
+
+    public function integratedNumber(): string
+    {
+        $env = (string) env('MSG91_WA_INTEGRATED_NUMBER', '');
+        if ($env !== '') return preg_replace('/\D+/', '', $env);
+        $digits = preg_replace('/\D+/', '', $this->sender);
+        return ltrim($digits, '+');
     }
 
     public function sendBulkTemplate(
@@ -28,14 +33,20 @@ class Msg91WhatsappService
         array $components,
         ?string $templateName = null,
         ?string $namespace = null,
-        ?string $languageCode = 'en_GB'
+        ?string $languageCode = null,
+        ?string $integratedNumber = null
     ): array {
-        if (!$templateName || !$namespace || !$this->integratedNumber) {
+        $templateName     = $templateName     ?: (string) env('MSG91_WA_TEMPLATE', '');
+        $namespace        = $namespace        ?: (string) env('MSG91_WA_NAMESPACE', '');
+        $languageCode     = $languageCode     ?: (string) env('MSG91_WA_LANG_CODE', 'en_GB');
+        $integratedNumber = $integratedNumber ?: $this->integratedNumber();
+
+        if ($templateName === '' || $namespace === '' || $integratedNumber === '') {
             throw new \RuntimeException('MSG91 config missing: template/namespace/integrated number.');
         }
 
         $payload = [
-            'integrated_number' => $this->integratedNumber,
+            'integrated_number' => $integratedNumber,
             'content_type'      => 'template',
             'payload'           => [
                 'messaging_product' => 'whatsapp',
