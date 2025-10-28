@@ -9,6 +9,7 @@ use App\Models\OfficeLedger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class OfficeTransactionController extends Controller
 {
@@ -20,71 +21,116 @@ class OfficeTransactionController extends Controller
 
     public function manageOfficeTransaction()
     {
-        $transactions = OfficeTransaction::where('status', 'active')
-            ->orderBy('date', 'desc')
-            ->get();
+        // Default timezone safety
+        $tz = config('app.timezone', 'Asia/Kolkata');
 
-        // All-time total payment
-        $rangeTotal = OfficeTransaction::where('status', 'active')->sum('amount');
+        $transactions = OfficeTransaction::query()
+            ->where('status', 'active')
+            ->orderByDesc('date')
+            ->get(['id','date','categories','amount','mode_of_payment','paid_by','description']);
 
-        // Today's total
-        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'));
-        $todayTotal = OfficeTransaction::where('status', 'active')
-            ->whereDate('date', $today->toDateString())
+        // All-time total (active)
+        $rangeTotal = (float) OfficeTransaction::where('status','active')->sum('amount');
+
+        // Today’s total
+        $today = Carbon::today($tz)->toDateString();
+        $todayTotal = (float) OfficeTransaction::where('status','active')
+            ->whereDate('date', $today)
             ->sum('amount');
 
-        return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
+        // If you don’t have ledger totals yet, keep them zero to avoid Blade errors
+        $ledgerInTotal  = 0.0;
+        $ledgerOutTotal = 0.0;
+        $ledgerNetTotal = 0.0;
+
+        return view('admin.manage-office-transaction', compact(
+            'transactions',
+            'todayTotal',
+            'rangeTotal',
+            'ledgerInTotal',
+            'ledgerOutTotal',
+            'ledgerNetTotal'
+        ));
     }
 
     public function filter(Request $request)
     {
         try {
+            // Validate query params
+            $v = Validator::make($request->query(), [
+                'from_date' => ['nullable','date_format:Y-m-d'],
+                'to_date'   => ['nullable','date_format:Y-m-d'],
+                'category'  => ['nullable','string','in:rent,rider_salary,vendor_payment,fuel,package,bus_fare,miscellaneous'],
+            ], [
+                'from_date.date_format' => 'from_date must be in Y-m-d format.',
+                'to_date.date_format'   => 'to_date must be in Y-m-d format.',
+            ]);
+
+            if ($v->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $v->errors()->first(),
+                ], 422);
+            }
+
             $from = $request->query('from_date');
             $to   = $request->query('to_date');
+            $cat  = $request->query('category'); // from the “Ledger Category” dropdown
 
-            $q = OfficeTransaction::query();
+            if ($from && $to && $from > $to) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'From date cannot be after To date.',
+                ], 422);
+            }
+
+            $q = OfficeTransaction::query()->where('status', 'active');
 
             if ($from) $q->whereDate('date', '>=', $from);
             if ($to)   $q->whereDate('date', '<=', $to);
+            if ($cat)  $q->where('categories', $cat);
 
             $transactions = $q->orderByDesc('date')->get([
-                'id', 'date', 'categories', 'amount', 'mode_of_payment', 'paid_by', 'description'
+                'id','date','categories','amount','mode_of_payment','paid_by','description'
             ]);
 
-            // Totals
+            // Range total = sum of filtered rows
             $rangeTotal = (float) $transactions->sum('amount');
 
-            // Today total (based on app timezone)
-            $today = Carbon::today(config('app.timezone'))->format('Y-m-d');
-            $todayTotal = (float) OfficeTransaction::whereDate('date', $today)->sum('amount');
+            // Today total uses app timezone
+            $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
+            $todayTotal = (float) OfficeTransaction::where('status','active')
+                ->whereDate('date', $today)
+                ->sum('amount');
 
-            // Map rows into the JSON shape the JS expects
+            // Shape rows
             $list = $transactions->map(function ($t) {
                 return [
                     'id'              => $t->id,
-                    'date'            => Carbon::parse($t->date)->format('Y-m-d'),
-                    'categories'      => $t->categories,
+                    'date'            => $t->date instanceof Carbon ? $t->date->format('Y-m-d') : Carbon::parse($t->date)->format('Y-m-d'),
+                    'categories'      => (string) $t->categories,
                     'amount'          => (float) $t->amount,
-                    'mode_of_payment' => $t->mode_of_payment,
-                    'paid_by'         => $t->paid_by,
-                    'description'     => $t->description ?? '',
+                    'mode_of_payment' => (string) ($t->mode_of_payment ?? ''),
+                    'paid_by'         => (string) ($t->paid_by ?? ''),
+                    'description'     => (string) ($t->description ?? ''),
                 ];
             })->values();
 
+            // Always success (even if empty)
             return response()->json([
-                'success'       => true,
-                'today_total'   => round($todayTotal, 2),
-                'range_total'   => round($rangeTotal, 2),
-                'transactions'  => $list,
+                'success'      => true,
+                'today_total'  => round($todayTotal, 2),
+                'range_total'  => round($rangeTotal, 2),
+                'transactions' => $list,
             ]);
         } catch (\Throwable $e) {
+            // Bubble up a clear message for the UI to show
             return response()->json([
                 'success' => false,
                 'message' => 'Server error: '.$e->getMessage(),
             ], 500);
         }
     }
-    
     public function manageOfficeFund()
     {
         // Initial list (active + latest first)

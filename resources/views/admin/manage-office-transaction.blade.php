@@ -12,10 +12,14 @@
     <style>
         /* ===== Premium look & feel ===== */
         :root {
-            --brand: #4f46e5; /* indigo */
-            --brand-2: #06b6d4; /* cyan */
-            --ink: #0f172a; /* slate-900 */
-            --muted: #64748b; /* slate-500 */
+            --brand: #4f46e5;
+            /* indigo */
+            --brand-2: #06b6d4;
+            /* cyan */
+            --ink: #0f172a;
+            /* slate-900 */
+            --muted: #64748b;
+            /* slate-500 */
             --line: #eef2f7;
             --soft: #f8fafc;
             --success-bg: #ecfdf5;
@@ -26,62 +30,168 @@
             --danger-br: #fecdd3;
         }
 
-        .card.custom-card { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+        .card.custom-card {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+        }
 
         .metric {
-            position: relative; border-radius: 14px; padding: 14px 16px;
+            position: relative;
+            border-radius: 14px;
+            padding: 14px 16px;
             background: linear-gradient(0deg, #fff, #fff) padding-box,
-                linear-gradient(135deg, rgba(79,70,229,.35), rgba(6,182,212,.35)) border-box;
-            border: 1px solid transparent; box-shadow: 0 10px 24px rgba(15,23,42,.06);
+                linear-gradient(135deg, rgba(79, 70, 229, .35), rgba(6, 182, 212, .35)) border-box;
+            border: 1px solid transparent;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-        .metric .label { color: var(--muted); font-weight: 600; letter-spacing: .02em; }
-        .metric .value { color: var(--ink); font-weight: 800; }
-        .metric .icon {
-            width: 36px; height: 36px; border-radius: 10px;
-            background: linear-gradient(135deg, rgba(79,70,229,.1), rgba(6,182,212,.1));
-            display: flex; align-items: center; justify-content: center; margin-right: 10px;
-        }
-        .metric svg { stroke: var(--brand); }
 
-        .filters { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+        .metric .label {
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: .02em;
+        }
+
+        .metric .value {
+            color: var(--ink);
+            font-weight: 800;
+        }
+
+        .metric .icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, .1), rgba(6, 182, 212, .1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .metric svg {
+            stroke: var(--brand);
+        }
+
+        .filters {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+        }
 
         .quick-chip {
-            border: 1px dashed rgba(79,70,229,.35); border-radius: 999px; padding: 6px 12px; color: var(--brand);
-            background: #eef3ff; cursor: pointer; user-select: none; transition: .18s; font-weight: 600; white-space: nowrap;
+            border: 1px dashed rgba(79, 70, 229, .35);
+            border-radius: 999px;
+            padding: 6px 12px;
+            color: var(--brand);
+            background: #eef3ff;
+            cursor: pointer;
+            user-select: none;
+            transition: .18s;
+            font-weight: 600;
+            white-space: nowrap;
         }
-        .quick-chip:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(79,70,229,.08); }
 
-        .table-premium { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+        .quick-chip:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, .08);
+        }
+
+        .table-premium {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
         .table-premium thead th {
-            position: sticky; top: 0; z-index: 2; background: linear-gradient(180deg,#f9fbff,#f6f8fe);
-            color: #223; font-weight: 700; border-bottom: 1px solid var(--line) !important;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: linear-gradient(180deg, #f9fbff, #f6f8fe);
+            color: #223;
+            font-weight: 700;
+            border-bottom: 1px solid var(--line) !important;
         }
-        .table-premium tbody td { vertical-align: middle; }
 
-        .badge-soft { background: #eef3ff; color: var(--brand); border: 1px solid rgba(79,70,229,.25); border-radius: 999px; padding: .25rem .5rem; font-weight: 600; }
-        .text-capitalize { text-transform: capitalize; }
+        .table-premium tbody td {
+            vertical-align: middle;
+        }
+
+        .badge-soft {
+            background: #eef3ff;
+            color: var(--brand);
+            border: 1px solid rgba(79, 70, 229, .25);
+            border-radius: 999px;
+            padding: .25rem .5rem;
+            font-weight: 600;
+        }
+
+        .text-capitalize {
+            text-transform: capitalize;
+        }
 
         .btn-brand {
             background: linear-gradient(135deg, var(--brand), var(--brand-2));
-            border: none; color: #fff; box-shadow: 0 10px 20px rgba(79,70,229,.25);
+            border: none;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, .25);
         }
-        .btn-brand:hover { opacity: .95 }
-        .btn-outline-brand { border-color: var(--brand); color: var(--brand); }
-        .btn-outline-brand:hover { background: #eef3ff; border-color: var(--brand); color: var(--brand); }
 
-        .skeleton { position: relative; overflow: hidden; background: #eef2f7; border-radius: 6px; }
+        .btn-brand:hover {
+            opacity: .95
+        }
+
+        .btn-outline-brand {
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+
+        .btn-outline-brand:hover {
+            background: #eef3ff;
+            border-color: var(--brand);
+            color: var(--brand);
+        }
+
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #eef2f7;
+            border-radius: 6px;
+        }
+
         .skeleton::after {
-            content: ''; position: absolute; inset: 0; transform: translateX(-100%);
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.65) 50%, rgba(255,255,255,0) 100%);
+            content: '';
+            position: absolute;
+            inset: 0;
+            transform: translateX(-100%);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .65) 50%, rgba(255, 255, 255, 0) 100%);
             animation: shimmer 1.2s infinite;
         }
-        @keyframes shimmer { 100% { transform: translateX(100%); } }
 
-        .dt-buttons .btn { border-radius: 999px !important; }
-        table.dataTable tbody tr:hover { background: #fbfdff; }
-        .dataTables_wrapper .dataTables_filter input { border-radius: 999px; padding: .4rem .8rem; border: 1px solid var(--line); }
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
 
-        .note-muted { color: var(--muted); font-size: .9rem; }
+        .dt-buttons .btn {
+            border-radius: 999px !important;
+        }
+
+        table.dataTable tbody tr:hover {
+            background: #fbfdff;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border-radius: 999px;
+            padding: .4rem .8rem;
+            border: 1px solid var(--line);
+        }
+
+        .note-muted {
+            color: var(--muted);
+            font-size: .9rem;
+        }
     </style>
 @endsection
 
@@ -95,7 +205,7 @@
                     @if (session('success'))
                         <div class="alert alert-success border-0 rounded-3 d-flex align-items-center gap-2">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 6L9 17l-5-5"></path>
                             </svg>
                             <div>{{ session('success') }}</div>
@@ -109,8 +219,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                             stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <rect x="3" y="5" width="18" height="14" rx="2"></rect>
                                             <line x1="3" y1="9" x2="21" y2="9"></line>
                                             <line x1="7" y1="15" x2="12" y2="15"></line>
@@ -131,8 +241,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                             stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <rect x="3" y="5" width="18" height="16" rx="2"></rect>
                                             <line x1="8" y1="3" x2="8" y2="7"></line>
                                             <line x1="16" y1="3" x2="16" y2="7"></line>
@@ -146,7 +256,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <span class="badge-soft">{{ \Carbon\Carbon::today(config('app.timezone'))->format('d M Y') }}</span>
+                                <span
+                                    class="badge-soft">{{ \Carbon\Carbon::today(config('app.timezone'))->format('d M Y') }}</span>
                             </div>
                         </div>
                     </div>
@@ -158,8 +269,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                             stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M12 1v22"></path>
                                             <path d="M17 5l-5-4-5 4"></path>
                                         </svg>
@@ -177,8 +288,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                             stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <path d="M12 23V1"></path>
                                             <path d="M7 19l5 4 5-4"></path>
                                         </svg>
@@ -196,8 +307,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                             stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <circle cx="12" cy="12" r="10"></circle>
                                             <path d="M16 12A4 4 0 1 1 8 12a4 4 0 0 1 8 0z"></path>
                                         </svg>
@@ -239,8 +350,8 @@
                             <div class="col-md-3 d-flex align-items-end gap-2">
                                 <button type="button" id="searchBtn" class="btn btn-brand w-100">
                                     <svg width="18" height="18" class="me-1" viewBox="0 0 24 24"
-                                         fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                         stroke-linejoin="round">
+                                        fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
@@ -261,8 +372,8 @@
                     {{-- ======= OPEN LEDGER IN NEW TAB ======= --}}
                     <div class="d-flex justify-content-end mb-3">
                         <a href="#" id="openLedgerBtn" class="btn btn-brand" target="_blank" rel="noopener">
-                            <svg width="18" height="18" class="me-1" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" class="me-1" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="4" width="18" height="14" rx="2"></rect>
                                 <path d="M7 10h10M7 14h6"></path>
                             </svg>
@@ -276,29 +387,31 @@
                         <div class="table-responsive">
                             <table id="file-datatable" class="table table-hover align-middle text-nowrap mb-0">
                                 <thead>
-                                <tr>
-                                    <th>Sl No.</th>
-                                    <th>Date</th>
-                                    <th>Categories</th>
-                                    <th class="text-end">Amount</th>
-                                    <th>Mode</th>
-                                    <th>Paid By</th>
-                                    <th>Description</th>
-                                    <th>Action</th>
-                                </tr>
+                                    <tr>
+                                        <th>Sl No.</th>
+                                        <th>Date</th>
+                                        <th>Categories</th>
+                                        <th class="text-end">Amount</th>
+                                        <th>Mode</th>
+                                        <th>Paid By</th>
+                                        <th>Description</th>
+                                        <th>Action</th>
+                                    </tr>
                                 </thead>
                                 <tbody id="transactionsBody">
-                                @foreach ($transactions as $transaction)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
-                                        <td><span class="badge-soft text-capitalize">{{ str_replace('_', ' ', $transaction->categories) }}</span></td>
-                                        <td class="text-end">₹{{ number_format($transaction->amount, 2) }}</td>
-                                        <td class="text-capitalize">{{ $transaction->mode_of_payment }}</td>
-                                        <td class="text-capitalize">{{ $transaction->paid_by }}</td>
-                                        <td>{{ $transaction->description }}</td>
-                                        <td class="d-flex gap-2">
-                                            <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
+                                    @foreach ($transactions as $transaction)
+                                        <tr>
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
+                                            <td><span
+                                                    class="badge-soft text-capitalize">{{ str_replace('_', ' ', $transaction->categories) }}</span>
+                                            </td>
+                                            <td class="text-end">₹{{ number_format($transaction->amount, 2) }}</td>
+                                            <td class="text-capitalize">{{ $transaction->mode_of_payment }}</td>
+                                            <td class="text-capitalize">{{ $transaction->paid_by }}</td>
+                                            <td>{{ $transaction->description }}</td>
+                                            <td class="d-flex gap-2">
+                                                <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
                                                     data-bs-toggle="modal" data-bs-target="#editModal"
                                                     data-id="{{ $transaction->id }}"
                                                     data-date="{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}"
@@ -307,23 +420,23 @@
                                                     data-mode_of_payment="{{ $transaction->mode_of_payment }}"
                                                     data-paid_by="{{ $transaction->paid_by }}"
                                                     data-description="{{ $transaction->description }}">
-                                                Edit
-                                            </button>
-                                            <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                                    Edit
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger btn-delete"
                                                     data-bs-toggle="modal" data-bs-target="#deleteModal"
                                                     data-id="{{ $transaction->id }}">
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
-                                <tr>
-                                    <th colspan="3" class="text-end">Total (shown):</th>
-                                    <th class="text-end" id="tableShownTotal">—</th>
-                                    <th colspan="4"></th>
-                                </tr>
+                                    <tr>
+                                        <th colspan="3" class="text-end">Total (shown):</th>
+                                        <th class="text-end" id="tableShownTotal">—</th>
+                                        <th colspan="4"></th>
+                                    </tr>
                                 </tfoot>
                             </table>
                         </div>
@@ -369,12 +482,14 @@
                                 <label for="edit_amount" class="form-label">Amount</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
-                                    <input type="number" class="form-control" id="edit_amount" name="amount" step="0.01" min="0" required>
+                                    <input type="number" class="form-control" id="edit_amount" name="amount"
+                                        step="0.01" min="0" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <label for="edit_mode_of_payment" class="form-label">Mode of Payment</label>
-                                <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment" required>
+                                <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment"
+                                    required>
                                     <option value="">Select Mode</option>
                                     <option value="cash">Cash</option>
                                     <option value="upi">UPI</option>
@@ -391,7 +506,8 @@
                             </div>
                             <div class="col-md-12">
                                 <label for="edit_description" class="form-label">Description</label>
-                                <textarea class="form-control" id="edit_description" name="description" rows="3" placeholder="Enter description"></textarea>
+                                <textarea class="form-control" id="edit_description" name="description" rows="3"
+                                    placeholder="Enter description"></textarea>
                             </div>
                         </div>
                     </div>
@@ -454,62 +570,135 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        (function () {
+        (function() {
             // ===== Helpers =====
-            const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
+            const fmtINR = n => new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 2
+            }).format(Number(n || 0));
             const toISO = d => d.toISOString().slice(0, 10);
-            const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+            const addDays = (d, n) => {
+                const x = new Date(d);
+                x.setDate(x.getDate() + n);
+                return x;
+            };
 
             // ===== Quick ranges =====
             const fromEl = document.getElementById('from_date');
             const toEl = document.getElementById('to_date');
             const catEl = document.getElementById('ledger_category');
             const today = new Date();
-            const fyStart = () => { const y = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1; return new Date(y, 3, 1); };
-            const weekStart = () => { const d = new Date(today); const day = (d.getDay() + 6) % 7; d.setDate(d.getDate() - day); return d; };
+            const fyStart = () => {
+                const y = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+                return new Date(y, 3, 1);
+            };
+            const weekStart = () => {
+                const d = new Date(today);
+                const day = (d.getDay() + 6) % 7;
+                d.setDate(d.getDate() - day);
+                return d;
+            };
 
             function setRange(range) {
-                let f = null, t = null;
+                let f = null,
+                    t = null;
                 switch (range) {
-                    case 'today': f = t = today; break;
-                    case 'week':  f = weekStart(); t = today; break;
-                    case 'month': f = new Date(today.getFullYear(), today.getMonth(), 1); t = today; break;
-                    case '30':    f = addDays(today, -29); t = today; break;
-                    case 'fy':    f = fyStart(); t = today; break;
+                    case 'today':
+                        f = t = today;
+                        break;
+                    case 'week':
+                        f = weekStart();
+                        t = today;
+                        break;
+                    case 'month':
+                        f = new Date(today.getFullYear(), today.getMonth(), 1);
+                        t = today;
+                        break;
+                    case '30':
+                        f = addDays(today, -29);
+                        t = today;
+                        break;
+                    case 'fy':
+                        f = fyStart();
+                        t = today;
+                        break;
                 }
-                if (f && t) { fromEl.value = toISO(f); toEl.value = toISO(t); doSearch(); }
+                if (f && t) {
+                    fromEl.value = toISO(f);
+                    toEl.value = toISO(t);
+                    doSearch();
+                }
             }
-            document.querySelectorAll('.quick-chip').forEach(chip => chip.addEventListener('click', () => setRange(chip.dataset.range)));
+            document.querySelectorAll('.quick-chip').forEach(chip => chip.addEventListener('click', () => setRange(chip
+                .dataset.range)));
             document.getElementById('resetBtn').addEventListener('click', () => {
-                fromEl.value = ''; toEl.value = ''; catEl.value = '';
+                fromEl.value = '';
+                toEl.value = '';
+                catEl.value = '';
                 doSearch();
             });
 
             // ===== DataTable init (Transactions) =====
-            const tableEl = $('#file-datatable'); let dt = null;
+            const tableEl = $('#file-datatable');
+            let dt = null;
+
             function initDT() {
                 if ($.fn.dataTable.isDataTable(tableEl)) tableEl.DataTable().destroy();
                 dt = tableEl.DataTable({
-                    responsive: true, autoWidth: false, pageLength: 25,
-                    order: [[1, 'desc']],
-                    columnDefs: [{ targets: [3], className: 'text-end' }, { targets: [7], orderable: false, searchable: false }],
+                    responsive: true,
+                    autoWidth: false,
+                    pageLength: 25,
+                    order: [
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                        targets: [3],
+                        className: 'text-end'
+                    }, {
+                        targets: [7],
+                        orderable: false,
+                        searchable: false
+                    }],
                     dom: "<'row align-items-center mb-2'<'col-md-6'l><'col-md-6 text-end'B>>" +
-                         "<'row'<'col-sm-12'tr>>" +
-                         "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
-                    buttons: [
-                        { extend: 'copyHtml5',  className: 'btn btn-outline-brand me-2', title: 'Office Transactions' },
-                        { extend: 'csvHtml5',   className: 'btn btn-outline-brand me-2', title: 'Office Transactions' },
-                        { extend: 'excelHtml5', className: 'btn btn-outline-brand me-2', title: 'Office Transactions' },
-                        { extend: 'pdfHtml5',   className: 'btn btn-outline-brand me-2', title: 'Office Transactions' },
-                        { extend: 'print',      className: 'btn btn-outline-brand',      title: 'Office Transactions' }
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
+                    buttons: [{
+                            extend: 'copyHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Transactions'
+                        },
+                        {
+                            extend: 'csvHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Transactions'
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Transactions'
+                        },
+                        {
+                            extend: 'pdfHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Transactions'
+                        },
+                        {
+                            extend: 'print',
+                            className: 'btn btn-outline-brand',
+                            title: 'Office Transactions'
+                        }
                     ]
                 });
                 computeShownTotal();
                 dt.on('draw', computeShownTotal);
             }
+
             function computeShownTotal() {
                 let sum = 0;
-                dt.rows({ page: 'current' }).every(function () {
+                dt.rows({
+                    page: 'current'
+                }).every(function() {
                     const td = $(this.node()).find('td').eq(3).text().trim();
                     const num = parseFloat(String(td).replace(/[^\d.-]/g, ''));
                     if (!isNaN(num)) sum += num;
@@ -519,7 +708,7 @@
             initDT();
 
             // ===== Edit/Delete modal handlers =====
-            document.body.addEventListener('click', function (e) {
+            document.body.addEventListener('click', function(e) {
                 const editBtn = e.target.closest('.btn-edit');
                 if (editBtn) {
                     const id = editBtn.getAttribute('data-id');
@@ -530,7 +719,8 @@
                     const paidBy = editBtn.getAttribute('data-paid_by');
                     const description = editBtn.getAttribute('data-description') || '';
                     const editForm = document.getElementById('editForm');
-                    editForm.action = "{{ route('officeTransactions.update', ['id' => '__ID__']) }}".replace('__ID__', id);
+                    editForm.action = "{{ route('officeTransactions.update', ['id' => '__ID__']) }}".replace(
+                        '__ID__', id);
                     document.getElementById('edit_date').value = date;
                     $('#edit_categories').val(categories).trigger('change');
                     document.getElementById('edit_amount').value = amount;
@@ -542,10 +732,13 @@
                 if (delBtn) {
                     const id = delBtn.getAttribute('data-id');
                     const deleteForm = document.getElementById('deleteForm');
-                    deleteForm.action = "{{ route('officeTransactions.destroy', ['id' => '__ID__']) }}".replace('__ID__', id);
+                    deleteForm.action = "{{ route('officeTransactions.destroy', ['id' => '__ID__']) }}"
+                        .replace('__ID__', id);
                 }
             });
-            $('.select2').select2({ dropdownParent: $('#editModal') });
+            $('.select2').select2({
+                dropdownParent: $('#editModal')
+            });
 
             // ===== AJAX Filter (Transactions) =====
             const btn = document.getElementById('searchBtn');
@@ -557,7 +750,8 @@
                 if (loading) {
                     btn.disabled = true;
                     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching…';
-                    todayCard.classList.add('skeleton'); rangeCard.classList.add('skeleton');
+                    todayCard.classList.add('skeleton');
+                    rangeCard.classList.add('skeleton');
                     body.innerHTML = `<tr><td colspan="8">
                         <div class="skeleton" style="height:12px;margin:8px 0;"></div>
                         <div class="skeleton" style="height:12px;margin:8px 0;"></div>
@@ -565,8 +759,10 @@
                         <div class="skeleton" style="height:12px;margin:8px 0;"></div>
                     </td></tr>`;
                 } else {
-                    btn.disabled = false; btn.textContent = 'Search';
-                    todayCard.classList.remove('skeleton'); rangeCard.classList.remove('skeleton');
+                    btn.disabled = false;
+                    btn.textContent = 'Search';
+                    todayCard.classList.remove('skeleton');
+                    rangeCard.classList.remove('skeleton');
                 }
             }
 
@@ -607,43 +803,68 @@
                 const params = new URLSearchParams();
                 if (fromEl.value) params.append('from_date', fromEl.value);
                 if (toEl.value) params.append('to_date', toEl.value);
+                const ledgerCat = document.getElementById('ledger_category').value;
+                if (ledgerCat) params.append('category', ledgerCat);
+
                 const url = `{{ route('officeTransactions.filter') }}?${params.toString()}`;
 
                 setLoadingState(true);
                 try {
-                    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                    const res = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
                     const data = await res.json();
-                    if (!data || !data.success) throw new Error('Failed to load');
+
+                    if (!res.ok || !data || data.success === false) {
+                        const msg = (data && data.message) ? data.message : 'Unexpected error';
+                        throw new Error(msg);
+                    }
 
                     todayCard.textContent = fmtINR(data.today_total || 0);
                     rangeCard.textContent = fmtINR(data.range_total || 0);
 
                     const list = Array.isArray(data.transactions) ? data.transactions : [];
                     const html = list.map((row, i) => rowHTML(row, i + 1)).join('');
+
                     if ($.fn.dataTable.isDataTable(tableEl)) tableEl.DataTable().clear().destroy();
-                    body.innerHTML = html || `<tr><td colspan="8" class="text-center text-muted">No records</td></tr>`;
+
+                    body.innerHTML = html ||
+                        `<tr><td colspan="8" class="text-center text-muted">No records</td></tr>`;
                     initDT();
                 } catch (err) {
                     console.error(err);
-                    Swal.fire({ icon: 'error', title: 'Oops', text: 'Error loading data. Please try again.' });
+                    const msg = err?.message || 'Error loading data. Please try again.';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Filter failed',
+                        text: msg
+                    });
+
                     if ($.fn.dataTable.isDataTable(tableEl)) tableEl.DataTable().clear().destroy();
-                    body.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Error loading data</td></tr>`;
+                    body.innerHTML = `<tr><td colspan="8" class="text-center text-danger">${msg}</td></tr>`;
                     initDT();
+
                     todayCard.textContent = fmtINR(0);
                     rangeCard.textContent = fmtINR(0);
-                } finally { setLoadingState(false); }
+                } finally {
+                    setLoadingState(false);
+                }
             }
 
             document.getElementById('searchBtn').addEventListener('click', doSearch);
 
             // ===== Open Ledger in new tab (carry filters via query params) =====
-            document.getElementById('openLedgerBtn').addEventListener('click', function (e) {
+            document.getElementById('openLedgerBtn').addEventListener('click', function(e) {
                 e.preventDefault();
                 const params = new URLSearchParams();
                 if (fromEl.value) params.append('from_date', fromEl.value);
-                if (toEl.value)   params.append('to_date', toEl.value);
-                if (document.getElementById('ledger_category').value) params.append('category', document.getElementById('ledger_category').value);
-                const url = `{{ route('officeLedger.category.index') }}${params.toString() ? '?' + params.toString() : ''}`;
+                if (toEl.value) params.append('to_date', toEl.value);
+                if (document.getElementById('ledger_category').value) params.append('category', document
+                    .getElementById('ledger_category').value);
+                const url =
+                    `{{ route('officeLedger.category.index') }}${params.toString() ? '?' + params.toString() : ''}`;
                 window.open(url, '_blank', 'noopener');
             });
 

@@ -9,6 +9,7 @@ class OfficeTransaction extends Model
 {
     use HasFactory;
 
+    // If your table name is indeed "office_transaction" keep this. Otherwise use the default plural.
     protected $table = 'office_transaction';
 
     protected $fillable = [
@@ -18,8 +19,12 @@ class OfficeTransaction extends Model
         'mode_of_payment',
         'categories',
         'description',
-        'status', 
-
+        'status',
     ];
 
+    protected $casts = [
+        // Make sure Carbon instances are returned, and arithmetic works
+        'date'   => 'date:Y-m-d',
+        'amount' => 'decimal:2',
+    ];
 }
