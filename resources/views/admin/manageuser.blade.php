@@ -229,7 +229,7 @@
                                 <td class="text-center action-icons">
                                     <a class="btn btn-warning btn-sm text-center"
                                         href="{{ route('showCustomerDetails', $user->userid) }}">
-                                        View Details
+                                        View 
                                     </a>
 
                                     <button type="button" class="btn btn-sm btn-primary editUserBtn" title="Edit"
@@ -238,7 +238,7 @@
                                         data-email="{{ $user->email }}" data-phone="{{ $user->mobile_number }}"
                                         data-user_type="{{ $user->user_type }}"
                                         data-userphoto="{{ $user->userphoto ? asset('storage/' . $user->userphoto) : asset('front-assets/img/images.jfif') }}">
-                                        <i class="fas fa-edit me-1"></i> Edit
+                                        <i class="fas fa-edit me-1"></i> 
                                     </button>
                                 </td>
                             </tr>
