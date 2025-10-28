@@ -15,7 +15,7 @@ use App\Jobs\SendWhatsappTemplateJob;
 class AdminWhatsappMessageController extends Controller
 {
     // === HARD-CODED CONFIG (NO .env) ===
-    private const MSG91_AUTHKEY       = 'REPLACE_WITH_YOUR_AUTHKEY';
+    private const MSG91_AUTHKEY       = '425546AOXNCrBOzpq6878de9cP1';
     private const INTEGRATED_NUMBER   = '919124420330'; // digits only
     private const TEMPLATE_NAME       = 'flower_wp_message';          // Marketing
     private const TEMPLATE_NAMESPACE  = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
