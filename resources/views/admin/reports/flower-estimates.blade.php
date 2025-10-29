@@ -215,38 +215,7 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                    <div class="col-12 col-lg-4">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-header bg-white"><strong>Totals by Category</strong></div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Category</th>
-                                                <th class="text-end">Total Qty</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($rByCat as $row)
-                                                <tr>
-                                                    <td>{{ $row['label'] }}</td>
-                                                    <td class="text-end">
-                                                        {{ rtrim(rtrim(number_format($row['total_qty_disp'], 3), '0'), '.') }}
-                                                        {{ $row['total_unit_disp'] }}
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="2" class="text-muted">No quantities in range.</td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                   
 
                     <div class="col-12 col-lg-8">
                         <div class="card border-0 shadow-sm h-100">
@@ -278,6 +247,39 @@
                                     </table>
                                 </div>
                                 <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="col-12 col-lg-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white"><strong>Totals by Category</strong></div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Category</th>
+                                                <th class="text-end">Total Qty</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($rByCat as $row)
+                                                <tr>
+                                                    <td>{{ $row['label'] }}</td>
+                                                    <td class="text-end">
+                                                        {{ rtrim(rtrim(number_format($row['total_qty_disp'], 3), '0'), '.') }}
+                                                        {{ $row['total_unit_disp'] }}
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="2" class="text-muted">No quantities in range.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
