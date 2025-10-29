@@ -317,10 +317,7 @@
                         </span>
                     </div>
                 </div>
-                <small class="text-muted d-block mt-1">
-                    Rule: <code>start_date ≤ tomorrow ≤ COALESCE(new_date, end_date)</code>, excluding paused (between
-                    <code>pause_start_date</code> and <code>pause_end_date</code>).
-                </small>
+                
             </div>
             <div class="card-body bg-white">
                 @if (empty($tProducts))
