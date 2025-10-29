@@ -38,7 +38,7 @@ class VendorPickupController extends Controller
                     'rider'
                 ])
                 ->where('vendor_id', $vendor->vendor_id)
-                ->where('stuatus',  'pending')
+                ->where('status',  'pending')
                 ->orderBy('created_at', 'desc');
                 
 
