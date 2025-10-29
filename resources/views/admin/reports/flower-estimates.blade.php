@@ -84,6 +84,37 @@
             border-top: 1px solid #e9ecef;
             padding: .9rem 1rem 1.1rem;
         }
+
+        /* --------- Card Grid (replaces tables) --------- */
+        .grid { --gap: .75rem; display: grid; gap: var(--gap); }
+        @media (min-width: 576px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (min-width: 992px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1400px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .tile {
+            background: #fff;
+            border: 1px solid #e9ecef;
+            border-radius: 1rem;
+            box-shadow: 0 2px 10px rgba(16, 24, 40, .04);
+            padding: .9rem .95rem;
+            display: flex; flex-direction: column; gap: .5rem;
+            height: 100%;
+        }
+        .tile .tile-head { display:flex; justify-content:space-between; align-items: start; gap:.5rem; }
+        .tile .tile-title { font-weight: 600; line-height: 1.25; }
+        .tile .badge-unit { background:#eef2ff; color:#4338ca; }
+        .tile .tile-value { font-size: 1.35rem; font-weight: 700; letter-spacing: .2px; }
+        .tile .subtle { color:#6c757d; font-size:.85rem; }
+        .tile .icon {
+            display:inline-flex; width:28px; height:28px; border-radius:999px;
+            align-items:center; justify-content:center; font-size:14px; background:#f8f9fa; border:1px solid #e9ecef;
+        }
+
+        /* Category accent dots */
+        .dot { width:8px; height:8px; border-radius:999px; display:inline-block; margin-right:.4rem; }
+        .dot-weight { background:#0ea5e9; }
+        .dot-volume { background:#22c55e; }
+        .dot-count  { background:#f59e0b; }
     </style>
 @endsection
 
@@ -180,72 +211,70 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
+                        {{-- Totals by Item: card grid --}}
                         <div class="col-12 col-lg-8">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white"><strong>Totals by Item (All Products)</strong></div>
                                 <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm align-middle">
-                                            <thead class="table-light">
-                                            <tr>
-                                                <th style="width:55%">Item</th>
-                                                <th class="text-end" style="width:45%">Total Qty</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @forelse($rByItem as $it)
-                                                <tr>
-                                                    <td>{{ $it['item_name'] }}</td>
-                                                    <td class="text-end">
-                                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                        {{ $it['total_unit_disp'] }}
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="2" class="text-muted">No items in range.</td>
-                                                </tr>
-                                            @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                    @if(empty($rByItem))
+                                        <div class="text-muted">No items in range.</div>
+                                    @else
+                                        <div class="grid">
+                                            @foreach($rByItem as $it)
+                                                @php
+                                                    $qty = rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.');
+                                                    $unit = $it['total_unit_disp'] ?? '';
+                                                @endphp
+                                                <div class="tile">
+                                                    <div class="tile-head">
+                                                        <div class="tile-title">{{ $it['item_name'] }}</div>
+                                                        <span class="badge badge-unit">{{ $unit }}</span>
+                                                    </div>
+                                                    <div class="tile-value">{{ $qty }}</div>
+                                                    <div class="subtle">Total quantity in selected range</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                    @endif
                                 </div>
                             </div>
                         </div>
 
+                        {{-- Totals by Category: card grid --}}
                         <div class="col-12 col-lg-4">
-                            <div class="card border-0 shadow-sm">
+                            <div class="card border-0 shadow-sm h-100">
                                 <div class="card-header bg-white"><strong>Totals by Category</strong></div>
                                 <div class="card-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-sm align-middle">
-                                            <thead class="table-light">
-                                            <tr>
-                                                <th>Category</th>
-                                                <th class="text-end">Total Qty</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            @forelse($rByCat as $row)
-                                                <tr>
-                                                    <td>{{ $row['label'] }}</td>
-                                                    <td class="text-end">
-                                                        {{ rtrim(rtrim(number_format($row['total_qty_disp'], 3), '0'), '.') }}
-                                                        {{ $row['total_unit_disp'] }}
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="2" class="text-muted">No quantities in range.</td>
-                                                </tr>
-                                            @endforelse
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    @if(empty($rByCat))
+                                        <div class="text-muted">No quantities in range.</div>
+                                    @else
+                                        <div class="grid" style="--gap:.65rem">
+                                            @foreach($rByCat as $row)
+                                                @php
+                                                    $qty = rtrim(rtrim(number_format($row['total_qty_disp'], 3), '0'), '.');
+                                                    $unit = $row['total_unit_disp'] ?? '';
+                                                    $label = $row['label'] ?? 'Category';
+                                                    $dotClass = Str::contains(strtolower($label),'weight') ? 'dot-weight' :
+                                                                (Str::contains(strtolower($label),'volume') ? 'dot-volume' : 'dot-count');
+                                                @endphp
+                                                <div class="tile">
+                                                    <div class="tile-head">
+                                                        <div class="tile-title">
+                                                            <span class="dot {{ $dotClass }}"></span>{{ $label }}
+                                                        </div>
+                                                        <span class="badge badge-unit">{{ $unit }}</span>
+                                                    </div>
+                                                    <div class="tile-value">{{ $qty }}</div>
+                                                    <div class="subtle">Aggregated by category</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -329,74 +358,68 @@
                             </div>
                         </div>
 
-                         <div class="card border-0 shadow-sm mt-3">
+                        {{-- Tomorrow — Totals by Item: card grid --}}
+                        <div class="card border-0 shadow-sm mt-3">
                             <div class="card-header bg-white"><strong>Tomorrow — Totals by Item (All Products)</strong></div>
                             <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th>Item</th>
-                                            <th class="text-end">Total Qty</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @forelse($tTotals as $it)
-                                            <tr>
-                                                <td>{{ $it['item_name'] }}</td>
-                                                <td class="text-end">
-                                                    {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                    {{ $it['total_unit_disp'] }}
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="2" class="text-muted">No items.</td>
-                                            </tr>
-                                        @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
+                                @if(empty($tTotals))
+                                    <div class="text-muted">No items.</div>
+                                @else
+                                    <div class="grid">
+                                        @foreach ($tTotals as $it)
+                                            @php
+                                                $qty = rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.');
+                                                $unit = $it['total_unit_disp'] ?? '';
+                                            @endphp
+                                            <div class="tile">
+                                                <div class="tile-head">
+                                                    <div class="tile-title">{{ $it['item_name'] }}</div>
+                                                    <span class="badge badge-unit">{{ $unit }}</span>
+                                                </div>
+                                                <div class="tile-value">{{ $qty }}</div>
+                                                <div class="subtle">Required for tomorrow</div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <small class="text-muted d-block mt-2">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                @endif
                             </div>
                         </div>
 
-                        {{-- Tomorrow Totals by Category --}}
+                        {{-- Tomorrow — Totals by Category: mini tiles --}}
                         @php
                             $catRows = [
-                                ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
-                                ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit],
-                                ['label' => 'Count', 'qty' => $cQty, 'unit' => $cUnit],
+                                ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit,  'dot' => 'dot-weight', 'icon' => 'bi bi-speedometer2'],
+                                ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit, 'dot' => 'dot-volume', 'icon' => 'bi bi-droplet'],
+                                ['label' => 'Count',  'qty' => $cQty, 'unit' => $cUnit, 'dot' => 'dot-count',  'icon' => 'bi bi-123'],
                             ];
                         @endphp
                         <div class="card border-0 shadow-sm mt-3">
                             <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
                             <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th>Category</th>
-                                            <th class="text-end">Total Qty</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach ($catRows as $r)
-                                            <tr>
-                                                <td>{{ $r['label'] }}</td>
-                                                <td class="text-end">
-                                                    {{ rtrim(rtrim(number_format($r['qty'], 3), '0'), '.') }} {{ $r['unit'] }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                <div class="grid" style="--gap:.75rem">
+                                    @foreach($catRows as $r)
+                                        @php
+                                            $qty = rtrim(rtrim(number_format($r['qty'], 3), '0'), '.');
+                                        @endphp
+                                        <div class="tile">
+                                            <div class="tile-head">
+                                                <div class="tile-title">
+                                                    <span class="dot {{ $r['dot'] }}"></span>{{ $r['label'] }}
+                                                </div>
+                                                <span class="badge badge-unit">{{ $r['unit'] }}</span>
+                                            </div>
+                                            <div class="tile-value">{{ $qty }}</div>
+                                            <div class="subtle"><i class="{{ $r['icon'] }}"></i> Aggregated category need</div>
+                                        </div>
+                                    @endforeach
                                 </div>
+                                <small class="text-muted d-block mt-2">Units auto-scale (kg/g, L/ml, pcs).</small>
                             </div>
                         </div>
 
                         {{-- Products (native disclosure) --}}
-                        <div class="row g-3">
+                        <div class="row g-3 mt-3">
                             @foreach ($tProducts as $pid => $row)
                                 @php
                                     $product = $row['product'];
@@ -467,7 +490,6 @@
                                 </div>
                             @endforeach
                         </div>
-                       
                     @endif
                 </div>
             </div>
