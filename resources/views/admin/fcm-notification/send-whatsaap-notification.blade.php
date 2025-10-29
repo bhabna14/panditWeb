@@ -27,13 +27,6 @@
 @endsection
 
 @section('content')
-    @php
-        // Hard-coded UX flags (no .env)
-        $requiresParam = true; // ✅ required by your template
-        $buttonBase = ''; // set if you want to show base in help text
-        $senderLabel = '+919124420330';
-    @endphp
-
     <div class="container-fluid">
         <div class="nu-hero p-4 mb-4">
             <div class="d-flex align-items-center justify-content-between">
@@ -82,24 +75,24 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Button URL parameter
+                            <label class="form-label fw-semibold">
+                                Button URL parameter
                                 @if ($requiresParam)
-                                    <span class="text-danger">(required)</span>
-                                @else
-                                    <span class="text-muted">(optional)</span>
+                                <span class="text-danger">(required)</span>@else<span
+                                        class="text-muted">(optional)</span>
                                 @endif
                             </label>
                             <input type="text" name="button_url_value" class="form-control"
                                 value="{{ old('button_url_value') }}"
-                                placeholder="e.g., ABC123{{ $buttonBase ? ' or ' . $buttonBase . 'ABC123' : '' }}" required>
-
+                                placeholder="e.g., ABC123{{ $buttonBase ? ' or ' . rtrim($buttonBase, '/') . '/ABC123' : '' }}"
+                                @if ($requiresParam) required @endif>
                             @if ($buttonBase)
                                 <div class="form-text">
                                     If your button URL in MSG91 looks like
                                     <code>{{ rtrim($buttonBase, '/') }}/@{{ 1 }}</code>,
                                     enter either just the token (<code>ABC123</code>) or the full URL
-                                    (<code>{{ rtrim($buttonBase, '/') }}/ABC123</code>).
-                                    We’ll automatically send only the token for <code>@{{ 1 }}</code>.
+                                    (<code>{{ rtrim($buttonBase, '/') }}/ABC123</code>). We’ll send only the token for
+                                    <code>@{{ 1 }}</code>.
                                 </div>
                             @endif
                         </div>
@@ -157,7 +150,7 @@
                 <div class="nu-card p-4">
                     <h5 class="fw-bold mb-3">Tips</h5>
                     <ul class="mb-0">
-                        <li>Your MSG91 sender {{ $senderLabel }} must be approved & verified.</li>
+                        <li>Your MSG91 sender {{ $senderLabel ?? '+91XXXXXXXXXX' }} must be approved & verified.</li>
                         <li>Template name/namespace & language must match MSG91 exactly, with the same number/order of
                             variables.</li>
                     </ul>

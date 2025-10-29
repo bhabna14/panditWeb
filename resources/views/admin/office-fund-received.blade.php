@@ -207,6 +207,8 @@
                                 <option value="">Select Mode</option>
                                 <option value="cash" @selected(old('mode_of_payment')==='cash')>Cash</option>
                                 <option value="upi"  @selected(old('mode_of_payment')==='upi')>UPI</option>
+                                <option value="icici"  @selected(old('mode_of_payment')==='icici')>ICICI</option>
+
                             </select>
                             @error('mode_of_payment') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
@@ -228,6 +230,8 @@
                                 <option value="pankaj"  @selected(old('paid_by')==='pankaj')>Pankaj</option>
                                 <option value="subrat"  @selected(old('paid_by')==='subrat')>Subrat</option>
                                 <option value="basudha" @selected(old('paid_by')==='basudha')>Basudha</option>
+                                <option value="biswa" @selected(old('paid_by')==='biswa')>Biswa Sir</option>
+                                <option value="pooja" @selected(old('paid_by')==='pooja')>Pooja Mam</option>
                             </select>
                             @error('paid_by') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>
