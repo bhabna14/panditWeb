@@ -38,7 +38,9 @@ class VendorPickupController extends Controller
                     'rider'
                 ])
                 ->where('vendor_id', $vendor->vendor_id)
+                ->where('stuatus',  'pending')
                 ->orderBy('created_at', 'desc');
+                
 
             if ($date) {
                 // Match either pickup_date or created_at to the given date (adjust to your schema)
@@ -274,40 +276,46 @@ class VendorPickupController extends Controller
         }
     }
 
-    public function getAllPickups()
-    {
-        try {
-            $vendor = Auth::guard('vendor-api')->user();
+ public function getAllPickups()
+{
+    try {
+        $vendor = Auth::guard('vendor-api')->user();
 
-            if (!$vendor) {
-                            return response()->json([
-                                'status'  => 401,
-                                'message' => 'Unauthorized. Vendor not logged in.',
-                            ], 401);
-            }
-            $pickups = FlowerPickupDetails::with([
-                    'flowerPickupItems.flower',
-                    'flowerPickupItems.unit',
-                    'vendor',
-                    'rider'
-                ])
-                ->where('vendor_id', $vendor->vendor_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
-
+        if (!$vendor) {
             return response()->json([
-                'status'  => 200,
-                'message' => 'All pickup requests fetched successfully.',
-                'data'    => $pickups,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status'  => 500,
-                'message' => 'Something went wrong while fetching all pickups.',
-                'error'   => $e->getMessage(),
-            ], 500);
+                'status'  => 401,
+                'message' => 'Unauthorized. Vendor not logged in.',
+            ], 401);
         }
+
+        $pickups = FlowerPickupDetails::with([
+                'flowerPickupItems.flower',
+                'flowerPickupItems.unit',
+                'vendor',
+                'rider'
+            ])
+            ->where('vendor_id', $vendor->vendor_id)
+            ->where(function ($q) {
+                $q->where('status', '!=', 'pending')
+                  ->orWhereNull('status'); // keep this only if you want NULLs included
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'All pickup requests fetched successfully.',
+            'data'    => $pickups,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status'  => 500,
+            'message' => 'Something went wrong while fetching all pickups.',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
+
 
     public function vendorDetails(Request $request)
     {
