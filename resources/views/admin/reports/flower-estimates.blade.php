@@ -329,6 +329,72 @@
                             </div>
                         </div>
 
+                         <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Item (All Products)</strong></div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-end">Total Qty</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @forelse($tTotals as $it)
+                                            <tr>
+                                                <td>{{ $it['item_name'] }}</td>
+                                                <td class="text-end">
+                                                    {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                    {{ $it['total_unit_disp'] }}
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="2" class="text-muted">No items.</td>
+                                            </tr>
+                                        @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Tomorrow Totals by Category --}}
+                        @php
+                            $catRows = [
+                                ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
+                                ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit],
+                                ['label' => 'Count', 'qty' => $cQty, 'unit' => $cUnit],
+                            ];
+                        @endphp
+                        <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                        <tr>
+                                            <th>Category</th>
+                                            <th class="text-end">Total Qty</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach ($catRows as $r)
+                                            <tr>
+                                                <td>{{ $r['label'] }}</td>
+                                                <td class="text-end">
+                                                    {{ rtrim(rtrim(number_format($r['qty'], 3), '0'), '.') }} {{ $r['unit'] }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                        </tbody>
+                                    </table>
+                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Products (native disclosure) --}}
                         <div class="row g-3">
                             @foreach ($tProducts as $pid => $row)
@@ -401,73 +467,7 @@
                                 </div>
                             @endforeach
                         </div>
-
-                        {{-- Tomorrow Totals by Item --}}
-                        <div class="card border-0 shadow-sm mt-3">
-                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Item (All Products)</strong></div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th>Item</th>
-                                            <th class="text-end">Total Qty</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @forelse($tTotals as $it)
-                                            <tr>
-                                                <td>{{ $it['item_name'] }}</td>
-                                                <td class="text-end">
-                                                    {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                    {{ $it['total_unit_disp'] }}
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="2" class="text-muted">No items.</td>
-                                            </tr>
-                                        @endforelse
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Tomorrow Totals by Category --}}
-                        @php
-                            $catRows = [
-                                ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
-                                ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit],
-                                ['label' => 'Count', 'qty' => $cQty, 'unit' => $cUnit],
-                            ];
-                        @endphp
-                        <div class="card border-0 shadow-sm mt-3">
-                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                        <tr>
-                                            <th>Category</th>
-                                            <th class="text-end">Total Qty</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        @foreach ($catRows as $r)
-                                            <tr>
-                                                <td>{{ $r['label'] }}</td>
-                                                <td class="text-end">
-                                                    {{ rtrim(rtrim(number_format($r['qty'], 3), '0'), '.') }} {{ $r['unit'] }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                        </tbody>
-                                    </table>
-                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
-                                </div>
-                            </div>
-                        </div>
+                       
                     @endif
                 </div>
             </div>
