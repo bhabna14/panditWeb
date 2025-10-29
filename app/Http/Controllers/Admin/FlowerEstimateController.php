@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB as DBFacade;
 
 class FlowerEstimateController extends Controller
 {
+        
     public function index(Request $request)
     {
         // ---- Filters ---------------------------------------------------------
@@ -35,7 +36,6 @@ class FlowerEstimateController extends Controller
         }
 
         // ---- FlowerDetails live price index (name → {unit, price}) ----------
-        // Only "active" rows; tweak if your status values differ.
         $fdIndex = FlowerDetails::query()
             ->select(['name', 'unit', 'price'])
             ->where('status', 'active')
@@ -94,28 +94,24 @@ class FlowerEstimateController extends Controller
                         $category     = $this->inferCategory($origUnit);
                         if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
                         $toBaseFactor = $this->toBaseFactor($origUnit); // item unit → base
-                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor; // base qty across subs
+                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
                         [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
 
                         // ----- DYNAMIC PRICING from FlowerDetails -------------------
                         $nameKey = strtolower(trim((string) $pi->item_name));
-                        $fd      = $fdIndex->get($nameKey); // {unit, price} or null
+                        $fd      = $fdIndex->get($nameKey);
                         $itemPricePerSub = 0.0;
 
                         if ($fd) {
                             $fdUnit   = strtolower(trim((string) $fd->unit));
                             $fdPrice  = (float) $fd->price;
 
-                            // Convert per-sub quantity to base, and FD unit to base, then scale
                             $perSubQtyBase  = $perItemQty * $this->toBaseFactor($origUnit);
                             $fdUnitBase     = $this->toBaseFactor($fdUnit) ?: 1.0;
 
-                            // How many FD units does the per-sub quantity represent?
-                            // e.g. 250 g item with FD unit kg(=1000g): perSubQtyBase(250g)/fdUnitBase(1000g)=0.25
                             $fdUnitsCount   = $perSubQtyBase / $fdUnitBase;
                             $itemPricePerSub = $fdPrice * $fdUnitsCount;
                         }
-                        // else: no FD row -> price stays 0.0
 
                         $totalPrice = $itemPricePerSub * $subsCount;
 
@@ -124,11 +120,11 @@ class FlowerEstimateController extends Controller
                             'category'           => $category,
                             'per_item_qty'       => $perItemQty,
                             'per_item_unit'      => $origUnit,
-                            'item_price_per_sub' => round($itemPricePerSub, 2), // DYNAMIC
+                            'item_price_per_sub' => round($itemPricePerSub, 2),
                             'total_qty_base'     => $totalQtyBase,
                             'total_qty_disp'     => $qtyDisp,
                             'total_unit_disp'    => $unitDisp,
-                            'total_price'        => round($totalPrice, 2),      // DYNAMIC
+                            'total_price'        => round($totalPrice, 2),
                         ];
 
                         $productTotal += $totalPrice;
