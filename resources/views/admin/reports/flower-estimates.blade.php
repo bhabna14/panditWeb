@@ -32,74 +32,47 @@
         }
 
         /* Date input with icon (pure CSS) */
-        .date-wrap {
-            position: relative;
-        }
+        .date-wrap { position: relative; }
         .date-wrap .bi {
-            position: absolute;
-            left: .6rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            pointer-events: none;
+            position: absolute; left: .6rem; top: 50%;
+            transform: translateY(-50%); color: #6c757d; pointer-events: none;
         }
-        .date-wrap input[type="date"] {
-            padding-left: 2rem;
-        }
+        .date-wrap input[type="date"] { padding-left: 2rem; }
 
         /* Quick presets as pill chips */
-        .preset-chips {
-            display: flex;
-            flex-wrap: wrap;
-            gap: .5rem;
-        }
+        .preset-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
         .preset-chips .btn {
-            border-radius: 999px;
-            padding: .35rem .75rem;
-            line-height: 1.1;
+            border-radius: 999px; padding: .35rem .75rem; line-height: 1.1;
         }
-        .preset-chips .btn.active {
-            font-weight: 700;
-        }
+        .preset-chips .btn.active { font-weight: 700; }
 
         /* View segmented control */
         .segmented {
-            display: inline-flex;
-            border: 1px solid #ced4da;
-            border-radius: .5rem;
-            overflow: hidden;
-            background: #fff;
+            display: inline-flex; border: 1px solid #ced4da; border-radius: .5rem; overflow: hidden; background: #fff;
         }
         .segmented a {
-            padding: .45rem .85rem;
-            text-decoration: none;
-            color: #0d6efd;
-            border-right: 1px solid #ced4da;
-            display: inline-flex;
-            align-items: center;
-            gap: .4rem;
+            padding: .45rem .85rem; text-decoration: none; color: #0d6efd; border-right: 1px solid #ced4da;
+            display: inline-flex; align-items: center; gap: .4rem;
         }
         .segmented a:last-child { border-right: 0; }
-        .segmented a.active {
-            background: #0d6efd;
-            color: #fff;
-        }
+        .segmented a.active { background: #0d6efd; color: #fff; }
 
         /* Actions alignment */
-        .actions-wrap {
-            display: flex;
-            gap: .5rem;
-            flex-wrap: wrap;
-        }
+        .actions-wrap { display: flex; gap: .5rem; flex-wrap: wrap; }
         @media (min-width: 992px) {
-            .actions-wrap {
-                justify-content: flex-end;
-            }
+            .actions-wrap { justify-content: flex-end; }
         }
 
         /* Section headings/tables (unchanged from your layout) */
         .nav-pills .nav-link.active { font-weight: 600; }
         .filter-card .row > [class*="col-"] { min-width: 0; }
+
+        /* --- Tiny UX polish for collapsible product rows --- */
+        .card-toggle {
+            display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+        }
+        .card-toggle .chev { transition: transform .2s ease; }
+        .card-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
     </style>
 @endsection
 
@@ -215,8 +188,6 @@
             </div>
             <div class="card-body">
                 <div class="row g-3">
-                   
-
                     <div class="col-12 col-lg-8">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-header bg-white"><strong>Totals by Item (All Products)</strong></div>
@@ -251,7 +222,7 @@
                         </div>
                     </div>
 
-                     <div class="col-12 col-lg-4">
+                    <div class="col-12 col-lg-4">
                         <div class="card border-0 shadow-sm">
                             <div class="card-header bg-white"><strong>Totals by Category</strong></div>
                             <div class="card-body">
@@ -288,12 +259,48 @@
         </div>
 
         {{-- ================================ --}}
-        {{-- TOMORROW ESTIMATE (always shown) --}}
+        {{-- TOMORROW ESTIMATE (redesigned)  --}}
         {{-- ================================ --}}
         @php
+            use Illuminate\Support\Str;
+
             $tProducts = $tomorrowEstimate['products'] ?? [];
             $tGrand    = $tomorrowEstimate['grand_total_amount'] ?? 0;
             $tTotals   = $tomorrowEstimate['totals_by_item'] ?? [];
+
+            // --- Build Tomorrow summary (from product items we already have) ---
+            $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
+            $distinctItems = [];
+
+            foreach ($tProducts as $row) {
+                foreach (($row['items'] ?? []) as $it) {
+                    $cat = $it['category'] ?? 'count';
+                    $catBase[$cat] += (float)($it['total_qty_base'] ?? 0);
+                    $distinctItems[strtolower(trim($it['item_name']))] = true;
+                }
+            }
+
+            $tomorrowDistinctItemCount = count($distinctItems);
+
+            // --- Simple auto unit formatters for category totals ---
+            $fmtCat = function(float $qtyBase, string $cat): array {
+                if ($cat === 'weight') {
+                    // base grams → show kg if >= 1000
+                    if ($qtyBase >= 1000) return [round($qtyBase / 1000, 3), 'kg'];
+                    return [round($qtyBase, 3), 'g'];
+                }
+                if ($cat === 'volume') {
+                    // base ml → show L if >= 1000
+                    if ($qtyBase >= 1000) return [round($qtyBase / 1000, 3), 'L'];
+                    return [round($qtyBase, 3), 'ml'];
+                }
+                // count
+                return [round($qtyBase, 3), 'pcs'];
+            };
+
+            [$wQty, $wUnit] = $fmtCat($catBase['weight'], 'weight');
+            [$vQty, $vUnit] = $fmtCat($catBase['volume'], 'volume');
+            [$cQty, $cUnit] = $fmtCat($catBase['count' ], 'count' );
         @endphp
 
         <div class="card border-0 shadow-sm mt-4">
@@ -318,6 +325,41 @@
                 @if (empty($tProducts))
                     <div class="alert alert-secondary">No active subscriptions tomorrow.</div>
                 @else
+                    {{-- ======= Summary strip ======= --}}
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-md-3">
+                            <div class="mini-stat p-3 bg-light border">
+                                <div class="text-muted">Distinct Items</div>
+                                <div class="fs-4 fw-bold">{{ number_format($tomorrowDistinctItemCount) }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="mini-stat p-3 bg-light border">
+                                <div class="text-muted">Total Weight</div>
+                                <div class="fs-4 fw-bold">
+                                    {{ rtrim(rtrim(number_format($wQty, 3), '0'), '.') }} {{ $wUnit }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="mini-stat p-3 bg-light border">
+                                <div class="text-muted">Total Volume</div>
+                                <div class="fs-4 fw-bold">
+                                    {{ rtrim(rtrim(number_format($vQty, 3), '0'), '.') }} {{ $vUnit }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="mini-stat p-3 bg-light border">
+                                <div class="text-muted">Total Count</div>
+                                <div class="fs-4 fw-bold">
+                                    {{ rtrim(rtrim(number_format($cQty, 3), '0'), '.') }} {{ $cUnit }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ======= Products (collapsible) ======= --}}
                     <div class="row g-3">
                         @foreach ($tProducts as $pid => $row)
                             @php
@@ -326,6 +368,9 @@
                                 $items         = $row['items'] ?? [];
                                 $productTotal  = $row['product_total'] ?? 0;
                                 $bundlePerSub  = $row['bundle_total_per_sub'] ?? 0;
+
+                                $panelId = 'tomorrow-p-' . \Illuminate\Support\Str::slug((string)$pid . '-' . ($product?->name ?? 'product'));
+                                $showNow = $loop->first; // first one opened by default
                             @endphp
 
                             <div class="col-12">
@@ -339,55 +384,66 @@
                                                     <span class="ms-2">(Bundle / Sub: ₹{{ number_format($bundlePerSub, 2) }})</span>
                                                 </div>
                                             </div>
-                                            <div>
+                                            <div class="d-flex align-items-center gap-2">
                                                 <span class="badge bg-primary">Product Total:
                                                     <span class="money">₹{{ number_format($productTotal, 2) }}</span>
                                                 </span>
+                                                <a class="card-toggle text-decoration-none"
+                                                   data-bs-toggle="collapse"
+                                                   href="#{{ $panelId }}"
+                                                   role="button"
+                                                   aria-expanded="{{ $showNow ? 'true' : 'false' }}"
+                                                   aria-controls="{{ $panelId }}">
+                                                    <span>Details</span>
+                                                    <i class="bi bi-chevron-down chev"></i>
+                                                </a>
                                             </div>
                                         </div>
 
-                                        <div class="table-responsive mt-3">
-                                            <table class="table table-sm table-hover align-middle">
-                                                <thead class="table-light">
-                                                    <tr>
-                                                        <th style="width:30%">Item</th>
-                                                        <th class="text-end">Per-Sub Qty</th>
-                                                        <th>Per-Sub Unit</th>
-                                                        <th class="text-end">Item Price (₹)</th>
-                                                        <th class="text-end">Total Qty</th>
-                                                        <th class="text-end">Total Price (₹)</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @forelse($items as $it)
+                                        <div class="collapse {{ $showNow ? 'show' : '' }}" id="{{ $panelId }}">
+                                            <div class="table-responsive mt-3">
+                                                <table class="table table-sm table-hover align-middle">
+                                                    <thead class="table-light">
                                                         <tr>
-                                                            <td>{{ $it['item_name'] }}</td>
-                                                            <td class="text-end">
-                                                                {{ rtrim(rtrim(number_format($it['per_item_qty'], 3), '0'), '.') }}
-                                                            </td>
-                                                            <td>{{ strtoupper($it['per_item_unit']) }}</td>
-                                                            <td class="text-end money">{{ number_format($it['item_price_per_sub'], 2) }}</td>
-                                                            <td class="text-end">
-                                                                {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                                {{ $it['total_unit_disp'] }}
-                                                            </td>
-                                                            <td class="text-end money">{{ number_format($it['total_price'], 2) }}</td>
+                                                            <th style="width:30%">Item</th>
+                                                            <th class="text-end">Per-Sub Qty</th>
+                                                            <th>Per-Sub Unit</th>
+                                                            <th class="text-end">Item Price (₹)</th>
+                                                            <th class="text-end">Total Qty</th>
+                                                            <th class="text-end">Total Price (₹)</th>
                                                         </tr>
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="6" class="text-muted">No package items configured.</td>
-                                                        </tr>
-                                                    @endforelse
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                                    </thead>
+                                                    <tbody>
+                                                        @forelse($items as $it)
+                                                            <tr>
+                                                                <td>{{ $it['item_name'] }}</td>
+                                                                <td class="text-end">
+                                                                    {{ rtrim(rtrim(number_format($it['per_item_qty'], 3), '0'), '.') }}
+                                                                </td>
+                                                                <td>{{ strtoupper($it['per_item_unit']) }}</td>
+                                                                <td class="text-end money">{{ number_format($it['item_price_per_sub'], 2) }}</td>
+                                                                <td class="text-end">
+                                                                    {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                                    {{ $it['total_unit_disp'] }}
+                                                                </td>
+                                                                <td class="text-end money">{{ number_format($it['total_price'], 2) }}</td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td colspan="6" class="text-muted">No package items configured.</td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div> {{-- /collapse --}}
                                     </div>
                                 </div>
                             </div>
                         @endforeach
                     </div>
 
-                    {{-- Tomorrow Totals by Item --}}
+                    {{-- ======= Tomorrow Totals by Item ======= --}}
                     <div class="card border-0 shadow-sm mt-3">
                         <div class="card-header bg-white">
                             <strong>Tomorrow — Totals by Item (All Products)</strong>
@@ -417,6 +473,43 @@
                                         @endforelse
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- ======= NEW: Tomorrow Totals by Category ======= --}}
+                    @php
+                        $catRows = [
+                            ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
+                            ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit],
+                            ['label' => 'Count' , 'qty' => $cQty, 'unit' => $cUnit],
+                        ];
+                    @endphp
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-header bg-white">
+                            <strong>Tomorrow — Totals by Category</strong>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Category</th>
+                                            <th class="text-end">Total Qty</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($catRows as $r)
+                                            <tr>
+                                                <td>{{ $r['label'] }}</td>
+                                                <td class="text-end">
+                                                    {{ rtrim(rtrim(number_format($r['qty'], 3), '0'), '.') }} {{ $r['unit'] }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                                <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
                             </div>
                         </div>
                     </div>

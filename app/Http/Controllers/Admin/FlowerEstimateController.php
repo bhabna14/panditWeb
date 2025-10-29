@@ -336,9 +336,6 @@ class FlowerEstimateController extends Controller
         return $filtered->values();
     }
 
-    /**
-     * Build a day estimate from a subscriptions collection using LIVE prices.
-     */
     private function buildEstimateForSubsOnDate($subs, Carbon $date, \Illuminate\Support\Collection $fdIndex): array
     {
         $byProduct = $subs->groupBy('product_id');
@@ -428,8 +425,6 @@ class FlowerEstimateController extends Controller
             'totals_by_item'     => $this->formatTotalsByItem($dayTotalsByItemBase),
         ];
     }
-
-    // --------------------- Helpers -------------------------------------------
 
     private function resolveRange(Request $request, ?string $preset): array
     {
