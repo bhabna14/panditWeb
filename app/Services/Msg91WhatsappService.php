@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Log;
 
 class Msg91WhatsappService
 {
-    /** ===== HARD-CODED MSG91 CONFIG (no .env) ===== */
     private const AUTHKEY              = '425546AOXNCrBOzpq6878de9cP1';
     private const INTEGRATED_NUMBER    = '919124420330'; // digits only (no +)
     private const SENDER_E164          = '+919124420330';

@@ -198,7 +198,8 @@ class AdminNotificationController extends Controller
             'users','requiresParam','buttonBase','senderLabel'
         ));
     }
-    
+    // AdminNotificationController.php
+
 public function whatsappSend(Request $request)
 {
     $requiresParam = Msg91WhatsappService::requiresUrlParam();
@@ -208,8 +209,9 @@ public function whatsappSend(Request $request)
         'audience'         => ['required', Rule::in(['all','selected'])],
         'user'             => ['nullable','array'],
         'user.*'           => ['nullable','string'],
-        'title'            => ['nullable','string','max:255'],   // not used by template
-        'description'      => ['nullable','string'],             // not used by template
+        // Title & description not used (BODY_FIELDS=0). Make them optional to avoid UX errors.
+        'title'            => ['nullable','string','max:255'],
+        'description'      => ['nullable','string'],
         'button_url_value' => [$requiresParam ? 'required' : 'nullable','string','max:2000'],
     ]);
 
@@ -236,23 +238,26 @@ public function whatsappSend(Request $request)
         return back()->with('error', 'No valid phone numbers found to send.')->withInput();
     }
 
-    // Build components (BODY_FIELDS = 0 -> do NOT send body_*)
+    // Components (BODY_FIELDS=0 -> send no body_* at all)
     $components = [];
 
     // URL button {{1}} token (required)
     if ($requiresParam) {
         $rawVal = (string)($validated['button_url_value'] ?? '');
-        $param  = $this->normalizeButtonParamStrict($rawVal, Msg91WhatsappService::buttonBase());
+        $param  = $this->extractTokenForButton($rawVal, Msg91WhatsappService::buttonBase());
 
         if ($param === '') {
-            return back()->with('error', 'URL button requires a token for {{1}} (do not paste the full URL).')->withInput();
+            return back()->with('error',
+                'URL button requires a token for {{1}}. Paste a token like ABC123 or a full URL like '
+                . (Msg91WhatsappService::buttonBase() ?: 'https://your.domain/path/')
+                . 'ABC123'
+            )->withInput();
         }
 
         $components['button_1'] = [
             'subtype' => 'url',
             'type'    => 'text',
-            // DO NOT send 'text' or full URL. Only the token for {{1}}:
-            'value'   => $param,
+            'value'   => $param, // ONLY the token for {{1}}
         ];
     }
 
@@ -299,12 +304,76 @@ public function whatsappSend(Request $request)
 }
 
 /**
- * Strictly normalize the admin’s input into a {{1}} token:
- * - If they paste full URL (e.g., https://your.site/track/ABC123), strip the base and keep ABC123.
- * - If they paste token with braces ({{1}} / {{-1-}}), reject.
- * - Remove spaces; convert spaces to dashes.
- * - Disallow any scheme/host in the final token.
+ * Turn admin input into the {{1}} token.
+ * Accepts:
+ *   - Raw token:  ABC123
+ *   - Full URL:   https://your.site/track/ABC123
+ *   - Full URL w/ query: https://your.site/track?code=ABC123 or ?t=ABC123
+ * Rejects anything containing {{...}}.
  */
+private function extractTokenForButton(string $input, string $base): string
+{
+    $s = $this->sanitizeBodyValue($input);
+    if ($s === '') return '';
+
+    // Never pass template placeholders like {{-1-}} to WhatsApp
+    if (preg_match('/\{\{.*\}\}/', $s)) {
+        return '';
+    }
+
+    // If input is a full URL…
+    $isUrl = (bool) preg_match('#^[a-z][a-z0-9+\-.]*://#i', $s);
+    if ($isUrl) {
+        // If a base is configured and matches, strip it
+        if ($base) {
+            $baseNorm = rtrim($base, '/') . '/';
+            if (stripos($s, $baseNorm) === 0) {
+                $token = substr($s, strlen($baseNorm));
+                $token = trim($token, "/ \t\n\r\0\x0B");
+                return $this->cleanToken($token);
+            }
+        }
+
+        // Else: parse URL and try to extract the last path segment
+        $parts = parse_url($s);
+        if (!empty($parts['path'])) {
+            $segments = array_values(array_filter(explode('/', $parts['path']), fn($x) => $x !== ''));
+            if (!empty($segments)) {
+                return $this->cleanToken(end($segments));
+            }
+        }
+
+        // Fall back to common query keys
+        if (!empty($parts['query'])) {
+            parse_str($parts['query'], $q);
+            foreach (['t','token','code','id','ref'] as $k) {
+                if (!empty($q[$k])) {
+                    return $this->cleanToken((string)$q[$k]);
+                }
+            }
+        }
+
+        // No usable token found
+        return '';
+    }
+
+    // Treat as raw token
+    return $this->cleanToken($s);
+}
+
+/** Keep only safe characters for a URL path token */
+private function cleanToken(string $token): string
+{
+    $token = trim($token);
+    // Convert whitespace runs to dashes
+    $token = preg_replace('/\s+/', '-', $token);
+    // Strip anything not safe in a path segment
+    $token = preg_replace('/[^A-Za-z0-9._\-~]/', '', $token);
+    // Disallow empty or placeholder-like content
+    if ($token === '' || preg_match('/\{\{.*\}\}/', $token)) return '';
+    return $token;
+}
+
 private function normalizeButtonParamStrict(string $input, string $base): string
 {
     $clean = $this->sanitizeBodyValue($input);
