@@ -231,7 +231,6 @@
                                                         <span class="badge badge-unit">{{ $unit }}</span>
                                                     </div>
                                                     <div class="tile-value">{{ $qty }}</div>
-                                                    <div class="subtle">Total quantity in selected range</div>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -266,7 +265,6 @@
                                                         <span class="badge badge-unit">{{ $unit }}</span>
                                                     </div>
                                                     <div class="tile-value">{{ $qty }}</div>
-                                                    <div class="subtle">Aggregated by category</div>
                                                 </div>
                                             @endforeach
                                         </div>
@@ -377,7 +375,6 @@
                                                     <span class="badge badge-unit">{{ $unit }}</span>
                                                 </div>
                                                 <div class="tile-value">{{ $qty }}</div>
-                                                <div class="subtle">Required for tomorrow</div>
                                             </div>
                                         @endforeach
                                     </div>
