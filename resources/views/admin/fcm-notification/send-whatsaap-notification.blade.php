@@ -32,7 +32,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <h3 class="mb-1 fw-bold">Send WhatsApp Notification</h3>
-                    <div class="text-muted">Send to all users or select specific phone numbers. Optional image.</div>
+                    <div class="text-muted">Send to all users or select specific phone numbers.</div>
                 </div>
             </div>
         </div>
@@ -75,29 +75,6 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                                Button URL parameter
-                                @if ($requiresParam)
-                                <span class="text-danger">(required)</span>@else<span
-                                        class="text-muted">(optional)</span>
-                                @endif
-                            </label>
-                            <input type="text" name="button_url_value" class="form-control"
-                                value="{{ old('button_url_value') }}"
-                                placeholder="e.g., ABC123{{ $buttonBase ? ' or ' . rtrim($buttonBase, '/') . '/ABC123' : '' }}"
-                                @if ($requiresParam) required @endif>
-                            @if ($buttonBase)
-                                <div class="form-text">
-                                    If your button URL in MSG91 looks like
-                                    <code>{{ rtrim($buttonBase, '/') }}/@{{ 1 }}</code>,
-                                    enter either just the token (<code>ABC123</code>) or the full URL
-                                    (<code>{{ rtrim($buttonBase, '/') }}/ABC123</code>). We’ll send only the token for
-                                    <code>@{{ 1 }}</code>.
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="mb-3">
                             <label class="form-label fw-semibold">Recipients (phone numbers)</label>
                             <select class="form-control" name="user[]" id="waUsers" multiple>
                                 @foreach ($users as $u)
@@ -116,24 +93,16 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Title</label>
-                            <input type="text" name="title" class="form-control" required maxlength="255"
+                            <label class="form-label fw-semibold">Title (optional, not sent)</label>
+                            <input type="text" name="title" class="form-control" maxlength="255"
                                 value="{{ old('title') }}">
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Message</label>
-                            <textarea name="description" rows="5" class="form-control" required>{{ old('description') }}</textarea>
-                            <div class="form-text">Line breaks will be converted to spaces to satisfy MSG91 bulk API rules.
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Image (optional)</label>
-                            <input type="file" name="image" id="waImage" class="form-control" accept="image/*">
-                            <div class="mt-2"><img id="waPreview" class="img-preview d-none" /></div>
-                            <div class="form-text text-muted">Bulk API ignores images unless your approved template has a
-                                header image component.</div>
+                            <label class="form-label fw-semibold">Message (optional, not sent)</label>
+                            <textarea name="description" rows="5" class="form-control">{{ old('description') }}</textarea>
+                            <div class="form-text">These are for preview/audit only. The approved MSG91 template content
+                                will be sent.</div>
                         </div>
 
                         <div class="d-flex gap-2">
@@ -151,8 +120,8 @@
                     <h5 class="fw-bold mb-3">Tips</h5>
                     <ul class="mb-0">
                         <li>Your MSG91 sender {{ $senderLabel ?? '+91XXXXXXXXXX' }} must be approved & verified.</li>
-                        <li>Template name/namespace & language must match MSG91 exactly, with the same number/order of
-                            variables.</li>
+                        <li>Template <code>flower_wp_message</code> must have <b>no placeholders</b> and <b>no URL
+                                token</b>.</li>
                     </ul>
                 </div>
             </div>
@@ -181,27 +150,12 @@
         document.querySelectorAll('input[name="audience"]').forEach(el => el.addEventListener('change', setAudienceState));
         setAudienceState();
 
-        const waImg = document.getElementById('waImage');
-        const waPrev = document.getElementById('waPreview');
-        waImg.addEventListener('change', e => {
-            const f = e.target.files[0];
-            if (!f) {
-                waPrev.classList.add('d-none');
-                waPrev.removeAttribute('src');
-                return;
-            }
-            waPrev.src = URL.createObjectURL(f);
-            waPrev.classList.remove('d-none');
-        });
-
         document.getElementById('waPreviewBtn').addEventListener('click', () => {
             const title = document.querySelector('[name="title"]').value || '(No title)';
             const desc = document.querySelector('[name="description"]').value || '(No message)';
             Swal.fire({
                 title,
                 html: `<div style="text-align:left"><p><b>${title}</b></p><p>${desc.replace(/\n/g,'<br>')}</p></div>`,
-                imageUrl: waPrev.src && !waPrev.classList.contains('d-none') ? waPrev.src : undefined,
-                imageWidth: 300,
                 confirmButtonText: 'Looks Good'
             });
         });
