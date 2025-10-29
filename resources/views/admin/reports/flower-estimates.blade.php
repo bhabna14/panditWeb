@@ -70,6 +70,7 @@
         /* --- Tiny UX polish for collapsible product rows --- */
         .card-toggle {
             display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+            background: transparent; border: 0; padding: 0; color: inherit;
         }
         .card-toggle .chev { transition: transform .2s ease; }
         .card-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
@@ -369,6 +370,7 @@
                                 $productTotal  = $row['product_total'] ?? 0;
                                 $bundlePerSub  = $row['bundle_total_per_sub'] ?? 0;
 
+                                // keep IDs unique and CSS-friendly
                                 $panelId = 'tomorrow-p-' . \Illuminate\Support\Str::slug((string)$pid . '-' . ($product?->name ?? 'product'));
                                 $showNow = $loop->first; // first one opened by default
                             @endphp
@@ -388,15 +390,17 @@
                                                 <span class="badge bg-primary">Product Total:
                                                     <span class="money">₹{{ number_format($productTotal, 2) }}</span>
                                                 </span>
-                                                <a class="card-toggle text-decoration-none"
-                                                   data-bs-toggle="collapse"
-                                                   href="#{{ $panelId }}"
-                                                   role="button"
-                                                   aria-expanded="{{ $showNow ? 'true' : 'false' }}"
-                                                   aria-controls="{{ $panelId }}">
+                                                {{-- FIX: use button + data-bs-target (not href) and "collapsed" class when closed --}}
+                                                <button
+                                                    class="card-toggle text-decoration-none {{ $showNow ? '' : 'collapsed' }}"
+                                                    type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#{{ $panelId }}"
+                                                    aria-expanded="{{ $showNow ? 'true' : 'false' }}"
+                                                    aria-controls="{{ $panelId }}">
                                                     <span>Details</span>
                                                     <i class="bi bi-chevron-down chev"></i>
-                                                </a>
+                                                </button>
                                             </div>
                                         </div>
 
