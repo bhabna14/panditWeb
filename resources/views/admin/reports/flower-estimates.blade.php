@@ -391,7 +391,29 @@
                                 ['label' => 'Count',  'qty' => $cQty, 'unit' => $cUnit, 'dot' => 'dot-count',  'icon' => 'bi bi-123'],
                             ];
                         @endphp
-                       
+                        <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
+                            <div class="card-body">
+                                <div class="grid" style="--gap:.75rem">
+                                    @foreach($catRows as $r)
+                                        @php
+                                            $qty = rtrim(rtrim(number_format($r['qty'], 3), '0'), '.');
+                                        @endphp
+                                        <div class="tile">
+                                            <div class="tile-head">
+                                                <div class="tile-title">
+                                                    <span class="dot {{ $r['dot'] }}"></span>{{ $r['label'] }}
+                                                </div>
+                                                <span class="badge badge-unit">{{ $r['unit'] }}</span>
+                                            </div>
+                                            <div class="tile-value">{{ $qty }}</div>
+                                            <div class="subtle"><i class="{{ $r['icon'] }}"></i> Aggregated category need</div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <small class="text-muted d-block mt-2">Units auto-scale (kg/g, L/ml, pcs).</small>
+                            </div>
+                        </div>
 
                         {{-- Products (native disclosure) --}}
                         <div class="row g-3 mt-3">
