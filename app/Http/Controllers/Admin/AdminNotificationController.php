@@ -314,9 +314,7 @@ class AdminNotificationController extends Controller
 
     private function deriveDefaultCcDigitsFromNumber(string $integratedNumberDigits): string
     {
-        // Use first 1–3 digits as country code (you’re +91)
-        // For 919124420330, assume '91' as CC.
-        // We’ll detect common 91-length case:
+
         if (str_starts_with($integratedNumberDigits, '91')) return '91';
         // Fallback: take up to first 3 digits
         return substr($integratedNumberDigits, 0, 3) ?: '91';
