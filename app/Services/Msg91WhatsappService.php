@@ -10,18 +10,16 @@ class Msg91WhatsappService
     /** ===== HARD-CODED MSG91 CONFIG (no .env) ===== */
     private const AUTHKEY              = '425546AOXNCrBOzpq6878de9cP1';
     private const INTEGRATED_NUMBER    = '919124420330'; // digits only (no +)
-    private const SENDER_E164          = '+919124420330'; // optional (info only)
+    private const SENDER_E164          = '+919124420330';
     private const TEMPLATE_NAMESPACE   = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
     private const TEMPLATE_NAME        = 'flower_wp_message';
     private const LANGUAGE_CODE        = 'en_US';
     private const ENDPOINT_BULK        = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // IMPORTANT: Your template body has 0 placeholders → do not send body_*.
-    private const BODY_FIELDS          = 0;      // ← CHANGED from 1 to 0
-    private const REQUIRES_URL_PARAM   = true;   // button_1 has {{1}} (URL param)
-    private const BUTTON_BASE          = '';     // set a fixed base if you use one
+    private const BODY_FIELDS          = 0;
+    private const REQUIRES_URL_PARAM   = true;
 
-    /** ============================================ */
+    private const BUTTON_BASE          = 'https://your.site/track/';
 
     protected Client $http;
 
