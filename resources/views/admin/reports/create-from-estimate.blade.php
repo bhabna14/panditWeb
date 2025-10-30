@@ -56,9 +56,7 @@
             $oldUnitIds   = old('unit_id', []);
             $oldQtys      = old('quantity', []);
             $oldPrices    = old('price', []);
-
             $oldEstQtys   = old('est_quantity', []);
-
             $oldVendors   = old('row_vendor_id', []);
             $oldRiders    = old('row_rider_id', []);
 
@@ -167,10 +165,11 @@
 
                                 {{-- Est. Unit (mirrors actual; read-only UI) --}}
                                 <td>
+                                    {{-- FIXED: preselect to $unitVal so it shows immediately --}}
                                     <select class="form-control" data-est-unit-display disabled>
-                                        <option value="" selected>Choose</option>
+                                        <option value="" {{ $unitVal ? '' : 'selected' }}>Choose</option>
                                         @foreach ($units as $unit)
-                                            <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                                            <option value="{{ $unit->id }}" @selected($unitVal == $unit->id)>{{ $unit->unit_name }}</option>
                                         @endforeach
                                     </select>
                                     {{-- Hidden field that actually submits the mirrored unit --}}
@@ -277,6 +276,7 @@
 
                         {{-- Est. Unit (display only) --}}
                         <td>
+                            {{-- FIXED: default shows "Choose" until Actual is selected; JS will mirror --}}
                             <select class="form-control" data-est-unit-display disabled>
                                 <option value="" selected>Choose</option>
                                 @foreach ($units as $unit)
@@ -371,8 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function qsa(root, sel) { return Array.from((root || document).querySelectorAll(sel)); }
 
-    // ----- Unit conversions (to base) -----
-    // Base: weight → g, volume → ml, count → pcs
+    // Base unit helpers
     function symbolToCategory(sym) {
         if (!sym) return 'count';
         if (sym === 'kg' || sym === 'g') return 'weight';
@@ -381,15 +380,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     function toBaseFactor(sym) {
         switch (sym) {
-            case 'kg': return 1000; // kg → g
+            case 'kg': return 1000;
             case 'g':  return 1;
-            case 'l':  return 1000; // L → ml
+            case 'l':  return 1000;
             case 'ml': return 1;
             case 'pcs': default: return 1;
         }
     }
 
-    // Return the **line** estimated total for estQty in the chosen (actual) unit
     function computeEstimatedLineTotal(productId, estQty, actualUnitId) {
         const info = PRICING[String(productId)];
         if (!info || !estQty || !actualUnitId) return 0;
@@ -399,14 +397,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const catA = symbolToCategory(actualSym);
         const catB = symbolToCategory(fdSym);
-        if (catA !== catB) {
-            return 0; // cannot compare different categories
-        }
+        if (catA !== catB) return 0;
 
         const actualBase = toBaseFactor(actualSym);
         const fdBase     = toBaseFactor(fdSym);
 
-        // estQty (actual unit) → base → FD units → × price
         const fdUnitsCount = (estQty * actualBase) / fdBase;
         return fdUnitsCount * (parseFloat(info.fd_price) || 0);
     }
@@ -438,20 +433,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const tr = rowsBody.querySelector('tr[data-row]:last-child');
         attachRowHandlers(tr);
 
-        // Bulk rider?
         if (applyOneRiderCb.checked) {
             const riderSel = tr.querySelector('[data-row-rider]');
             syncRowRider(riderSel);
             riderSel.disabled = true;
         }
 
-        // Initial sync & totals
         syncEstimateUnit(tr);
         computeTotals();
     }
 
     function computeTotals() {
-        // Estimated total: sum of line totals using FD pricing
         let estTotal = 0;
         rowsBody.querySelectorAll('tr[data-row]').forEach(tr => {
             const productId = tr.querySelector('select[name="flower_id[]"]')?.value || '';
@@ -463,7 +455,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         estTotalEl.textContent = estTotal.toFixed(2);
 
-        // Actual total: sum price × qty
         let actTotal = 0;
         rowsBody.querySelectorAll('tr[data-row]').forEach(tr => {
             const qty   = parseFloat(tr.querySelector('input[name="quantity[]"]')?.value || '0') || 0;
@@ -484,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (estUnitHidden)  estUnitHidden.value  = value;
     }
 
-    // ---- Bulk Rider logic --------------------------------------------
+    // Bulk Rider logic
     function syncAllRiders() {
         const val = bulkRiderSel.value || '';
         qsa(rowsBody, '[data-row-rider]').forEach(sel => {
@@ -516,11 +507,10 @@ document.addEventListener('DOMContentLoaded', function() {
     addRowBtn.addEventListener('click', addRow);
     attachRowHandlers(document);
 
-    // Initial sync for existing rows
-    qsa(rowsBody, 'tr[data-row]').forEach(tr => syncEstimateUnit(tr));
+    // Ensure first render shows Est. Unit immediately
+    Array.from(rowsBody.querySelectorAll('tr[data-row]')).forEach(tr => syncEstimateUnit(tr));
     computeTotals();
 
-    // Rehydrate bulk rider state
     if (applyOneRiderCb.checked) {
         bulkRiderSel.disabled = false;
         syncAllRiders();

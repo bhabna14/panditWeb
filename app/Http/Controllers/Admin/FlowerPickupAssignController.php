@@ -19,106 +19,106 @@ class FlowerPickupAssignController extends Controller
 {
 
     public function createFromEstimate(Request $request)
-{
-    $date = $request->filled('date')
-        ? Carbon::parse($request->get('date'))->startOfDay()
-        : Carbon::tomorrow()->startOfDay();
+    {
+        $date = $request->filled('date')
+            ? Carbon::parse($request->get('date'))->startOfDay()
+            : Carbon::tomorrow()->startOfDay();
 
-    // Lookups
-    $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get();
-    $riders  = RiderDetails::select('rider_id','rider_name')->orderBy('rider_name')->get();
-    $flowers = FlowerProduct::select('product_id','name')->orderBy('name')->get();
-    $units   = PoojaUnit::select('id','unit_name')->get();
+        // Lookups
+        $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get();
+        $riders  = RiderDetails::select('rider_id','rider_name')->orderBy('rider_name')->get();
+        $flowers = FlowerProduct::select('product_id','name')->orderBy('name')->get();
+        $units   = PoojaUnit::select('id','unit_name')->get();
 
-    // name -> product_id
-    $flowerNameToId = $flowers->pluck('product_id','name')->toArray();
+        // name -> product_id
+        $flowerNameToId = $flowers->pluck('product_id','name')->toArray();
 
-    // normalize unit names → canonical symbols and build map symbol -> unit_id
-    $unitSymbolToId = [];
-    foreach ($units as $u) {
-        $key = $this->normalizeUnitKey($u->unit_name); // returns 'kg','g','l','ml','pcs'
-        if ($key) $unitSymbolToId[$key] = $u->id;
-    }
+        // normalize unit names → canonical symbols and build map symbol -> unit_id
+        $unitSymbolToId = [];
+        foreach ($units as $u) {
+            $key = $this->normalizeUnitKey($u->unit_name); // returns 'kg','g','l','ml','pcs'
+            if ($key) $unitSymbolToId[$key] = $u->id;
+        }
 
-    // ====== Tomorrow estimate to prefill estimate quantities =================
-    $subs     = $this->fetchActiveSubsEffectiveOn($date);
-    $estimate = $this->buildEstimateForSubsOnDate($subs, $date);
-    $totals   = array_values($estimate['totals_by_item'] ?? []);
+        // ====== Tomorrow estimate to prefill estimate quantities =================
+        $subs     = $this->fetchActiveSubsEffectiveOn($date);
+        $estimate = $this->buildEstimateForSubsOnDate($subs, $date);
+        $totals   = array_values($estimate['totals_by_item'] ?? []);
 
-    // ====== Live price index (FlowerDetails) for JS auto-pricing =============
-    // Build a product_id → {fd_unit_symbol, fd_unit_id, fd_price} map
-    $fdIndexByName = FlowerDetails::query()
-        ->select(['name','unit','price'])
-        ->where('status', 'active')
-        ->get()
-        ->keyBy(function ($fd) { return strtolower(trim((string)$fd->name)); });
+        // ====== Live price index (FlowerDetails) for JS auto-pricing =============
+        // Build a product_id → {fd_unit_symbol, fd_unit_id, fd_price} map
+        $fdIndexByName = FlowerDetails::query()
+            ->select(['name','unit','price'])
+            ->where('status', 'active')
+            ->get()
+            ->keyBy(function ($fd) { return strtolower(trim((string)$fd->name)); });
 
-    // product_id → pricing
-    $fdProductPricing = [];
-    foreach ($flowers as $f) {
-        $nameKey = strtolower(trim((string)$f->name));
-        $fd = $fdIndexByName->get($nameKey);
-        if ($fd) {
-            $sym = $this->normalizeUnitKey($fd->unit); // 'kg','g','l','ml','pcs'
-            $fdProductPricing[$f->product_id] = [
-                'fd_unit_symbol' => $sym,
-                'fd_unit_id'     => $unitSymbolToId[$sym] ?? null, // may be null if no matching unit in PoojaUnit
-                'fd_price'       => (float) $fd->price,             // price per FD unit
-            ];
-        } else {
-            // If not found, default to pcs @ 0
-            $fdProductPricing[$f->product_id] = [
-                'fd_unit_symbol' => 'pcs',
-                'fd_unit_id'     => $unitSymbolToId['pcs'] ?? null,
-                'fd_price'       => 0.0,
+        // product_id → pricing
+        $fdProductPricing = [];
+        foreach ($flowers as $f) {
+            $nameKey = strtolower(trim((string)$f->name));
+            $fd = $fdIndexByName->get($nameKey);
+            if ($fd) {
+                $sym = $this->normalizeUnitKey($fd->unit); // 'kg','g','l','ml','pcs'
+                $fdProductPricing[$f->product_id] = [
+                    'fd_unit_symbol' => $sym,
+                    'fd_unit_id'     => $unitSymbolToId[$sym] ?? null, // may be null if no matching unit in PoojaUnit
+                    'fd_price'       => (float) $fd->price,             // price per FD unit
+                ];
+            } else {
+                // If not found, default to pcs @ 0
+                $fdProductPricing[$f->product_id] = [
+                    'fd_unit_symbol' => 'pcs',
+                    'fd_unit_id'     => $unitSymbolToId['pcs'] ?? null,
+                    'fd_price'       => 0.0,
+                ];
+            }
+        }
+
+        // ====== Prefill rows (estimate qty; estimate unit mirrors actual → handled on JS) ====
+        $prefillRows = [];
+        foreach ($totals as $row) {
+            $name     = trim($row['item_name'] ?? '');
+            $flowerId = $flowerNameToId[$name] ?? null;
+
+            // Estimate quantity and a displayed unit label (for info only)
+            $dispUnit = strtolower((string)($row['total_unit_disp'] ?? ''));
+            $prefillRows[] = [
+                'flower_id'    => $flowerId,
+
+                // ESTIMATE (prefill qty only; est_unit mirrors actual unit via JS; price is auto)
+                'est_quantity' => $row['total_qty_disp'] ?? null,
+
+                // ACTUAL defaults empty
+                'unit_id'      => null,
+                'quantity'     => null,
+                'price'        => null,
+
+                // UX hints
+                'flower_name'  => $name,
+                'unit_label'   => $dispUnit,
             ];
         }
+
+        // Build a unitId → canonical symbol map for JS conversion
+        $unitIdToSymbol = [];
+        foreach ($units as $u) {
+            $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
+        }
+
+        return view('admin.reports.create-from-estimate', [
+            'prefillDate'        => $date->toDateString(),
+            'vendors'            => $vendors,
+            'riders'             => $riders,
+            'flowers'            => $flowers,
+            'units'              => $units,
+            'prefillRows'        => $prefillRows,
+            'todayDate'          => Carbon::today()->toDateString(),
+            // for JS auto-pricing
+            'fdProductPricing'   => $fdProductPricing,
+            'unitIdToSymbol'     => $unitIdToSymbol,
+        ]);
     }
-
-    // ====== Prefill rows (estimate qty; estimate unit mirrors actual → handled on JS) ====
-    $prefillRows = [];
-    foreach ($totals as $row) {
-        $name     = trim($row['item_name'] ?? '');
-        $flowerId = $flowerNameToId[$name] ?? null;
-
-        // Estimate quantity and a displayed unit label (for info only)
-        $dispUnit = strtolower((string)($row['total_unit_disp'] ?? ''));
-        $prefillRows[] = [
-            'flower_id'    => $flowerId,
-
-            // ESTIMATE (prefill qty only; est_unit mirrors actual unit via JS; price is auto)
-            'est_quantity' => $row['total_qty_disp'] ?? null,
-
-            // ACTUAL defaults empty
-            'unit_id'      => null,
-            'quantity'     => null,
-            'price'        => null,
-
-            // UX hints
-            'flower_name'  => $name,
-            'unit_label'   => $dispUnit,
-        ];
-    }
-
-    // Build a unitId → canonical symbol map for JS conversion
-    $unitIdToSymbol = [];
-    foreach ($units as $u) {
-        $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
-    }
-
-    return view('admin.reports.create-from-estimate', [
-        'prefillDate'        => $date->toDateString(),
-        'vendors'            => $vendors,
-        'riders'             => $riders,
-        'flowers'            => $flowers,
-        'units'              => $units,
-        'prefillRows'        => $prefillRows,
-        'todayDate'          => Carbon::today()->toDateString(),
-        // for JS auto-pricing
-        'fdProductPricing'   => $fdProductPricing,
-        'unitIdToSymbol'     => $unitIdToSymbol,
-    ]);
-}
 
     public function saveFlowerPickupAssignRider(Request $request)
     {
