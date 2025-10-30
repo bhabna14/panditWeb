@@ -25,10 +25,6 @@ class FlowerPickupItems extends Model
         'est_unit_id',
         'est_quantity',
         'est_price',
-
-        // Per-row ownership (make sure these columns exist in your table)
-        'vendor_id',
-        'rider_id',
     ];
 
     protected $casts = [
@@ -52,26 +48,14 @@ class FlowerPickupItems extends Model
             ->withDefault(['unit_name' => 'N/A']);
     }
 
-    /** Estimate unit (this is the one missing in your app) */
+    /** Estimate unit */
     public function estUnit()
     {
         return $this->belongsTo(PoojaUnit::class, 'est_unit_id', 'id')
             ->withDefault(['unit_name' => 'N/A']);
     }
 
-    /** Per-row vendor (optional if your schema supports it) */
-    public function vendor()
-    {
-        return $this->belongsTo(FlowerVendor::class, 'vendor_id', 'vendor_id');
-    }
-
-    /** Per-row rider (optional if your schema supports it) */
-    public function rider()
-    {
-        return $this->belongsTo(RiderDetails::class, 'rider_id', 'rider_id');
-    }
-
-    /** Back-reference to header (optional, handy sometimes) */
+    /** Header back-reference */
     public function pickup()
     {
         return $this->belongsTo(FlowerPickupDetails::class, 'pick_up_id', 'pick_up_id');
