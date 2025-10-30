@@ -58,7 +58,6 @@
             $oldPrices    = old('price', []);
 
             $oldEstQtys   = old('est_quantity', []);
-            $oldEstPrices = old('est_price', []);
 
             $oldVendors   = old('row_vendor_id', []);
             $oldRiders    = old('row_rider_id', []);
@@ -66,7 +65,7 @@
             $rowCountOld = max(
                 count($oldFlowerIds), count($oldUnitIds),
                 count($oldQtys), count($oldPrices),
-                count($oldEstQtys), count($oldEstPrices),
+                count($oldEstQtys),
                 count($oldVendors), count($oldRiders)
             );
             $rows = $rowCountOld > 0 ? range(0, $rowCountOld - 1) : range(0, max(count($prefillRows), 1) - 1);
@@ -76,7 +75,7 @@
             <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
                     <strong>Items</strong>
-                    <div class="subhead">Estimate unit is always the same as Actual unit. Estimate price is auto-calculated.</div>
+                    <div class="subhead">Estimate unit is always the same as Actual unit (shown as read-only). Estimate price is hidden and auto-applied in totals.</div>
                 </div>
 
                 {{-- Bulk rider controls --}}
@@ -107,9 +106,10 @@
                         <tr>
                             <th style="width:18%">Flower</th>
 
-                            {{-- Estimate (unit mirrors actual) --}}
+                            {{-- Estimate --}}
+                            <th style="width:12%">Est. Unit</th>
                             <th style="width:12%">Est. Qty</th>
-                            <th style="width:12%">Est. Price (₹)</th>
+                            {{-- Est. Price column removed/hidden --}}
 
                             {{-- Actual --}}
                             <th style="width:13%">Actual Unit</th>
@@ -139,7 +139,6 @@
 
                                 $flowerVal  = $oldFlowerIds[$i] ?? $default['flower_id'];
                                 $estQtyVal  = $oldEstQtys[$i]   ?? $default['est_quantity'];
-                                $estPriceVal= $oldEstPrices[$i] ?? null;
 
                                 $unitVal    = $oldUnitIds[$i]   ?? $default['unit_id'];
                                 $qtyVal     = $oldQtys[$i]      ?? $default['quantity'];
@@ -166,6 +165,18 @@
                                     @enderror
                                 </td>
 
+                                {{-- Est. Unit (mirrors actual; read-only UI) --}}
+                                <td>
+                                    <select class="form-control" data-est-unit-display disabled>
+                                        <option value="" selected>Choose</option>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                                        @endforeach
+                                    </select>
+                                    {{-- Hidden field that actually submits the mirrored unit --}}
+                                    <input type="hidden" name="est_unit_id[]" value="{{ $unitVal }}">
+                                </td>
+
                                 {{-- Est. Qty (editable) --}}
                                 <td>
                                     <input type="number" name="est_quantity[]"
@@ -176,17 +187,6 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </td>
-
-                                {{-- Est. Price (auto, readonly) --}}
-                                <td>
-                                    <input type="number" name="est_price[]"
-                                           class="form-control readonly-input"
-                                           inputmode="decimal" min="0" step="0.01"
-                                           value="{{ $estPriceVal }}" readonly>
-                                </td>
-
-                                {{-- Hidden est_unit_id that mirrors actual unit --}}
-                                <input type="hidden" name="est_unit_id[]" value="{{ $unitVal }}"/>
 
                                 {{-- Actual Unit --}}
                                 <td>
@@ -275,14 +275,20 @@
                             </select>
                         </td>
 
+                        {{-- Est. Unit (display only) --}}
+                        <td>
+                            <select class="form-control" data-est-unit-display disabled>
+                                <option value="" selected>Choose</option>
+                                @foreach ($units as $unit)
+                                    <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                                @endforeach
+                            </select>
+                            <input type="hidden" name="est_unit_id[]" value="">
+                        </td>
+
                         <td>
                             <input type="number" name="est_quantity[]" class="form-control" inputmode="decimal" min="0.01" step="0.01">
                         </td>
-                        <td>
-                            <input type="number" name="est_price[]" class="form-control readonly-input" inputmode="decimal" min="0" step="0.01" readonly>
-                        </td>
-
-                        <input type="hidden" name="est_unit_id[]" value=""/>
 
                         <td>
                             <select name="unit_id[]" class="form-control" data-actual-unit>
@@ -328,7 +334,7 @@
                             <div><strong>Estimated Total (₹):</strong> <span id="estTotal">0.00</span></div>
                             <div><strong>Actual Total (₹):</strong> <span id="actTotal">0.00</span></div>
                         </div>
-                        <small class="text-muted d-block mt-1">Totals are Σ(price × qty) where both values exist.</small>
+                        <small class="text-muted d-block mt-1">Estimated uses Est. Qty × price-per Actual Unit (from live prices).</small>
                     </div>
                 </div>
             </div>
@@ -383,8 +389,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Convert quantity from actual unit to FD unit, then multiply by fd_price
-    function computeEstimatedPrice(productId, estQty, actualUnitId) {
+    // Return the **line** estimated total for estQty in the chosen (actual) unit
+    function computeEstimatedLineTotal(productId, estQty, actualUnitId) {
         const info = PRICING[String(productId)];
         if (!info || !estQty || !actualUnitId) return 0;
 
@@ -394,16 +400,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const catA = symbolToCategory(actualSym);
         const catB = symbolToCategory(fdSym);
         if (catA !== catB) {
-            // Different categories: cannot price; return 0
-            return 0;
+            return 0; // cannot compare different categories
         }
 
         const actualBase = toBaseFactor(actualSym);
         const fdBase     = toBaseFactor(fdSym);
 
-        // quantity in FD units
+        // estQty (actual unit) → base → FD units → × price
         const fdUnitsCount = (estQty * actualBase) / fdBase;
-
         return fdUnitsCount * (parseFloat(info.fd_price) || 0);
     }
 
@@ -418,16 +422,13 @@ document.addEventListener('DOMContentLoaded', function() {
         (root || document).querySelectorAll(
             'input[name="quantity[]"], input[name="price[]"], input[name="est_quantity[]"], select[name="unit_id[]"], select[name="flower_id[]"]'
         ).forEach(inp => {
-            inp.addEventListener('input', () => {
+            const handler = () => {
                 const tr = inp.closest('tr[data-row]');
-                recalcEstimateForRow(tr);
+                syncEstimateUnit(tr);
                 computeTotals();
-            });
-            inp.addEventListener('change', () => {
-                const tr = inp.closest('tr[data-row]');
-                recalcEstimateForRow(tr);
-                computeTotals();
-            });
+            };
+            inp.addEventListener('input', handler);
+            inp.addEventListener('change', handler);
         });
     }
 
@@ -444,60 +445,43 @@ document.addEventListener('DOMContentLoaded', function() {
             riderSel.disabled = true;
         }
 
-        // Initial estimate calc
-        recalcEstimateForRow(tr);
+        // Initial sync & totals
+        syncEstimateUnit(tr);
         computeTotals();
     }
 
-    function sumProduct(priceSelector, qtySelector) {
-        let total = 0;
-        rowsBody.querySelectorAll('tr[data-row]').forEach(tr => {
-            const qtyEl   = tr.querySelector(qtySelector);
-            const priceEl = tr.querySelector(priceSelector);
-            const qty     = qtyEl ? parseFloat(qtyEl.value) || 0 : 0;
-            const price   = priceEl ? parseFloat(priceEl.value) || 0 : 0;
-            if (qty > 0 && price >= 0) total += qty * price;
-        });
-        return total;
-    }
-
     function computeTotals() {
-        // Estimated total adds up est_price × est_quantity
+        // Estimated total: sum of line totals using FD pricing
         let estTotal = 0;
         rowsBody.querySelectorAll('tr[data-row]').forEach(tr => {
-            const q = parseFloat(tr.querySelector('input[name="est_quantity[]"]')?.value || '0') || 0;
-            const p = parseFloat(tr.querySelector('input[name="est_price[]"]')?.value || '0') || 0;
-            if (q > 0 && p >= 0) estTotal += q * p;
+            const productId = tr.querySelector('select[name="flower_id[]"]')?.value || '';
+            const estQty    = parseFloat(tr.querySelector('input[name="est_quantity[]"]')?.value || '0') || 0;
+            const unitId    = tr.querySelector('select[name="unit_id[]"]')?.value || '';
+            if (productId && unitId && estQty > 0) {
+                estTotal += computeEstimatedLineTotal(productId, estQty, unitId);
+            }
         });
         estTotalEl.textContent = estTotal.toFixed(2);
 
-        // Actual total
-        actTotalEl.textContent = sumProduct('input[name="price[]"]', 'input[name="quantity[]"]').toFixed(2);
+        // Actual total: sum price × qty
+        let actTotal = 0;
+        rowsBody.querySelectorAll('tr[data-row]').forEach(tr => {
+            const qty   = parseFloat(tr.querySelector('input[name="quantity[]"]')?.value || '0') || 0;
+            const price = parseFloat(tr.querySelector('input[name="price[]"]')?.value || '0') || 0;
+            if (qty > 0 && price >= 0) actTotal += qty * price;
+        });
+        actTotalEl.textContent = actTotal.toFixed(2);
     }
 
-    // Keep est_unit_id in sync with actual unit and recalc est_price
-    function recalcEstimateForRow(tr) {
+    // Mirror actual unit → est unit (display + hidden field)
+    function syncEstimateUnit(tr) {
         if (!tr) return;
-        const flowerSel = tr.querySelector('select[name="flower_id[]"]');
-        const estQtyEl  = tr.querySelector('input[name="est_quantity[]"]');
-        const estPriceEl= tr.querySelector('input[name="est_price[]"]');
-        const unitSel   = tr.querySelector('select[name="unit_id[]"]');
-        const estUnitHidden = tr.querySelector('input[name="est_unit_id[]"]');
-
-        const productId = flowerSel ? flowerSel.value : '';
-        const estQty    = estQtyEl ? parseFloat(estQtyEl.value) || 0 : 0;
-        const unitId    = unitSel ? unitSel.value : '';
-
-        // Mirror est_unit_id to actual unit
-        if (estUnitHidden) estUnitHidden.value = unitId || '';
-
-        const pricePerUnit = computeEstimatedPrice(productId, 1, unitId); // price for 1 actual-unit
-        const lineEstPrice = computeEstimatedPrice(productId, estQty, unitId);
-
-        // We store per-unit price (est_price) as the price for the chosen unit,
-        // so the "Estimated Total" uses (est_qty × est_price)
-        // If you prefer est_price to be the line total, set it directly to lineEstPrice and adjust totals accordingly.
-        if (estPriceEl) estPriceEl.value = (pricePerUnit || 0).toFixed(2);
+        const unitSel        = tr.querySelector('select[name="unit_id[]"]');
+        const estUnitDisplay = tr.querySelector('[data-est-unit-display]');
+        const estUnitHidden  = tr.querySelector('input[name="est_unit_id[]"]');
+        const value = unitSel?.value || '';
+        if (estUnitDisplay) estUnitDisplay.value = value;
+        if (estUnitHidden)  estUnitHidden.value  = value;
     }
 
     // ---- Bulk Rider logic --------------------------------------------
@@ -528,12 +512,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (applyOneRiderCb.checked) syncAllRiders();
     });
 
-    // Init bindings
+    // Init
     addRowBtn.addEventListener('click', addRow);
     attachRowHandlers(document);
 
-    // Initial calc for existing rows
-    qsa(rowsBody, 'tr[data-row]').forEach(tr => recalcEstimateForRow(tr));
+    // Initial sync for existing rows
+    qsa(rowsBody, 'tr[data-row]').forEach(tr => syncEstimateUnit(tr));
     computeTotals();
 
     // Rehydrate bulk rider state
