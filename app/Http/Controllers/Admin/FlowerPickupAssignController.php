@@ -639,57 +639,93 @@ public function saveFlowerPickupAssignRider(Request $request)
     }
 
     public function itemCalculation(Request $request)
-{
-    // Filters (defaults to today)
-    $start = $request->filled('start')
-        ? Carbon::parse($request->input('start'))->startOfDay()
-        : Carbon::today()->startOfDay();
+    {
+        // Preset quick filters: today|yesterday|tomorrow|this_week|this_month
+        $preset = $request->string('preset')->toString();
 
-    $end = $request->filled('end')
-        ? Carbon::parse($request->input('end'))->endOfDay()
-        : Carbon::today()->endOfDay();
+        // Resolve date range by preset (or use explicit dates)
+        [$start, $end] = $this->resolveRange($request, $preset);
 
-    $vendorId = $request->input('vendor_id');
-    $riderId  = $request->input('rider_id');
+        $vendorId = $request->input('vendor_id');
+        $riderId  = $request->input('rider_id');
 
-    // Lookups for filters
-    $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
-    $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
+        // Lookups for dropdown filters
+        $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
+        $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
 
-    // Eager-load everything we'll display
-    $pickups = FlowerPickupDetails::with([
-            'vendor:vendor_id,vendor_name',
-            'rider:rider_id,rider_name',
-            'flowerPickupItems' => function ($q) {
-                $q->with([
-                    'flower:product_id,name',
-                    'estUnit:id,unit_name',
-                    'unit:id,unit_name',
-                    'vendor:vendor_id,vendor_name',
-                    'rider:rider_id,rider_name',
-                ])->orderBy('id');
-            },
-        ])
-        ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
-        ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
-        ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
-        ->orderBy('pickup_date', 'desc')
-        ->orderBy('pick_up_id', 'desc')
-        ->paginate(20);
+        // Eager-load all we’ll display (estUnit relationship must exist in FlowerPickupItems)
+        $pickups = FlowerPickupDetails::with([
+                'vendor:vendor_id,vendor_name',
+                'rider:rider_id,rider_name',
+                'flowerPickupItems' => function ($q) {
+                    $q->with([
+                        'flower:product_id,name',
+                        'estUnit:id,unit_name',
+                        'unit:id,unit_name',
+                        'vendor:vendor_id,vendor_name', // per-row vendor (optional if you store it)
+                        'rider:rider_id,rider_name',    // per-row rider  (optional if you store it)
+                    ])->orderBy('id');
+                },
+            ])
+            ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
+            ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
+            ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
+            ->orderBy('pickup_date', 'desc')
+            ->orderBy('pick_up_id', 'desc')
+            ->paginate(20);
 
-    // Optional: unit map (for safety if any unit is missing relationship)
-    $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
+        // Optional: unit map (fallback if any relationship missing)
+        $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
 
-    return view('admin.reports.flower-estimate-calculation', [
-        'pickups'  => $pickups,
-        'vendors'  => $vendors,
-        'riders'   => $riders,
-        'start'    => $start->toDateString(),
-        'end'      => $end->toDateString(),
-        'vendorId' => $vendorId,
-        'riderId'  => $riderId,
-        'unitMap'  => $unitMap,
-    ]);
-}
+        return view('admin.reports.flower-estimate-calculation', [
+            'pickups'  => $pickups,
+            'vendors'  => $vendors,
+            'riders'   => $riders,
+            'start'    => $start->toDateString(),
+            'end'      => $end->toDateString(),
+            'vendorId' => $vendorId,
+            'riderId'  => $riderId,
+            'preset'   => $preset,
+            'unitMap'  => $unitMap,
+        ]);
+    }
+
+    private function resolveRange(Request $request, ?string $preset): array
+    {
+        $today = Carbon::today();
+
+        if ($preset === 'today') {
+            return [$today->copy()->startOfDay(), $today->copy()->endOfDay()];
+        }
+        if ($preset === 'yesterday') {
+            $y = $today->copy()->subDay();
+            return [$y->copy()->startOfDay(), $y->copy()->endOfDay()];
+        }
+        if ($preset === 'tomorrow') {
+            $t = $today->copy()->addDay();
+            return [$t->copy()->startOfDay(), $t->copy()->endOfDay()];
+        }
+        if ($preset === 'this_week') {
+            return [$today->copy()->startOfWeek(), $today->copy()->endOfWeek()];
+        }
+        if ($preset === 'this_month') {
+            return [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()];
+        }
+
+        // If preset not set, fall back to specific inputs or today
+        $start = $request->filled('start')
+            ? Carbon::parse($request->input('start'))->startOfDay()
+            : $today->copy()->startOfDay();
+
+        $end = $request->filled('end')
+            ? Carbon::parse($request->input('end'))->endOfDay()
+            : $today->copy()->endOfDay();
+
+        if ($end->lt($start)) {
+            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+        }
+
+        return [$start, $end];
+    }
 
 }

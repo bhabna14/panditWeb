@@ -2,299 +2,475 @@
 
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .card-vendor {
-            border-left: 6px solid #6366f1;
+        :root {
+            --tab1: #6366f1;
+            --tab2: #06b6d4;
+            --tab3: #22c55e;
+            --tab4: #f59e0b;
+
+            --bg: #0f172a;
+            /* slate-900 */
+            --card: #0b1220;
+            /* deep bluish */
+            --muted: #94a3b8;
+            /* slate-400 */
+            --ring: rgba(255, 255, 255, .08);
+            --success: #22c55e;
+            --danger: #ef4444;
         }
 
-        .badge-soft {
-            background: #eef2ff;
-            color: #4338ca;
+        body {
+            background: linear-gradient(135deg, #0b1220, #111827 45%, #0b1220);
         }
 
-        .badge-ok {
-            background: #ecfdf5;
-            color: #065f46;
+        .container-page {
+            max-width: 1200px;
         }
 
-        .badge-warn {
-            background: #fff7ed;
-            color: #9a3412;
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            backdrop-filter: blur(10px);
+            background: rgba(11, 18, 32, .7);
+            border: 1px solid var(--ring);
+            border-radius: 14px;
+            padding: .75rem;
+            display: grid;
+            gap: .75rem;
+            grid-template-columns: 1fr auto;
+            align-items: center;
         }
 
-        .badge-bad {
-            background: #fef2f2;
-            color: #991b1b;
-        }
-
-        .diff-pos {
-            color: #065f46;
+        .btn-chip {
+            border: none;
+            padding: .55rem .9rem;
+            border-radius: 999px;
+            color: #fff;
             font-weight: 600;
+            letter-spacing: .2px;
+            cursor: pointer;
+            transition: transform .08s ease;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .07);
         }
 
-        /* better/under */
-        .diff-neg {
-            color: #991b1b;
-            font-weight: 600;
+        .btn-chip:active {
+            transform: translateY(1px) scale(.99);
         }
 
-        /* worse/over  */
-        .table-items th,
-        .table-items td {
+        .chip1 {
+            background: linear-gradient(135deg, var(--tab1), #8b5cf6);
+        }
+
+        .chip2 {
+            background: linear-gradient(135deg, var(--tab2), #22d3ee);
+        }
+
+        .chip3 {
+            background: linear-gradient(135deg, var(--tab3), #86efac);
+            color: #052e16;
+        }
+
+        .chip4 {
+            background: linear-gradient(135deg, var(--tab4), #fbbf24);
+            color: #3b1d00;
+        }
+
+        .chip5 {
+            background: linear-gradient(135deg, #64748b, #cbd5e1);
+            color: #0b1220;
+        }
+
+        .date-range {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+            color: #e2e8f0;
+        }
+
+        .date-range input,
+        .select-in {
+            background: #0b1220;
+            border: 1px solid var(--ring);
+            color: #e2e8f0;
+            border-radius: 10px;
+            padding: .5rem .75rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .75rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            padding: .85rem 1rem;
+            border-radius: 14px;
+            background: #0b1220;
+            color: #e2e8f0;
+            border: 1px solid var(--ring);
+        }
+
+        .stat-title {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .stat-value {
+            font-weight: 800;
+            letter-spacing: .5px;
+            font-size: 1.1rem;
+        }
+
+        .vendor-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--ring);
+            color: #e5e7eb;
+            background: linear-gradient(135deg, rgba(99, 102, 241, .16), rgba(11, 18, 32, .6));
+        }
+
+        .vendor-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1rem;
+            background:
+                radial-gradient(1200px 200px at -10% -100%, rgba(255, 255, 255, .06), transparent 40%),
+                linear-gradient(135deg, var(--tab1), var(--tab2));
+            color: #fff;
+        }
+
+        .vendor-title {
+            font-weight: 800;
+            font-size: 1.05rem;
+            text-shadow: 0 2px 18px rgba(0, 0, 0, .25);
+        }
+
+        .vendor-sub {
+            font-size: .85rem;
+            opacity: .9;
+        }
+
+        .table-box {
+            padding: .6rem .8rem;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 .5rem;
+        }
+
+        .items-table thead th {
+            text-transform: uppercase;
+            font-size: .7rem;
+            letter-spacing: .09em;
+            color: #c7d2fe;
+            text-align: left;
+            padding: .35rem .6rem;
+        }
+
+        .row-card {
+            background: #0b1220;
+            border: 1px solid var(--ring);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+        }
+
+        .row-card td {
+            padding: .6rem .65rem;
             vertical-align: middle;
+            color: #e5e7eb;
         }
 
-        .kpi {
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .25rem .55rem;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: .73rem;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .diff-up {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        .diff-down {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .pill {
+            padding: .25rem .6rem;
+            border-radius: 999px;
             font-weight: 700;
         }
 
-        .muted {
-            color: #6b7280;
+        .pill-est {
+            background: rgba(99, 102, 241, .2);
+            border: 1px solid rgba(99, 102, 241, .35);
+            color: #c7d2fe;
         }
 
-        .chip {
-            padding: .25rem .5rem;
-            border-radius: 999px;
-            font-size: .75rem;
+        .pill-act {
+            background: rgba(34, 197, 94, .2);
+            border: 1px solid rgba(34, 197, 94, .35);
+            color: #bbf7d0;
         }
 
-        .chip-unit {
-            background: #f1f5f9;
+        .pagination {
+            margin-top: 1rem;
+        }
+
+        .pagination .page-link {
+            background: #0b1220;
+            border: 1px solid var(--ring);
+            color: #e2e8f0;
+        }
+
+        .pagination .active .page-link {
+            background: var(--tab2);
+            border-color: var(--tab2);
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="container py-4">
-        <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
-            <div>
-                <h4 class="mb-0">Manage Pickups</h4>
-                <div class="muted">Vendor-wise headers with line items and Estimate vs Actual.</div>
+    <div class="container container-page py-4">
+
+        {{-- Sticky toolbar --}}
+        <form method="GET" action="{{ route('admin.pickups.manage') }}" id="filterForm" class="toolbar">
+            <div class="date-range">
+                <span class="tag" title="From date">From</span>
+                <input type="date" name="start" value="{{ $start }}" />
+                <span class="tag" title="To date">To</span>
+                <input type="date" name="end" value="{{ $end }}" />
+
+                <select class="select-in" name="vendor_id" aria-label="Vendor">
+                    <option value="">All Vendors</option>
+                    @foreach ($vendors as $v)
+                        <option value="{{ $v->vendor_id }}" {{ $vendorId == $v->vendor_id ? 'selected' : '' }}>
+                            {{ $v->vendor_name }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <select class="select-in" name="rider_id" aria-label="Rider">
+                    <option value="">All Riders</option>
+                    @foreach ($riders as $r)
+                        <option value="{{ $r->rider_id }}" {{ $riderId == $r->rider_id ? 'selected' : '' }}>
+                            {{ $r->rider_name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
-            {{-- Filters --}}
-            <form class="row gy-2 gx-2 align-items-end" method="get" action="{{ route('admin.pickups.manage') }}">
-                <div class="col-auto">
-                    <label class="form-label mb-1">Start</label>
-                    <input type="date" name="start" value="{{ $start }}" class="form-control form-control-sm">
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-1">End</label>
-                    <input type="date" name="end" value="{{ $end }}" class="form-control form-control-sm">
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-1">Vendor</label>
-                    <select name="vendor_id" class="form-select form-select-sm">
-                        <option value="">All</option>
-                        @foreach ($vendors as $v)
-                            <option value="{{ $v->vendor_id }}" @selected($vendorId == $v->vendor_id)>{{ $v->vendor_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <label class="form-label mb-1">Rider</label>
-                    <select name="rider_id" class="form-select form-select-sm">
-                        <option value="">All</option>
-                        @foreach ($riders as $r)
-                            <option value="{{ $r->rider_id }}" @selected($riderId == $r->rider_id)>{{ $r->rider_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button class="btn btn-primary btn-sm">Filter</button>
-                </div>
-            </form>
-        </div>
+            <div class="btns" style="display:flex; gap:.4rem; flex-wrap: wrap; justify-content:flex-end">
+                <button class="btn-chip chip1" data-preset="today" type="button">Today</button>
+                <button class="btn-chip chip5" data-preset="yesterday" type="button">Yesterday</button>
+                <button class="btn-chip chip2" data-preset="tomorrow" type="button">Tomorrow</button>
+                <button class="btn-chip chip3" data-preset="this_week" type="button">This Week</button>
+                <button class="btn-chip chip4" data-preset="this_month" type="button">This Month</button>
+                <button class="btn-chip" style="background:linear-gradient(135deg,#111827,#1f2937);"
+                    type="submit">Apply</button>
+            </div>
+            <input type="hidden" name="preset" id="presetInput" value="{{ $preset }}">
+        </form>
 
-        @forelse($pickups as $pickup)
+        {{-- Top stats --}}
+        <div class="stats">
             @php
-                // Compute vendor-level totals (Actual)
-                $actualTotal = 0.0;
-                foreach ($pickup->flowerPickupItems as $it) {
-                    $actualTotal += (float) ($it->item_total_price ?? ($it->price ?? 0) * ($it->quantity ?? 0));
-                }
-
-                // Compute estimate total if you store est_price (if not, we just show 0 / N/A)
-                $estimateTotal = 0.0;
-                $hasAnyEstPrice = false;
-                foreach ($pickup->flowerPickupItems as $it) {
-                    if (!is_null($it->est_price ?? null)) {
-                        $hasAnyEstPrice = true;
-                        $estimateTotal += (float) $it->est_price * (float) ($it->est_quantity ?? 0);
-                    }
-                }
-                $estimateTotal = $hasAnyEstPrice ? $estimateTotal : null;
-
-                $diffValue = $estimateTotal !== null ? $actualTotal - $estimateTotal : null;
+                $totalPickups = $pickups->total();
+                $totalVendors = $pickups->getCollection()->pluck('vendor.vendor_id')->filter()->unique()->count();
+                $totalItems = $pickups->getCollection()->flatMap->flowerPickupItems->count();
+                $grandAmount = number_format($pickups->getCollection()->sum('total_price'), 2);
             @endphp
 
-            <div class="card card-vendor mb-4 shadow-sm">
-                <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <div class="d-flex align-items-center gap-3">
-                        <span class="badge badge-soft"># {{ $pickup->pick_up_id }}</span>
-                        <h6 class="mb-0">
-                            {{ $pickup->vendor->vendor_name ?? '—' }}
-                        </h6>
+            <div class="stat-card">
+                <div class="stat-title">Pickups</div>
+                <div class="stat-value">{{ $totalPickups }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Vendors (page)</div>
+                <div class="stat-value">{{ $totalVendors }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Items (page)</div>
+                <div class="stat-value">{{ $totalItems }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Total Amount (page)</div>
+                <div class="stat-value">₹ {{ $grandAmount }}</div>
+            </div>
+        </div>
+
+        {{-- Vendor grouped cards --}}
+        @forelse($pickups as $pickup)
+            @php
+                $vendorName = optional($pickup->vendor)->vendor_name ?? 'Unknown Vendor';
+                $riderName = optional($pickup->rider)->rider_name ?? '—';
+                $pkDate = optional($pickup->pickup_date)->format('d M Y');
+                $dvDate = optional($pickup->delivery_date)->format('d M Y');
+                $sumEst = 0;
+                $sumAct = (float) $pickup->total_price;
+            @endphp
+
+            <div class="vendor-card mb-3">
+                <div class="vendor-head">
+                    <div>
+                        <div class="vendor-title">{{ $vendorName }}</div>
+                        <div class="vendor-sub">Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider:
+                            {{ $riderName }}</div>
                     </div>
-                    <div class="d-flex flex-wrap align-items-center gap-3">
-                        <div class="chip chip-unit">
-                            Pickup: <strong>{{ $pickup->pickup_date?->toDateString() }}</strong>
-                        </div>
-                        <div class="chip chip-unit">
-                            Delivery: <strong>{{ $pickup->delivery_date?->toDateString() }}</strong>
-                        </div>
-                        <div class="chip {{ $pickup->rider ? 'badge-ok' : 'badge-bad' }}">
-                            Rider: <strong>{{ $pickup->rider->rider_name ?? 'N/A' }}</strong>
-                        </div>
-                        <div class="chip badge-ok">Actual Total: <span class="kpi ms-1">₹
-                                {{ number_format($actualTotal, 2) }}</span></div>
-                        <div class="chip {{ $estimateTotal === null ? 'badge-warn' : 'badge-soft' }}">
-                            Est. Total:
-                            <span
-                                class="kpi ms-1">{{ $estimateTotal === null ? 'N/A' : '₹ ' . number_format($estimateTotal, 2) }}</span>
-                        </div>
-                        @if (!is_null($diffValue))
-                            <div class="chip {{ $diffValue > 0 ? 'badge-bad' : 'badge-ok' }}">
-                                Diff (A−E):
-                                <span class="kpi ms-1">{{ $diffValue > 0 ? '+' : '' }}₹
-                                    {{ number_format($diffValue, 2) }}</span>
-                            </div>
-                        @endif
+                    <div style="display:flex; gap:.4rem;">
+                        <span class="pill pill-act">Actual: ₹ {{ number_format($sumAct, 2) }}</span>
                     </div>
                 </div>
 
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm table-items align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Flower</th>
+                <div class="table-box">
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Estimate</th>
+                                <th>Actual</th>
+                                <th>Diff</th>
+                                <th>Line Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pickup->flowerPickupItems as $it)
+                                @php
+                                    $ename = optional($it->estUnit)->unit_name ?? ($unitMap[$it->est_unit_id] ?? '—');
+                                    $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
 
-                                    {{-- Estimate --}}
-                                    <th class="text-center">Est. Unit</th>
-                                    <th class="text-end">Est. Qty</th>
-                                    <th class="text-end">Est. Price</th>
-                                    <th class="text-end">Est. Subtotal</th>
+                                    $eqty = $it->est_quantity ?? 0;
+                                    $eprc = $it->est_price ?? null; // if you store estimate price
+                                    $aqty = $it->quantity ?? 0;
+                                    $aprc = $it->price ?? 0;
+                                    $ltotal = $it->item_total_price ?? ($aprc ?: 0) * ($aqty ?: 0);
 
-                                    {{-- Actual --}}
-                                    <th class="text-center">Actual Unit</th>
-                                    <th class="text-end">Actual Qty</th>
-                                    <th class="text-end">Actual Price</th>
-                                    <th class="text-end">Actual Subtotal</th>
+                                    // Estimate amount (fallback if you store price)
+                                    $eamt = $eprc !== null ? $eqty * $eprc : null;
 
-                                    <th class="text-end">Qty Δ</th>
-                                    <th class="text-end">Value Δ (A−E)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($pickup->flowerPickupItems as $item)
-                                    @php
-                                        $estUnitName =
-                                            optional($item->estUnit)->unit_name ??
-                                            ($unitMap[$item->est_unit_id] ?? null);
-                                        $actUnitName =
-                                            optional($item->unit)->unit_name ?? ($unitMap[$item->unit_id] ?? null);
+                                    // Difference logic (by quantity if same unit name; otherwise show “—”)
+                                    $diffTxt = '—';
+                                    $diffCls = '';
+                                    if ($ename && $aname && $ename === $aname) {
+                                        $qdiff = round(($aqty ?: 0) - ($eqty ?: 0), 2);
+                                        if ($qdiff > 0) {
+                                            $diffTxt = "+{$qdiff} $aname";
+                                            $diffCls = 'diff-up';
+                                        } elseif ($qdiff < 0) {
+                                            $diffTxt = "{$qdiff} $aname";
+                                            $diffCls = 'diff-down';
+                                        } else {
+                                            $diffTxt = '0';
+                                        }
+                                    }
 
-                                        $estQty = (float) ($item->est_quantity ?? 0);
-                                        $estPrice = isset($item->est_price) ? (float) $item->est_price : null; // if you saved it
-                                        $estSubtotal = !is_null($estPrice) ? $estQty * $estPrice : null;
-
-                                        $actQty = (float) ($item->quantity ?? 0);
-                                        $actPrice = (float) ($item->price ?? 0);
-                                        $actSubtotal = (float) ($item->item_total_price ?? $actPrice * $actQty);
-
-                                        $qtyDiff = $actQty - $estQty;
-                                        $valDiff = !is_null($estSubtotal) ? $actSubtotal - $estSubtotal : null;
-                                    @endphp
-                                    <tr>
-                                        <td>
-                                            <div class="fw-semibold">{{ $item->flower->name ?? '#' . $item->flower_id }}
-                                            </div>
-                                            <div class="small text-muted">
-                                                Vendor: {{ $item->vendor->vendor_name ?? '—' }} |
-                                                Rider: {{ $item->rider->rider_name ?? '—' }}
-                                            </div>
-                                        </td>
-
-                                        {{-- Estimate --}}
-                                        <td class="text-center">
-                                            <span class="chip chip-unit">{{ $estUnitName ?? '—' }}</span>
-                                        </td>
-                                        <td class="text-end">{{ $estQty ? number_format($estQty, 2) : '—' }}</td>
-                                        <td class="text-end">
-                                            {{ !is_null($estPrice) ? '₹ ' . number_format($estPrice, 2) : '—' }}</td>
-                                        <td class="text-end">
-                                            {{ !is_null($estSubtotal) ? '₹ ' . number_format($estSubtotal, 2) : '—' }}</td>
-
-                                        {{-- Actual --}}
-                                        <td class="text-center">
-                                            <span class="chip chip-unit">{{ $actUnitName ?? '—' }}</span>
-                                        </td>
-                                        <td class="text-end">{{ number_format($actQty, 2) }}</td>
-                                        <td class="text-end">₹ {{ number_format($actPrice, 2) }}</td>
-                                        <td class="text-end">₹ {{ number_format($actSubtotal, 2) }}</td>
-
-                                        {{-- Diffs --}}
-                                        <td class="text-end">
-                                            @if ($estQty > 0 || $actQty > 0)
-                                                <span
-                                                    class="{{ $qtyDiff > 0 ? 'diff-neg' : ($qtyDiff < 0 ? 'diff-pos' : '') }}">
-                                                    {{ $qtyDiff > 0 ? '+' : '' }}{{ number_format($qtyDiff, 2) }}
-                                                </span>
-                                            @else
-                                                —
+                                    if ($eamt !== null) {
+                                        $sumEst += $eamt;
+                                    }
+                                @endphp
+                                <tr class="row-card">
+                                    <td>
+                                        <div style="font-weight:700">{{ optional($it->flower)->name ?? '—' }}</div>
+                                        <div style="color:var(--muted); font-size:.78rem">
+                                            @if ($it->vendor?->vendor_name)
+                                                <span class="tag">{{ $it->vendor->vendor_name }}</span>
                                             @endif
-                                        </td>
-                                        <td class="text-end">
-                                            @if (!is_null($valDiff))
-                                                <span
-                                                    class="{{ $valDiff > 0 ? 'diff-neg' : ($valDiff < 0 ? 'diff-pos' : '') }}">
-                                                    {{ $valDiff > 0 ? '+' : '' }}₹ {{ number_format($valDiff, 2) }}
-                                                </span>
-                                            @else
-                                                —
+                                            @if ($it->rider?->rider_name)
+                                                <span class="tag">{{ $it->rider->rider_name }}</span>
                                             @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="11" class="text-center text-muted py-4">No items.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-
-                            <tfoot>
-                                <tr class="table-light">
-                                    <th colspan="4" class="text-end">Totals:</th>
-                                    <th class="text-end">
-                                        {{ $estimateTotal === null ? '—' : '₹ ' . number_format($estimateTotal, 2) }}
-                                    </th>
-                                    <th colspan="3"></th>
-                                    <th class="text-end">₹ {{ number_format($actualTotal, 2) }}</th>
-                                    <th></th>
-                                    <th class="text-end">
-                                        @if (!is_null($diffValue))
-                                            <span
-                                                class="{{ $diffValue > 0 ? 'diff-neg' : ($diffValue < 0 ? 'diff-pos' : '') }}">
-                                                {{ $diffValue > 0 ? '+' : '' }}₹ {{ number_format($diffValue, 2) }}
-                                            </span>
-                                        @else
-                                            —
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="pill pill-est">
+                                            {{ $eqty ? number_format($eqty, 2) : '—' }} {{ $ename }}
+                                        </span>
+                                        @if (!is_null($eamt))
+                                            <div style="color:#c7d2fe; font-size:.8rem; margin-top:.15rem">₹
+                                                {{ number_format($eamt, 2) }}</div>
                                         @endif
-                                    </th>
+                                    </td>
+                                    <td>
+                                        <span class="pill pill-act">
+                                            {{ $aqty ? number_format($aqty, 2) : '—' }} {{ $aname }}
+                                        </span>
+                                        <div style="color:#bbf7d0; font-size:.8rem; margin-top:.15rem">
+                                            ₹ {{ number_format($aprc ?: 0, 2) }}
+                                        </div>
+                                    </td>
+                                    <td class="{{ $diffCls }}" style="font-weight:800;">
+                                        {{ $diffTxt }}
+                                    </td>
+                                    <td style="font-weight:800;">
+                                        ₹ {{ number_format($ltotal, 2) }}
+                                    </td>
                                 </tr>
-                            </tfoot>
-                        </table>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <div style="display:flex; gap:.6rem; justify-content:flex-end; margin-top:.6rem;">
+                        @if ($sumEst > 0)
+                            <span class="pill pill-est">Estimated (sum): ₹ {{ number_format($sumEst, 2) }}</span>
+                        @endif
+                        <span class="pill pill-act">Actual (sum): ₹ {{ number_format($sumAct, 2) }}</span>
+                        @if ($sumEst > 0)
+                            @php
+                                $delta = $sumAct - $sumEst;
+                                $deltaCls = $delta > 0 ? 'diff-up' : ($delta < 0 ? 'diff-down' : '');
+                                $sign = $delta > 0 ? '+' : '';
+                            @endphp
+                            <span class="pill" style="background:rgba(255,255,255,.06); border:1px solid var(--ring);">
+                                Diff: <span class="{{ $deltaCls }}"> {{ $sign }}₹
+                                    {{ number_format($delta, 2) }}</span>
+                            </span>
+                        @endif
                     </div>
                 </div>
             </div>
         @empty
-            <div class="alert alert-info">No pickups found for the selected filters.</div>
+            <div class="vendor-card" style="padding:1rem">
+                <div style="color:#e2e8f0;">No pickups found for the selected range.</div>
+            </div>
         @endforelse
 
+        {{-- Pagination --}}
         <div class="d-flex justify-content-center">
             {{ $pickups->withQueryString()->links() }}
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Quick preset buttons
+            document.querySelectorAll('[data-preset]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.getElementById('presetInput').value = btn.getAttribute('data-preset');
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
+            // If user manually changes date inputs, clear preset to “custom”
+            const startEl = document.querySelector('input[name="start"]');
+            const endEl = document.querySelector('input[name="end"]');
+            [startEl, endEl].forEach(el => {
+                el.addEventListener('change', () => {
+                    document.getElementById('presetInput').value = '';
+                });
+            });
+        });
+    </script>
 @endsection
