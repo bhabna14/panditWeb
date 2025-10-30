@@ -401,7 +401,7 @@
                                     $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
 
                                     $eqty = $it->est_quantity ?? 0;
-                                    $eprc = $it->est_price ?? null; // optional if you store estimate price
+                                    $eprc = $it->est_price ?? null; // if you store estimate price
                                     $aqty = $it->quantity ?? 0;
                                     $aprc = $it->price ?? 0;
                                     $ltotal = $it->item_total_price ?? ($aprc ?: 0) * ($aqty ?: 0);
@@ -427,26 +427,18 @@
                                         $sumEst += $eamt;
                                     }
                                 @endphp
+
                                 <tr class="row-card">
                                     <td>
-                                        <div style="font-weight:700; color:var(--text);">
-                                            {{ optional($it->flower)->name ?? '—' }}
-                                        </div>
-                                        <div style="color:var(--muted); font-size:.78rem">
-                                            @if ($it->vendor?->vendor_name)
-                                                <span class="tag">{{ $it->vendor->vendor_name }}</span>
-                                            @endif
-                                            @if ($it->rider?->rider_name)
-                                                <span class="tag">{{ $it->rider->rider_name }}</span>
-                                            @endif
-                                        </div>
+                                        <div style="font-weight:700">{{ optional($it->flower)->name ?? '—' }}</div>
+                                        {{-- Removed per-item vendor/rider chips; vendor & rider are shown in the header --}}
                                     </td>
                                     <td>
                                         <span class="pill pill-est">
                                             {{ $eqty ? number_format($eqty, 2) : '—' }} {{ $ename }}
                                         </span>
                                         @if (!is_null($eamt))
-                                            <div style="color:#3730a3; font-size:.8rem; margin-top:.15rem">
+                                            <div style="font-size:.8rem; margin-top:.15rem">
                                                 ₹ {{ number_format($eamt, 2) }}
                                             </div>
                                         @endif
@@ -455,16 +447,15 @@
                                         <span class="pill pill-act">
                                             {{ $aqty ? number_format($aqty, 2) : '—' }} {{ $aname }}
                                         </span>
-                                        <div style="color:#065f46; font-size:.8rem; margin-top:.15rem">
+                                        <div style="font-size:.8rem; margin-top:.15rem">
                                             ₹ {{ number_format($aprc ?: 0, 2) }}
                                         </div>
                                     </td>
                                     <td class="{{ $diffCls }}" style="font-weight:800;">{{ $diffTxt }}</td>
-                                    <td style="font-weight:800; color:var(--text);">
-                                        ₹ {{ number_format($ltotal, 2) }}
-                                    </td>
+                                    <td style="font-weight:800;">₹ {{ number_format($ltotal, 2) }}</td>
                                 </tr>
                             @endforeach
+
                         </tbody>
                     </table>
 

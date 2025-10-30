@@ -122,168 +122,165 @@ class FlowerPickupAssignController extends Controller
             'unitIdToSymbol'     => $unitIdToSymbol,
         ]);
     }
+        
+    public function saveFlowerPickupAssignRider(Request $request)
+    {
+        // 1) Validate inputs
+        $validator = Validator::make($request->all(), [
+            // Optional header defaults
+            'vendor_id'     => 'nullable|exists:flower__vendor_details,vendor_id',
+            'pickup_date'   => 'required|date',
+            'delivery_date' => 'required|date|after_or_equal:pickup_date',
+            'rider_id'      => 'nullable|exists:flower__rider_details,rider_id',
 
-public function saveFlowerPickupAssignRider(Request $request)
-{
-    // 1) Validate inputs
-    $validator = Validator::make($request->all(), [
-        // Optional header defaults
-        'vendor_id'     => 'nullable|exists:flower__vendor_details,vendor_id',
-        'pickup_date'   => 'required|date',
-        'delivery_date' => 'required|date|after_or_equal:pickup_date',
-        'rider_id'      => 'nullable|exists:flower__rider_details,rider_id',
+            // Items
+            'flower_id'     => 'required|array|min:1',
+            'flower_id.*'   => 'required|exists:flower_products,product_id',
 
-        // Items
-        'flower_id'     => 'required|array|min:1',
-        'flower_id.*'   => 'required|exists:flower_products,product_id',
+            // ESTIMATE
+            'est_unit_id'    => 'sometimes|array',
+            'est_unit_id.*'  => 'nullable|exists:pooja_units,id',
+            'est_quantity'   => 'sometimes|array',
+            'est_quantity.*' => 'nullable|numeric|min:0.01',
 
-        // ESTIMATE
-        'est_unit_id'    => 'sometimes|array',
-        'est_unit_id.*'  => 'nullable|exists:pooja_units,id',
-        'est_quantity'   => 'sometimes|array',
-        'est_quantity.*' => 'nullable|numeric|min:0.01',
+            // ACTUAL
+            'unit_id'       => 'sometimes|array',
+            'unit_id.*'     => 'nullable|exists:pooja_units,id',
+            'quantity'      => 'sometimes|array',
+            'quantity.*'    => 'nullable|numeric|min:0.01',
+            'price'         => 'sometimes|array',
+            'price.*'       => 'nullable|numeric|min:0',
 
-        // ACTUAL
-        'unit_id'       => 'sometimes|array',
-        'unit_id.*'     => 'nullable|exists:pooja_units,id',
-        'quantity'      => 'sometimes|array',
-        'quantity.*'    => 'nullable|numeric|min:0.01',
-        'price'         => 'sometimes|array',
-        'price.*'       => 'nullable|numeric|min:0',
+            // Per-row grouping helpers (not stored on items)
+            'row_vendor_id'   => 'sometimes|array',
+            'row_vendor_id.*' => 'nullable|exists:flower__vendor_details,vendor_id',
+            'row_rider_id'    => 'sometimes|array',
+            'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
+        ]);
 
-        // Per-row grouping helpers (not stored on items)
-        'row_vendor_id'   => 'sometimes|array',
-        'row_vendor_id.*' => 'nullable|exists:flower__vendor_details,vendor_id',
-        'row_rider_id'    => 'sometimes|array',
-        'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
-    ]);
+        // Custom rule: each row must resolve to a vendor (from row or header).
+        $validator->after(function ($v) use ($request) {
+            $flowerIds    = $request->input('flower_id', []);
+            $rowVendors   = $request->input('row_vendor_id', []);
+            $headerVendor = $request->input('vendor_id');
 
-    // Custom rule: each row must resolve to a vendor (from row or header).
-    // Rider is only required at header-per-vendor level (we derive it below).
-    $validator->after(function ($v) use ($request) {
-        $flowerIds    = $request->input('flower_id', []);
-        $rowVendors   = $request->input('row_vendor_id', []);
-        $headerVendor = $request->input('vendor_id');
-
-        foreach ($flowerIds as $i => $fid) {
-            $resolvedVendor = $rowVendors[$i] ?? $headerVendor;
-            if (empty($resolvedVendor)) {
-                $v->errors()->add("row_vendor_id.$i", 'Vendor is required (set per-row or choose a header vendor).');
-            }
-        }
-    });
-
-    $validator->validate();
-
-    // 2) Read arrays
-    $flowerIds   = $request->input('flower_id', []);
-    $estUnits    = $request->input('est_unit_id', []);
-    $estQtys     = $request->input('est_quantity', []);
-    $unitIds     = $request->input('unit_id', []);
-    $qtys        = $request->input('quantity', []);
-    $prices      = $request->input('price', []);
-    $rowVendors  = $request->input('row_vendor_id', []);
-    $rowRiders   = $request->input('row_rider_id', []);
-
-    $headerVendorId = $request->input('vendor_id');
-    $headerRiderId  = $request->input('rider_id');
-
-    // 3) Group rows by resolved vendor
-    $groups = []; // vendor_id => ['rows'=>[], 'row_riders'=>[]]
-    foreach ($flowerIds as $i => $flowerId) {
-        $vendorId = $rowVendors[$i] ?? $headerVendorId; // ensured by validator
-        $rowRider = $rowRiders[$i] ?? null;             // optional, helps derive header rider
-
-        if (!isset($groups[$vendorId])) {
-            $groups[$vendorId] = ['rows' => [], 'row_riders' => []];
-        }
-
-        $groups[$vendorId]['rows'][] = [
-            'flower_id'    => $flowerId,
-            // Estimate
-            'est_unit_id'  => $estUnits[$i]   ?? null,
-            'est_quantity' => isset($estQtys[$i]) ? (float)$estQtys[$i] : null,
-            // Actual
-            'unit_id'      => $unitIds[$i]    ?? null,
-            'quantity'     => isset($qtys[$i])   ? (float)$qtys[$i]   : null,
-            'price'        => isset($prices[$i]) ? (float)$prices[$i] : null,
-        ];
-
-        if ($rowRider) {
-            $groups[$vendorId]['row_riders'][$rowRider] = true;
-        }
-    }
-
-    // 4) Save per vendor (one header per vendor). Rider goes on **header only**.
-    DB::transaction(function () use ($request, $groups, $headerRiderId) {
-        foreach ($groups as $vendorId => $bundle) {
-            $rows     = $bundle['rows'];
-            $riderIds = array_keys($bundle['row_riders']);
-
-            // Choose header rider for this vendor:
-            //   - prefer the form header rider if given
-            //   - otherwise pick the first per-row rider seen for this vendor
-            $headerRiderForVendor = $headerRiderId ?: ($riderIds[0] ?? null);
-
-            // If your DB requires NOT NULL on rider_id, enforce here:
-            if (is_null($headerRiderForVendor)) {
-                throw \Illuminate\Validation\ValidationException::withMessages([
-                    'rider_id' => ['Rider is required (set a header rider or at least one per-row rider for each vendor).']
-                ]);
-            }
-
-            $pickUpId = 'PICKUP-' . strtoupper(uniqid());
-
-            $pickup = FlowerPickupDetails::create([
-                'pick_up_id'     => $pickUpId,
-                'vendor_id'      => $vendorId,
-                'pickup_date'    => $request->pickup_date,
-                'delivery_date'  => $request->delivery_date,
-                'rider_id'       => $headerRiderForVendor, // store on header
-                'total_price'    => 0,
-                'payment_method' => null,
-                'payment_status' => 'pending',
-                'status'         => 'pending',
-                'payment_id'     => null,
-            ]);
-
-            $vendorTotal = 0.0;
-
-            foreach ($rows as $row) {
-                $itemTotal = (!is_null($row['price']) && !is_null($row['quantity']))
-                    ? ($row['price'] * $row['quantity'])
-                    : null;
-
-                FlowerPickupItems::create([
-                    'pick_up_id'       => $pickUpId,
-                    'flower_id'        => $row['flower_id'],
-
-                    // Estimate
-                    'est_unit_id'      => $row['est_unit_id'],
-                    'est_quantity'     => $row['est_quantity'],
-
-                    // Actual
-                    'unit_id'          => $row['unit_id'],
-                    'quantity'         => $row['quantity'] ?? 0,
-                    'price'            => $row['price'],
-
-                    // NO vendor_id / rider_id on items
-                    'item_total_price' => $itemTotal,
-                ]);
-
-                if (!is_null($itemTotal)) {
-                    $vendorTotal += $itemTotal;
+            foreach ($flowerIds as $i => $fid) {
+                $resolvedVendor = $rowVendors[$i] ?? $headerVendor;
+                if (empty($resolvedVendor)) {
+                    $v->errors()->add("row_vendor_id.$i", 'Vendor is required (set per-row or select a header vendor).');
                 }
             }
+        });
 
-            $pickup->update(['total_price' => $vendorTotal]);
+        $validator->validate();
+
+        // 2) Read arrays
+        $flowerIds   = $request->input('flower_id', []);
+        $estUnits    = $request->input('est_unit_id', []);
+        $estQtys     = $request->input('est_quantity', []);
+        $unitIds     = $request->input('unit_id', []);
+        $qtys        = $request->input('quantity', []);
+        $prices      = $request->input('price', []);
+        $rowVendors  = $request->input('row_vendor_id', []);
+        $rowRiders   = $request->input('row_rider_id', []);
+
+        $headerVendorId = $request->input('vendor_id');
+        $headerRiderId  = $request->input('rider_id');
+
+        // 3) Group rows by resolved vendor
+        $groups = []; // vendor_id => ['rows'=>[], 'row_riders'=>[]]
+        foreach ($flowerIds as $i => $flowerId) {
+            $vendorId = $rowVendors[$i] ?? $headerVendorId; // ensured by validator
+            $rowRider = $rowRiders[$i] ?? null;             // optional hint for header rider
+
+            if (!isset($groups[$vendorId])) {
+                $groups[$vendorId] = ['rows' => [], 'row_riders' => []];
+            }
+
+            $groups[$vendorId]['rows'][] = [
+                'flower_id'    => $flowerId,
+                // Estimate
+                'est_unit_id'  => $estUnits[$i]   ?? null,
+                'est_quantity' => isset($estQtys[$i]) ? (float)$estQtys[$i] : null,
+                // Actual
+                'unit_id'      => $unitIds[$i]    ?? null,
+                'quantity'     => isset($qtys[$i])   ? (float)$qtys[$i]   : null,
+                'price'        => isset($prices[$i]) ? (float)$prices[$i] : null,
+            ];
+
+            if ($rowRider) {
+                $groups[$vendorId]['row_riders'][$rowRider] = true;
+            }
         }
-    });
 
-    return redirect()
-        ->back()
-        ->with('success', 'Flower pickups saved vendor-wise (vendor & rider stored on header only).');
-}
+        // 4) Save per vendor (one header per vendor). Rider goes on header only.
+        DB::transaction(function () use ($request, $groups, $headerRiderId) {
+            foreach ($groups as $vendorId => $bundle) {
+                $rows     = $bundle['rows'];
+                $riderIds = array_keys($bundle['row_riders']);
+
+                // pick header rider for this vendor
+                $headerRiderForVendor = $headerRiderId ?: ($riderIds[0] ?? null);
+
+                // If DB requires NOT NULL rider_id, enforce here
+                if (is_null($headerRiderForVendor)) {
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'rider_id' => ['Rider is required (set a header rider or at least one per-row rider for each vendor).']
+                    ]);
+                }
+
+                $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+
+                $pickup = FlowerPickupDetails::create([
+                    'pick_up_id'     => $pickUpId,
+                    'vendor_id'      => $vendorId,
+                    'pickup_date'    => $request->pickup_date,
+                    'delivery_date'  => $request->delivery_date,
+                    'rider_id'       => $headerRiderForVendor,
+                    'total_price'    => 0,
+                    'payment_method' => null,
+                    'payment_status' => 'pending',
+                    'status'         => 'pending',
+                    'payment_id'     => null,
+                ]);
+
+                $vendorTotal = 0.0;
+
+                foreach ($rows as $row) {
+                    $itemTotal = (!is_null($row['price']) && !is_null($row['quantity']))
+                        ? ($row['price'] * $row['quantity'])
+                        : null;
+
+                    FlowerPickupItems::create([
+                        'pick_up_id'       => $pickUpId,
+                        'flower_id'        => $row['flower_id'],
+
+                        // Estimate
+                        'est_unit_id'      => $row['est_unit_id'],
+                        'est_quantity'     => $row['est_quantity'],
+
+                        // Actual
+                        'unit_id'          => $row['unit_id'],
+                        'quantity'         => $row['quantity'] ?? 0,
+                        'price'            => $row['price'],
+
+                        // no vendor_id / rider_id on items
+                        'item_total_price' => $itemTotal,
+                    ]);
+
+                    if (!is_null($itemTotal)) {
+                        $vendorTotal += $itemTotal;
+                    }
+                }
+
+                $pickup->update(['total_price' => $vendorTotal]);
+            }
+        });
+
+        return redirect()
+            ->back()
+            ->with('success', 'Flower pickups saved vendor-wise (vendor & rider stored on header only).');
+    }
 
     public function store(Request $request)
     {
@@ -630,57 +627,55 @@ public function saveFlowerPickupAssignRider(Request $request)
         };
     }
 
-    public function itemCalculation(Request $request)
-    {
-        // Preset quick filters: today|yesterday|tomorrow|this_week|this_month
-        $preset = $request->string('preset')->toString();
+   
+public function itemCalculation(Request $request)
+{
+    $start = $request->filled('start')
+        ? Carbon::parse($request->input('start'))->startOfDay()
+        : Carbon::today()->startOfDay();
 
-        // Resolve date range by preset (or use explicit dates)
-        [$start, $end] = $this->resolveRange($request, $preset);
+    $end = $request->filled('end')
+        ? Carbon::parse($request->input('end'))->endOfDay()
+        : Carbon::today()->endOfDay();
 
-        $vendorId = $request->input('vendor_id');
-        $riderId  = $request->input('rider_id');
+    $vendorId = $request->input('vendor_id');
+    $riderId  = $request->input('rider_id');
 
-        // Lookups for dropdown filters
-        $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
-        $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
+    $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
+    $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
 
-        // Eager-load all we’ll display (estUnit relationship must exist in FlowerPickupItems)
-        $pickups = FlowerPickupDetails::with([
-                'vendor:vendor_id,vendor_name',
-                'rider:rider_id,rider_name',
-                'flowerPickupItems' => function ($q) {
-                    $q->with([
-                        'flower:product_id,name',
-                        'estUnit:id,unit_name',
-                        'unit:id,unit_name',
-                        'vendor:vendor_id,vendor_name', // per-row vendor (optional if you store it)
-                        'rider:rider_id,rider_name',    // per-row rider  (optional if you store it)
-                    ])->orderBy('id');
-                },
-            ])
-            ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
-            ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
-            ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
-            ->orderBy('pickup_date', 'desc')
-            ->orderBy('pick_up_id', 'desc')
-            ->paginate(20);
+    $pickups = FlowerPickupDetails::with([
+            'vendor:vendor_id,vendor_name',
+            'rider:rider_id,rider_name',
+            'flowerPickupItems' => function ($q) {
+                $q->with([
+                    'flower:product_id,name',
+                    'estUnit:id,unit_name',
+                    'unit:id,unit_name',
+                ])->orderBy('id');
+            },
+        ])
+        ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
+        ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
+        ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
+        ->orderBy('pickup_date', 'desc')
+        ->orderBy('pick_up_id', 'desc')
+        ->paginate(20);
 
-        // Optional: unit map (fallback if any relationship missing)
-        $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
+    $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
 
-        return view('admin.reports.flower-estimate-calculation', [
-            'pickups'  => $pickups,
-            'vendors'  => $vendors,
-            'riders'   => $riders,
-            'start'    => $start->toDateString(),
-            'end'      => $end->toDateString(),
-            'vendorId' => $vendorId,
-            'riderId'  => $riderId,
-            'preset'   => $preset,
-            'unitMap'  => $unitMap,
-        ]);
-    }
+    return view('admin.reports.flower-estimate-calculation', [
+        'pickups'  => $pickups,
+        'vendors'  => $vendors,
+        'riders'   => $riders,
+        'start'    => $start->toDateString(),
+        'end'      => $end->toDateString(),
+        'vendorId' => $vendorId,
+        'riderId'  => $riderId,
+        'unitMap'  => $unitMap,
+        'preset'   => $request->input('preset', ''),
+    ]);
+}
 
     private function resolveRange(Request $request, ?string $preset): array
     {
