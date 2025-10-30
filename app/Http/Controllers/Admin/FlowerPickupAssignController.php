@@ -14,118 +14,120 @@ use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FlowerPickupAssignController extends Controller
 {
 
-public function createFromEstimate(Request $request)
-{
-    $date = $request->filled('date')
-        ? Carbon::parse($request->get('date'))->startOfDay()
-        : Carbon::tomorrow()->startOfDay();
+    public function createFromEstimate(Request $request)
+    {
+        $date = $request->filled('date')
+            ? Carbon::parse($request->get('date'))->startOfDay()
+            : Carbon::tomorrow()->startOfDay();
 
-    // Lookups
-    $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get();
-    $riders  = RiderDetails::select('rider_id','rider_name')->orderBy('rider_name')->get();
-    $flowers = FlowerProduct::select('product_id','name')->orderBy('name')->get();
-    $units   = PoojaUnit::select('id','unit_name')->get();
+        // Lookups
+        $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get();
+        $riders  = RiderDetails::select('rider_id','rider_name')->orderBy('rider_name')->get();
+        $flowers = FlowerProduct::select('product_id','name')->orderBy('name')->get();
+        $units   = PoojaUnit::select('id','unit_name')->get();
 
-    // name -> product_id
-    $flowerNameToId = $flowers->pluck('product_id','name')->toArray();
+        // name -> product_id
+        $flowerNameToId = $flowers->pluck('product_id','name')->toArray();
 
-    // normalize unit names → canonical symbols and build map symbol -> unit_id
-    $unitSymbolToId = [];
-    foreach ($units as $u) {
-        $key = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
-        if ($key) $unitSymbolToId[$key] = $u->id;
-    }
+        // normalize unit names → canonical symbols and build map symbol -> unit_id
+        $unitSymbolToId = [];
+        foreach ($units as $u) {
+            $key = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
+            if ($key) $unitSymbolToId[$key] = $u->id;
+        }
 
-    // ====== Tomorrow estimate to prefill estimate quantities =================
-    $subs     = $this->fetchActiveSubsEffectiveOn($date);
-    $estimate = $this->buildEstimateForSubsOnDate($subs, $date);
-    $totals   = array_values($estimate['totals_by_item'] ?? []);
+        // ====== Tomorrow estimate to prefill estimate quantities =================
+        $subs     = $this->fetchActiveSubsEffectiveOn($date);
+        $estimate = $this->buildEstimateForSubsOnDate($subs, $date);
+        $totals   = array_values($estimate['totals_by_item'] ?? []);
 
-    // ====== Live price index (FlowerDetails) for JS auto-pricing =============
-    $fdIndexByName = FlowerDetails::query()
-        ->select(['name','unit','price'])
-        ->where('status', 'active')
-        ->get()
-        ->keyBy(function ($fd) { return strtolower(trim((string)$fd->name)); });
+        // ====== Live price index (FlowerDetails) for JS auto-pricing =============
+        $fdIndexByName = FlowerDetails::query()
+            ->select(['name','unit','price'])
+            ->where('status', 'active')
+            ->get()
+            ->keyBy(function ($fd) { return strtolower(trim((string)$fd->name)); });
 
-    // product_id → pricing
-    $fdProductPricing = [];
-    foreach ($flowers as $f) {
-        $nameKey = strtolower(trim((string)$f->name));
-        $fd = $fdIndexByName->get($nameKey);
-        if ($fd) {
-            $sym = $this->normalizeUnitKey($fd->unit); // 'kg','g','l','ml','pcs'
-            $fdProductPricing[$f->product_id] = [
-                'fd_unit_symbol' => $sym,
-                'fd_unit_id'     => $unitSymbolToId[$sym] ?? null,
-                'fd_price'       => (float) $fd->price,
-            ];
-        } else {
-            $fdProductPricing[$f->product_id] = [
-                'fd_unit_symbol' => 'pcs',
-                'fd_unit_id'     => $unitSymbolToId['pcs'] ?? null,
-                'fd_price'       => 0.0,
+        // product_id → pricing
+        $fdProductPricing = [];
+        foreach ($flowers as $f) {
+            $nameKey = strtolower(trim((string)$f->name));
+            $fd = $fdIndexByName->get($nameKey);
+            if ($fd) {
+                $sym = $this->normalizeUnitKey($fd->unit); // 'kg','g','l','ml','pcs'
+                $fdProductPricing[$f->product_id] = [
+                    'fd_unit_symbol' => $sym,
+                    'fd_unit_id'     => $unitSymbolToId[$sym] ?? null,
+                    'fd_price'       => (float) $fd->price,
+                ];
+            } else {
+                $fdProductPricing[$f->product_id] = [
+                    'fd_unit_symbol' => 'pcs',
+                    'fd_unit_id'     => $unitSymbolToId['pcs'] ?? null,
+                    'fd_price'       => 0.0,
+                ];
+            }
+        }
+
+        // ====== Prefill rows =====================================================
+        $prefillRows = [];
+        foreach ($totals as $row) {
+            $name     = trim($row['item_name'] ?? '');
+            $flowerId = $flowerNameToId[$name] ?? null;
+
+            // "unit-wise" label coming from estimate aggregation (e.g., kg/g/L/ml/pcs)
+            $dispUnit = strtolower((string)($row['total_unit_disp'] ?? ''));
+
+            $prefillRows[] = [
+                'flower_id'    => $flowerId,
+
+                // ESTIMATE (prefill qty only; Est Unit mirrors Actual in UI)
+                'est_quantity' => $row['total_qty_disp'] ?? null,
+
+                // IMPORTANT: prefill Actual unit from estimate’s unit label so both
+                // Actual Unit and Est. Unit (display) show immediately.
+                'unit_id'      => $unitSymbolToId[$dispUnit] ?? null,
+
+                // Actual values still empty by default
+                'quantity'     => null,
+                'price'        => null,
+
+                // UX hints
+                'flower_name'  => $name,
+                'unit_label'   => $dispUnit,
             ];
         }
+
+        // Build a unitId → canonical symbol map for JS conversion
+        $unitIdToSymbol = [];
+        foreach ($units as $u) {
+            $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
+        }
+
+        return view('admin.reports.create-from-estimate', [
+            'prefillDate'        => $date->toDateString(),
+            'vendors'            => $vendors,
+            'riders'             => $riders,
+            'flowers'            => $flowers,
+            'units'              => $units,
+            'prefillRows'        => $prefillRows,
+            'todayDate'          => Carbon::today()->toDateString(),
+            // for JS auto-pricing
+            'fdProductPricing'   => $fdProductPricing,
+            'unitIdToSymbol'     => $unitIdToSymbol,
+        ]);
     }
-
-    // ====== Prefill rows =====================================================
-    $prefillRows = [];
-    foreach ($totals as $row) {
-        $name     = trim($row['item_name'] ?? '');
-        $flowerId = $flowerNameToId[$name] ?? null;
-
-        // "unit-wise" label coming from estimate aggregation (e.g., kg/g/L/ml/pcs)
-        $dispUnit = strtolower((string)($row['total_unit_disp'] ?? ''));
-
-        $prefillRows[] = [
-            'flower_id'    => $flowerId,
-
-            // ESTIMATE (prefill qty only; Est Unit mirrors Actual in UI)
-            'est_quantity' => $row['total_qty_disp'] ?? null,
-
-            // IMPORTANT: prefill Actual unit from estimate’s unit label so both
-            // Actual Unit and Est. Unit (display) show immediately.
-            'unit_id'      => $unitSymbolToId[$dispUnit] ?? null,
-
-            // Actual values still empty by default
-            'quantity'     => null,
-            'price'        => null,
-
-            // UX hints
-            'flower_name'  => $name,
-            'unit_label'   => $dispUnit,
-        ];
-    }
-
-    // Build a unitId → canonical symbol map for JS conversion
-    $unitIdToSymbol = [];
-    foreach ($units as $u) {
-        $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
-    }
-
-    return view('admin.reports.create-from-estimate', [
-        'prefillDate'        => $date->toDateString(),
-        'vendors'            => $vendors,
-        'riders'             => $riders,
-        'flowers'            => $flowers,
-        'units'              => $units,
-        'prefillRows'        => $prefillRows,
-        'todayDate'          => Carbon::today()->toDateString(),
-        // for JS auto-pricing
-        'fdProductPricing'   => $fdProductPricing,
-        'unitIdToSymbol'     => $unitIdToSymbol,
-    ]);
-}
 
     public function saveFlowerPickupAssignRider(Request $request)
     {
-        $request->validate([
-            // Header fields — optional now (kept for compatibility, stored if you still want a “default” header vendor/rider)
+        // 1) Base validation
+        $validator = Validator::make($request->all(), [
+            // Header (kept optional, but we'll enforce a resolved vendor later)
             'vendor_id'     => 'nullable|exists:flower__vendor_details,vendor_id',
             'pickup_date'   => 'required|date',
             'delivery_date' => 'required|date|after_or_equal:pickup_date',
@@ -156,81 +158,135 @@ public function createFromEstimate(Request $request)
             'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
         ]);
 
-        // Create the pickup header (header vendor/rider kept but optional)
-        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
-        $pickup = FlowerPickupDetails::create([
-            'pick_up_id'     => $pickUpId,
-            'vendor_id'      => $request->vendor_id,   // may be null
-            'pickup_date'    => $request->pickup_date,
-            'delivery_date'  => $request->delivery_date,
-            'rider_id'       => $request->rider_id,    // may be null
-            'total_price'    => 0,
-            'payment_method' => null,
-            'payment_status' => 'pending',
-            'status'         => 'pending',
-            'payment_id'     => null,
-        ]);
+        // 2) Custom rule: each line must resolve to a vendor (row or header)
+        $validator->after(function ($v) use ($request) {
+            $flowerIds  = $request->input('flower_id', []);
+            $rowVendors = $request->input('row_vendor_id', []);
+            $headerVendor = $request->input('vendor_id');
 
-        // Pull arrays
-        $flowerIds   = $request->input('flower_id', []);
-        $estUnits    = $request->input('est_unit_id', []);
-        $estQtys     = $request->input('est_quantity', []);
-        $unitIds     = $request->input('unit_id', []);
-        $qtys        = $request->input('quantity', []);
-        $prices      = $request->input('price', []);
-        $rowVendors  = $request->input('row_vendor_id', []);
-        $rowRiders   = $request->input('row_rider_id', []);
-
-        $totalPrice = 0;
-
-        foreach ($flowerIds as $i => $flowerId) {
-            // Read aligned row values (null if missing)
-            $estUnitId   = $estUnits[$i]   ?? null;
-            $estQty      = isset($estQtys[$i])   ? (float) $estQtys[$i] : null;
-
-            $unitId      = $unitIds[$i]    ?? null;
-            $quantity    = isset($qtys[$i])   ? (float) $qtys[$i]      : null;
-            $price       = isset($prices[$i]) ? (float) $prices[$i]    : null;
-
-            $rowVendorId = $rowVendors[$i] ?? null;
-            $rowRiderId  = $rowRiders[$i]  ?? null;
-
-            $itemTotal   = ($price !== null && $quantity !== null) ? ($price * $quantity) : null;
-
-            // Persist the line
-            FlowerPickupItems::create([
-                'pick_up_id'        => $pickUpId,
-                'flower_id'         => $flowerId,
-
-                // ESTIMATE (unit/qty as mirrored by UI)
-                'est_unit_id'       => $estUnitId,
-                'est_quantity'      => $estQty,
-
-                // ACTUAL
-                'unit_id'           => $unitId,
-                'quantity'          => $quantity ?? 0,
-                'price'             => $price,
-
-                // Per-row ownership
-                'vendor_id'         => $rowVendorId,   // <-- per-row vendor
-                'rider_id'          => $rowRiderId,    // <-- per-row rider
-
-                // convenience total
-                'item_total_price'  => $itemTotal,
-            ]);
-
-            if ($itemTotal !== null) {
-                $totalPrice += $itemTotal;
+            // If header vendor is empty, we still allow it, but each row must have a vendor.
+            foreach ($flowerIds as $i => $fid) {
+                $resolvedVendor = $rowVendors[$i] ?? $headerVendor;
+                if (empty($resolvedVendor)) {
+                    $v->errors()->add("row_vendor_id.$i", 'Vendor is required for this line (or set a header vendor).');
+                }
             }
+
+            // If your header table has NOT NULL on vendor_id, ensure at least one vendor overall:
+            if (empty($headerVendor)) {
+                $anyRowVendor = collect($rowVendors ?? [])->filter()->first();
+                if (empty($anyRowVendor)) {
+                    $v->errors()->add('vendor_id', 'Please select a vendor at header or per each line.');
+                }
+            }
+
+            // (Optional) Enforce rider per line if items table rider_id NOT NULL:
+            // $rowRiders = $request->input('row_rider_id', []);
+            // $headerRider = $request->input('rider_id');
+            // foreach ($flowerIds as $i => $fid) {
+            //     $resolvedRider = $rowRiders[$i] ?? $headerRider;
+            //     if (empty($resolvedRider)) {
+            //         $v->errors()->add("row_rider_id.$i", 'Rider is required for this line (or set a header rider).');
+            //     }
+            // }
+        });
+
+        $validator->validate();
+
+        // 3) Read arrays
+        $flowerIds  = $request->input('flower_id', []);
+        $estUnits   = $request->input('est_unit_id', []);
+        $estQtys    = $request->input('est_quantity', []);
+        $unitIds    = $request->input('unit_id', []);
+        $qtys       = $request->input('quantity', []);
+        $prices     = $request->input('price', []);
+        $rowVendors = $request->input('row_vendor_id', []);
+        $rowRiders  = $request->input('row_rider_id', []);
+
+        // 4) Resolve header vendor/rider (header vendor must not be null if table enforces NOT NULL)
+        $headerVendorId = $request->input('vendor_id');
+        if (!$headerVendorId) {
+            // Take first non-empty per-row vendor as header vendor fallback
+            $headerVendorId = collect($rowVendors)->filter()->first();
         }
 
-        $pickup->update(['total_price' => $totalPrice]);
+        $headerRiderId = $request->input('rider_id'); // keep nullable by default
+        if (!$headerRiderId) {
+            // Optional: pick first row rider if you want a default on header
+            $headerRiderId = collect($rowRiders)->filter()->first();
+        }
+
+        // 5) Persist within a transaction
+        DB::transaction(function () use (
+            $request,
+            $flowerIds, $estUnits, $estQtys, $unitIds, $qtys, $prices, $rowVendors, $rowRiders,
+            $headerVendorId, $headerRiderId
+        ) {
+            $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+
+            // Header insert — vendor_id is guaranteed non-null now
+            $pickup = \App\Models\FlowerPickupDetails::create([
+                'pick_up_id'     => $pickUpId,
+                'vendor_id'      => $headerVendorId,                  // NOT NULL-safe
+                'pickup_date'    => $request->pickup_date,
+                'delivery_date'  => $request->delivery_date,
+                'rider_id'       => $headerRiderId,                   // keep nullable if DB allows
+                'total_price'    => 0,
+                'payment_method' => null,
+                'payment_status' => 'pending',
+                'status'         => 'pending',
+                'payment_id'     => null,
+            ]);
+
+            $totalPrice = 0.0;
+
+            foreach ($flowerIds as $i => $flowerId) {
+                $estUnitId = $estUnits[$i] ?? null;
+                $estQty    = isset($estQtys[$i]) ? (float)$estQtys[$i] : null;
+
+                $unitId    = $unitIds[$i] ?? null;
+                $quantity  = isset($qtys[$i])   ? (float)$qtys[$i]   : null;
+                $price     = isset($prices[$i]) ? (float)$prices[$i] : null;
+
+                // Resolve per-line vendor/rider with header fallback
+                $lineVendorId = $rowVendors[$i] ?? $headerVendorId; // never null now
+                $lineRiderId  = $rowRiders[$i]  ?? $headerRiderId;  // nullable unless you enforce otherwise
+
+                $itemTotal    = ($price !== null && $quantity !== null) ? ($price * $quantity) : null;
+
+                \App\Models\FlowerPickupItems::create([
+                    'pick_up_id'       => $pickUpId,
+                    'flower_id'        => $flowerId,
+
+                    // Estimate (from UI mirror)
+                    'est_unit_id'      => $estUnitId,
+                    'est_quantity'     => $estQty,
+
+                    // Actual
+                    'unit_id'          => $unitId,
+                    'quantity'         => $quantity ?? 0,
+                    'price'            => $price,
+
+                    // Ownership per row
+                    'vendor_id'        => $lineVendorId,   // NOT NULL-safe
+                    'rider_id'         => $lineRiderId,    // nullable unless enforced otherwise
+
+                    'item_total_price' => $itemTotal,
+                ]);
+
+                if ($itemTotal !== null) {
+                    $totalPrice += $itemTotal;
+                }
+            }
+
+            $pickup->update(['total_price' => $totalPrice]);
+        });
 
         return redirect()
             ->back()
             ->with('success', 'Flower pickup details saved successfully!');
     }
-   
+
     public function store(Request $request)
     {
         $request->validate([
