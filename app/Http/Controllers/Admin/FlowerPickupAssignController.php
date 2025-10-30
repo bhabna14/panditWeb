@@ -7,6 +7,7 @@ use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\FlowerProduct;
 use App\Models\FlowerVendor;
+use App\Models\FlowerDetails;
 use App\Models\PoojaUnit;
 use App\Models\RiderDetails;
 use App\Models\Subscription;
