@@ -123,114 +123,128 @@ class FlowerPickupAssignController extends Controller
         ]);
     }
 
-    public function saveFlowerPickupAssignRider(Request $request)
-    {
-        // 1) Base validation
-        $validator = Validator::make($request->all(), [
-            // Header (kept optional, but we'll enforce a resolved vendor later)
-            'vendor_id'     => 'nullable|exists:flower__vendor_details,vendor_id',
-            'pickup_date'   => 'required|date',
-            'delivery_date' => 'required|date|after_or_equal:pickup_date',
-            'rider_id'      => 'nullable|exists:flower__rider_details,rider_id',
+public function saveFlowerPickupAssignRider(Request $request)
+{
+    // 1) Base validation
+    $validator = Validator::make($request->all(), [
+        // Header vendor/rider optional; rows will be grouped per vendor
+        'vendor_id'     => 'nullable|exists:flower__vendor_details,vendor_id',
+        'pickup_date'   => 'required|date',
+        'delivery_date' => 'required|date|after_or_equal:pickup_date',
+        'rider_id'      => 'nullable|exists:flower__rider_details,rider_id',
 
-            // Items
-            'flower_id'     => 'required|array|min:1',
-            'flower_id.*'   => 'required|exists:flower_products,product_id',
+        // Items
+        'flower_id'     => 'required|array|min:1',
+        'flower_id.*'   => 'required|exists:flower_products,product_id',
 
-            // ESTIMATE
-            'est_unit_id'    => 'sometimes|array',
-            'est_unit_id.*'  => 'nullable|exists:pooja_units,id',
-            'est_quantity'   => 'sometimes|array',
-            'est_quantity.*' => 'nullable|numeric|min:0.01',
+        // ESTIMATE
+        'est_unit_id'    => 'sometimes|array',
+        'est_unit_id.*'  => 'nullable|exists:pooja_units,id',
+        'est_quantity'   => 'sometimes|array',
+        'est_quantity.*' => 'nullable|numeric|min:0.01',
 
-            // ACTUAL
-            'unit_id'       => 'sometimes|array',
-            'unit_id.*'     => 'nullable|exists:pooja_units,id',
-            'quantity'      => 'sometimes|array',
-            'quantity.*'    => 'nullable|numeric|min:0.01',
-            'price'         => 'sometimes|array',
-            'price.*'       => 'nullable|numeric|min:0',
+        // ACTUAL
+        'unit_id'       => 'sometimes|array',
+        'unit_id.*'     => 'nullable|exists:pooja_units,id',
+        'quantity'      => 'sometimes|array',
+        'quantity.*'    => 'nullable|numeric|min:0.01',
+        'price'         => 'sometimes|array',
+        'price.*'       => 'nullable|numeric|min:0',
 
-            // Per-row Vendor/Rider
-            'row_vendor_id'   => 'sometimes|array',
-            'row_vendor_id.*' => 'nullable|exists:flower__vendor_details,vendor_id',
-            'row_rider_id'    => 'sometimes|array',
-            'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
-        ]);
+        // Per-row Vendor/Rider
+        'row_vendor_id'   => 'sometimes|array',
+        'row_vendor_id.*' => 'nullable|exists:flower__vendor_details,vendor_id',
+        'row_rider_id'    => 'sometimes|array',
+        'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
+    ]);
 
-        // 2) Custom rule: each line must resolve to a vendor (row or header)
-        $validator->after(function ($v) use ($request) {
-            $flowerIds  = $request->input('flower_id', []);
-            $rowVendors = $request->input('row_vendor_id', []);
-            $headerVendor = $request->input('vendor_id');
+    // 2) Custom rule: EVERY line must resolve to a vendor (row vendor OR header vendor)
+    $validator->after(function ($v) use ($request) {
+        $flowerIds    = $request->input('flower_id', []);
+        $rowVendors   = $request->input('row_vendor_id', []);
+        $headerVendor = $request->input('vendor_id');
 
-            // If header vendor is empty, we still allow it, but each row must have a vendor.
-            foreach ($flowerIds as $i => $fid) {
-                $resolvedVendor = $rowVendors[$i] ?? $headerVendor;
-                if (empty($resolvedVendor)) {
-                    $v->errors()->add("row_vendor_id.$i", 'Vendor is required for this line (or set a header vendor).');
-                }
+        foreach ($flowerIds as $i => $fid) {
+            $resolvedVendor = $rowVendors[$i] ?? $headerVendor;
+            if (empty($resolvedVendor)) {
+                $v->errors()->add("row_vendor_id.$i", 'Vendor is required for this line (set per-row vendor or a header vendor).');
             }
+        }
+    });
 
-            // If your header table has NOT NULL on vendor_id, ensure at least one vendor overall:
-            if (empty($headerVendor)) {
-                $anyRowVendor = collect($rowVendors ?? [])->filter()->first();
-                if (empty($anyRowVendor)) {
-                    $v->errors()->add('vendor_id', 'Please select a vendor at header or per each line.');
-                }
-            }
+    $validator->validate();
 
-            // (Optional) Enforce rider per line if items table rider_id NOT NULL:
-            // $rowRiders = $request->input('row_rider_id', []);
-            // $headerRider = $request->input('rider_id');
-            // foreach ($flowerIds as $i => $fid) {
-            //     $resolvedRider = $rowRiders[$i] ?? $headerRider;
-            //     if (empty($resolvedRider)) {
-            //         $v->errors()->add("row_rider_id.$i", 'Rider is required for this line (or set a header rider).');
-            //     }
-            // }
-        });
+    // 3) Pull aligned arrays
+    $flowerIds   = $request->input('flower_id', []);
+    $estUnits    = $request->input('est_unit_id', []);
+    $estQtys     = $request->input('est_quantity', []);
+    $unitIds     = $request->input('unit_id', []);
+    $qtys        = $request->input('quantity', []);
+    $prices      = $request->input('price', []);
+    $rowVendors  = $request->input('row_vendor_id', []);
+    $rowRiders   = $request->input('row_rider_id', []);
 
-        $validator->validate();
+    $headerVendorId = $request->input('vendor_id'); // optional fallback for rows without row_vendor_id
+    $headerRiderId  = $request->input('rider_id');  // optional; items keep their own rider anyway
 
-        // 3) Read arrays
-        $flowerIds  = $request->input('flower_id', []);
-        $estUnits   = $request->input('est_unit_id', []);
-        $estQtys    = $request->input('est_quantity', []);
-        $unitIds    = $request->input('unit_id', []);
-        $qtys       = $request->input('quantity', []);
-        $prices     = $request->input('price', []);
-        $rowVendors = $request->input('row_vendor_id', []);
-        $rowRiders  = $request->input('row_rider_id', []);
+    // 4) Group rows by resolved vendor
+    $groups = []; // vendor_id => [ 'rows' => [ ... ], 'riders' => set-of-riders ]
+    foreach ($flowerIds as $i => $flowerId) {
+        $vendorId = $rowVendors[$i] ?? $headerVendorId;  // validated non-empty by custom rule
+        $riderId  = $rowRiders[$i]  ?? $headerRiderId;
 
-        // 4) Resolve header vendor/rider (header vendor must not be null if table enforces NOT NULL)
-        $headerVendorId = $request->input('vendor_id');
-        if (!$headerVendorId) {
-            // Take first non-empty per-row vendor as header vendor fallback
-            $headerVendorId = collect($rowVendors)->filter()->first();
+        if (!isset($groups[$vendorId])) {
+            $groups[$vendorId] = [
+                'rows'   => [],
+                'riders' => [],
+            ];
         }
 
-        $headerRiderId = $request->input('rider_id'); // keep nullable by default
-        if (!$headerRiderId) {
-            // Optional: pick first row rider if you want a default on header
-            $headerRiderId = collect($rowRiders)->filter()->first();
+        $groups[$vendorId]['rows'][] = [
+            'flower_id'    => $flowerId,
+
+            // Estimate
+            'est_unit_id'  => $estUnits[$i]   ?? null,
+            'est_quantity' => isset($estQtys[$i]) ? (float)$estQtys[$i] : null,
+
+            // Actual
+            'unit_id'      => $unitIds[$i]    ?? null,
+            'quantity'     => isset($qtys[$i])   ? (float)$qtys[$i]   : null,
+            'price'        => isset($prices[$i]) ? (float)$prices[$i] : null,
+
+            // Ownership per row
+            'vendor_id'    => $vendorId,
+            'rider_id'     => $riderId,
+        ];
+
+        if (!is_null($riderId)) {
+            $groups[$vendorId]['riders'][$riderId] = true;
         }
+    }
 
-        // 5) Persist within a transaction
-        DB::transaction(function () use (
-            $request,
-            $flowerIds, $estUnits, $estQtys, $unitIds, $qtys, $prices, $rowVendors, $rowRiders,
-            $headerVendorId, $headerRiderId
-        ) {
-            $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+    // 5) Persist vendor-wise within a transaction
+    DB::transaction(function () use ($request, $groups) {
+        $createdPickups = [];
 
-            // Header insert — vendor_id is guaranteed non-null now
+        foreach ($groups as $vendorId => $bundle) {
+            $rows   = $bundle['rows'];
+            $riders = array_keys($bundle['riders']);
+
+            // Header rider logic: set only if all lines share the same rider; else keep null
+            $headerRiderForVendor = null;
+            if (count($riders) === 1) {
+                $headerRiderForVendor = $riders[0];
+            }
+
+            $pickUpId = 'PICKUP-' . $vendorId . '-' . strtoupper(uniqid());
+
+            // Create header per vendor
             $pickup = \App\Models\FlowerPickupDetails::create([
                 'pick_up_id'     => $pickUpId,
-                'vendor_id'      => $headerVendorId,                  // NOT NULL-safe
+                'vendor_id'      => $vendorId,                        // NOT NULL (vendor-wise)
                 'pickup_date'    => $request->pickup_date,
                 'delivery_date'  => $request->delivery_date,
-                'rider_id'       => $headerRiderId,                   // keep nullable if DB allows
+                'rider_id'       => $headerRiderForVendor,            // optional
                 'total_price'    => 0,
                 'payment_method' => null,
                 'payment_status' => 'pending',
@@ -238,54 +252,53 @@ class FlowerPickupAssignController extends Controller
                 'payment_id'     => null,
             ]);
 
-            $totalPrice = 0.0;
+            $vendorTotal = 0.0;
 
-            foreach ($flowerIds as $i => $flowerId) {
-                $estUnitId = $estUnits[$i] ?? null;
-                $estQty    = isset($estQtys[$i]) ? (float)$estQtys[$i] : null;
-
-                $unitId    = $unitIds[$i] ?? null;
-                $quantity  = isset($qtys[$i])   ? (float)$qtys[$i]   : null;
-                $price     = isset($prices[$i]) ? (float)$prices[$i] : null;
-
-                // Resolve per-line vendor/rider with header fallback
-                $lineVendorId = $rowVendors[$i] ?? $headerVendorId; // never null now
-                $lineRiderId  = $rowRiders[$i]  ?? $headerRiderId;  // nullable unless you enforce otherwise
-
-                $itemTotal    = ($price !== null && $quantity !== null) ? ($price * $quantity) : null;
+            // Insert items for this vendor
+            foreach ($rows as $row) {
+                $itemTotal = (!is_null($row['price']) && !is_null($row['quantity']))
+                    ? ($row['price'] * $row['quantity'])
+                    : null;
 
                 \App\Models\FlowerPickupItems::create([
                     'pick_up_id'       => $pickUpId,
-                    'flower_id'        => $flowerId,
+                    'flower_id'        => $row['flower_id'],
 
-                    // Estimate (from UI mirror)
-                    'est_unit_id'      => $estUnitId,
-                    'est_quantity'     => $estQty,
+                    // Estimate
+                    'est_unit_id'      => $row['est_unit_id'],
+                    'est_quantity'     => $row['est_quantity'],
 
                     // Actual
-                    'unit_id'          => $unitId,
-                    'quantity'         => $quantity ?? 0,
-                    'price'            => $price,
+                    'unit_id'          => $row['unit_id'],
+                    'quantity'         => $row['quantity'] ?? 0,
+                    'price'            => $row['price'],
 
-                    // Ownership per row
-                    'vendor_id'        => $lineVendorId,   // NOT NULL-safe
-                    'rider_id'         => $lineRiderId,    // nullable unless enforced otherwise
+                    // Per-row ownership (still stored for traceability)
+                    'vendor_id'        => $row['vendor_id'],    // equals $vendorId
+                    'rider_id'         => $row['rider_id'],     // per-row rider
 
                     'item_total_price' => $itemTotal,
                 ]);
 
-                if ($itemTotal !== null) {
-                    $totalPrice += $itemTotal;
+                if (!is_null($itemTotal)) {
+                    $vendorTotal += $itemTotal;
                 }
             }
 
-            $pickup->update(['total_price' => $totalPrice]);
-        });
+            // Update vendor header total
+            $pickup->update(['total_price' => $vendorTotal]);
 
-        return redirect()
-            ->back()
-            ->with('success', 'Flower pickup details saved successfully!');
-    }
+            $createdPickups[] = $pickUpId;
+        }
+
+        // Optionally: you can flash the created pickup ids, if helpful.
+        session()->flash('created_pickups', $createdPickups);
+    });
+
+    return redirect()
+        ->back()
+        ->with('success', 'Flower pickup details saved vendor-wise successfully!');
+}
 
     public function store(Request $request)
     {
