@@ -11,9 +11,9 @@
             --tab4: #f59e0b; /* amber  */
 
             /* Dark mode core */
-            --bg:    #0a0f1a;  /* app background */
-            --bg-2:  #0e1524;  /* section background */
-            --card:  #0f172a;  /* cards */
+            --bg:    #eeeff2;  /* app background */
+            --bg-2:  #eaeef7;  /* section background */
+            --card:  rgb(209, 211, 215);  /* cards */
             --soft:  #141c2f;  /* table rows / soft blocks */
             --ring:  rgba(255,255,255,0.08);
             --ring-2:rgba(255,255,255,0.12);
