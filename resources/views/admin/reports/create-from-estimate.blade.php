@@ -71,29 +71,7 @@
 
         <div class="card mb-3">
             <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <div>
-                    <strong>Items</strong>
-                    <div class="subhead">Estimate unit is always the same as Actual unit (shown as read-only). Estimate price is hidden and auto-applied in totals.</div>
-                </div>
-
-                {{-- Bulk rider controls --}}
-                <div class="d-flex align-items-center gap-3">
-                    <div class="form-check form-check-align">
-                        <input class="form-check-input" type="checkbox" value="1" id="applyOneRider" name="apply_one_rider"
-                               @checked(old('apply_one_rider') == '1')>
-                        <label class="form-check-label" for="applyOneRider">Use one rider for all items</label>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <label for="bulkRider" class="small-muted">Rider:</label>
-                        <select id="bulkRider" name="bulk_rider_id" class="form-control form-control-sm" {{ old('apply_one_rider') == '1' ? '' : 'disabled' }}>
-                            <option value="" selected>Choose</option>
-                            @foreach ($riders as $r)
-                                <option value="{{ $r->rider_id }}" @selected(old('bulk_rider_id') == $r->rider_id)>{{ $r->rider_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
+                <strong>Flower Items</strong>
                 <button type="button" class="btn btn-outline-primary btn-sm ms-auto" id="addRowBtn">Add Row</button>
             </div>
 
