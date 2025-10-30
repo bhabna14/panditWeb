@@ -4,241 +4,135 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
-            --tab1: #6366f1;
-            --tab2: #06b6d4;
-            --tab3: #22c55e;
-            --tab4: #f59e0b;
+            /* Accent palette (unchanged) */
+            --tab1: #6366f1; /* indigo */
+            --tab2: #06b6d4; /* cyan   */
+            --tab3: #22c55e; /* green  */
+            --tab4: #f59e0b; /* amber  */
 
-            --bg: #f2f3f6;
-            /* slate-900 */
-            --card: #f2f3f6;
-            /* deep bluish */
-            --muted: #94a3b8;
-            /* slate-400 */
-            --ring: rgba(255, 255, 255, .08);
-            --success: #22c55e;
-            --danger: #ef4444;
+            /* Dark mode core */
+            --bg:    #0a0f1a;  /* app background */
+            --bg-2:  #0e1524;  /* section background */
+            --card:  #0f172a;  /* cards */
+            --soft:  #141c2f;  /* table rows / soft blocks */
+            --ring:  rgba(255,255,255,0.08);
+            --ring-2:rgba(255,255,255,0.12);
+            --text:  #e5e7eb;  /* primary text */
+            --muted: #94a3b8;  /* secondary text */
+            --head:  #c7d2fe;  /* table header text */
+            --ok:    #22c55e;
+            --bad:   #ef4444;
+
+            /* Shadows */
+            --shadow-lg: 0 18px 40px rgba(0,0,0,.45);
+            --shadow-md: 0 10px 24px rgba(0,0,0,.35);
         }
 
+        /* Page */
+        html, body { background: var(--bg); color: var(--text); }
         body {
-            background: linear-gradient(135deg, #0b1220, #111827 45%, #0b1220);
+            background:
+                radial-gradient(1200px 600px at -20% -30%, rgba(99,102,241,.06), transparent 40%),
+                radial-gradient(1000px 500px at 120% 120%, rgba(6,182,212,.05), transparent 40%),
+                linear-gradient(180deg, #0a0f1a, #0a0f1a);
         }
+        .container-page { max-width: 1200px; }
 
-        .container-page {
-            max-width: 1200px;
-        }
-
+        /* Sticky toolbar */
         .toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 30;
+            position: sticky; top: 0; z-index: 30;
             backdrop-filter: blur(10px);
-            background: rgba(11, 18, 32, .7);
+            background: rgba(15, 23, 42, .7);
             border: 1px solid var(--ring);
             border-radius: 14px;
             padding: .75rem;
-            display: grid;
-            gap: .75rem;
+            display: grid; gap: .75rem;
             grid-template-columns: 1fr auto;
             align-items: center;
+            box-shadow: var(--shadow-md);
         }
 
-        .btn-chip {
-            border: none;
-            padding: .55rem .9rem;
-            border-radius: 999px;
-            color: #fff;
-            font-weight: 600;
-            letter-spacing: .2px;
-            cursor: pointer;
-            transition: transform .08s ease;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .07);
+        .btn-chip{
+            border: none; padding:.55rem .9rem; border-radius:999px; color:#fff;
+            font-weight:600; letter-spacing:.2px; cursor:pointer; transition: transform .08s ease, box-shadow .2s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.07);
         }
+        .btn-chip:hover{ box-shadow: 0 10px 26px rgba(0,0,0,.5), inset 0 0 0 1px rgba(255,255,255,.12); }
+        .btn-chip:active { transform: translateY(1px) scale(.99); }
+        .chip1{ background: linear-gradient(135deg,var(--tab1), #8b5cf6); }
+        .chip2{ background: linear-gradient(135deg,var(--tab2), #22d3ee); }
+        .chip3{ background: linear-gradient(135deg,var(--tab3), #86efac); color:#052e16; }
+        .chip4{ background: linear-gradient(135deg,var(--tab4), #fbbf24); color:#3b1d00; }
+        .chip5{ background: linear-gradient(135deg,#64748b, #cbd5e1); color:#0b1220; }
 
-        .btn-chip:active {
-            transform: translateY(1px) scale(.99);
+        .date-range{
+            display:flex; gap:.5rem; align-items:center; color:var(--text);
         }
-
-        .chip1 {
-            background: linear-gradient(135deg, var(--tab1), #8b5cf6);
+        .date-range input, .select-in {
+            background: var(--card); border:1px solid var(--ring); color:var(--text);
+            border-radius:10px; padding:.5rem .75rem;
         }
+        .date-range input:focus, .select-in:focus { outline: none; border-color: var(--tab2); box-shadow: 0 0 0 3px rgba(6,182,212,.2); }
 
-        .chip2 {
-            background: linear-gradient(135deg, var(--tab2), #22d3ee);
-        }
-
-        .chip3 {
-            background: linear-gradient(135deg, var(--tab3), #86efac);
-            color: #052e16;
-        }
-
-        .chip4 {
-            background: linear-gradient(135deg, var(--tab4), #fbbf24);
-            color: #3b1d00;
-        }
-
-        .chip5 {
-            background: linear-gradient(135deg, #64748b, #cbd5e1);
-            color: #0b1220;
-        }
-
-        .date-range {
-            display: flex;
-            gap: .5rem;
-            align-items: center;
-            color: #e2e8f0;
-        }
-
-        .date-range input,
-        .select-in {
-            background: #0b1220;
-            border: 1px solid var(--ring);
-            color: #e2e8f0;
-            border-radius: 10px;
-            padding: .5rem .75rem;
-        }
-
+        /* Stats */
         .stats {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: .75rem;
-            margin: 1rem 0;
+            display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:.75rem; margin:1rem 0;
         }
-
-        .stat-card {
-            padding: .85rem 1rem;
-            border-radius: 14px;
-            background: #0b1220;
-            color: #e2e8f0;
-            border: 1px solid var(--ring);
+        .stat-card{
+            padding:.85rem 1rem; border-radius:14px; background: var(--card); color:var(--text);
+            border: 1px solid var(--ring); box-shadow: var(--shadow-md);
         }
+        .stat-title{ font-size:.85rem; color:var(--muted); }
+        .stat-value{ font-weight:800; letter-spacing:.5px; font-size:1.1rem; }
 
-        .stat-title {
-            font-size: .85rem;
-            color: var(--muted);
+        /* Vendor Card */
+        .vendor-card{
+            border-radius: 16px; overflow: hidden; border: 1px solid var(--ring); color:var(--text);
+            background: linear-gradient(180deg, rgba(15,23,42,.9), rgba(14,21,36,.9));
+            box-shadow: var(--shadow-lg);
         }
-
-        .stat-value {
-            font-weight: 800;
-            letter-spacing: .5px;
-            font-size: 1.1rem;
-        }
-
-        .vendor-card {
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--ring);
-            color: #e5e7eb;
-            background: linear-gradient(135deg, rgba(99, 102, 241, .16), rgba(11, 18, 32, .6));
-        }
-
-        .vendor-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .vendor-head{
+            display:flex; justify-content:space-between; align-items:center;
             padding: 1rem 1rem;
             background:
-                radial-gradient(1200px 200px at -10% -100%, rgba(255, 255, 255, .06), transparent 40%),
-                linear-gradient(135deg, var(--tab1), var(--tab2));
-            color: #fff;
+                radial-gradient(1200px 200px at -10% -100%, rgba(255,255,255,.06), transparent 40%),
+                linear-gradient(135deg,var(--tab1), var(--tab2));
+            color:#fff;
+        }
+        .vendor-title{ font-weight:800; font-size:1.05rem; text-shadow: 0 2px 18px rgba(0,0,0,.25); }
+        .vendor-sub{ font-size:.85rem; opacity:.95; }
+
+        .table-box { padding:.6rem .8rem; }
+
+        /* Table */
+        .items-table{ width:100%; border-collapse:separate; border-spacing:0 .6rem; }
+        .items-table thead th{
+            text-transform:uppercase; font-size:.7rem; letter-spacing:.09em;
+            color: var(--head); text-align:left; padding:.35rem .6rem;
+        }
+        .row-card{
+            background: var(--soft); border:1px solid var(--ring);
+            box-shadow: var(--shadow-md);
+        }
+        .row-card td{ padding:.65rem .7rem; vertical-align: middle; color:var(--text); }
+
+        .tag{
+            display:inline-flex; align-items:center; gap:.35rem;
+            padding:.25rem .55rem; border-radius:999px; font-weight:700; font-size:.73rem;
+            background: rgba(255,255,255,.06); border:1px solid var(--ring-2); color: var(--text);
         }
 
-        .vendor-title {
-            font-weight: 800;
-            font-size: 1.05rem;
-            text-shadow: 0 2px 18px rgba(0, 0, 0, .25);
-        }
+        .diff-up{ color: var(--bad); font-weight:800; }
+        .diff-down{ color: var(--ok); font-weight:800; }
 
-        .vendor-sub {
-            font-size: .85rem;
-            opacity: .9;
-        }
+        .pill { padding:.28rem .65rem; border-radius:999px; font-weight:700; }
+        .pill-est { background: rgba(99,102,241,.18); border:1px solid rgba(99,102,241,.35); color:#c7d2fe; }
+        .pill-act { background: rgba(34,197,94,.18); border:1px solid rgba(34,197,94,.35); color:#bbf7d0; }
 
-        .table-box {
-            padding: .6rem .8rem;
-        }
-
-        .items-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 .5rem;
-        }
-
-        .items-table thead th {
-            text-transform: uppercase;
-            font-size: .7rem;
-            letter-spacing: .09em;
-            color: #c7d2fe;
-            text-align: left;
-            padding: .35rem .6rem;
-        }
-
-        .row-card {
-            background: #0b1220;
-            border: 1px solid var(--ring);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
-        }
-
-        .row-card td {
-            padding: .6rem .65rem;
-            vertical-align: middle;
-            color: #e5e7eb;
-        }
-
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            padding: .25rem .55rem;
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: .73rem;
-            background: rgba(255, 255, 255, .06);
-            border: 1px solid rgba(255, 255, 255, .12);
-        }
-
-        .diff-up {
-            color: var(--danger);
-            font-weight: 800;
-        }
-
-        .diff-down {
-            color: var(--success);
-            font-weight: 800;
-        }
-
-        .pill {
-            padding: .25rem .6rem;
-            border-radius: 999px;
-            font-weight: 700;
-        }
-
-        .pill-est {
-            background: rgba(99, 102, 241, .2);
-            border: 1px solid rgba(99, 102, 241, .35);
-            color: #c7d2fe;
-        }
-
-        .pill-act {
-            background: rgba(34, 197, 94, .2);
-            border: 1px solid rgba(34, 197, 94, .35);
-            color: #bbf7d0;
-        }
-
-        .pagination {
-            margin-top: 1rem;
-        }
-
-        .pagination .page-link {
-            background: #0b1220;
-            border: 1px solid var(--ring);
-            color: #e2e8f0;
-        }
-
-        .pagination .active .page-link {
-            background: var(--tab2);
-            border-color: var(--tab2);
-        }
+        /* Pagination */
+        .pagination { margin-top: 1rem; }
+        .pagination .page-link { background: var(--card); border:1px solid var(--ring); color:var(--text); }
+        .pagination .active .page-link { background: var(--tab2); border-color: var(--tab2); color:#022024; }
     </style>
 @endsection
 
@@ -278,8 +172,7 @@
                 <button class="btn-chip chip2" data-preset="tomorrow" type="button">Tomorrow</button>
                 <button class="btn-chip chip3" data-preset="this_week" type="button">This Week</button>
                 <button class="btn-chip chip4" data-preset="this_month" type="button">This Month</button>
-                <button class="btn-chip" style="background:linear-gradient(135deg,#111827,#1f2937);"
-                    type="submit">Apply</button>
+                <button class="btn-chip" style="background:linear-gradient(135deg,#0b1220,#1f2937);" type="submit">Apply</button>
             </div>
             <input type="hidden" name="preset" id="presetInput" value="{{ $preset }}">
         </form>
@@ -315,9 +208,9 @@
         @forelse($pickups as $pickup)
             @php
                 $vendorName = optional($pickup->vendor)->vendor_name ?? 'Unknown Vendor';
-                $riderName = optional($pickup->rider)->rider_name ?? '—';
-                $pkDate = optional($pickup->pickup_date)->format('d M Y');
-                $dvDate = optional($pickup->delivery_date)->format('d M Y');
+                $riderName  = optional($pickup->rider)->rider_name  ?? '—';
+                $pkDate     = optional($pickup->pickup_date)->format('d M Y');
+                $dvDate     = optional($pickup->delivery_date)->format('d M Y');
                 $sumEst = 0;
                 $sumAct = (float) $pickup->total_price;
             @endphp
@@ -326,8 +219,7 @@
                 <div class="vendor-head">
                     <div>
                         <div class="vendor-title">{{ $vendorName }}</div>
-                        <div class="vendor-sub">Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider:
-                            {{ $riderName }}</div>
+                        <div class="vendor-sub">Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider: {{ $riderName }}</div>
                     </div>
                     <div style="display:flex; gap:.4rem;">
                         <span class="pill pill-act">Actual: ₹ {{ number_format($sumAct, 2) }}</span>
@@ -349,71 +241,60 @@
                             @foreach ($pickup->flowerPickupItems as $it)
                                 @php
                                     $ename = optional($it->estUnit)->unit_name ?? ($unitMap[$it->est_unit_id] ?? '—');
-                                    $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
+                                    $aname = optional($it->unit)->unit_name    ?? ($unitMap[$it->unit_id] ?? '—');
 
-                                    $eqty = $it->est_quantity ?? 0;
-                                    $eprc = $it->est_price ?? null; // if you store estimate price
-                                    $aqty = $it->quantity ?? 0;
-                                    $aprc = $it->price ?? 0;
-                                    $ltotal = $it->item_total_price ?? ($aprc ?: 0) * ($aqty ?: 0);
+                                    $eqty  = $it->est_quantity ?? 0;
+                                    $eprc  = $it->est_price ?? null;
+                                    $aqty  = $it->quantity ?? 0;
+                                    $aprc  = $it->price ?? 0;
+                                    $ltotal= $it->item_total_price ?? (($aprc ?: 0) * ($aqty ?: 0));
 
-                                    // Estimate amount (fallback if you store price)
-                                    $eamt = $eprc !== null ? $eqty * $eprc : null;
+                                    $eamt  = ($eprc !== null) ? ($eqty * $eprc) : null;
 
-                                    // Difference logic (by quantity if same unit name; otherwise show “—”)
                                     $diffTxt = '—';
                                     $diffCls = '';
                                     if ($ename && $aname && $ename === $aname) {
                                         $qdiff = round(($aqty ?: 0) - ($eqty ?: 0), 2);
-                                        if ($qdiff > 0) {
-                                            $diffTxt = "+{$qdiff} $aname";
-                                            $diffCls = 'diff-up';
-                                        } elseif ($qdiff < 0) {
-                                            $diffTxt = "{$qdiff} $aname";
-                                            $diffCls = 'diff-down';
-                                        } else {
-                                            $diffTxt = '0';
-                                        }
+                                        if ($qdiff > 0) { $diffTxt = "+{$qdiff} $aname"; $diffCls = 'diff-up'; }
+                                        elseif ($qdiff < 0) { $diffTxt = "{$qdiff} $aname"; $diffCls = 'diff-down'; }
+                                        else { $diffTxt = '0'; }
                                     }
 
-                                    if ($eamt !== null) {
-                                        $sumEst += $eamt;
-                                    }
+                                    if ($eamt !== null) { $sumEst += $eamt; }
                                 @endphp
                                 <tr class="row-card">
                                     <td>
                                         <div style="font-weight:700">{{ optional($it->flower)->name ?? '—' }}</div>
                                         <div style="color:var(--muted); font-size:.78rem">
-                                            @if ($it->vendor?->vendor_name)
+                                            @if($it->vendor?->vendor_name)
                                                 <span class="tag">{{ $it->vendor->vendor_name }}</span>
                                             @endif
-                                            @if ($it->rider?->rider_name)
+                                            @if($it->rider?->rider_name)
                                                 <span class="tag">{{ $it->rider->rider_name }}</span>
                                             @endif
                                         </div>
                                     </td>
                                     <td>
                                         <span class="pill pill-est">
-                                            {{ $eqty ? number_format($eqty, 2) : '—' }} {{ $ename }}
+                                            {{ $eqty ? number_format($eqty,2) : '—' }} {{ $ename }}
                                         </span>
-                                        @if (!is_null($eamt))
-                                            <div style="color:#c7d2fe; font-size:.8rem; margin-top:.15rem">₹
-                                                {{ number_format($eamt, 2) }}</div>
+                                        @if(!is_null($eamt))
+                                            <div style="color:#c7d2fe; font-size:.8rem; margin-top:.15rem">₹ {{ number_format($eamt,2) }}</div>
                                         @endif
                                     </td>
                                     <td>
                                         <span class="pill pill-act">
-                                            {{ $aqty ? number_format($aqty, 2) : '—' }} {{ $aname }}
+                                            {{ $aqty ? number_format($aqty,2) : '—' }} {{ $aname }}
                                         </span>
                                         <div style="color:#bbf7d0; font-size:.8rem; margin-top:.15rem">
-                                            ₹ {{ number_format($aprc ?: 0, 2) }}
+                                            ₹ {{ number_format($aprc ?: 0,2) }}
                                         </div>
                                     </td>
                                     <td class="{{ $diffCls }}" style="font-weight:800;">
                                         {{ $diffTxt }}
                                     </td>
                                     <td style="font-weight:800;">
-                                        ₹ {{ number_format($ltotal, 2) }}
+                                        ₹ {{ number_format($ltotal,2) }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -432,8 +313,7 @@
                                 $sign = $delta > 0 ? '+' : '';
                             @endphp
                             <span class="pill" style="background:rgba(255,255,255,.06); border:1px solid var(--ring);">
-                                Diff: <span class="{{ $deltaCls }}"> {{ $sign }}₹
-                                    {{ number_format($delta, 2) }}</span>
+                                Diff: <span class="{{ $deltaCls }}"> {{ $sign }}₹ {{ number_format($delta, 2) }}</span>
                             </span>
                         @endif
                     </div>
@@ -441,7 +321,7 @@
             </div>
         @empty
             <div class="vendor-card" style="padding:1rem">
-                <div style="color:#e2e8f0;">No pickups found for the selected range.</div>
+                <div style="color:var(--text);">No pickups found for the selected range.</div>
             </div>
         @endforelse
 
@@ -463,9 +343,9 @@
                 });
             });
 
-            // If user manually changes date inputs, clear preset to “custom”
+            // Clear preset if manual date changed
             const startEl = document.querySelector('input[name="start"]');
-            const endEl = document.querySelector('input[name="end"]');
+            const endEl   = document.querySelector('input[name="end"]');
             [startEl, endEl].forEach(el => {
                 el.addEventListener('change', () => {
                     document.getElementById('presetInput').value = '';
