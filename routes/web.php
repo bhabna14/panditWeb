@@ -370,7 +370,6 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::post('/flower-pickup-request/approve/{id}',  'approveRequest')->name('flower-pickup-request.approve');
 
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
-        Route::post('/save-flower-pickup-assign-rider', 'saveFlowerPickupAssignRider')->name('admin.saveFlowerPickupAssignRider');
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
@@ -1005,7 +1004,7 @@ Route::get('/admin/flower-pickups/create-from-estimate', [FlowerPickupAssignCont
     ->name('admin.assignPickupForm');
 
 // save the pickup (uses the same name you were already posting to)
-Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'store'])
+Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'saveFlowerPickupAssignRider'])
     ->name('admin.saveFlowerPickupAssignRider');
 
     Route::get('/admin/reports/tomorrow-subscriptions', [TomorrowSubscriptionsController::class, 'index'])

@@ -14,17 +14,25 @@ class FlowerPickupItems extends Model
     protected $fillable = [
         'pick_up_id',
         'flower_id',
+
+        // ACTUAL
         'unit_id',
         'quantity',
         'price',
         'item_total_price',
+
+        // ESTIMATE
+        'est_unit_id',
+        'est_quantity',
+        'est_price',
     ];
 
     protected $casts = [
-        'quantity' => 'decimal:2',
-        'price'    => 'decimal:2', // <— optional, helps JSON + formatting
-        'item_total_price' => 'decimal:2', // 👈 add this
-
+        'quantity'          => 'decimal:2',
+        'price'             => 'decimal:2',
+        'item_total_price'  => 'decimal:2',
+        'est_quantity'      => 'decimal:2',
+        'est_price'         => 'decimal:2',
     ];
 
     public function flower()
