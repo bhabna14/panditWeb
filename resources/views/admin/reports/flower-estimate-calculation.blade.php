@@ -9,9 +9,9 @@
             --tab3: #22c55e;
             --tab4: #f59e0b;
 
-            --bg: #0f172a;
+            --bg: #f2f3f6;
             /* slate-900 */
-            --card: #0b1220;
+            --card: #f2f3f6;
             /* deep bluish */
             --muted: #94a3b8;
             /* slate-400 */
