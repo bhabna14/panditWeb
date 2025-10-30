@@ -234,7 +234,7 @@ public function saveFlowerPickupAssignRider(Request $request)
             // Header rider must NOT be null. If multiple riders in group, pick the first for header.
             $headerRiderForVendor = $riders[0]; // since validator ensured every row had a rider
 
-            $pickUpId = 'PICKUP-' . $vendorId . '-' . strtoupper(uniqid());
+            $pickUpId = 'PICKUP-' . strtoupper(uniqid());
 
             // Create header per vendor
             $pickup = \App\Models\FlowerPickupDetails::create([
