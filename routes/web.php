@@ -1007,6 +1007,9 @@ Route::get('/admin/flower-pickups/create-from-estimate', [FlowerPickupAssignCont
 Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'saveFlowerPickupAssignRider'])
     ->name('admin.saveFlowerPickupAssignRider');
 
+    Route::get('/flower-item-calculation', [FlowerPickupController::class, 'itemCalculation'])->name('pickups.manage');
+    
+
     Route::get('/admin/reports/tomorrow-subscriptions', [TomorrowSubscriptionsController::class, 'index'])
     ->name('admin.tomorrowSubscriptions');
 
