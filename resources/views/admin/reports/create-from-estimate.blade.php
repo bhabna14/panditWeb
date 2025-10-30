@@ -71,7 +71,29 @@
 
         <div class="card mb-3">
             <div class="card-header bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-                <strong>Flowers Pickup Details</strong>
+                <div>
+                    <strong>Items</strong>
+                    <div class="subhead">Estimate unit is always the same as Actual unit (shown as read-only). Estimate price is hidden and auto-applied in totals.</div>
+                </div>
+
+                {{-- Bulk rider controls --}}
+                <div class="d-flex align-items-center gap-3">
+                    <div class="form-check form-check-align">
+                        <input class="form-check-input" type="checkbox" value="1" id="applyOneRider" name="apply_one_rider"
+                               @checked(old('apply_one_rider') == '1')>
+                        <label class="form-check-label" for="applyOneRider">Use one rider for all items</label>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="bulkRider" class="small-muted">Rider:</label>
+                        <select id="bulkRider" name="bulk_rider_id" class="form-control form-control-sm" {{ old('apply_one_rider') == '1' ? '' : 'disabled' }}>
+                            <option value="" selected>Choose</option>
+                            @foreach ($riders as $r)
+                                <option value="{{ $r->rider_id }}" @selected(old('bulk_rider_id') == $r->rider_id)>{{ $r->rider_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
                 <button type="button" class="btn btn-outline-primary btn-sm ms-auto" id="addRowBtn">Add Row</button>
             </div>
 
@@ -85,7 +107,6 @@
                             {{-- Estimate --}}
                             <th style="width:12%">Est. Unit</th>
                             <th style="width:12%">Est. Qty</th>
-                            {{-- Est. Price column removed/hidden --}}
 
                             {{-- Actual --}}
                             <th style="width:13%">Actual Unit</th>
@@ -143,7 +164,7 @@
 
                                 {{-- Est. Unit (mirrors actual; read-only UI) --}}
                                 <td>
-                                    {{-- FIXED: preselect to $unitVal so it shows immediately --}}
+                                    {{-- Preselect to $unitVal so it shows immediately --}}
                                     <select class="form-control" data-est-unit-display disabled>
                                         <option value="" {{ $unitVal ? '' : 'selected' }}>Choose</option>
                                         @foreach ($units as $unit)
@@ -254,7 +275,6 @@
 
                         {{-- Est. Unit (display only) --}}
                         <td>
-                            {{-- FIXED: default shows "Choose" until Actual is selected; JS will mirror --}}
                             <select class="form-control" data-est-unit-display disabled>
                                 <option value="" selected>Choose</option>
                                 @foreach ($units as $unit)
@@ -349,7 +369,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function qsa(root, sel) { return Array.from((root || document).querySelectorAll(sel)); }
 
-    // Base unit helpers
     function symbolToCategory(sym) {
         if (!sym) return 'count';
         if (sym === 'kg' || sym === 'g') return 'weight';
@@ -485,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
     addRowBtn.addEventListener('click', addRow);
     attachRowHandlers(document);
 
-    // Ensure first render shows Est. Unit immediately
+    // First render: ensure Est. Unit shows
     Array.from(rowsBody.querySelectorAll('tr[data-row]')).forEach(tr => syncEstimateUnit(tr));
     computeTotals();
 
