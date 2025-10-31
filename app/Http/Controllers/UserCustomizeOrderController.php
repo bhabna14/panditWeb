@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\DB;
 
 class UserCustomizeOrderController extends Controller
 {
-    public function demoCustomizeOrder()
+    public function createCustomizeOrder()
     {
 
         $user_details = User::get();
@@ -44,7 +44,7 @@ class UserCustomizeOrderController extends Controller
         ->get();
     
     
-        return view('demo-customize-order', compact('flowers','user_details','singleflowers','Poojaunits'));
+        return view('create-customize-order', compact('flowers','user_details','singleflowers','Poojaunits'));
     }
 
     public function getUserAddresses($userId)
@@ -63,21 +63,21 @@ class UserCustomizeOrderController extends Controller
 public function saveCustomizeOrder(Request $request)
 {
     try {
-        // Validate the incoming request data
+        // NOTE: Because we submit with Accept: application/json, Laravel will return 422 JSON on validation errors.
         $request->validate([
-            'userid' => 'required|exists:users,userid',
-            'address_id' => 'required|exists:user_addresses,id',
-            'date' => 'required|date',
-            'time' => 'required',
-            'flower_name' => 'required|array|min:1',
-            'flower_unit' => 'required|array|min:1',
-            'flower_quantity' => 'required|array|min:1',
-            'flower_name.*' => 'required|string',
-            'flower_unit.*' => 'required|string',
-            'flower_quantity.*' => 'required|numeric',
+            'userid'            => 'required|exists:users,userid',
+            'address_id'        => 'required|exists:user_addresses,id',
+            'date'              => 'required|date',
+            'time'              => 'required',
+            'flower_name'       => 'required|array|min:1',
+            'flower_unit'       => 'required|array|min:1',
+            'flower_quantity'   => 'required|array|min:1',
+            'flower_name.*'     => 'required|string',
+            'flower_unit.*'     => 'required|string',
+            'flower_quantity.*' => 'required|numeric|min:0.01',
         ]);
 
-        // Check if the input arrays have the same number of items
+        // Cross-size check
         $totalFlowers = count($request->flower_name);
         if (
             $totalFlowers !== count($request->flower_unit) ||
@@ -88,45 +88,54 @@ public function saveCustomizeOrder(Request $request)
             ], 400);
         }
 
-        // Generate a unique request ID
+        // Generate unique human-readable request id
         $requestId = 'REQ-' . strtoupper(Str::random(12));
 
-        // Create the main flower request record
+        DB::beginTransaction();
+
         $flowerRequest = FlowerRequest::create([
             'request_id' => $requestId,
-            'product_id' => 'FLOW1977630', // Placeholder product ID, change as needed
-            'user_id' => $request->userid,
+            'product_id' => 'FLOW1977630', // TODO: replace if you want a real product link
+            'user_id'    => $request->userid,
             'address_id' => $request->address_id,
-            'date' => $request->date,
-            'time' => $request->time,
-            'status' => 'pending',
+            'date'       => $request->date,
+            'time'       => $request->time,
+            'status'     => 'pending',
         ]);
 
-        // Iterate through the flower details and create associated records
+        // If your FlowerRequestItem foreign key references the numeric primary key, use:
+        // $parentKey = $flowerRequest->id;
+        // and set 'flower_request_id' => $parentKey below.
+        // In your current schema it seems to reference the string request_id, so we keep that:
+        $parentKey = $requestId;
+
         foreach ($request->flower_name as $index => $flowerName) {
             FlowerRequestItem::create([
-                'flower_request_id' => $requestId, // Use the ID from the created FlowerRequest
-                'flower_name' => $flowerName,
-                'flower_unit' => $request->flower_unit[$index],
-                'flower_quantity' => $request->flower_quantity[$index],
+                'flower_request_id' => $parentKey,
+                'flower_name'       => $flowerName,
+                'flower_unit'       => $request->flower_unit[$index],
+                'flower_quantity'   => $request->flower_quantity[$index],
             ]);
         }
 
-        // Return success response
-        return response()->json([
-            'message' => 'Customize Order added successfully.',
-        ], 200);
-    } catch (\Exception $e) {
-        // Log the exception for debugging
-        \Log::error('Error in saveCustomizeOrder: ' . $e->getMessage());
+        DB::commit();
 
-        // Return error response
+        return response()->json([
+            'message'     => 'Customize Order added successfully.',
+            'request_id'  => $requestId,
+            'created_at'  => now()->toDateTimeString(),
+        ], 200);
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        \Log::error('Error in saveCustomizeOrder: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+
         return response()->json([
             'message' => 'An error occurred while saving the order.',
-            'error' => $e->getMessage(),
+            'error'   => app()->hasDebugModeEnabled() ? $e->getMessage() : 'Server error',
         ], 500);
     }
 }
+
 
 
 }

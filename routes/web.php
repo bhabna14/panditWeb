@@ -277,7 +277,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/mark-product-payment/{id}', 'markPayment')->name('admin.markProductPayment');
     });
 
-    Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
+    Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower.customize.request');
     Route::get('/manage-flower-request/data', [FlowerRequestController::class, 'ajaxData'])->name('admin.flower-request.data');
 
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
@@ -632,7 +632,7 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
     });
 
     Route::controller(UserCustomizeOrderController::class)->group(function() {
-        Route::get('/demo-customize-order', 'demoCustomizeOrder')->name('demoCustomizeOrder');
+        Route::get('/create-customize-order', 'createCustomizeOrder')->name('createCustomizeOrder');
         Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
     });
