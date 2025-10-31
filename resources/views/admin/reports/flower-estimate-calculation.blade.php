@@ -153,14 +153,14 @@
                     @endforeach
                 </select>
 
-                <select class="select-in" name="rider_id" aria-label="Rider">
+                {{-- <select class="select-in" name="rider_id" aria-label="Rider">
                     <option value="">All Riders</option>
                     @foreach ($riders as $r)
                         <option value="{{ $r->rider_id }}" {{ $riderId == $r->rider_id ? 'selected' : '' }}>
                             {{ $r->rider_name }}
                         </option>
                     @endforeach
-                </select>
+                </select> --}}
             </div>
 
             <div style="display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end">
