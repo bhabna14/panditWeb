@@ -279,7 +279,6 @@
             letter-spacing: .3px;
         }
 
-        /* Pagination */
         .pagination {
             margin-top: 1rem;
         }
@@ -301,7 +300,7 @@
 @section('content')
     <div class="container container-page py-4">
 
-        {{-- Filters toolbar --}}
+        {{-- IMPORTANT: ensure this route name matches your controller method --}}
         <form method="GET" action="{{ route('admin.pickups.manage') }}" id="filterForm" class="toolbar">
             <div class="date-range">
                 <strong>From</strong>
@@ -366,7 +365,7 @@
             </div>
         </div>
 
-        {{-- Global export (all visible cards -> multi-sheet workbook) --}}
+        {{-- Global export --}}
         @if ($pickups->count())
             <div style="display:flex; justify-content:flex-end; margin-bottom:.5rem;">
                 <button class="export-btn" id="exportAllBtn">Export All (XLSX)</button>
@@ -396,10 +395,8 @@
                 <div class="excel-head">
                     <div>
                         <div class="title">{{ $vendorName }}</div>
-                        <div class="sub">
-                            Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider: {{ $riderName }} •
-                            Ref: #{{ $pickup->pick_up_id }}
-                        </div>
+                        <div class="sub">Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider:
+                            {{ $riderName }} • Ref: #{{ $pickup->pick_up_id }}</div>
                     </div>
                     <div class="excel-tools">
                         <button type="button" class="mini-btn" onclick="scrollIntoViewSmooth('#{{ $tableId }}')">Jump
@@ -434,36 +431,31 @@
                                     $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
 
                                     $eqty = (float) ($it->est_quantity ?? 0);
-                                    $eprc = $it->est_price !== null ? (float) $it->est_price : null; // optional
+                                    $eprc = $it->est_price !== null ? (float) $it->est_price : null;
                                     $aqty = (float) ($it->quantity ?? 0);
                                     $aprc = (float) ($it->price ?? 0);
                                     $ltotal =
                                         $it->item_total_price !== null ? (float) $it->item_total_price : $aprc * $aqty;
 
                                     $eamt = $eprc !== null ? $eqty * $eprc : null;
-
                                     if ($eamt !== null) {
                                         $sumEstAmt += $eamt;
                                     }
 
-                                    // Differences
                                     $qdiff = round($aqty - $eqty, 2);
                                     $adiff = $eamt !== null ? round($ltotal - $eamt, 2) : null;
                                 @endphp
                                 <tr>
                                     <td>{{ $idx + 1 }}</td>
                                     <td><strong>{{ optional($it->flower)->name ?? '—' }}</strong></td>
-
                                     <td>{{ $eqty ? number_format($eqty, 2) : '—' }}</td>
                                     <td>{{ $ename }}</td>
                                     <td>{{ !is_null($eprc) ? '₹ ' . number_format($eprc, 2) : '—' }}</td>
                                     <td>{{ !is_null($eamt) ? '₹ ' . number_format($eamt, 2) : '—' }}</td>
-
                                     <td>{{ $aqty ? number_format($aqty, 2) : '—' }}</td>
                                     <td>{{ $aname }}</td>
                                     <td>₹ {{ number_format($aprc, 2) }}</td>
                                     <td><strong>₹ {{ number_format($ltotal, 2) }}</strong></td>
-
                                     <td class="{{ $qdiff > 0 ? 'diff-up' : ($qdiff < 0 ? 'diff-down' : '') }}">
                                         {{ $qdiff > 0 ? '+' : '' }}{{ $qdiff }} {{ $aname }}
                                     </td>
@@ -476,7 +468,6 @@
                         </tbody>
                         <tfoot>
                             @php
-                                // If actual sum not on pickup row, recompute from items:
                                 $sumActAmt = $pickup->flowerPickupItems->sum(function ($it) {
                                     $aprc = (float) ($it->price ?? 0);
                                     $aqty = (float) ($it->quantity ?? 0);
@@ -507,7 +498,6 @@
             </div>
         @endforelse
 
-        {{-- Pagination --}}
         <div class="d-flex justify-content-center">
             {{ $pickups->withQueryString()->links() }}
         </div>
@@ -531,19 +521,16 @@
             document.getElementById('presetInput').value = '';
         }));
 
-        // Smooth jump to a table
         function scrollIntoViewSmooth(selector) {
             const el = document.querySelector(selector);
-            if (el) {
-                el.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
+            if (el) el.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         }
         window.scrollIntoViewSmooth = scrollIntoViewSmooth;
 
-        // === Excel Export helpers (SheetJS) ===
+        // Excel export helpers
         function tableToSheet(table) {
             return XLSX.utils.table_to_sheet(table, {
                 raw: true
@@ -552,9 +539,7 @@
 
         function exportOne(tableId, sheetName) {
             const table = document.getElementById(tableId);
-            if (!table) {
-                return;
-            }
+            if (!table) return;
             const wb = XLSX.utils.book_new();
             const ws = tableToSheet(table);
             XLSX.utils.book_append_sheet(wb, ws, (sheetName || 'Sheet').substring(0, 31));
@@ -563,19 +548,16 @@
         }
         window.exportOne = exportOne;
 
-        // Export all visible cards as multi-sheet workbook
         const exportAllBtn = document.getElementById('exportAllBtn');
         if (exportAllBtn) {
             exportAllBtn.addEventListener('click', () => {
                 const cards = document.querySelectorAll('.excel-card');
-                if (!cards.length) {
-                    return;
-                }
+                if (!cards.length) return;
                 const wb = XLSX.utils.book_new();
                 cards.forEach((card, idx) => {
                     const tableId = card.getAttribute('data-table-id');
                     const sheetRaw = card.getAttribute('data-sheet-name') || ('Sheet_' + (idx + 1));
-                    const sheet = sheetRaw.substring(0, 31); // Excel sheet name limit
+                    const sheet = sheetRaw.substring(0, 31);
                     const table = document.getElementById(tableId);
                     if (table) {
                         const ws = tableToSheet(table);

@@ -626,16 +626,11 @@ class FlowerPickupAssignController extends Controller
             default => null
         };
     }
-
-    public function itemCalculation(Request $request)
+public function itemCalculation(Request $request)
     {
-        $start = $request->filled('start')
-            ? Carbon::parse($request->input('start'))->startOfDay()
-            : Carbon::today()->startOfDay();
-
-        $end = $request->filled('end')
-            ? Carbon::parse($request->input('end'))->endOfDay()
-            : Carbon::today()->endOfDay();
+        // --- Use resolveRange so presets work ---
+        $preset = $request->string('preset')->toString() ?: null;
+        [$start, $end] = $this->resolveRange($request, $preset);
 
         $vendorId = $request->input('vendor_id');
         $riderId  = $request->input('rider_id');
@@ -654,7 +649,8 @@ class FlowerPickupAssignController extends Controller
                     ])->orderBy('id');
                 },
             ])
-            ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
+            // IMPORTANT: keep full datetime range; don't toDateString() the ends
+            ->whereBetween('pickup_date', [$start, $end])
             ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
             ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
             ->orderBy('pickup_date', 'desc')
@@ -663,7 +659,7 @@ class FlowerPickupAssignController extends Controller
 
         $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
 
-        // Optional: ensure dates are Carbon (if stored as strings)
+        // Make sure dates are Carbon for formatting in the view
         $pickups->getCollection()->transform(function($p){
             if ($p->pickup_date && !($p->pickup_date instanceof \Carbon\Carbon)) {
                 $p->pickup_date = \Carbon\Carbon::parse($p->pickup_date);
@@ -678,13 +674,14 @@ class FlowerPickupAssignController extends Controller
             'pickups'  => $pickups,
             'vendors'  => $vendors,
             'riders'   => $riders,
-            'start'    => $start->toDateString(),
-            'end'      => $end->toDateString(),
+            // keep the inputs in yyyy-mm-dd for date inputs
+            'start'    => $start->copy()->toDateString(),
+            'end'      => $end->copy()->toDateString(),
             'vendorId' => $vendorId,
             'riderId'  => $riderId,
             'unitMap'  => $unitMap,
-            'preset'   => $request->input('preset', ''),
-            'sheetTitlePrefix' => 'Pickups', // used by export
+            'preset'   => $preset ?? '',
+            'sheetTitlePrefix' => 'Pickups',
         ]);
     }
 
@@ -704,13 +701,13 @@ class FlowerPickupAssignController extends Controller
             return [$t->copy()->startOfDay(), $t->copy()->endOfDay()];
         }
         if ($preset === 'this_week') {
-            return [$today->copy()->startOfWeek(), $today->copy()->endOfWeek()];
+            return [$today->copy()->startOfWeek(), $today->copy()->endOfWeek()->endOfDay()];
         }
         if ($preset === 'this_month') {
-            return [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()];
+            return [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()->endOfDay()];
         }
 
-        // If preset not set, fall back to specific inputs or today
+        // Fall back to specific inputs or today
         $start = $request->filled('start')
             ? Carbon::parse($request->input('start'))->startOfDay()
             : $today->copy()->startOfDay();
@@ -725,5 +722,4 @@ class FlowerPickupAssignController extends Controller
 
         return [$start, $end];
     }
-
 }
