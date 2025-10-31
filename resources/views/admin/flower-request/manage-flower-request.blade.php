@@ -62,7 +62,7 @@
     <div class="row mb-4 mt-4">
         {{-- Total --}}
         <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="card-filter text-decoration-none"
+            <a href="{{ route('flower.customize.request', ['filter' => 'all']) }}" class="card-filter text-decoration-none"
                 data-filter="all">
                 <div class="card metric-card h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
                     <div class="card-body d-flex align-items-center">
@@ -80,7 +80,7 @@
 
         {{-- Today --}}
         <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'today']) }}" class="card-filter text-decoration-none"
+            <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}" class="card-filter text-decoration-none"
                 data-filter="today">
                 <div class="card metric-card h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}" data-card="today">
                     <div class="card-body d-flex align-items-center">
