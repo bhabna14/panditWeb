@@ -520,7 +520,7 @@ class FlowerDashboardController extends Controller
             'totalItemsCount'     => $totalItemsCount,
         ]);
     }
-
+    
     public function paymentHistory(Request $request)
     {
         // -------- Parse filters ----------
@@ -534,7 +534,6 @@ class FlowerDashboardController extends Controller
         [$start, $end] = $this->resolveRange($request, $preset);
 
         // -------- Base query ----------
-        // NOTE: users.userid is the foreign key for payments.user_id in your models.
         $q = FlowerPayment::query()
             ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
             ->select([
@@ -552,9 +551,9 @@ class FlowerDashboardController extends Controller
                 $needle = '%' . trim($search) . '%';
                 $qq->where(function ($w) use ($needle) {
                     $w->where('flower_payments.order_id', 'like', $needle)
-                      ->orWhere('flower_payments.payment_id', 'like', $needle)
-                      ->orWhere('users.name', 'like', $needle)
-                      ->orWhere('users.mobile_number', 'like', $needle);
+                    ->orWhere('flower_payments.payment_id', 'like', $needle)
+                    ->orWhere('users.name', 'like', $needle)
+                    ->orWhere('users.mobile_number', 'like', $needle);
                 });
             })
             ->orderByDesc('flower_payments.created_at');
@@ -563,12 +562,19 @@ class FlowerDashboardController extends Controller
         $payments = $q->paginate(25)->withQueryString();
 
         // -------- Totals / Stats for the current filter ----------
-        $stats = (clone $q)->selectRaw('
-            COUNT(*) as cnt,
-            SUM(CASE WHEN payment_status = "paid" THEN paid_amount ELSE 0 END) as sum_paid,
-            SUM(CASE WHEN payment_status = "pending" THEN paid_amount ELSE 0 END) as sum_pending,
-            SUM(paid_amount) as sum_all
-        ')->first();
+        // IMPORTANT: clear previous selected columns + orders before aggregating
+        $statsQ = (clone $q);
+        $statsQ->getQuery()->orders  = null;  // drop ORDER BY for aggregation
+        $statsQ->getQuery()->columns = null;  // drop previous SELECT list
+
+        $stats = $statsQ
+            ->selectRaw('
+                COUNT(*) as cnt,
+                SUM(CASE WHEN flower_payments.payment_status = "paid" THEN flower_payments.paid_amount ELSE 0 END)      as sum_paid,
+                SUM(CASE WHEN flower_payments.payment_status = "pending" THEN flower_payments.paid_amount ELSE 0 END)   as sum_pending,
+                SUM(flower_payments.paid_amount) as sum_all
+            ')
+            ->first();
 
         // -------- Lookups ----------
         $users = User::query()
@@ -605,36 +611,35 @@ class FlowerDashboardController extends Controller
         $end   = null;
 
         if ($request->filled('start_date') || $request->filled('end_date')) {
-            $start = $request->filled('start_date') ? Carbon::parse($request->get('start_date'))->startOfDay() : null;
-            $end   = $request->filled('end_date')   ? Carbon::parse($request->get('end_date'))->endOfDay()     : null;
+            $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->get('start_date'))->startOfDay() : null;
+            $end   = $request->filled('end_date')   ? \Carbon\Carbon::parse($request->get('end_date'))->endOfDay()     : null;
         } else {
             switch ($preset) {
                 case 'today':
-                    $start = Carbon::today()->startOfDay();
-                    $end   = Carbon::today()->endOfDay();
+                    $start = \Carbon\Carbon::today()->startOfDay();
+                    $end   = \Carbon\Carbon::today()->endOfDay();
                     break;
                 case 'yesterday':
-                    $start = Carbon::yesterday()->startOfDay();
-                    $end   = Carbon::yesterday()->endOfDay();
+                    $start = \Carbon\Carbon::yesterday()->startOfDay();
+                    $end   = \Carbon\Carbon::yesterday()->endOfDay();
                     break;
                 case 'tomorrow':
-                    $start = Carbon::tomorrow()->startOfDay();
-                    $end   = Carbon::tomorrow()->endOfDay();
+                    $start = \Carbon\Carbon::tomorrow()->startOfDay();
+                    $end   = \Carbon\Carbon::tomorrow()->endOfDay();
                     break;
                 case 'this_week':
                 case 'week':
-                    $start = Carbon::now()->startOfWeek();
-                    $end   = Carbon::now()->endOfWeek();
+                    $start = \Carbon\Carbon::now()->startOfWeek();
+                    $end   = \Carbon\Carbon::now()->endOfWeek();
                     break;
                 case 'this_month':
                 case 'month':
-                    $start = Carbon::now()->startOfMonth();
-                    $end   = Carbon::now()->endOfMonth();
+                    $start = \Carbon\Carbon::now()->startOfMonth();
+                    $end   = \Carbon\Carbon::now()->endOfMonth();
                     break;
                 default:
-                    // default to "this_week" for first load
-                    $start = Carbon::now()->startOfWeek();
-                    $end   = Carbon::now()->endOfWeek();
+                    $start = \Carbon\Carbon::now()->startOfWeek();
+                    $end   = \Carbon\Carbon::now()->endOfWeek();
                     break;
             }
         }
@@ -645,4 +650,5 @@ class FlowerDashboardController extends Controller
 
         return [$start, $end];
     }
+
 }
