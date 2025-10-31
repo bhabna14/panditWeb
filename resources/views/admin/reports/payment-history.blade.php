@@ -172,81 +172,122 @@
     {{-- TABLE                --}}
     {{-- ===================== --}}
     <div class="card card-smooth shadow-sm mt-3">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <strong><i class="bi bi-cash-coin"></i> Payments</strong>
-            <span class="text-muted small">
-                From {{ \Carbon\Carbon::parse($start)->toFormattedDateString() }}
-                to {{ \Carbon\Carbon::parse($end)->toFormattedDateString() }}
-            </span>
-        </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 sticky-header">
-                <thead class="table-light">
-                    <tr>
-                        <th class="cell-datetime">Date/Time</th>
-                        <th class="cell-user">User</th>
-                        <th class="cell-method text-center">Method</th>
-                        <th class="cell-amount text-end">Amount</th>
-                        <th class="cell-status text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($payments as $p)
-                        @php
-                            $dt = \Carbon\Carbon::parse($p->created_at);
-                            $method = strtolower((string)($p->payment_method ?? ''));
-                            $badgeMethod = match(true){
-                                str_contains($method,'upi')  => 'badge-upi',
-                                str_contains($method,'cash') => 'badge-cash',
-                                str_contains($method,'card') => 'badge-card',
-                                default => 'badge-soft',
-                            };
-                            $badgeStatus = $p->payment_status === 'paid' ? 'badge-paid' : 'badge-pending';
-                        @endphp
-                        <tr class="td-tight">
-                            <td class="cell-datetime">
-                                <div class="fw-semibold">{{ $dt->format('d M Y') }}</div>
-                                <div class="text-muted small"><i class="bi bi-clock"></i> {{ $dt->format('h:i A') }}</div>
-                            </td>
-                            <td class="cell-user">
-                                <div class="fw-semibold"><i class="bi bi-person-circle"></i> {{ $p->user_name ?? '—' }}</div>
-                                <div class="text-muted small"><i class="bi bi-telephone"></i> {{ $p->user_mobile ?? '' }}</div>
-                            </td>
-                            <td class="cell-method">
-                                <span class="badge {{ $badgeMethod }}">{{ $p->payment_method ?? '—' }}</span>
-                            </td>
-                            <td class="cell-amount money">₹{{ number_format($p->paid_amount ?? 0, 2) }}</td>
-                            <td class="cell-status">
-                                <span class="badge {{ $badgeStatus }}">{{ ucfirst($p->payment_status ?? '—') }}</span>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="bi bi-inboxes"></i> No payments found for the selected filters.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-
-                @if ($payments->count())
-                <tfoot class="sticky-summary">
-                    <tr class="table-light">
-                        <th colspan="3" class="text-end">Page Total:</th>
-                        <th class="text-end money">₹{{ number_format($payments->sum('paid_amount'), 2) }}</th>
-                        <th></th>
-                    </tr>
-                </tfoot>
-                @endif
-            </table>
-        </div>
-        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-            <div class="text-muted small">
-                Showing <strong>{{ $payments->firstItem() ?? 0 }}</strong>–<strong>{{ $payments->lastItem() ?? 0 }}</strong> of <strong>{{ $payments->total() }}</strong>
-            </div>
-            {{ $payments->links() }}
-        </div>
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <strong><i class="bi bi-cash-coin"></i> Payments</strong>
+        <span class="text-muted small">
+            From {{ \Carbon\Carbon::parse($start)->toFormattedDateString() }}
+            to {{ \Carbon\Carbon::parse($end)->toFormattedDateString() }}
+        </span>
     </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 sticky-header">
+            <thead class="table-light">
+                <tr>
+                    <th class="cell-datetime">Date/Time</th>
+                    <th class="cell-user">User</th>
+                    <th style="min-width:220px">Type</th>       {{-- NEW --}}
+                    <th style="min-width:200px">Duration</th>   {{-- NEW --}}
+                    <th class="cell-method text-center">Method</th>
+                    <th class="cell-amount text-end">Amount</th>
+                    <th class="cell-status text-center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($payments as $p)
+                    @php
+                        $dt = \Carbon\Carbon::parse($p->created_at);
+                        $method = strtolower((string)($p->payment_method ?? ''));
+                        $badgeMethod = match(true){
+                            str_contains($method,'upi')  => 'badge-upi',
+                            str_contains($method,'cash') => 'badge-cash',
+                            str_contains($method,'card') => 'badge-card',
+                            default => 'badge-soft',
+                        };
+                        $badgeStatus = $p->payment_status === 'paid' ? 'badge-paid' : 'badge-pending';
+
+                        // Duration (subscription window)
+                        $startAt = $p->start_date ? \Carbon\Carbon::parse($p->start_date) : null;
+                        $endAt   = $p->end_date   ? \Carbon\Carbon::parse($p->end_date)   : null;
+                        $days    = ($startAt && $endAt) ? ($startAt->diffInDays($endAt) + 1) : null;
+                    @endphp
+                    <tr class="td-tight">
+                        <td class="cell-datetime">
+                            <div class="fw-semibold">{{ $dt->format('d M Y') }}</div>
+                            <div class="text-muted small"><i class="bi bi-clock"></i> {{ $dt->format('h:i A') }}</div>
+                        </td>
+
+                        <td class="cell-user">
+                            <div class="fw-semibold"><i class="bi bi-person-circle"></i> {{ $p->user_name ?? '—' }}</div>
+                            <div class="text-muted small"><i class="bi bi-telephone"></i> {{ $p->user_mobile ?? '' }}</div>
+                        </td>
+
+                        {{-- NEW: Subscription Type (Category + Product name + Sub id) --}}
+                        <td>
+                            <div class="fw-semibold">
+                                {{ $p->product_category ?? '—' }}
+                                @if ($p->product_name)
+                                    <span class="text-muted small">({{ $p->product_name }})</span>
+                                @endif
+                            </div>
+                            <div class="text-muted small">
+                                @if($p->subscription_id)
+                                    Sub #{{ $p->subscription_id }}
+                                @else
+                                    —
+                                @endif
+                            </div>
+                        </td>
+
+                        {{-- NEW: Subscription Duration --}}
+                        <td>
+                            @if ($startAt && $endAt)
+                                {{ $startAt->format('d M Y') }} — {{ $endAt->format('d M Y') }}
+                                <span class="text-muted small">({{ $days }}d)</span>
+                            @else
+                                —
+                            @endif
+
+                            @if(!empty($p->product_duration))
+                                <div class="text-muted small">Plan: {{ $p->product_duration }} days</div>
+                            @endif
+                        </td>
+
+                        <td class="cell-method">
+                            <span class="badge {{ $badgeMethod }}">{{ $p->payment_method ?? '—' }}</span>
+                        </td>
+                        <td class="cell-amount money">₹{{ number_format($p->paid_amount ?? 0, 2) }}</td>
+                        <td class="cell-status">
+                            <span class="badge {{ $badgeStatus }}">{{ ucfirst($p->payment_status ?? '—') }}</span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-inboxes"></i> No payments found for the selected filters.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+
+            @if ($payments->count())
+            <tfoot class="sticky-summary">
+                <tr class="table-light">
+                    <th colspan="5" class="text-end">Page Total:</th>
+                    <th class="text-end money">₹{{ number_format($payments->sum('paid_amount'), 2) }}</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+            @endif
+        </table>
+    </div>
+    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+            Showing <strong>{{ $payments->firstItem() ?? 0 }}</strong>–<strong>{{ $payments->lastItem() ?? 0 }}</strong> of <strong>{{ $payments->total() }}</strong>
+        </div>
+        {{ $payments->links() }}
+    </div>
+</div>
+
 </div>
 @endsection
 

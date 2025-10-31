@@ -524,7 +524,7 @@ class FlowerDashboardController extends Controller
             'totalItemsCount'     => $totalItemsCount,
         ]);
     }
-public function paymentHistory(Request $request)
+    public function paymentHistory(Request $request)
 {
     // -------- Parse filters ----------
     $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month
@@ -536,13 +536,24 @@ public function paymentHistory(Request $request)
     // Resolve [start, end] (inclusive) — defaults to TODAY if nothing provided
     [$start, $end, $effectivePreset] = $this->resolveRange($request, $preset);
 
-    // -------- Base query ----------
+    // -------- Base query (JOIN subscriptions + flower_products) ----------
     $q = FlowerPayment::query()
         ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
+        ->leftJoin('subscriptions as s', 's.order_id', '=', 'flower_payments.order_id')
+        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
         ->select([
             'flower_payments.*',
             'users.name as user_name',
             'users.mobile_number as user_mobile',
+
+            // subscription + product fields to show in table
+            's.subscription_id',
+            's.start_date',
+            's.end_date',
+            's.status as subscription_status',
+            'p.name as product_name',
+            'p.category as product_category',
+            'p.duration as product_duration', // optional plan length if you want to display it too
         ])
         ->when($start, fn($qq) => $qq->whereDate('flower_payments.created_at', '>=', $start->toDateString()))
         ->when($end,   fn($qq) => $qq->whereDate('flower_payments.created_at', '<=', $end->toDateString()))
@@ -555,7 +566,10 @@ public function paymentHistory(Request $request)
                 $w->where('flower_payments.order_id', 'like', $needle)
                   ->orWhere('flower_payments.payment_id', 'like', $needle)
                   ->orWhere('users.name', 'like', $needle)
-                  ->orWhere('users.mobile_number', 'like', $needle);
+                  ->orWhere('users.mobile_number', 'like', $needle)
+                  ->orWhere('p.name', 'like', $needle)
+                  ->orWhere('p.category', 'like', $needle)
+                  ->orWhere('s.subscription_id', 'like', $needle);
             });
         })
         ->orderByDesc('flower_payments.created_at');
@@ -565,8 +579,9 @@ public function paymentHistory(Request $request)
 
     // -------- Totals / Stats (GROUP BY safe) ----------
     $statsQ = (clone $q);
-    $statsQ->getQuery()->orders  = null;  // remove ORDER BY
-    $statsQ->getQuery()->columns = null;  // remove previous SELECT list
+    // Remove ORDER BY and previous select to safely aggregate
+    $statsQ->getQuery()->orders  = null;
+    $statsQ->getQuery()->columns = null;
 
     $stats = $statsQ
         ->selectRaw('
@@ -607,11 +622,6 @@ public function paymentHistory(Request $request)
     ]);
 }
 
-/**
- * Resolve [start, end] from request + preset.
- * DEFAULT: Today (if no preset/dates supplied)
- * Returns: [Carbon $start, Carbon $end, string $effectivePreset]
- */
 private function resolveRange(Request $request, ?string $preset): array
 {
     $start = null;
