@@ -208,7 +208,6 @@ class OrderController extends Controller
 
             // Fetch delivery history with pending status and today's delivery start time
             $deliveries = DeliveryHistory::where('rider_id', $rider->rider_id)
-                ->where('delivery_status', 'pending')
                 ->whereDate('created_at', Carbon::today())
                 ->with([
                     'order.subscription',

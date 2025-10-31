@@ -627,55 +627,66 @@ class FlowerPickupAssignController extends Controller
         };
     }
 
-   
-public function itemCalculation(Request $request)
-{
-    $start = $request->filled('start')
-        ? Carbon::parse($request->input('start'))->startOfDay()
-        : Carbon::today()->startOfDay();
+    public function itemCalculation(Request $request)
+    {
+        $start = $request->filled('start')
+            ? Carbon::parse($request->input('start'))->startOfDay()
+            : Carbon::today()->startOfDay();
 
-    $end = $request->filled('end')
-        ? Carbon::parse($request->input('end'))->endOfDay()
-        : Carbon::today()->endOfDay();
+        $end = $request->filled('end')
+            ? Carbon::parse($request->input('end'))->endOfDay()
+            : Carbon::today()->endOfDay();
 
-    $vendorId = $request->input('vendor_id');
-    $riderId  = $request->input('rider_id');
+        $vendorId = $request->input('vendor_id');
+        $riderId  = $request->input('rider_id');
 
-    $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
-    $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
+        $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
+        $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
 
-    $pickups = FlowerPickupDetails::with([
-            'vendor:vendor_id,vendor_name',
-            'rider:rider_id,rider_name',
-            'flowerPickupItems' => function ($q) {
-                $q->with([
-                    'flower:product_id,name',
-                    'estUnit:id,unit_name',
-                    'unit:id,unit_name',
-                ])->orderBy('id');
-            },
-        ])
-        ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
-        ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
-        ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
-        ->orderBy('pickup_date', 'desc')
-        ->orderBy('pick_up_id', 'desc')
-        ->paginate(20);
+        $pickups = FlowerPickupDetails::with([
+                'vendor:vendor_id,vendor_name',
+                'rider:rider_id,rider_name',
+                'flowerPickupItems' => function ($q) {
+                    $q->with([
+                        'flower:product_id,name',
+                        'estUnit:id,unit_name',
+                        'unit:id,unit_name',
+                    ])->orderBy('id');
+                },
+            ])
+            ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
+            ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
+            ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
+            ->orderBy('pickup_date', 'desc')
+            ->orderBy('pick_up_id', 'desc')
+            ->paginate(20);
 
-    $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
+        $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
 
-    return view('admin.reports.flower-estimate-calculation', [
-        'pickups'  => $pickups,
-        'vendors'  => $vendors,
-        'riders'   => $riders,
-        'start'    => $start->toDateString(),
-        'end'      => $end->toDateString(),
-        'vendorId' => $vendorId,
-        'riderId'  => $riderId,
-        'unitMap'  => $unitMap,
-        'preset'   => $request->input('preset', ''),
-    ]);
-}
+        // Optional: ensure dates are Carbon (if stored as strings)
+        $pickups->getCollection()->transform(function($p){
+            if ($p->pickup_date && !($p->pickup_date instanceof \Carbon\Carbon)) {
+                $p->pickup_date = \Carbon\Carbon::parse($p->pickup_date);
+            }
+            if ($p->delivery_date && !($p->delivery_date instanceof \Carbon\Carbon)) {
+                $p->delivery_date = \Carbon\Carbon::parse($p->delivery_date);
+            }
+            return $p;
+        });
+
+        return view('admin.reports.flower-estimate-calculation', [
+            'pickups'  => $pickups,
+            'vendors'  => $vendors,
+            'riders'   => $riders,
+            'start'    => $start->toDateString(),
+            'end'      => $end->toDateString(),
+            'vendorId' => $vendorId,
+            'riderId'  => $riderId,
+            'unitMap'  => $unitMap,
+            'preset'   => $request->input('preset', ''),
+            'sheetTitlePrefix' => 'Pickups', // used by export
+        ]);
+    }
 
     private function resolveRange(Request $request, ?string $preset): array
     {

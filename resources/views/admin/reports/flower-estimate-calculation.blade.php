@@ -2,44 +2,32 @@
 
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- SheetJS for client-side Excel export --}}
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
     <style>
         :root {
-            /* Accent palette */
-            --tab1: #6366f1;
-            /* indigo */
-            --tab2: #06b6d4;
-            /* cyan   */
-            --tab3: #22c55e;
-            /* green  */
-            --tab4: #f59e0b;
-            /* amber  */
+            /* Excel-ish palette */
+            --excel-green: #1f6e43;
+            --excel-green-2: #2e7d57;
+            --excel-light: #e8f5e9;
+            --excel-border: #cfd8dc;
+            --excel-zebra: #f8fbff;
 
-            /* Light theme tokens */
-            --bg: #f7f8fb;
-            --card: #ffffff;
-            --muted: #64748b;
-            /* slate-500 */
+            --accent-1: #6366f1;
+            --accent-2: #06b6d4;
+            --accent-3: #22c55e;
+            --accent-4: #f59e0b;
+            --accent-5: #64748b;
             --text: #0f172a;
-            /* slate-900 */
-            --text-soft: #334155;
-            /* slate-700 */
+            --muted: #64748b;
+            --bg: #f6f7fb;
+            --card: #ffffff;
             --ring: #e5e7eb;
-            /* gray-200 */
-            --ring-2: #cbd5e1;
-            /* gray-300 */
-            --ok: #16a34a;
-            /* green-600 */
-            --bad: #dc2626;
-            /* red-600 */
-            --head: #0f172a;
-
-            --shadow-sm: 0 2px 6px rgba(2, 6, 23, .06);
-            --shadow-md: 0 6px 18px rgba(2, 6, 23, .08);
-            --shadow-lg: 0 14px 38px rgba(2, 6, 23, .10);
+            --shadow: 0 8px 28px rgba(2, 6, 23, .08);
             --radius: 14px;
         }
 
-        /* Page */
         html,
         body {
             background: var(--bg);
@@ -47,14 +35,14 @@
         }
 
         .container-page {
-            max-width: 1200px;
+            max-width: 1260px;
         }
 
-        /* Sticky toolbar */
+        /* Toolbar */
         .toolbar {
             position: sticky;
             top: 0;
-            z-index: 30;
+            z-index: 20;
             background: var(--card);
             border: 1px solid var(--ring);
             border-radius: var(--radius);
@@ -63,35 +51,33 @@
             gap: .75rem;
             grid-template-columns: 1fr auto;
             align-items: center;
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
         }
 
-        /* Inputs/selects */
         .date-range {
             display: flex;
             gap: .5rem;
+            flex-wrap: wrap;
             align-items: center;
-            color: var(--text-soft);
+            color: var(--muted);
         }
 
-        .date-range input,
-        .select-in {
-            background: #fff;
+        .select-in,
+        .date-range input {
             border: 1px solid var(--ring);
-            color: var(--text);
             border-radius: 10px;
             padding: .5rem .75rem;
-            box-shadow: var(--shadow-sm);
+            background: #fff;
         }
 
-        .date-range input:focus,
-        .select-in:focus {
+        .select-in:focus,
+        .date-range input:focus {
             outline: none;
-            border-color: var(--tab2);
+            border-color: var(--accent-2);
             box-shadow: 0 0 0 3px rgba(6, 182, 212, .2);
         }
 
-        /* Preset buttons (chips) */
         .btn-chip {
             border: none;
             padding: .55rem .9rem;
@@ -99,39 +85,29 @@
             color: #fff;
             font-weight: 700;
             cursor: pointer;
-            transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-chip:hover {
-            filter: brightness(1.05);
-            box-shadow: var(--shadow-md);
-        }
-
-        .btn-chip:active {
-            transform: translateY(1px) scale(.99);
+            box-shadow: var(--shadow);
         }
 
         .chip1 {
-            background: linear-gradient(135deg, var(--tab1), #8b5cf6);
+            background: linear-gradient(135deg, var(--accent-1), #8b5cf6);
         }
 
         .chip2 {
-            background: linear-gradient(135deg, var(--tab2), #22d3ee);
+            background: linear-gradient(135deg, var(--accent-2), #22d3ee);
         }
 
         .chip3 {
-            background: linear-gradient(135deg, var(--tab3), #86efac);
+            background: linear-gradient(135deg, var(--accent-3), #86efac);
             color: #065f46;
         }
 
         .chip4 {
-            background: linear-gradient(135deg, var(--tab4), #fbbf24);
+            background: linear-gradient(135deg, var(--accent-4), #fbbf24);
             color: #7c2d12;
         }
 
         .chip5 {
-            background: linear-gradient(135deg, #64748b, #cbd5e1);
+            background: linear-gradient(135deg, var(--accent-5), #cbd5e1);
             color: #0f172a;
         }
 
@@ -140,113 +116,118 @@
             color: #fff;
         }
 
-        /* Small tag */
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            padding: .28rem .6rem;
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: .73rem;
-            background: #f1f5f9;
-            color: #0f172a;
-            border: 1px solid var(--ring);
-        }
-
-        /* Stats */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: .75rem;
-            margin: 1rem 0;
-        }
-
-        .stat-card {
-            padding: .9rem 1rem;
-            border-radius: var(--radius);
+        /* Excel card */
+        .excel-card {
             background: var(--card);
             border: 1px solid var(--ring);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .stat-title {
-            font-size: .85rem;
-            color: var(--muted);
-        }
-
-        .stat-value {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: .3px;
-        }
-
-        /* Vendor Card */
-        .vendor-card {
             border-radius: 16px;
             overflow: hidden;
-            background: var(--card);
-            border: 1px solid var(--ring);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
         }
 
-        .vendor-head {
+        .excel-head {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem 1rem;
             color: #fff;
-            background:
-                linear-gradient(90deg, rgba(99, 102, 241, .95), rgba(6, 182, 212, .95));
+            background: linear-gradient(90deg, var(--excel-green), var(--excel-green-2));
         }
 
-        .vendor-title {
+        .excel-head .title {
             font-weight: 800;
             font-size: 1.05rem;
         }
 
-        .vendor-sub {
-            font-size: .85rem;
+        .excel-head .sub {
+            font-size: .9rem;
             opacity: .95;
         }
 
-        .table-box {
-            padding: .8rem 1rem;
+        .excel-tools {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
         }
 
-        /* Items table */
-        .items-table {
+        .export-btn,
+        .mini-btn {
+            border: none;
+            border-radius: 8px;
+            padding: .5rem .7rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .export-btn {
+            background: #fff;
+            color: var(--excel-green-2);
+        }
+
+        .mini-btn {
+            background: #0ea5e9;
+            color: #fff;
+        }
+
+        /* Excel table */
+        .excel-wrap {
+            padding: 1rem;
+            overflow: auto;
+        }
+
+        .excel {
             width: 100%;
             border-collapse: separate;
-            border-spacing: 0 .5rem;
+            border-spacing: 0;
+            background: white;
+            font-size: .95rem;
+            border: 1px solid var(--excel-border);
         }
 
-        .items-table thead th {
+        .excel thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: var(--excel-light);
+            color: #0b3e1f;
             text-transform: uppercase;
             font-size: .72rem;
             letter-spacing: .08em;
-            color: var(--head);
+            border-bottom: 2px solid var(--excel-border);
+            padding: .55rem .6rem;
             text-align: left;
-            padding: .35rem .6rem;
         }
 
-        .row-card {
-            background: #ffffff;
-            border: 1px solid var(--ring);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .row-card td {
-            padding: .65rem .7rem;
+        .excel td {
+            border-top: 1px solid var(--excel-border);
+            border-right: 1px solid var(--excel-border);
+            padding: .55rem .6rem;
             vertical-align: middle;
-            color: var(--text-soft);
+            color: #0f172a;
         }
 
-        /* Pills */
+        .excel tr:nth-child(even) td {
+            background: var(--excel-zebra);
+        }
+
+        .excel tr td:first-child,
+        .excel thead th:first-child {
+            border-left: 1px solid var(--excel-border);
+        }
+
+        .excel tfoot td {
+            background: #eef6f0;
+            font-weight: 800;
+            border-top: 2px solid var(--excel-border);
+        }
+
         .pill {
-            padding: .28rem .7rem;
+            display: inline-block;
+            padding: .18rem .55rem;
             border-radius: 999px;
             font-weight: 700;
+            font-size: .78rem;
         }
 
         .pill-est {
@@ -262,13 +243,40 @@
         }
 
         .diff-up {
-            color: var(--bad);
+            color: #dc2626;
             font-weight: 800;
         }
 
         .diff-down {
-            color: var(--ok);
+            color: #16a34a;
             font-weight: 800;
+        }
+
+        /* Stats (top) */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .75rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            padding: .9rem 1rem;
+            border-radius: var(--radius);
+            background: var(--card);
+            border: 1px solid var(--ring);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-title {
+            font-size: .85rem;
+            color: var(--muted);
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: .3px;
         }
 
         /* Pagination */
@@ -280,12 +288,11 @@
             background: #fff;
             border: 1px solid var(--ring);
             color: var(--text);
-            box-shadow: var(--shadow-sm);
         }
 
         .pagination .active .page-link {
-            background: var(--tab2);
-            border-color: var(--tab2);
+            background: var(--accent-2);
+            border-color: var(--accent-2);
             color: #00303a;
         }
     </style>
@@ -294,12 +301,12 @@
 @section('content')
     <div class="container container-page py-4">
 
-        {{-- Sticky toolbar --}}
+        {{-- Filters toolbar --}}
         <form method="GET" action="{{ route('admin.pickups.manage') }}" id="filterForm" class="toolbar">
             <div class="date-range">
-                <span class="tag" title="From date">From</span>
+                <strong>From</strong>
                 <input type="date" name="start" value="{{ $start }}" />
-                <span class="tag" title="To date">To</span>
+                <strong>To</strong>
                 <input type="date" name="end" value="{{ $end }}" />
 
                 <select class="select-in" name="vendor_id" aria-label="Vendor">
@@ -321,7 +328,7 @@
                 </select>
             </div>
 
-            <div class="btns" style="display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end">
+            <div style="display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end">
                 <button class="btn-chip chip1" data-preset="today" type="button">Today</button>
                 <button class="btn-chip chip5" data-preset="yesterday" type="button">Yesterday</button>
                 <button class="btn-chip chip2" data-preset="tomorrow" type="button">Tomorrow</button>
@@ -332,7 +339,7 @@
             <input type="hidden" name="preset" id="presetInput" value="{{ $preset }}">
         </form>
 
-        {{-- Top stats --}}
+        {{-- Stats --}}
         <div class="stats">
             @php
                 $totalPickups = $pickups->total();
@@ -359,128 +366,144 @@
             </div>
         </div>
 
-        {{-- Vendor grouped cards --}}
-        @forelse($pickups as $pickup)
+        {{-- Global export (all visible cards -> multi-sheet workbook) --}}
+        @if ($pickups->count())
+            <div style="display:flex; justify-content:flex-end; margin-bottom:.5rem;">
+                <button class="export-btn" id="exportAllBtn">Export All (XLSX)</button>
+            </div>
+        @endif
+
+        {{-- Excel-like cards --}}
+        @forelse($pickups as $i => $pickup)
             @php
                 $vendorName = optional($pickup->vendor)->vendor_name ?? 'Unknown Vendor';
                 $riderName = optional($pickup->rider)->rider_name ?? '—';
-                $pkDate = optional($pickup->pickup_date)->format('d M Y');
-                $dvDate = optional($pickup->delivery_date)->format('d M Y');
-                $sumEst = 0;
-                $sumAct = (float) $pickup->total_price;
+                $pkDate = $pickup->pickup_date ? \Carbon\Carbon::parse($pickup->pickup_date)->format('d M Y') : '—';
+                $dvDate = $pickup->delivery_date ? \Carbon\Carbon::parse($pickup->delivery_date)->format('d M Y') : '—';
+
+                $sumEstAmt = 0.0;
+                $sumActAmt = (float) ($pickup->total_price ?? 0);
+                $tableId = 'excelTable_' . $pickup->pick_up_id;
+                $sheetName =
+                    ($sheetTitlePrefix ?? 'Pickups') .
+                    '_' .
+                    ($pickup->pickup_date ? \Carbon\Carbon::parse($pickup->pickup_date)->format('Ymd') : 'NA') .
+                    '_' .
+                    preg_replace('/[^A-Za-z0-9]/', '', $vendorName);
             @endphp
 
-            <div class="vendor-card mb-3">
-                <div class="vendor-head">
+            <div class="excel-card" data-sheet-name="{{ $sheetName }}" data-table-id="{{ $tableId }}">
+                <div class="excel-head">
                     <div>
-                        <div class="vendor-title">{{ $vendorName }}</div>
-                        <div class="vendor-sub">
-                            Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider: {{ $riderName }}
+                        <div class="title">{{ $vendorName }}</div>
+                        <div class="sub">
+                            Pickup: {{ $pkDate }} • Delivery: {{ $dvDate }} • Rider: {{ $riderName }} •
+                            Ref: #{{ $pickup->pick_up_id }}
                         </div>
                     </div>
-                    <div style="display:flex; gap:.4rem;">
-                        <span class="pill pill-act">Actual: ₹ {{ number_format($sumAct, 2) }}</span>
+                    <div class="excel-tools">
+                        <button type="button" class="mini-btn" onclick="scrollIntoViewSmooth('#{{ $tableId }}')">Jump
+                            to Table</button>
+                        <button type="button" class="export-btn"
+                            onclick="exportOne('{{ $tableId }}','{{ $sheetName }}')">Export this (XLSX)</button>
                     </div>
                 </div>
 
-                <div class="table-box">
-                    <table class="items-table">
+                <div class="excel-wrap">
+                    <table class="excel" id="{{ $tableId }}">
                         <thead>
                             <tr>
+                                <th style="width:48px;">#</th>
                                 <th>Item</th>
-                                <th>Estimate</th>
-                                <th>Actual</th>
-                                <th>Diff</th>
+                                <th>Est. Qty</th>
+                                <th>Est. Unit</th>
+                                <th>Est. Price</th>
+                                <th>Est. Amount</th>
+                                <th>Act. Qty</th>
+                                <th>Act. Unit</th>
+                                <th>Unit Price</th>
                                 <th>Line Total</th>
+                                <th>Qty Diff</th>
+                                <th>Amt Diff</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($pickup->flowerPickupItems as $it)
+                            @foreach ($pickup->flowerPickupItems as $idx => $it)
                                 @php
                                     $ename = optional($it->estUnit)->unit_name ?? ($unitMap[$it->est_unit_id] ?? '—');
                                     $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
 
-                                    $eqty = $it->est_quantity ?? 0;
-                                    $eprc = $it->est_price ?? null; // if you store estimate price
-                                    $aqty = $it->quantity ?? 0;
-                                    $aprc = $it->price ?? 0;
-                                    $ltotal = $it->item_total_price ?? ($aprc ?: 0) * ($aqty ?: 0);
+                                    $eqty = (float) ($it->est_quantity ?? 0);
+                                    $eprc = $it->est_price !== null ? (float) $it->est_price : null; // optional
+                                    $aqty = (float) ($it->quantity ?? 0);
+                                    $aprc = (float) ($it->price ?? 0);
+                                    $ltotal =
+                                        $it->item_total_price !== null ? (float) $it->item_total_price : $aprc * $aqty;
 
                                     $eamt = $eprc !== null ? $eqty * $eprc : null;
 
-                                    $diffTxt = '—';
-                                    $diffCls = '';
-                                    if ($ename && $aname && $ename === $aname) {
-                                        $qdiff = round(($aqty ?: 0) - ($eqty ?: 0), 2);
-                                        if ($qdiff > 0) {
-                                            $diffTxt = "+{$qdiff} $aname";
-                                            $diffCls = 'diff-up';
-                                        } elseif ($qdiff < 0) {
-                                            $diffTxt = "{$qdiff} $aname";
-                                            $diffCls = 'diff-down';
-                                        } else {
-                                            $diffTxt = '0';
-                                        }
-                                    }
-
                                     if ($eamt !== null) {
-                                        $sumEst += $eamt;
+                                        $sumEstAmt += $eamt;
                                     }
-                                @endphp
 
-                                <tr class="row-card">
-                                    <td>
-                                        <div style="font-weight:700">{{ optional($it->flower)->name ?? '—' }}</div>
-                                        {{-- Removed per-item vendor/rider chips; vendor & rider are shown in the header --}}
+                                    // Differences
+                                    $qdiff = round($aqty - $eqty, 2);
+                                    $adiff = $eamt !== null ? round($ltotal - $eamt, 2) : null;
+                                @endphp
+                                <tr>
+                                    <td>{{ $idx + 1 }}</td>
+                                    <td><strong>{{ optional($it->flower)->name ?? '—' }}</strong></td>
+
+                                    <td>{{ $eqty ? number_format($eqty, 2) : '—' }}</td>
+                                    <td>{{ $ename }}</td>
+                                    <td>{{ !is_null($eprc) ? '₹ ' . number_format($eprc, 2) : '—' }}</td>
+                                    <td>{{ !is_null($eamt) ? '₹ ' . number_format($eamt, 2) : '—' }}</td>
+
+                                    <td>{{ $aqty ? number_format($aqty, 2) : '—' }}</td>
+                                    <td>{{ $aname }}</td>
+                                    <td>₹ {{ number_format($aprc, 2) }}</td>
+                                    <td><strong>₹ {{ number_format($ltotal, 2) }}</strong></td>
+
+                                    <td class="{{ $qdiff > 0 ? 'diff-up' : ($qdiff < 0 ? 'diff-down' : '') }}">
+                                        {{ $qdiff > 0 ? '+' : '' }}{{ $qdiff }} {{ $aname }}
                                     </td>
-                                    <td>
-                                        <span class="pill pill-est">
-                                            {{ $eqty ? number_format($eqty, 2) : '—' }} {{ $ename }}
-                                        </span>
-                                        @if (!is_null($eamt))
-                                            <div style="font-size:.8rem; margin-top:.15rem">
-                                                ₹ {{ number_format($eamt, 2) }}
-                                            </div>
-                                        @endif
+                                    <td
+                                        class="{{ !is_null($adiff) && $adiff > 0 ? 'diff-up' : (!is_null($adiff) && $adiff < 0 ? 'diff-down' : '') }}">
+                                        {{ is_null($adiff) ? '—' : ($adiff > 0 ? '+' : '') . '₹ ' . number_format($adiff, 2) }}
                                     </td>
-                                    <td>
-                                        <span class="pill pill-act">
-                                            {{ $aqty ? number_format($aqty, 2) : '—' }} {{ $aname }}
-                                        </span>
-                                        <div style="font-size:.8rem; margin-top:.15rem">
-                                            ₹ {{ number_format($aprc ?: 0, 2) }}
-                                        </div>
-                                    </td>
-                                    <td class="{{ $diffCls }}" style="font-weight:800;">{{ $diffTxt }}</td>
-                                    <td style="font-weight:800;">₹ {{ number_format($ltotal, 2) }}</td>
                                 </tr>
                             @endforeach
-
                         </tbody>
-                    </table>
-
-                    <div style="display:flex; gap:.6rem; justify-content:flex-end; margin-top:.6rem;">
-                        @if ($sumEst > 0)
-                            <span class="pill pill-est">Estimated (sum): ₹ {{ number_format($sumEst, 2) }}</span>
-                        @endif
-                        <span class="pill pill-act">Actual (sum): ₹ {{ number_format($sumAct, 2) }}</span>
-                        @if ($sumEst > 0)
+                        <tfoot>
                             @php
-                                $delta = $sumAct - $sumEst;
-                                $deltaCls = $delta > 0 ? 'diff-up' : ($delta < 0 ? 'diff-down' : '');
-                                $sign = $delta > 0 ? '+' : '';
+                                // If actual sum not on pickup row, recompute from items:
+                                $sumActAmt = $pickup->flowerPickupItems->sum(function ($it) {
+                                    $aprc = (float) ($it->price ?? 0);
+                                    $aqty = (float) ($it->quantity ?? 0);
+                                    $ltotal =
+                                        $it->item_total_price !== null ? (float) $it->item_total_price : $aprc * $aqty;
+                                    return $ltotal;
+                                });
+                                $delta = $sumEstAmt > 0 ? $sumActAmt - $sumEstAmt : null;
                             @endphp
-                            <span class="pill" style="background:#f8fafc; border:1px solid var(--ring);">
-                                Diff: <span class="{{ $deltaCls }}"> {{ $sign }}₹
-                                    {{ number_format($delta, 2) }}</span>
-                            </span>
-                        @endif
-                    </div>
+                            <tr>
+                                <td colspan="5" style="text-align:right;">Estimated (sum)</td>
+                                <td><strong>{{ $sumEstAmt > 0 ? '₹ ' . number_format($sumEstAmt, 2) : '—' }}</strong></td>
+                                <td colspan="3" style="text-align:right;">Actual (sum)</td>
+                                <td><strong>₹ {{ number_format($sumActAmt, 2) }}</strong></td>
+                                <td style="text-align:right;">Diff (Amt)</td>
+                                <td
+                                    class="{{ !is_null($delta) && $delta > 0 ? 'diff-up' : (!is_null($delta) && $delta < 0 ? 'diff-down' : '') }}">
+                                    <strong>{{ is_null($delta) ? '—' : ($delta > 0 ? '+' : '') . '₹ ' . number_format($delta, 2) }}</strong>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         @empty
-            <div class="vendor-card" style="padding:1rem">
-                <div style="color:var(--text-soft);">No pickups found for the selected range.</div>
+            <div class="excel-card" style="padding:1rem">
+                <div style="color:var(--muted);">No pickups found for the selected range.</div>
             </div>
         @endforelse
 
@@ -493,21 +516,74 @@
 
 @section('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Quick presets
-            document.querySelectorAll('[data-preset]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.getElementById('presetInput').value = btn.getAttribute('data-preset');
-                    document.getElementById('filterForm').submit();
-                });
+        // Quick presets
+        document.querySelectorAll('[data-preset]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('presetInput').value = btn.getAttribute('data-preset');
+                document.getElementById('filterForm').submit();
             });
-
-            // Clear preset when dates change
-            const startEl = document.querySelector('input[name="start"]');
-            const endEl = document.querySelector('input[name="end"]');
-            [startEl, endEl].forEach(el => el.addEventListener('change', () => {
-                document.getElementById('presetInput').value = '';
-            }));
         });
+
+        // Clear preset when dates change
+        const startEl = document.querySelector('input[name="start"]');
+        const endEl = document.querySelector('input[name="end"]');
+        [startEl, endEl].forEach(el => el.addEventListener('change', () => {
+            document.getElementById('presetInput').value = '';
+        }));
+
+        // Smooth jump to a table
+        function scrollIntoViewSmooth(selector) {
+            const el = document.querySelector(selector);
+            if (el) {
+                el.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        }
+        window.scrollIntoViewSmooth = scrollIntoViewSmooth;
+
+        // === Excel Export helpers (SheetJS) ===
+        function tableToSheet(table) {
+            return XLSX.utils.table_to_sheet(table, {
+                raw: true
+            });
+        }
+
+        function exportOne(tableId, sheetName) {
+            const table = document.getElementById(tableId);
+            if (!table) {
+                return;
+            }
+            const wb = XLSX.utils.book_new();
+            const ws = tableToSheet(table);
+            XLSX.utils.book_append_sheet(wb, ws, (sheetName || 'Sheet').substring(0, 31));
+            const fileName = (sheetName || 'Export') + '.xlsx';
+            XLSX.writeFile(wb, fileName);
+        }
+        window.exportOne = exportOne;
+
+        // Export all visible cards as multi-sheet workbook
+        const exportAllBtn = document.getElementById('exportAllBtn');
+        if (exportAllBtn) {
+            exportAllBtn.addEventListener('click', () => {
+                const cards = document.querySelectorAll('.excel-card');
+                if (!cards.length) {
+                    return;
+                }
+                const wb = XLSX.utils.book_new();
+                cards.forEach((card, idx) => {
+                    const tableId = card.getAttribute('data-table-id');
+                    const sheetRaw = card.getAttribute('data-sheet-name') || ('Sheet_' + (idx + 1));
+                    const sheet = sheetRaw.substring(0, 31); // Excel sheet name limit
+                    const table = document.getElementById(tableId);
+                    if (table) {
+                        const ws = tableToSheet(table);
+                        XLSX.utils.book_append_sheet(wb, ws, sheet || ('Sheet' + (idx + 1)));
+                    }
+                });
+                XLSX.writeFile(wb, 'Pickups_Export.xlsx');
+            });
+        }
     </script>
 @endsection
