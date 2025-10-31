@@ -50,4 +50,6 @@ class FlowerRequest extends Model
         return $this->hasMany(FlowerRequestItem::class, 'flower_request_id', 'request_id');
     }
 
+    
+
 }

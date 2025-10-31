@@ -405,6 +405,7 @@
                                     $productTotal = $row['product_total'] ?? 0;
                                     $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
                                     $openFirst = $loop->first; // open only the first by default
+                                    $isRequests = ($product?->name ?? '') === 'On-demand Requests';
                                 @endphp
 
                                 <div class="col-12">
@@ -414,8 +415,10 @@
                                                 <h6 class="mb-1">{{ $product?->name ?? 'Product #' . $pid }}</h6>
                                                 <div class="text-muted">
                                                     <strong>{{ $subsCount }}</strong>
-                                                    subscription{{ $subsCount == 1 ? '' : 's' }}
-                                                    <span class="ms-2">(Bundle / Sub: ₹{{ number_format($bundlePerSub, 2) }})</span>
+                                                    {{ $isRequests ? 'request' : 'subscription' }}{{ $subsCount == 1 ? '' : 's' }}
+                                                    @if (!$isRequests && ($bundlePerSub ?? 0) > 0)
+                                                        <span class="ms-2">(Bundle / Sub: ₹{{ number_format($bundlePerSub, 2) }})</span>
+                                                    @endif
                                                 </div>
                                             </div>
                                             <div class="summary-right">
@@ -467,7 +470,7 @@
                                 </div>
                             @endforeach
                         </div>
-                       
+
                     @endif
                 </div>
             </div>
