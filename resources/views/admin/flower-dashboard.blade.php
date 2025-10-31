@@ -203,7 +203,7 @@
                         </div>
                     </a>
                  </div> <!-- Today Total Income -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a href="{{ route('admin.payments.index') }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
