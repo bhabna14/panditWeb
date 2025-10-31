@@ -98,7 +98,7 @@
 
         {{-- Paid --}}
         <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'paid']) }}" class="card-filter text-decoration-none"
+            <a href="{{ route('flower.customize.request', ['filter' => 'paid']) }}" class="card-filter text-decoration-none"
                 data-filter="paid">
                 <div class="card metric-card h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}" data-card="paid">
                     <div class="card-body d-flex align-items-center">
@@ -116,7 +116,7 @@
 
         {{-- Rejected --}}
         <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'rejected']) }}" class="card-filter text-decoration-none"
+            <a href="{{ route('flower.customize.request', ['filter' => 'rejected']) }}" class="card-filter text-decoration-none"
                 data-filter="rejected">
                 <div class="card metric-card h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
                     <div class="card-body d-flex align-items-center">
