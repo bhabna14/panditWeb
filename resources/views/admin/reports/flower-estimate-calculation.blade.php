@@ -131,7 +131,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 1rem;
-            color: #fff;
+            color: #060606;
             background: linear-gradient(90deg, var(--excel-green), var(--excel-green-2));
         }
 
