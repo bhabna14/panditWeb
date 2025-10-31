@@ -335,9 +335,48 @@
   </div>
 </div>
 
-{{-- ======= Collect Modal (unchanged) ======= --}}
-@include('admin.payment-collection._collect-modal')
-
+    {{-- ======= Collect Modal ======= --}}
+    <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog">
+            <form id="collectForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="collectModalLabel">Collect Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="payment_id" id="payment_id">
+                    <div class="mb-2">
+                        <div class="small text-muted" id="collectInfo">Order —</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" min="0" class="form-control" name="amount"
+                            id="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mode of Payment</label>
+                        <select class="form-select" name="payment_method" id="payment_method" required>
+                            <option value="" disabled selected>Select method</option>
+                            @foreach ($methods as $m)
+                                <option value="{{ $m }}">{{ $m }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Received By</label>
+                        <input type="text" class="form-control" name="received_by" id="received_by"
+                            value="{{ auth('admins')->user()->name ?? '' }}" maxlength="100" required>
+                    </div>
+                    <div class="form-text">Confirm the amount and who received the payment.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="collectSubmit">Mark as Paid</button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
