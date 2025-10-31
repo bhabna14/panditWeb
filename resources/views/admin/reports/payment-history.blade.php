@@ -257,13 +257,10 @@
                     <thead class="table-light">
                         <tr>
                             <th style="width: 12%">Date/Time</th>
-                            <th style="width: 10%">Order ID</th>
-                            <th style="width: 12%">Payment ID</th>
                             <th style="width: 22%">User</th>
                             <th style="width: 10%" class="text-center">Method</th>
                             <th style="width: 10%" class="text-end">Amount</th>
                             <th style="width: 10%" class="text-center">Status</th>
-                            <th style="width: 14%">Received By</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -284,8 +281,6 @@
                                     <div class="fw-semibold">{{ $dt->format('d M Y') }}</div>
                                     <div class="text-muted small">{{ $dt->format('h:i A') }}</div>
                                 </td>
-                                <td><span class="pill">{{ $p->order_id }}</span></td>
-                                <td><span class="pill">{{ $p->payment_id }}</span></td>
                                 <td>
                                     <div class="fw-semibold">{{ $p->user_name ?? '—' }}</div>
                                     <div class="text-muted small">{{ $p->user_mobile ?? '' }}</div>
@@ -298,7 +293,6 @@
                                     <span
                                         class="badge {{ $badgeStatus }}">{{ ucfirst($p->payment_status ?? '—') }}</span>
                                 </td>
-                                <td>{{ $p->received_by ?? '—' }}</td>
                             </tr>
                         @empty
                             <tr>
