@@ -8,8 +8,8 @@
     <style>
         :root {
             /* Excel-ish palette */
-            --excel-green: #1f6e43;
-            --excel-green-2: #2e7d57;
+            --excel-green: #c4f5f3;
+            --excel-green-2: #7acff9;
             --excel-light: #e8f5e9;
             --excel-border: #cfd8dc;
             --excel-zebra: #f8fbff;
