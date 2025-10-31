@@ -218,7 +218,7 @@
 
         .excel tfoot td {
             background: #eef6f0;
-            font-weight: 800;
+            font-weight: 500;
             border-top: 2px solid var(--excel-border);
         }
 
