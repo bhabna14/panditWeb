@@ -183,7 +183,6 @@
                             <th style="width:56px;">#</th>
                             <th>Vendor</th>
                             <th>Pickup Date</th>
-                            <th>Rider</th>
                             <th>Item</th>
 
                             <th>Est. Qty</th>
@@ -239,7 +238,6 @@
                                         <td>{{ $rowNo }}</td>
                                         <td>{{ $vendorName }}</td>
                                         <td>{{ $pkDate }}</td>
-                                        <td>{{ $riderName }}</td>
                                         <td>{{ optional($it->flower)->name ?? '—' }}</td>
 
                                         <td>{{ $eqty ? number_format($eqty, 2) : '—' }}</td>
