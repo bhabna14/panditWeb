@@ -385,7 +385,7 @@
                         </div>
                     </a> </div> <!-- Customize Order (WATCH, main one) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
+                        href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card watch-card" data-color="cyan"
                             style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
@@ -400,7 +400,7 @@
                         </div>
                     </a> </div> <!-- Customize Order (Upcoming 3 Days) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('flower-request', ['filter' => 'upcoming']) }}" target="_blank">
+                        href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
