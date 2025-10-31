@@ -626,81 +626,69 @@ class FlowerPickupAssignController extends Controller
         };
     }
 
-    public function itemCalculation(Request $request)
-        {
-            // Use resolveRange so preset chips work correctly
-            $preset = $request->string('preset')->toString() ?: null;
-            [$start, $end] = $this->resolveRange($request, $preset);
+     public function itemCalculation(Request $request)
+    {
+        // Use resolveRange so preset chips work
+        $preset = $request->string('preset')->toString() ?: null;
+        [$start, $end] = $this->resolveRange($request, $preset);
 
-            $vendorId = $request->input('vendor_id');
-            $riderId  = $request->input('rider_id');
+        // Query pickups (no vendor/rider filters anymore)
+        $pickups = FlowerPickupDetails::with([
+                'vendor:vendor_id,vendor_name',
+                'rider:rider_id,rider_name',
+                'flowerPickupItems' => function ($q) {
+                    $q->with([
+                        'flower:product_id,name',
+                        'estUnit:id,unit_name',
+                        'unit:id,unit_name',
+                    ])->orderBy('id');
+                },
+            ])
+            ->whereBetween('pickup_date', [$start, $end]) // keep full datetime range
+            ->orderBy('vendor_id')
+            ->orderBy('pickup_date', 'desc')
+            ->orderBy('pick_up_id', 'desc')
+            ->paginate(20);
 
-            $vendors = FlowerVendor::orderBy('vendor_name')->get(['vendor_id','vendor_name']);
-            $riders  = RiderDetails::orderBy('rider_name')->get(['rider_id','rider_name']);
+        $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
 
-            $pickups = FlowerPickupDetails::with([
-                    'vendor:vendor_id,vendor_name',
-                    'rider:rider_id,rider_name',
-                    'flowerPickupItems' => function ($q) {
-                        $q->with([
-                            'flower:product_id,name',
-                            'estUnit:id,unit_name',
-                            'unit:id,unit_name',
-                        ])->orderBy('id');
-                    },
-                ])
-                // Keep full datetime range for DATETIME columns
-                ->whereBetween('pickup_date', [$start, $end])
-                ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
-                ->when($riderId,  fn($q) => $q->where('rider_id',  $riderId))
-                ->orderBy('vendor_id')
-                ->orderBy('pickup_date', 'desc')
-                ->orderBy('pick_up_id', 'desc')
-                ->paginate(20);
-
-            $unitMap = PoojaUnit::pluck('unit_name', 'id')->toArray();
-
-            // Ensure dates are Carbon for the Blade formatting
-            $pickups->getCollection()->transform(function($p){
-                if ($p->pickup_date && !($p->pickup_date instanceof \Carbon\Carbon)) {
-                    $p->pickup_date = \Carbon\Carbon::parse($p->pickup_date);
-                }
-                if ($p->delivery_date && !($p->delivery_date instanceof \Carbon\Carbon)) {
-                    $p->delivery_date = \Carbon\Carbon::parse($p->delivery_date);
-                }
-                return $p;
-            });
-
-            return view('admin.reports.flower-estimate-calculation', [
-                'pickups'  => $pickups,
-                'vendors'  => $vendors,
-                'riders'   => $riders,
-                'start'    => $start->toDateString(), // inputs need yyyy-mm-dd
-                'end'      => $end->toDateString(),
-                'vendorId' => $vendorId,
-                'riderId'  => $riderId,
-                'unitMap'  => $unitMap,
-                'preset'   => $preset ?? '',
-                'sheetTitlePrefix' => 'Pickups',
-            ]);
-        }
-
-        private function resolveRange(Request $request, ?string $preset): array
-        {
-            $today = Carbon::today();
-
-            if ($preset === 'today')     return [$today->copy()->startOfDay(), $today->copy()->endOfDay()];
-            if ($preset === 'yesterday'){ $y=$today->copy()->subDay(); return [$y->startOfDay(), $y->endOfDay()]; }
-            if ($preset === 'tomorrow') { $t=$today->copy()->addDay(); return [$t->startOfDay(), $t->endOfDay()]; }
-            if ($preset === 'this_week') return [$today->copy()->startOfWeek(), $today->copy()->endOfWeek()->endOfDay()];
-            if ($preset === 'this_month')return [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()->endOfDay()];
-
-            $start = $request->filled('start') ? Carbon::parse($request->input('start'))->startOfDay() : $today->copy()->startOfDay();
-            $end   = $request->filled('end')   ? Carbon::parse($request->input('end'))->endOfDay()   : $today->copy()->endOfDay();
-
-            if ($end->lt($start)) {
-                [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+        // Ensure Carbon instances for view formatting
+        $pickups->getCollection()->transform(function ($p) {
+            if ($p->pickup_date && !($p->pickup_date instanceof \Carbon\Carbon)) {
+                $p->pickup_date = \Carbon\Carbon::parse($p->pickup_date);
             }
-            return [$start, $end];
+            if ($p->delivery_date && !($p->delivery_date instanceof \Carbon\Carbon)) {
+                $p->delivery_date = \Carbon\Carbon::parse($p->delivery_date);
+            }
+            return $p;
+        });
+
+        return view('admin.reports.flower-estimate-calculation', [
+            'pickups'  => $pickups,
+            'start'    => $start->toDateString(), // for <input type="date">
+            'end'      => $end->toDateString(),
+            'unitMap'  => $unitMap,
+            'preset'   => $preset ?? '',
+            'sheetTitlePrefix' => 'Pickups',
+        ]);
+    }
+
+    private function resolveRange(Request $request, ?string $preset): array
+    {
+        $today = Carbon::today();
+
+        if ($preset === 'today')      return [$today->copy()->startOfDay(), $today->copy()->endOfDay()];
+        if ($preset === 'yesterday') { $y=$today->copy()->subDay(); return [$y->startOfDay(), $y->endOfDay()]; }
+        if ($preset === 'tomorrow')  { $t=$today->copy()->addDay(); return [$t->startOfDay(), $t->endOfDay()]; }
+        if ($preset === 'this_week')  return [$today->copy()->startOfWeek(), $today->copy()->endOfWeek()->endOfDay()];
+        if ($preset === 'this_month') return [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()->endOfDay()];
+
+        $start = $request->filled('start') ? Carbon::parse($request->input('start'))->startOfDay() : $today->copy()->startOfDay();
+        $end   = $request->filled('end')   ? Carbon::parse($request->input('end'))->endOfDay()   : $today->copy()->endOfDay();
+
+        if ($end->lt($start)) {
+            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
         }
+        return [$start, $end];
+    }
 }
