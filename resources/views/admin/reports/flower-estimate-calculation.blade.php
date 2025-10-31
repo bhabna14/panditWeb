@@ -183,7 +183,6 @@
                             <th style="width:56px;">#</th>
                             <th>Vendor</th>
                             <th>Pickup Date</th>
-                            <th>Delivery Date</th>
                             <th>Rider</th>
                             <th>Item</th>
 
@@ -214,7 +213,6 @@
                             @foreach ($vendorPickups as $pickup)
                                 @php
                                     $pkDate = $pickup->pickup_date ? \Carbon\Carbon::parse($pickup->pickup_date)->format('d M Y') : '—';
-                                    $dvDate = $pickup->delivery_date ? \Carbon\Carbon::parse($pickup->delivery_date)->format('d M Y') : '—';
                                     $riderName = optional($pickup->rider)->rider_name ?? '—';
                                 @endphp
 
@@ -241,7 +239,6 @@
                                         <td>{{ $rowNo }}</td>
                                         <td>{{ $vendorName }}</td>
                                         <td>{{ $pkDate }}</td>
-                                        <td>{{ $dvDate }}</td>
                                         <td>{{ $riderName }}</td>
                                         <td>{{ optional($it->flower)->name ?? '—' }}</td>
 
