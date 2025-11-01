@@ -282,7 +282,6 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/manage-flower-request/data', [FlowerRequestController::class, 'ajaxData'])->name('admin.flower-request.data');
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
-    Route::get('/create-customize-order/{id}/reorder', [FlowerRequestController::class, 'reorderCustomizeOrder'])->name('reorderCustomizeOrder');
     
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
@@ -635,6 +634,7 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::get('/create-customize-order', 'createCustomizeOrder')->name('createCustomizeOrder');
         Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
+        Route::get('/create-customize-order/{id}/reorder', [UserCustomizeOrderController::class, 'reorderCustomizeOrder'])->name('reorderCustomizeOrder');
     });
 
 });

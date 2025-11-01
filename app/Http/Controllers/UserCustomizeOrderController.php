@@ -38,10 +38,6 @@ class UserCustomizeOrderController extends Controller
         return view('create-customize-order', compact('flowers','user_details','singleflowers','Poojaunits'));
     }
 
-    /**
-     * Re-order: open the same create page but prefilled from an existing FlowerRequest.
-     * Submitting the form STILL creates a NEW FlowerRequest (i.e., a true "re-order").
-     */
     public function reorderCustomizeOrder($id)
     {
         $user_details = User::get();
