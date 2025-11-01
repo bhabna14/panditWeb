@@ -184,6 +184,193 @@
         }
     </style>
     @endsection @section('content')
+    
+    <div class="row card sales-card mt-2">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+            <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
+            <div class="row"> <!-- New Subscription (WATCH) -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
+                        <div class="card sales-card watch-card" data-color="amber"
+                            style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">New Subscription</h6>
+                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}"
+                                            class="tx-20 font-weight-semibold mb-2"> {{ $newUserSubscription }} </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div> <!-- Renewed Subscription (WATCH) -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
+                        <div class="card sales-card watch-card" data-color="fuchsia"
+                            style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Renewed Subscription</h6>
+                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}"
+                                            class="tx-20 font-weight-semibold mb-2"> {{ $renewSubscription }} </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div> <!-- Customize Order (WATCH, main one) -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
+                        <div class="card sales-card watch-card" data-color="cyan"
+                            style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Customize Order</h6>
+                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}"
+                                            class="tx-20 font-weight-semibold mb-2"> {{ $ordersRequestedToday }} </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div> <!-- Customize Order (Upcoming 3 Days) -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Customize Order (Next 3 Days)</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $upcomingCustomizeOrders }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row card sales-card mt-2">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+            <h4 class="card-title-custom" style="font-size: 14px">Subscription Status</h4>
+            <div class="row">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Ends Today</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $todayEndSubscription }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Subscription ends in 5 days</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $subscriptionEndFiveDays }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Subscription Renew Pending</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12"> New Order Assign Rider</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row card sales-card mt-2">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+            <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
+            <div class="row">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Today Paused Request</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayPausedRequest }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Paused Subscription</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Next-Day Pause</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
+                        href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Next-Day Resumed</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayResumed }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a> </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
@@ -350,189 +537,7 @@
             </div>
         </div>
     </div>
-    <div class="row card sales-card mt-2">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
-            <div class="row"> <!-- New Subscription (WATCH) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card watch-card" data-color="amber"
-                            style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">New Subscription</h6>
-                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}"
-                                            class="tx-20 font-weight-semibold mb-2"> {{ $newUserSubscription }} </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div> <!-- Renewed Subscription (WATCH) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card watch-card" data-color="fuchsia"
-                            style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Renewed Subscription</h6>
-                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}"
-                                            class="tx-20 font-weight-semibold mb-2"> {{ $renewSubscription }} </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div> <!-- Customize Order (WATCH, main one) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card watch-card" data-color="cyan"
-                            style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}"
-                                            class="tx-20 font-weight-semibold mb-2"> {{ $ordersRequestedToday }} </h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div> <!-- Customize Order (Upcoming 3 Days) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Customize Order (Next 3 Days)</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $upcomingCustomizeOrders }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-            </div>
-        </div>
-    </div>
-    <div class="row card sales-card mt-2">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom" style="font-size: 14px">Subscription Status</h4>
-            <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Ends Today</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $todayEndSubscription }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Subscription ends in 5 days</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $subscriptionEndFiveDays }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Subscription Renew Pending</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12"> New Order Assign Rider</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-            </div>
-        </div>
-    </div>
-    <div class="row card sales-card mt-2">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
-            <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Today Paused Request</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayPausedRequest }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Paused Subscription</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Next-Day Pause</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Next-Day Resumed</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayResumed }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a> </div>
-            </div>
-        </div>
-    </div>
+
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
