@@ -49,7 +49,7 @@ class FlowerDashboardController extends Controller
             $q->from('subscriptions')
             ->select('order_id')
             ->groupBy('order_id')
-            ->where('status',  'pending')
+            ->where('status', 'pending')
             ->havingRaw('COUNT(*) > 1');
         })
         ->count();
