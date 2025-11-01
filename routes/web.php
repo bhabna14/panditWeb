@@ -629,13 +629,15 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
         Route::get('/user-devices', 'index')->name('admin.adminUserDevice');
     });
+Route::controller(UserCustomizeOrderController::class)->group(function() {
+    Route::get('/create-customize-order', 'createCustomizeOrder')->name('createCustomizeOrder');
+    Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
+    Route::get('/get-user-addresses/{userId}','getUserAddresses');
 
-    Route::controller(UserCustomizeOrderController::class)->group(function() {
-        Route::get('/create-customize-order', 'createCustomizeOrder')->name('createCustomizeOrder');
-        Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
-        Route::get('/get-user-addresses/{userId}','getUserAddresses');
-        Route::get('/create-customize-order/{id}/reorder', [UserCustomizeOrderController::class, 'reorderCustomizeOrder'])->name('reorderCustomizeOrder');
-    });
+    // Re-order (view + submit)
+    Route::get('/create-customize-order/{id}/reorder', 'reorderCustomizeOrder')->name('reorderCustomizeOrder');
+    Route::post('/create-customize-order/{id}/reorder', 'storeReorderCustomizeOrder')->name('reorderCustomizeOrder.store');
+});
 
 });
 
