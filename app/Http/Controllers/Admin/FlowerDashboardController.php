@@ -44,12 +44,17 @@ class FlowerDashboardController extends Controller
             ->filter(fn ($sub) => Subscription::where('user_id', $sub->user_id)->count() === 1)
             ->count();
 
-        $renewSubscription = Subscription::whereDate('created_at', $today)->where('status','!=', 'cancelled')
-            ->whereIn('order_id', function ($q) {
-                $q->select('order_id')->from('subscriptions')
-                ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
-            })
-            ->count();
+      $renewSubscription = Subscription::whereDate('created_at', $today)
+    ->where('status', '!=', 'cancelled')
+    ->whereIn('order_id', function ($q) {
+        $q->from('subscriptions')
+          ->select('order_id')
+          ->where('status', '!=', 'cancelled')
+          ->groupBy('order_id')
+          ->havingRaw('COUNT(*) > 1');
+    })
+    ->count();
+
 
         $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', $todayStr)
             ->where('delivery_status', 'delivered')->count();
