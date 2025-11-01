@@ -3,6 +3,10 @@
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {{-- SweetAlert2 (CSS optional; theme via default JS is fine) --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         .table-items th,.table-items td{vertical-align:middle}
         .table-items select,.table-items input{min-width:120px}
@@ -11,6 +15,7 @@
         @media (max-width:768px){.totals-grid{grid-template-columns:1fr}}
         .small-muted{font-size:.875rem;color:#6b7280}
         .readonly-input{background:#f3f4f6}
+        .required:after{content:" *"; color:#dc2626;}
     </style>
 @endsection
 
@@ -301,6 +306,50 @@
 @endsection
 
 @section('scripts')
+    {{-- SweetAlert2 JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- Flash messages -> SweetAlert popups --}}
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved!',
+                    text: @json(session('success')),
+                    timer: 2200,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops!',
+                    text: @json(session('error')),
+                });
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Please fix the following:',
+                    html: `{!! '<ul class="text-start" style="margin:0;padding-left:1.2rem">' .
+                        collect($errors->all())->map(fn($e)=>'<li>'.e($e).'</li>')->implode('') .
+                        '</ul>' !!}`
+                });
+            });
+        </script>
+    @endif
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const rowsBody   = document.getElementById('rowsBody');
@@ -422,15 +471,10 @@
             }
 
             // === INITIAL HYDRATION ===
-            // 1) Ensure Est Unit & Qty mirror the initial Actual values
             rowsBody.querySelectorAll('tr[data-row]').forEach(tr=>{
-                // If actual qty empty but we rendered a prefill in Est display/hidden,
-                // we already defaulted Actual = Estimate on the server side.
-                // Mirror again in JS to be safe:
                 syncEstimateUnit(tr);
                 syncEstimateQty(tr);
             });
-            // 2) Compute initial totals
             computeTotals();
         });
     </script>

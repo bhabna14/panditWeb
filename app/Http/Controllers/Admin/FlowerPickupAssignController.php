@@ -123,8 +123,9 @@ class FlowerPickupAssignController extends Controller
         ]);
     }
         
-    public function saveFlowerPickupAssignRider(Request $request)
-    {
+  public function saveFlowerPickupAssignRider(Request $request)
+{
+    try {
         // 1) Validate inputs
         $validator = Validator::make($request->all(), [
             // Optional header defaults
@@ -224,7 +225,7 @@ class FlowerPickupAssignController extends Controller
 
                 // If DB requires NOT NULL rider_id, enforce here
                 if (is_null($headerRiderForVendor)) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
+                    throw ValidationException::withMessages([
                         'rider_id' => ['Rider is required (set a header rider or at least one per-row rider for each vendor).']
                     ]);
                 }
@@ -280,8 +281,22 @@ class FlowerPickupAssignController extends Controller
         return redirect()
             ->back()
             ->with('success', 'Flower pickups saved vendor-wise (vendor & rider stored on header only).');
-    }
 
+    } catch (ValidationException $e) {
+        // Redirect back with validation errors AND a generic error toast
+        return redirect()
+            ->back()
+            ->withErrors($e->errors())
+            ->withInput()
+            ->with('error', 'Please fix the highlighted errors and try again.');
+    } catch (\Throwable $e) {
+        report($e); // log it
+        return redirect()
+            ->back()
+            ->withInput()
+            ->with('error', 'Something went wrong while saving pickups. Please try again.');
+    }
+}
     public function store(Request $request)
     {
         $request->validate([
