@@ -44,7 +44,7 @@ class FlowerDashboardController extends Controller
             ->filter(fn ($sub) => Subscription::where('user_id', $sub->user_id)->count() === 1)
             ->count();
 
-        $renewSubscription = Subscription::whereDate('created_at', $today)
+        $renewSubscription = Subscription::whereDate('created_at', $today)->where('status','!=', 'cancelled')
             ->whereIn('order_id', function ($q) {
                 $q->select('order_id')->from('subscriptions')
                 ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
@@ -141,7 +141,7 @@ class FlowerDashboardController extends Controller
 
         $totalIncomeToday = 0;
 
-      $totalIncomeToday = FlowerPayment::query()
+        $totalIncomeToday = FlowerPayment::query()
         ->whereDate('created_at', Carbon::today())
         ->where('payment_status', 'paid')
         ->sum('paid_amount');
@@ -149,7 +149,7 @@ class FlowerDashboardController extends Controller
         $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today($tz))->sum('total_price');
 
         $riders = RiderDetails::where('status', 'active')->get();
-    $assignedRiderIds = Order::query()
+        $assignedRiderIds = Order::query()
         ->whereNotNull('rider_id')
         ->whereHas('subscription', function ($q) {
             // keep your current intent: count only orders tied to an ACTIVE subscription
@@ -192,7 +192,7 @@ class FlowerDashboardController extends Controller
         $todayStrs = Carbon::today($tz)->toDateString();
 
 
-    $newUserSubscription = DB::table('subscriptions as s')
+        $newUserSubscription = DB::table('subscriptions as s')
         ->join(DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
                         FROM subscriptions
                         GROUP BY user_id) firsts'),
@@ -463,6 +463,7 @@ class FlowerDashboardController extends Controller
             ], 500);
         }
     }
+
     public function todayExpenditure(Request $request)
     {
         $tz   = config('app.timezone');
@@ -524,155 +525,155 @@ class FlowerDashboardController extends Controller
             'totalItemsCount'     => $totalItemsCount,
         ]);
     }
+
     public function paymentHistory(Request $request)
-{
-    // -------- Parse filters ----------
-    $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month
-    $userId        = $request->string('user_id')->toString();
-    $statusFilter  = $request->string('status')->toString(); // pending|paid
-    $methodFilter  = $request->string('payment_method')->toString(); // UPI|Cash|Card|...
-    $search        = $request->string('q')->toString(); // search by order/payment id or user
+    {
+        // -------- Parse filters ----------
+        $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month
+        $userId        = $request->string('user_id')->toString();
+        $statusFilter  = $request->string('status')->toString(); // pending|paid
+        $methodFilter  = $request->string('payment_method')->toString(); // UPI|Cash|Card|...
+        $search        = $request->string('q')->toString(); // search by order/payment id or user
 
-    // Resolve [start, end] (inclusive) — defaults to TODAY if nothing provided
-    [$start, $end, $effectivePreset] = $this->resolveRange($request, $preset);
+        // Resolve [start, end] (inclusive) — defaults to TODAY if nothing provided
+        [$start, $end, $effectivePreset] = $this->resolveRange($request, $preset);
 
-    // -------- Base query (JOIN subscriptions + flower_products) ----------
-    $q = FlowerPayment::query()
-        ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
-        ->leftJoin('subscriptions as s', 's.order_id', '=', 'flower_payments.order_id')
-        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-        ->select([
-            'flower_payments.*',
-            'users.name as user_name',
-            'users.mobile_number as user_mobile',
+        // -------- Base query (JOIN subscriptions + flower_products) ----------
+        $q = FlowerPayment::query()
+            ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
+            ->leftJoin('subscriptions as s', 's.order_id', '=', 'flower_payments.order_id')
+            ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
+            ->select([
+                'flower_payments.*',
+                'users.name as user_name',
+                'users.mobile_number as user_mobile',
 
-            // subscription + product fields to show in table
-            's.subscription_id',
-            's.start_date',
-            's.end_date',
-            's.status as subscription_status',
-            'p.name as product_name',
-            'p.category as product_category',
-            'p.duration as product_duration', // optional plan length if you want to display it too
-        ])
-        ->when($start, fn($qq) => $qq->whereDate('flower_payments.created_at', '>=', $start->toDateString()))
-        ->when($end,   fn($qq) => $qq->whereDate('flower_payments.created_at', '<=', $end->toDateString()))
-        ->when($userId, fn($qq) => $qq->where('flower_payments.user_id', $userId))
-        ->when($statusFilter, fn($qq) => $qq->where('flower_payments.payment_status', $statusFilter))
-        ->when($methodFilter, fn($qq) => $qq->where('flower_payments.payment_method', $methodFilter))
-        ->when($search, function ($qq) use ($search) {
-            $needle = '%' . trim($search) . '%';
-            $qq->where(function ($w) use ($needle) {
-                $w->where('flower_payments.order_id', 'like', $needle)
-                  ->orWhere('flower_payments.payment_id', 'like', $needle)
-                  ->orWhere('users.name', 'like', $needle)
-                  ->orWhere('users.mobile_number', 'like', $needle)
-                  ->orWhere('p.name', 'like', $needle)
-                  ->orWhere('p.category', 'like', $needle)
-                  ->orWhere('s.subscription_id', 'like', $needle);
-            });
-        })
-        ->orderByDesc('flower_payments.created_at');
+                // subscription + product fields to show in table
+                's.subscription_id',
+                's.start_date',
+                's.end_date',
+                's.status as subscription_status',
+                'p.name as product_name',
+                'p.category as product_category',
+                'p.duration as product_duration', // optional plan length if you want to display it too
+            ])
+            ->when($start, fn($qq) => $qq->whereDate('flower_payments.created_at', '>=', $start->toDateString()))
+            ->when($end,   fn($qq) => $qq->whereDate('flower_payments.created_at', '<=', $end->toDateString()))
+            ->when($userId, fn($qq) => $qq->where('flower_payments.user_id', $userId))
+            ->when($statusFilter, fn($qq) => $qq->where('flower_payments.payment_status', $statusFilter))
+            ->when($methodFilter, fn($qq) => $qq->where('flower_payments.payment_method', $methodFilter))
+            ->when($search, function ($qq) use ($search) {
+                $needle = '%' . trim($search) . '%';
+                $qq->where(function ($w) use ($needle) {
+                    $w->where('flower_payments.order_id', 'like', $needle)
+                    ->orWhere('flower_payments.payment_id', 'like', $needle)
+                    ->orWhere('users.name', 'like', $needle)
+                    ->orWhere('users.mobile_number', 'like', $needle)
+                    ->orWhere('p.name', 'like', $needle)
+                    ->orWhere('p.category', 'like', $needle)
+                    ->orWhere('s.subscription_id', 'like', $needle);
+                });
+            })
+            ->orderByDesc('flower_payments.created_at');
 
-    // -------- Pagination ----------
-    $payments = $q->paginate(25)->withQueryString();
+        // -------- Pagination ----------
+        $payments = $q->paginate(25)->withQueryString();
 
-    // -------- Totals / Stats (GROUP BY safe) ----------
-    $statsQ = (clone $q);
-    // Remove ORDER BY and previous select to safely aggregate
-    $statsQ->getQuery()->orders  = null;
-    $statsQ->getQuery()->columns = null;
+        // -------- Totals / Stats (GROUP BY safe) ----------
+        $statsQ = (clone $q);
+        // Remove ORDER BY and previous select to safely aggregate
+        $statsQ->getQuery()->orders  = null;
+        $statsQ->getQuery()->columns = null;
 
-    $stats = $statsQ
-        ->selectRaw('
-            COUNT(*) as cnt,
-            SUM(CASE WHEN flower_payments.payment_status = "paid" THEN flower_payments.paid_amount ELSE 0 END)    as sum_paid,
-            SUM(CASE WHEN flower_payments.payment_status = "pending" THEN flower_payments.paid_amount ELSE 0 END) as sum_pending,
-            SUM(flower_payments.paid_amount) as sum_all
-        ')
-        ->first();
+        $stats = $statsQ
+            ->selectRaw('
+                COUNT(*) as cnt,
+                SUM(CASE WHEN flower_payments.payment_status = "paid" THEN flower_payments.paid_amount ELSE 0 END)    as sum_paid,
+                SUM(CASE WHEN flower_payments.payment_status = "pending" THEN flower_payments.paid_amount ELSE 0 END) as sum_pending,
+                SUM(flower_payments.paid_amount) as sum_all
+            ')
+            ->first();
 
-    // -------- Lookups ----------
-    $users = User::query()
-        ->orderBy('name')
-        ->get(['userid','name','mobile_number']);
+        // -------- Lookups ----------
+        $users = User::query()
+            ->orderBy('name')
+            ->get(['userid','name','mobile_number']);
 
-    $methods = FlowerPayment::query()
-        ->distinct()
-        ->orderBy('payment_method')
-        ->pluck('payment_method')
-        ->filter()
-        ->values();
+        $methods = FlowerPayment::query()
+            ->distinct()
+            ->orderBy('payment_method')
+            ->pluck('payment_method')
+            ->filter()
+            ->values();
 
-    return view('admin.reports.payment-history', [
-        'payments'  => $payments,
-        'users'     => $users,
-        'methods'   => $methods,
+        return view('admin.reports.payment-history', [
+            'payments'  => $payments,
+            'users'     => $users,
+            'methods'   => $methods,
 
-        // send the effective preset so "Today" lights up by default
-        'preset'    => $effectivePreset,
-        'userId'    => $userId,
-        'status'    => $statusFilter,
-        'method'    => $methodFilter,
-        'search'    => $search,
+            // send the effective preset so "Today" lights up by default
+            'preset'    => $effectivePreset,
+            'userId'    => $userId,
+            'status'    => $statusFilter,
+            'method'    => $methodFilter,
+            'search'    => $search,
 
-        'start'     => $start?->toDateString(),
-        'end'       => $end?->toDateString(),
-        'stats'     => $stats,
-    ]);
-}
-
-private function resolveRange(Request $request, ?string $preset): array
-{
-    $start = null;
-    $end   = null;
-    $effectivePreset = $preset;
-
-    if ($request->filled('start_date') || $request->filled('end_date')) {
-        $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->get('start_date'))->startOfDay() : null;
-        $end   = $request->filled('end_date')   ? \Carbon\Carbon::parse($request->get('end_date'))->endOfDay()     : null;
-        if (!$effectivePreset) {
-            $effectivePreset = 'custom';
-        }
-    } else {
-        switch ($preset) {
-            case 'today':
-                $start = \Carbon\Carbon::today()->startOfDay();
-                $end   = \Carbon\Carbon::today()->endOfDay();
-                break;
-            case 'yesterday':
-                $start = \Carbon\Carbon::yesterday()->startOfDay();
-                $end   = \Carbon\Carbon::yesterday()->endOfDay();
-                break;
-            case 'tomorrow':
-                $start = \Carbon\Carbon::tomorrow()->startOfDay();
-                $end   = \Carbon\Carbon::tomorrow()->endOfDay();
-                break;
-            case 'this_week':
-            case 'week':
-                $start = \Carbon\Carbon::now()->startOfWeek();
-                $end   = \Carbon\Carbon::now()->endOfWeek();
-                break;
-            case 'this_month':
-            case 'month':
-                $start = \Carbon\Carbon::now()->startOfMonth();
-                $end   = \Carbon\Carbon::now()->endOfMonth();
-                break;
-            default:
-                // DEFAULT → TODAY
-                $start = \Carbon\Carbon::today()->startOfDay();
-                $end   = \Carbon\Carbon::today()->endOfDay();
-                $effectivePreset = 'today';
-                break;
-        }
+            'start'     => $start?->toDateString(),
+            'end'       => $end?->toDateString(),
+            'stats'     => $stats,
+        ]);
     }
 
-    if ($start && $end && $end->lt($start)) {
-        [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+    private function resolveRange(Request $request, ?string $preset): array
+    {
+        $start = null;
+        $end   = null;
+        $effectivePreset = $preset;
+
+        if ($request->filled('start_date') || $request->filled('end_date')) {
+            $start = $request->filled('start_date') ? \Carbon\Carbon::parse($request->get('start_date'))->startOfDay() : null;
+            $end   = $request->filled('end_date')   ? \Carbon\Carbon::parse($request->get('end_date'))->endOfDay()     : null;
+            if (!$effectivePreset) {
+                $effectivePreset = 'custom';
+            }
+        } else {
+            switch ($preset) {
+                case 'today':
+                    $start = \Carbon\Carbon::today()->startOfDay();
+                    $end   = \Carbon\Carbon::today()->endOfDay();
+                    break;
+                case 'yesterday':
+                    $start = \Carbon\Carbon::yesterday()->startOfDay();
+                    $end   = \Carbon\Carbon::yesterday()->endOfDay();
+                    break;
+                case 'tomorrow':
+                    $start = \Carbon\Carbon::tomorrow()->startOfDay();
+                    $end   = \Carbon\Carbon::tomorrow()->endOfDay();
+                    break;
+                case 'this_week':
+                case 'week':
+                    $start = \Carbon\Carbon::now()->startOfWeek();
+                    $end   = \Carbon\Carbon::now()->endOfWeek();
+                    break;
+                case 'this_month':
+                case 'month':
+                    $start = \Carbon\Carbon::now()->startOfMonth();
+                    $end   = \Carbon\Carbon::now()->endOfMonth();
+                    break;
+                default:
+                    // DEFAULT → TODAY
+                    $start = \Carbon\Carbon::today()->startOfDay();
+                    $end   = \Carbon\Carbon::today()->endOfDay();
+                    $effectivePreset = 'today';
+                    break;
+            }
+        }
+
+        if ($start && $end && $end->lt($start)) {
+            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+        }
+
+        return [$start, $end, $effectivePreset];
     }
-
-    return [$start, $end, $effectivePreset];
-}
-
 
 }
