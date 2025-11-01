@@ -45,11 +45,10 @@ class FlowerDashboardController extends Controller
             ->count();
 
         $renewSubscription = Subscription::whereDate('created_at', $today)
-        ->where('status', '!=', 'cancelled')
+        ->where('status',  'pending')
         ->whereIn('order_id', function ($q) {
             $q->from('subscriptions')
             ->select('order_id')
-            ->where('status', '!=', 'cancelled')
             ->groupBy('order_id')
             ->havingRaw('COUNT(*) > 1');
         })
