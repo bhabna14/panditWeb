@@ -275,16 +275,16 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/manage-product-request', 'showRequests')->name('product-request');
     Route::post('/save-product-order/{id}', 'saveProductOrder')->name('admin.saveProductOrder');
     Route::post('/mark-product-payment/{id}', 'markPayment')->name('admin.markProductPayment');
+    Route::get('/create-customize-order/{id}/reorder', 'reorderCustomizeOrder')->name('reorderCustomizeOrder');
     });
 
     Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower.customize.request');
     Route::get('/manage-flower-request/data', [FlowerRequestController::class, 'ajaxData'])->name('admin.flower-request.data');
-
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
-
+    Route::get('/create-customize-order/{id}/reorder', [FlowerRequestController::class, 'reorderCustomizeOrder'])->name('reorderCustomizeOrder');
+    
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
-
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
 // ✅ Route must match the request you're making
     Route::put('/subscriptions/{id}/updateDates', [FlowerOrderController::class, 'updateDates'])->name('admin.subscriptions.updateDates');

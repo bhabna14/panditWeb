@@ -19,9 +19,7 @@
             --primary-contrast: #fff;
         }
 
-        body {
-            background: var(--bg);
-        }
+        body { background: var(--bg); }
 
         .card {
             border: 1px solid var(--border);
@@ -30,77 +28,30 @@
             background: var(--surface);
         }
 
-        .card h5 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text);
-        }
-
-        .card-body {
-            padding: 16px;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-        }
-
-        .section-title {
-            font-weight: 700;
-            font-size: 1.125rem;
-            color: var(--text);
-            margin: 16px 0 8px;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: var(--text);
-        }
-
-        .form-control {
-            border-radius: 10px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(90deg, #2563eb, #0ea5e9);
-            border: 0;
-            border-radius: 12px;
-            padding: 10px 18px;
-            font-weight: 700;
-        }
-
-        .btn-success,
-        .btn-danger {
-            border-radius: 10px;
-            font-weight: 700;
-        }
-
-        .breadcrumb-header {
-            margin-bottom: 12px;
-        }
-
-        .your-address-list .card {
-            transition: transform .15s ease;
-        }
-
-        .your-address-list .card:hover {
-            transform: translateY(-2px);
-        }
-
-        .muted-hint {
-            color: var(--muted);
-            font-size: .9rem;
-        }
-
-        /* SweetAlert tweaks */
-        .swal2-popup {
-            border-radius: 16px !important;
-        }
+        .card h5 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+        .card-body { padding: 16px; }
+        .badge { font-size: 0.75rem; }
+        .section-title { font-weight: 700; font-size: 1.125rem; color: var(--text); margin: 16px 0 8px; }
+        .form-label { font-weight: 600; color: var(--text); }
+        .form-control { border-radius: 10px; }
+        .btn-primary { background: linear-gradient(90deg, #2563eb, #0ea5e9); border: 0; border-radius: 12px; padding: 10px 18px; font-weight: 700; }
+        .btn-success, .btn-danger { border-radius: 10px; font-weight: 700; }
+        .breadcrumb-header { margin-bottom: 12px; }
+        .your-address-list .card { transition: transform .15s ease; }
+        .your-address-list .card:hover { transform: translateY(-2px); }
+        .muted-hint { color: var(--muted); font-size: .9rem; }
+        .swal2-popup { border-radius: 16px !important; }
     </style>
 @endsection
 
 @section('content')
-   
+
+    @if(isset($mode) && $mode === 'reorder' && isset($prefill))
+        <div class="alert alert-info">
+            Re-order mode: fields are prefilled from Request <strong>{{ $prefill->request_id }}</strong>.
+            Submitting will create a <strong>new</strong> customize request.
+        </div>
+    @endif
 
     <form id="customizeOrderForm" action="{{ route('saveCustomizeOrder') }}" method="post" enctype="multipart/form-data"
         class="card p-3">
@@ -137,7 +88,7 @@
         <div id="flower-container">
             <div class="row mb-3 flower-group">
                 <div class="col-12 col-md-3">
-                    <label for="flower_name" class="form-label">Flower <span class="text-danger">*</span></label>
+                    <label class="form-label">Flower <span class="text-danger">*</span></label>
                     <select name="flower_name[]" class="form-control" required>
                         @foreach ($singleflowers as $singleflower)
                             <option value="{{ $singleflower->name }}">{{ $singleflower->name }}</option>
@@ -255,10 +206,8 @@
                         if (data.addresses && data.addresses.length) {
                             let html = '<div class="row">';
                             data.addresses.forEach((address, index) => {
-                                const badge = address.default ?
-                                    '<span class="badge bg-success">Default</span>' : '';
-                                if (index % 3 === 0 && index !== 0) html +=
-                                    '</div><div class="row">';
+                                const badge = address.default ? '<span class="badge bg-success">Default</span>' : '';
+                                if (index % 3 === 0 && index !== 0) html += '</div><div class="row">';
                                 html += `
                                   <div class="col-md-4 mb-3">
                                     <div class="card h-100">
@@ -279,9 +228,14 @@
                             });
                             html += '</div>';
                             container.innerHTML = html;
+
+                            // If we are in prefill mode, auto-select the correct address id stored globally
+                            if (window.__prefillAddressId) {
+                                const radio = document.querySelector(`input[name="address_id"][value="${window.__prefillAddressId}"]`);
+                                if (radio) radio.checked = true;
+                            }
                         } else {
-                            container.innerHTML =
-                                '<div class="muted-hint">No addresses found for the selected user.</div>';
+                            container.innerHTML = '<div class="muted-hint">No addresses found for the selected user.</div>';
                         }
                     })
                     .catch(err => {
@@ -334,11 +288,11 @@
                 $(this).closest('.input-wrapper').remove();
             });
 
-            // Reset button
+            // Reset button (FIXED: use DOM for innerHTML)
             $('#resetFormBtn').on('click', function() {
                 $('#customizeOrderForm')[0].reset();
                 $('#userid').val(null).trigger('change');
-                $('#addressContainer').innerHTML =
+                document.getElementById('addressContainer').innerHTML =
                     '<div class="muted-hint">Select a user to load addresses.</div>';
             });
 
@@ -369,8 +323,7 @@
                     const res = await fetch(form.action, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]')
-                                .value,
+                            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
                             'Accept': 'application/json'
                         },
                         body: formData
@@ -399,8 +352,7 @@
                     } else if (res.status === 422) {
                         // Validation error
                         const errors = data.errors || {};
-                        const list = Object.values(errors).flat().map(msg => `<li>${msg}</li>`).join(
-                        '');
+                        const list = Object.values(errors).flat().map(msg => `<li>${msg}</li>`).join('');
                         await Swal.fire({
                             icon: 'warning',
                             title: 'Validation Errors',
@@ -431,4 +383,80 @@
             });
         });
     </script>
+
+    {{-- Prefill block for Re-order mode --}}
+    @if(isset($prefill))
+    <script>
+        (function(){
+            const prefill = @json([
+                'user_id'   => $prefill->user_id,
+                'address_id'=> $prefill->address_id,
+                'date'      => $prefill->date,
+                'time'      => $prefill->time,
+                'items'     => $prefill->flowerRequestItems->map(fn($i)=>[
+                    'flower_name'     => $i->flower_name,
+                    'flower_unit'     => $i->flower_unit,
+                    'flower_quantity' => (string)$i->flower_quantity,
+                ]),
+            ]);
+
+            // Let the address fetcher check the right radio button once loaded
+            window.__prefillAddressId = prefill.address_id ?? null;
+
+            // 1) Preselect user (triggers address fetch + address radio auto-check)
+            $('#userid').val(prefill.user_id).trigger('change');
+
+            // 2) Prefill date/time
+            if (prefill.date) $('#date').val(prefill.date).trigger('change');
+            if (prefill.time) $('#time').val(prefill.time);
+
+            // 3) Prefill items
+            const $container = $("#flower-container");
+            $container.empty();
+
+            const units = @json($Poojaunits->pluck('unit_name'));
+            const flowers = @json($singleflowers->pluck('name'));
+
+            function rowTemplate(item) {
+                const flowerOptions = flowers.map(n =>
+                    `<option value="${n}" ${n === item.flower_name ? 'selected':''}>${n}</option>`
+                ).join('');
+                const unitOptions = units.map(u =>
+                    `<option value="${u}" ${u === item.flower_unit ? 'selected':''}>${u}</option>`
+                ).join('');
+
+                return `
+                <div class="row mb-3 input-wrapper">
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Flower</label>
+                        <select name="flower_name[]" class="form-control" required>
+                            ${flowerOptions}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Quantity</label>
+                        <input type="text" name="flower_quantity[]" required class="form-control" value="${item.flower_quantity}">
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label class="form-label">Unit</label>
+                        <select name="flower_unit[]" class="form-control" required>
+                            ${unitOptions}
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-3 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger w-100 removeChild">
+                            <i class="fas fa-minus-circle me-1"></i> Remove
+                        </button>
+                    </div>
+                </div>`;
+            }
+
+            if (Array.isArray(prefill.items) && prefill.items.length) {
+                prefill.items.forEach(it => $container.append(rowTemplate(it)));
+            } else {
+                // fallback: keep one empty row
+            }
+        })();
+    </script>
+    @endif
 @endsection
