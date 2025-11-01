@@ -174,7 +174,7 @@
                 Details
             </button>
 
-            <a href="{{ route('reorderCustomizeOrder', ['id' => $requestItem->id]) }}"
+            <a href="{{ route('reorderCustomizeOrder', ['id' => $request->id]) }}"
                 class="btn btn-sm btn-secondary">
                 Re-order
             </a>
