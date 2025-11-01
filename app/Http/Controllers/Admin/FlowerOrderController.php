@@ -110,6 +110,7 @@ class FlowerOrderController extends Controller
         if ($filter === 'renewed') {
             // created today for users who had any subscription before today
             $query->whereBetween('created_at', [$todayStart, $todayEnd])
+                ->where('status','pending')
                 ->whereExists(function ($q) use ($todayStart) {
                     $q->select(DB::raw(1))
                         ->from('subscriptions as prev')
