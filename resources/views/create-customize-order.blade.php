@@ -385,26 +385,18 @@
     </script>
 
     {{-- Prefill block for Re-order mode --}}
-    @if(isset($prefill))
+    @if(isset($prefillData))
     <script>
         (function(){
-            const prefill = @json([
-                'user_id'   => $prefill->user_id,
-                'address_id'=> $prefill->address_id,
-                'date'      => $prefill->date,
-                'time'      => $prefill->time,
-                'items'     => $prefill->flowerRequestItems->map(fn($i)=>[
-                    'flower_name'     => $i->flower_name,
-                    'flower_unit'     => $i->flower_unit,
-                    'flower_quantity' => (string)$i->flower_quantity,
-                ]),
-            ]);
+            const prefill = @json($prefillData);
 
             // Let the address fetcher check the right radio button once loaded
-            window.__prefillAddressId = prefill.address_id ?? null;
+            window.__prefillAddressId = prefill.address_id || null;
 
             // 1) Preselect user (triggers address fetch + address radio auto-check)
-            $('#userid').val(prefill.user_id).trigger('change');
+            if (prefill.user_id) {
+                $('#userid').val(prefill.user_id).trigger('change');
+            }
 
             // 2) Prefill date/time
             if (prefill.date) $('#date').val(prefill.date).trigger('change');
@@ -418,12 +410,12 @@
             const flowers = @json($singleflowers->pluck('name'));
 
             function rowTemplate(item) {
-                const flowerOptions = flowers.map(n =>
-                    `<option value="${n}" ${n === item.flower_name ? 'selected':''}>${n}</option>`
-                ).join('');
-                const unitOptions = units.map(u =>
-                    `<option value="${u}" ${u === item.flower_unit ? 'selected':''}>${u}</option>`
-                ).join('');
+                const flowerOptions = flowers.map(function(n){
+                    return `<option value="${n}" ${n === item.flower_name ? 'selected':''}>${n}</option>`;
+                }).join('');
+                const unitOptions = units.map(function(u){
+                    return `<option value="${u}" ${u === item.flower_unit ? 'selected':''}>${u}</option>`;
+                }).join('');
 
                 return `
                 <div class="row mb-3 input-wrapper">
@@ -452,9 +444,9 @@
             }
 
             if (Array.isArray(prefill.items) && prefill.items.length) {
-                prefill.items.forEach(it => $container.append(rowTemplate(it)));
+                prefill.items.forEach(function(it){ $container.append(rowTemplate(it)); });
             } else {
-                // fallback: keep one empty row
+                // fallback: keep one empty row (do nothing)
             }
         })();
     </script>
