@@ -19,7 +19,7 @@ class OfficeTransactionController extends Controller
         return view('admin.office-transaction-details'); // your blade file
     }
 
-      public function manageOfficeTransaction()
+    public function manageOfficeTransaction()
     {
         $tz = config('app.timezone', 'Asia/Kolkata');
 
@@ -120,38 +120,108 @@ class OfficeTransactionController extends Controller
             ], 500);
         }
     }
+
     public function manageOfficeFund()
     {
-        // Initial list (active + latest first)
-        $transactions = OfficeFund::when(
-                OfficeFund::query()->getModel()->isFillable('status'),
-                fn($q) => $q->where('status', 'active'),
-                fn($q) => $q
-            )
+        // Base scope (active if column exists)
+        $base = OfficeFund::query()->active();
+
+        // Initial list (latest first)
+        $transactions = (clone $base)
             ->orderBy('date', 'desc')
             ->get();
 
         // Today total (independent of filter)
-        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
-        $todayTotal = OfficeFund::when(
-                OfficeFund::query()->getModel()->isFillable('status'),
-                fn($q) => $q->where('status', 'active'),
-                fn($q) => $q
-            )
-            ->whereDate('date', $today)
+        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'));
+        $todayTotal = (clone $base)
+            ->whereDate('date', $today->toDateString())
             ->sum('amount');
 
-        // Default (first load): show ALL-TIME total in the "Total Payment" card
-        $rangeTotal = OfficeFund::when(
-                OfficeFund::query()->getModel()->isFillable('status'),
-                fn($q) => $q->where('status', 'active'),
-                fn($q) => $q
-            )
-            ->sum('amount');
+        // All-time total for the left metric
+        $rangeTotal = (clone $base)->sum('amount');
 
         return view('admin.manage-office-fund', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
+    public function filterOfficeFund(Request $request)
+    {
+        $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date'   => ['nullable', 'date', 'after_or_equal:from_date'],
+        ]);
+
+        $from = $request->query('from_date');
+        $to   = $request->query('to_date');
+
+        $base = OfficeFund::query()->active();
+
+        // Build range query safely
+        $query = (clone $base);
+
+        // If your column is DATE (no time), whereDate is perfect.
+        // If DATETIME, convert $from->startOfDay(), $to->endOfDay() and use whereBetween.
+
+        $isDateTimeColumn = true; // set false if your DB column is DATE
+
+        if ($from && $to) {
+            if ($isDateTimeColumn) {
+                $start = Carbon::parse($from, config('app.timezone', 'Asia/Kolkata'))->startOfDay();
+                $end   = Carbon::parse($to,   config('app.timezone', 'Asia/Kolkata'))->endOfDay();
+                $query->whereBetween('date', [$start, $end]);
+            } else {
+                $query->whereDate('date', '>=', $from)
+                      ->whereDate('date', '<=', $to);
+            }
+        } elseif ($from) {
+            if ($isDateTimeColumn) {
+                $start = Carbon::parse($from, config('app.timezone', 'Asia/Kolkata'))->startOfDay();
+                $query->where('date', '>=', $start);
+            } else {
+                $query->whereDate('date', '>=', $from);
+            }
+        } elseif ($to) {
+            if ($isDateTimeColumn) {
+                $end = Carbon::parse($to, config('app.timezone', 'Asia/Kolkata'))->endOfDay();
+                $query->where('date', '<=', $end);
+            } else {
+                $query->whereDate('date', '<=', $to);
+            }
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->get();
+
+        // Range total is tied to the filtered query
+        $rangeTotal = (clone $query)->sum('amount');
+
+        // Today total should remain independent of filter
+        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'));
+        $todayTotal = (clone $base)
+            ->whereDate('date', $today->toDateString())
+            ->sum('amount');
+
+        // IMPORTANT: return RAW numbers (no commas!) to avoid NaN in the UI
+        $rows = $transactions->values()->map(function ($t, $idx) {
+            return [
+                'sl'              => $idx + 1,
+                'date'            => Carbon::parse($t->date)->format('Y-m-d'),
+                'categories'      => $t->categories,
+                'amount'          => (float) $t->amount,     // raw numeric
+                'mode_of_payment' => ucfirst((string) $t->mode_of_payment),
+                'paid_by'         => ucfirst((string) $t->paid_by),
+                'received_by'     => $t->received_by ? ucfirst((string) $t->received_by) : '',
+                'description'     => (string) $t->description,
+                'id'              => $t->id,
+            ];
+        });
+
+        return response()->json([
+            'success'      => true,
+            'range_total'  => (float) $rangeTotal,
+            'today_total'  => (float) $todayTotal,
+            'transactions' => $rows,
+        ]);
+    }
+    
     public function saveOfficeTransaction(Request $request)
     {
         $validatedData = $request->validate([
@@ -239,61 +309,6 @@ class OfficeTransactionController extends Controller
             'success'      => true,
             'today_total'  => (float) $todayTotal,
             'range_total'  => (float) $rangeTotal,
-            'transactions' => $rows,
-        ]);
-    }
-
-    public function filterOfficeFund(Request $request)
-    {
-        $request->validate([
-            'from_date' => ['nullable', 'date'],
-            'to_date'   => ['nullable', 'date', 'after_or_equal:from_date'],
-        ]);
-
-        $from = $request->query('from_date');
-        $to   = $request->query('to_date');
-
-        // Base query
-        $base = OfficeFund::when(
-            OfficeFund::query()->getModel()->isFillable('status'),
-            fn($q) => $q->where('status', 'active'),
-            fn($q) => $q
-        );
-
-        $query = (clone $base);
-        if ($from && $to) {
-            $query->whereBetween('date', [$from, $to]);
-        } elseif ($from) {
-            $query->whereDate('date', '>=', $from);
-        } elseif ($to) {
-            $query->whereDate('date', '<=', $to);
-        }
-
-        $transactions = $query->orderBy('date', 'desc')->get();
-
-        $rangeTotal = (clone $query)->sum('amount');
-
-        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
-        $todayTotal = (clone $base)->whereDate('date', $today)->sum('amount');
-
-        $rows = $transactions->map(function ($t, $idx) {
-            return [
-                'sl'              => $idx + 1,
-                'date'            => Carbon::parse($t->date)->format('Y-m-d'),
-                'categories'      => $t->categories,
-                'amount'          => number_format((float)$t->amount, 2),
-                'mode_of_payment' => ucfirst($t->mode_of_payment),
-                'paid_by'         => ucfirst($t->paid_by),
-                'received_by'     => isset($t->received_by) ? ucfirst($t->received_by) : '',
-                'description'     => $t->description,
-                'id'              => $t->id,
-            ];
-        });
-
-        return response()->json([
-            'success'      => true,
-            'range_total'  => (float) $rangeTotal,
-            'today_total'  => (float) $todayTotal,
             'transactions' => $rows,
         ]);
     }
