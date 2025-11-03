@@ -1,5 +1,4 @@
 <?php
-// app/Models/OfficeFund.php
 
 namespace App\Models;
 
@@ -20,19 +19,14 @@ class OfficeFund extends Model
         'paid_by',
         'received_by',
         'description',
-        // 'status', // include only if your table actually has this column
+        // 'status', // uncomment only if your table has this column
     ];
 
-    /**
-     * If your DB column is DATE, 'date' cast is ideal.
-     * If it's DATETIME and you need time precision, switch to 'datetime'.
-     */
     protected $casts = [
-        'date'   => 'date',        // <— change to 'datetime' if your column is datetime
+        'date'   => 'date',      // change to 'datetime' if needed
         'amount' => 'decimal:2',
     ];
 
-    /** Use like: OfficeFund::query()->active() */
     public function scopeActive($query)
     {
         $model = $query->getModel();

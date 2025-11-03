@@ -11,50 +11,73 @@
 
     <style>
         /* ===== Premium look & feel ===== */
-        :root{
-            --brand:#4f46e5;       /* indigo */
-            --brand-2:#06b6d4;     /* cyan */
-            --ink:#0f172a;         /* slate-900 */
-            --muted:#64748b;       /* slate-500 */
-            --line:#eef2f7;
-            --soft:#f8fafc;
+        :root {
+            --brand: #4f46e5;
+            /* indigo */
+            --brand-2: #06b6d4;
+            /* cyan */
+            --ink: #0f172a;
+            /* slate-900 */
+            --muted: #64748b;
+            /* slate-500 */
+            --line: #eef2f7;
+            --soft: #f8fafc;
         }
 
-        .card.custom-card{
+        .card.custom-card {
             border: 1px solid var(--line);
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 24px rgba(15, 23, 42, .04);
         }
 
-        .metric{
+        .metric {
             position: relative;
             border-radius: 14px;
             padding: 14px 16px;
             background:
                 linear-gradient(0deg, #fff, #fff) padding-box,
-                linear-gradient(135deg, rgba(79,70,229,.35), rgba(6,182,212,.35)) border-box;
+                linear-gradient(135deg, rgba(79, 70, 229, .35), rgba(6, 182, 212, .35)) border-box;
             border: 1px solid transparent;
             box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
-        .metric .label{ color: var(--muted); font-weight: 600; letter-spacing: .02em; }
-        .metric .value{ color: var(--ink); font-weight: 800; }
-        .metric .icon{
-            width: 36px; height: 36px; border-radius: 10px;
-            background: linear-gradient(135deg, rgba(79,70,229,.1), rgba(6,182,212,.1));
-            display:flex; align-items:center; justify-content:center; margin-right: 10px;
+
+        .metric .label {
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: .02em;
         }
-        .metric svg{ stroke: var(--brand); }
+
+        .metric .value {
+            color: var(--ink);
+            font-weight: 800;
+        }
+
+        .metric .icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(79, 70, 229, .1), rgba(6, 182, 212, .1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+
+        .metric svg {
+            stroke: var(--brand);
+        }
 
         /* Filters */
-        .filters{
+        .filters {
             background: #ffffff;
             border: 1px solid var(--line);
             border-radius: 14px;
             padding: 14px;
         }
-        .quick-chip{
-            border: 1px dashed rgba(79,70,229,.35);
+
+        .quick-chip {
+            border: 1px dashed rgba(79, 70, 229, .35);
             border-radius: 999px;
             padding: 6px 12px;
             color: var(--brand);
@@ -65,65 +88,106 @@
             font-weight: 600;
             white-space: nowrap;
         }
-        .quick-chip:hover{ transform: translateY(-1px); box-shadow: 0 10px 20px rgba(79,70,229,.08); }
+
+        .quick-chip:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, .08);
+        }
 
         /* Table */
-        .table-premium{
+        .table-premium {
             border: 1px solid var(--line);
             border-radius: 12px;
             overflow: hidden;
         }
-        .table-premium thead th{
-            position: sticky; top: 0; z-index: 2;
+
+        .table-premium thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
             background: linear-gradient(180deg, #f9fbff, #f6f8fe);
             color: #223;
             font-weight: 700;
-            border-bottom: 1px solid var(--line)!important;
+            border-bottom: 1px solid var(--line) !important;
         }
-        .table-premium tbody td{ vertical-align: middle; }
-        .badge-soft{
-            background: #eef3ff; color: var(--brand);
-            border: 1px solid rgba(79,70,229,.25);
+
+        .table-premium tbody td {
+            vertical-align: middle;
+        }
+
+        .badge-soft {
+            background: #eef3ff;
+            color: var(--brand);
+            border: 1px solid rgba(79, 70, 229, .25);
             border-radius: 999px;
             padding: .25rem .5rem;
             font-weight: 600;
         }
-        .text-capitalize { text-transform: capitalize; }
+
+        .text-capitalize {
+            text-transform: capitalize;
+        }
 
         /* Buttons */
-        .btn-brand{
+        .btn-brand {
             background: linear-gradient(135deg, var(--brand), var(--brand-2));
-            border: none; color: #fff;
-            box-shadow: 0 10px 20px rgba(79,70,229,.25);
+            border: none;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(79, 70, 229, .25);
         }
-        .btn-brand:hover{ opacity:.95 }
-        .btn-outline-brand{
+
+        .btn-brand:hover {
+            opacity: .95
+        }
+
+        .btn-outline-brand {
             border-color: var(--brand);
             color: var(--brand);
         }
-        .btn-outline-brand:hover{
+
+        .btn-outline-brand:hover {
             background: #eef3ff;
             border-color: var(--brand);
             color: var(--brand);
         }
 
         /* DataTables tweaks */
-        table.dataTable tbody tr:hover{ background: #fbfdff; }
-        .dataTables_wrapper .dataTables_filter input{
-            border-radius: 999px; padding:.4rem .8rem;
-            border:1px solid var(--line);
+        table.dataTable tbody tr:hover {
+            background: #fbfdff;
         }
-        .dt-buttons .btn{ border-radius: 999px!important; }
+
+        .dataTables_wrapper .dataTables_filter input {
+            border-radius: 999px;
+            padding: .4rem .8rem;
+            border: 1px solid var(--line);
+        }
+
+        .dt-buttons .btn {
+            border-radius: 999px !important;
+        }
 
         /* Skeleton while searching */
-        .skeleton{ position: relative; overflow: hidden; background: #eef2f7; border-radius: 6px; }
-        .skeleton::after{
-            content:''; position:absolute; inset:0;
+        .skeleton {
+            position: relative;
+            overflow: hidden;
+            background: #eef2f7;
+            border-radius: 6px;
+        }
+
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            inset: 0;
             transform: translateX(-100%);
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.65) 50%, rgba(255,255,255,0) 100%);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .65) 50%, rgba(255, 255, 255, 0) 100%);
             animation: shimmer 1.2s infinite;
         }
-        @keyframes shimmer{ 100% { transform: translateX(100%);} }
+
+        @keyframes shimmer {
+            100% {
+                transform: translateX(100%);
+            }
+        }
     </style>
 @endsection
 
@@ -135,8 +199,8 @@
 
                     @if (session('success'))
                         <div class="alert alert-success border-0 rounded-3 d-flex align-items-center gap-2">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 6L9 17l-5-5"></path>
                             </svg>
                             <div>{{ session('success') }}</div>
@@ -150,7 +214,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <rect x="3" y="5" width="18" height="14" rx="2"></rect>
                                             <line x1="3" y1="9" x2="21" y2="9"></line>
                                             <line x1="7" y1="15" x2="12" y2="15"></line>
@@ -172,7 +237,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="icon">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                             stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                            stroke-linejoin="round">
                                             <rect x="3" y="5" width="18" height="16" rx="2"></rect>
                                             <line x1="8" y1="3" x2="8" y2="7"></line>
                                             <line x1="16" y1="3" x2="16" y2="7"></line>
@@ -207,8 +273,9 @@
                             </div>
                             <div class="col-md-4 d-flex align-items-end gap-2">
                                 <button type="button" id="searchBtn" class="btn btn-brand w-100">
-                                    <svg width="18" height="18" class="me-1" viewBox="0 0 24 24" fill="none"
-                                         stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg width="18" height="18" class="me-1" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                        stroke-linejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
@@ -249,7 +316,9 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ \Carbon\Carbon::parse($t->date)->format('Y-m-d') }}</td>
-                                        <td><span class="badge-soft text-capitalize">{{ str_replace('_',' ',$t->categories) }}</span></td>
+                                        <td><span
+                                                class="badge-soft text-capitalize">{{ str_replace('_', ' ', $t->categories) }}</span>
+                                        </td>
                                         <td class="text-end">₹{{ number_format($t->amount, 2) }}</td>
                                         <td class="text-capitalize">{{ $t->mode_of_payment }}</td>
                                         <td class="text-capitalize">{{ $t->paid_by }}</td>
@@ -335,13 +404,14 @@
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" class="form-control" id="edit_amount" name="amount"
-                                           step="0.01" min="0" required>
+                                        step="0.01" min="0" required>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <label for="edit_mode_of_payment" class="form-label">Mode of Payment</label>
-                                <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment" required>
+                                <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment"
+                                    required>
                                     <option value="">Select Mode</option>
                                     <option value="cash">Cash</option>
                                     <option value="upi">UPI</option>
@@ -361,13 +431,13 @@
                             <div class="col-md-6">
                                 <label for="edit_received_by" class="form-label">Received By Name</label>
                                 <input type="text" class="form-control" id="edit_received_by" name="received_by"
-                                       placeholder="Enter name" required>
+                                    placeholder="Enter name" required>
                             </div>
 
                             <div class="col-md-12">
                                 <label for="edit_description" class="form-label">Description</label>
                                 <textarea class="form-control" id="edit_description" name="description" rows="3"
-                                          placeholder="Enter description"></textarea>
+                                    placeholder="Enter description"></textarea>
                             </div>
                         </div>
                     </div>
@@ -426,157 +496,236 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-   <script>
-(function() {
-    const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
+    <script>
+        (function() {
+            const fmtINR = n => new Intl.NumberFormat('en-IN', {
+                style: 'currency',
+                currency: 'INR',
+                maximumFractionDigits: 2
+            }).format(Number(n || 0));
+            const toLocalYMD = (d) => {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            };
+            const addDays = (d, n) => {
+                const x = new Date(d);
+                x.setDate(x.getDate() + n);
+                return x;
+            };
 
-    // Local YYYY-MM-DD (no UTC shift)
-    const toLocalYMD = (d) => {
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
-    };
+            const fromEl = document.getElementById('from_date');
+            const toEl = document.getElementById('to_date');
+            const today = new Date();
 
-    const addDays = (d, n)=> { const x=new Date(d); x.setDate(x.getDate()+n); return x; };
+            const fyStart = () => {
+                const y = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear() - 1;
+                return new Date(y, 3, 1);
+            };
+            const weekStart = () => {
+                const d = new Date(today);
+                const day = (d.getDay() + 6) % 7; // Monday=0
+                d.setDate(d.getDate() - day);
+                return d;
+            };
 
-    const fromEl = document.getElementById('from_date');
-    const toEl   = document.getElementById('to_date');
-    const today  = new Date();
+            function setRange(range) {
+                let f = null,
+                    t = null;
+                switch (range) {
+                    case 'today':
+                        f = t = today;
+                        break;
+                    case 'week':
+                        f = weekStart();
+                        t = today;
+                        break;
+                    case 'month':
+                        f = new Date(today.getFullYear(), today.getMonth(), 1);
+                        t = today;
+                        break;
+                    case '30':
+                        f = addDays(today, -29);
+                        t = today;
+                        break;
+                    case 'fy':
+                        f = fyStart();
+                        t = today;
+                        break;
+                }
+                if (f && t) {
+                    fromEl.value = toLocalYMD(f);
+                    toEl.value = toLocalYMD(t);
+                    doSearch();
+                }
+            }
+            document.querySelectorAll('.quick-chip').forEach(c => c.addEventListener('click', () => setRange(c.dataset
+                .range)));
+            document.getElementById('resetBtn').addEventListener('click', () => {
+                fromEl.value = '';
+                toEl.value = '';
+                doSearch();
+            });
 
-    const fyStart = ()=>{
-        const y = today.getMonth() >= 3 ? today.getFullYear() : today.getFullYear()-1;
-        return new Date(y, 3, 1);
-    };
-    const weekStart = ()=>{
-        const d = new Date(today);
-        const day = (d.getDay() + 6) % 7; // Monday=0
-        d.setDate(d.getDate() - day);
-        return d;
-    };
+            const $table = $('#file-datatable');
+            let dt = null;
 
-    function setRange(range){
-        let f=null, t=null;
-        switch(range){
-            case 'today': f=t=today; break;
-            case 'week' : f=weekStart(); t=today; break;
-            case 'month': f=new Date(today.getFullYear(), today.getMonth(), 1); t=today; break;
-            case '30'   : f=addDays(today, -29); t=today; break;
-            case 'fy'   : f=fyStart(); t=today; break;
-        }
-        if(f && t){
-            fromEl.value = toLocalYMD(f);
-            toEl.value   = toLocalYMD(t);
-            doSearch();
-        }
-    }
-    document.querySelectorAll('.quick-chip').forEach(c=>c.addEventListener('click', ()=> setRange(c.dataset.range)));
-    document.getElementById('resetBtn').addEventListener('click', ()=>{ fromEl.value=''; toEl.value=''; doSearch(); });
+            function initDT() {
+                if ($.fn.dataTable.isDataTable($table)) $table.DataTable().destroy();
+                dt = $table.DataTable({
+                    responsive: true,
+                    autoWidth: false,
+                    pageLength: 25,
+                    order: [
+                        [1, 'desc']
+                    ],
+                    columnDefs: [{
+                            targets: [3],
+                            className: 'text-end'
+                        },
+                        {
+                            targets: [8],
+                            orderable: false,
+                            searchable: false
+                        },
+                    ],
+                    dom: "<'row align-items-center mb-2'<'col-md-6'l><'col-md-6 text-end'B>>" +
+                        "<'row'<'col-sm-12'tr>>" +
+                        "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
+                    buttons: [{
+                            extend: 'copyHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Fund'
+                        },
+                        {
+                            extend: 'csvHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Fund'
+                        },
+                        {
+                            extend: 'excelHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Fund'
+                        },
+                        {
+                            extend: 'pdfHtml5',
+                            className: 'btn btn-outline-brand me-2',
+                            title: 'Office Fund'
+                        },
+                        {
+                            extend: 'print',
+                            className: 'btn btn-outline-brand',
+                            title: 'Office Fund'
+                        }
+                    ]
+                });
+                computeShownTotal();
+                dt.on('draw', computeShownTotal);
+            }
 
-    const tableEl = $('#file-datatable');
-    let dt = null;
-    function initDT(){
-        if ($.fn.dataTable.isDataTable(tableEl)) tableEl.DataTable().destroy();
-        dt = tableEl.DataTable({
-            responsive: true,
-            autoWidth: false,
-            pageLength: 25,
-            order: [[1,'desc']],
-            columnDefs: [
-                { targets: [3], className: 'text-end' },
-                { targets: [8], orderable: false, searchable: false },
-            ],
-            dom: "<'row align-items-center mb-2'<'col-md-6'l><'col-md-6 text-end'B>>" +
-                 "<'row'<'col-sm-12'tr>>" +
-                 "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
-            buttons: [
-                { extend:'copyHtml5',  className:'btn btn-outline-brand me-2', title: 'Office Fund' },
-                { extend:'csvHtml5',   className:'btn btn-outline-brand me-2', title: 'Office Fund' },
-                { extend:'excelHtml5', className:'btn btn-outline-brand me-2', title: 'Office Fund' },
-                { extend:'pdfHtml5',   className:'btn btn-outline-brand me-2', title: 'Office Fund' },
-                { extend:'print',      className:'btn btn-outline-brand',      title: 'Office Fund' }
-            ]
-        });
-        computeShownTotal();
-        dt.on('draw', computeShownTotal);
-    }
-    function computeShownTotal(){
-        let sum = 0;
-        dt.rows({ page:'current' }).every(function(){
-            const td = $(this.node()).find('td').eq(3).text().trim();
-            const num = parseFloat(td.replace(/[^\d.-]/g, ''));
-            if(!isNaN(num)) sum += num;
-        });
-        document.getElementById('tableShownTotal').textContent = fmtINR(sum);
-    }
-    initDT();
+            function computeShownTotal() {
+                if (!dt) return;
+                let sum = 0;
+                dt.rows({
+                    page: 'current'
+                }).every(function() {
+                    const td = $(this.node()).find('td').eq(3).text().trim();
+                    const num = parseFloat(td.replace(/[^\d.-]/g, ''));
+                    if (!isNaN(num)) sum += num;
+                });
+                document.getElementById('tableShownTotal').textContent = fmtINR(sum);
+            }
 
-    // Modals (unchanged from your version) …
-    document.body.addEventListener('click', function(e){
-        const editBtn = e.target.closest('.btn-edit');
-        if(editBtn){
-            const id = editBtn.getAttribute('data-id');
-            const date = editBtn.getAttribute('data-date');
-            const categories = editBtn.getAttribute('data-categories');
-            const amount = editBtn.getAttribute('data-amount');
-            const mode = editBtn.getAttribute('data-mode_of_payment');
-            const paidBy = editBtn.getAttribute('data-paid_by');
-            const receivedBy = editBtn.getAttribute('data-received_by') || '';
-            const description = editBtn.getAttribute('data-description') || '';
+            initDT();
 
-            const editForm = document.getElementById('editForm');
-            editForm.action = "{{ route('officeFund.update', ['id' => '__ID__']) }}".replace('__ID__', id);
+            // --- Placeholders WITHOUT colspan (9 tds to match the header) ---
+            function skeletonRow() {
+                const cell = '<td><div class="skeleton" style="height:12px; width:100%"></div></td>';
+                return `<tr>${cell.repeat(9)}</tr>`;
+            }
 
-            document.getElementById('edit_date').value = date;
-            $('#edit_categories').val(categories).trigger('change');
-            document.getElementById('edit_amount').value = amount;
-            $('#edit_mode_of_payment').val((mode || '').toLowerCase()).trigger('change');
-            $('#edit_paid_by').val((paidBy || '').toLowerCase()).trigger('change');
-            document.getElementById('edit_received_by').value = receivedBy;
-            document.getElementById('edit_description').value = description;
-        }
+            function emptyRow(msg, cls = 'text-muted') {
+                // 9 cells, with message in the first cell only
+                const cells = [
+                    `<td class="${cls}">${msg}</td>`,
+                    '<td></td>'.repeat(8)
+                ].join('');
+                return `<tr>${cells}</tr>`;
+            }
 
-        const delBtn = e.target.closest('.btn-delete');
-        if(delBtn){
-            const id = delBtn.getAttribute('data-id');
-            const deleteForm = document.getElementById('deleteForm');
-            deleteForm.action = "{{ route('officeFund.destroy', ['id' => '__ID__']) }}".replace('__ID__', id);
-        }
-    });
+            // Modals
+            document.body.addEventListener('click', function(e) {
+                const editBtn = e.target.closest('.btn-edit');
+                if (editBtn) {
+                    const id = editBtn.getAttribute('data-id');
+                    const date = editBtn.getAttribute('data-date');
+                    const categories = editBtn.getAttribute('data-categories');
+                    const amount = editBtn.getAttribute('data-amount');
+                    const mode = editBtn.getAttribute('data-mode_of_payment');
+                    const paidBy = editBtn.getAttribute('data-paid_by');
+                    const receivedBy = editBtn.getAttribute('data-received_by') || '';
+                    const description = editBtn.getAttribute('data-description') || '';
 
-    $('.select2').select2({ dropdownParent: $('#editModal') });
+                    const editForm = document.getElementById('editForm');
+                    editForm.action = "{{ route('officeFund.update', ['id' => '__ID__']) }}".replace('__ID__',
+                        id);
 
-    // AJAX filter
-    const btn = document.getElementById('searchBtn');
-    const body = document.getElementById('transactionsBody');
-    const todayCard = document.getElementById('todayPayment');
-    const rangeCard = document.getElementById('totalPaymentByDateRange');
-    const rangeLabel = document.getElementById('rangeLabel');
+                    document.getElementById('edit_date').value = date;
+                    $('#edit_categories').val(categories).trigger('change');
+                    document.getElementById('edit_amount').value = amount;
+                    $('#edit_mode_of_payment').val((mode || '').toLowerCase()).trigger('change');
+                    $('#edit_paid_by').val((paidBy || '').toLowerCase()).trigger('change');
+                    document.getElementById('edit_received_by').value = receivedBy;
+                    document.getElementById('edit_description').value = description;
+                }
 
-    function setLoadingState(loading){
-        if(loading){
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching…';
-            todayCard.classList.add('skeleton');
-            rangeCard.classList.add('skeleton');
-            body.innerHTML = `<tr><td colspan="9">
-                <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-            </td></tr>`;
-        }else{
-            btn.disabled = false;
-            btn.textContent = 'Search';
-            todayCard.classList.remove('skeleton');
-            rangeCard.classList.remove('skeleton');
-        }
-    }
+                const delBtn = e.target.closest('.btn-delete');
+                if (delBtn) {
+                    const id = delBtn.getAttribute('data-id');
+                    const deleteForm = document.getElementById('deleteForm');
+                    deleteForm.action = "{{ route('officeFund.destroy', ['id' => '__ID__']) }}".replace(
+                        '__ID__', id);
+                }
+            });
 
-    function rowHTML(row, sl){
-        const amountPretty = fmtINR(row.amount); // row.amount is a number from API
-        const catPretty = (row.categories || '').replace(/_/g,' ');
-        return `
+            $('.select2').select2({
+                dropdownParent: $('#editModal')
+            });
+
+            // AJAX filter
+            const btn = document.getElementById('searchBtn');
+            const body = document.getElementById('transactionsBody');
+            const todayCard = document.getElementById('todayPayment');
+            const rangeCard = document.getElementById('totalPaymentByDateRange');
+            const rangeLabel = document.getElementById('rangeLabel');
+
+            function setLoadingState(loading) {
+                if (loading) {
+                    // Destroy DT BEFORE changing tbody to avoid DataTables reading invalid rows
+                    if ($.fn.dataTable.isDataTable($table)) {
+                        $table.DataTable().clear().destroy();
+                        dt = null;
+                    }
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching…';
+                    todayCard.classList.add('skeleton');
+                    rangeCard.classList.add('skeleton');
+
+                    // Insert safe skeleton rows (no colspan)
+                    body.innerHTML = skeletonRow() + skeletonRow() + skeletonRow() + skeletonRow();
+                } else {
+                    btn.disabled = false;
+                    btn.textContent = 'Search';
+                    todayCard.classList.remove('skeleton');
+                    rangeCard.classList.remove('skeleton');
+                }
+            }
+
+            function rowHTML(row, sl) {
+                const amountPretty = fmtINR(row.amount);
+                const catPretty = (row.categories || '').replace(/_/g, ' ');
+                return `
             <tr>
                 <td>${sl}</td>
                 <td>${row.date}</td>
@@ -606,69 +755,72 @@
                     </div>
                 </td>
             </tr>`;
-    }
-
-    async function doSearch(){
-        const params = new URLSearchParams();
-        if (fromEl.value) params.append('from_date', fromEl.value);
-        if (toEl.value)   params.append('to_date',   toEl.value);
-
-        const url = `{{ route('officeFund.filter') }}?${params.toString()}`;
-
-        setLoadingState(true);
-        try{
-            const res = await fetch(url, { headers: { 'Accept':'application/json' }});
-
-            // Gracefully handle 4xx/5xx with JSON message
-            if (!res.ok) {
-                let msg = 'Error loading data.';
-                try { const err = await res.json(); if (err && err.message) msg = err.message; } catch {}
-                throw new Error(msg);
             }
 
-            const data = await res.json();
-            if (!data || data.success !== true) {
-                throw new Error('Unexpected response.');
+            async function doSearch() {
+                const params = new URLSearchParams();
+                if (fromEl.value) params.append('from_date', fromEl.value);
+                if (toEl.value) params.append('to_date', toEl.value);
+
+                const url = `{{ route('officeFund.filter') }}?${params.toString()}`;
+
+                setLoadingState(true);
+                try {
+                    const res = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    });
+
+                    if (!res.ok) {
+                        let msg = 'Error loading data.';
+                        try {
+                            const err = await res.json();
+                            if (err && err.message) msg = err.message;
+                        } catch {}
+                        throw new Error(msg);
+                    }
+
+                    const data = await res.json();
+                    if (!data || data.success !== true) throw new Error('Unexpected response.');
+
+                    rangeCard.textContent = fmtINR(data.range_total || 0);
+                    todayCard.textContent = fmtINR(data.today_total || 0);
+
+                    if ((fromEl.value || toEl.value) && rangeLabel) {
+                        const fromTxt = fromEl.value ? fromEl.value : 'Start';
+                        const toTxt = toEl.value ? toEl.value : 'Today';
+                        rangeLabel.textContent = `Range: ${fromTxt} → ${toTxt}`;
+                    } else if (rangeLabel) {
+                        rangeLabel.textContent = 'All-time total';
+                    }
+
+                    const list = Array.isArray(data.transactions) ? data.transactions : [];
+                    const html = list.length ? list.map((row, i) => rowHTML(row, i + 1)).join('') : emptyRow(
+                        'No records');
+
+                    body.innerHTML = html;
+                    initDT();
+
+                } catch (err) {
+                    console.error(err);
+                    body.innerHTML = emptyRow(err.message || 'Error loading data', 'text-danger');
+                    initDT();
+                    todayCard.textContent = fmtINR(0);
+                    rangeCard.textContent = fmtINR(0);
+                    if (rangeLabel) rangeLabel.textContent = 'All-time total';
+                    // Also show toast
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops',
+                        text: err.message || 'Error loading data. Please try again.'
+                    });
+                } finally {
+                    setLoadingState(false);
+                }
             }
 
-            rangeCard.textContent = fmtINR(data.range_total || 0);
-            todayCard.textContent = fmtINR(data.today_total || 0);
-
-            if ((fromEl.value || toEl.value) && rangeLabel) {
-                const fromTxt = fromEl.value ? fromEl.value : 'Start';
-                const toTxt   = toEl.value   ? toEl.value   : 'Today';
-                rangeLabel.textContent = `Range: ${fromTxt} → ${toTxt}`;
-            } else if (rangeLabel) {
-                rangeLabel.textContent = 'All-time total';
-            }
-
-            const list = Array.isArray(data.transactions) ? data.transactions : [];
-            const html = list.map((row, i)=> rowHTML(row, i+1)).join('');
-
-            if ($.fn.dataTable.isDataTable(tableEl)) {
-                tableEl.DataTable().clear().destroy();
-            }
-            body.innerHTML = html || `<tr><td colspan="9" class="text-center text-muted">No records</td></tr>`;
-            initDT();
-
-        }catch(err){
-            console.error(err);
-            Swal.fire({ icon:'error', title:'Oops', text: err.message || 'Error loading data. Please try again.' });
-            if ($.fn.dataTable.isDataTable(tableEl)) {
-                tableEl.DataTable().clear().destroy();
-            }
-            body.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading data</td></tr>`;
-            initDT();
-            todayCard.textContent = fmtINR(0);
-            rangeCard.textContent = fmtINR(0);
-            if (rangeLabel) rangeLabel.textContent = 'All-time total';
-        }finally{
-            setLoadingState(false);
-        }
-    }
-
-    document.getElementById('searchBtn').addEventListener('click', doSearch);
-})();
-</script>
-
+            document.getElementById('searchBtn').addEventListener('click', doSearch);
+        })();
+    </script>
 @endsection

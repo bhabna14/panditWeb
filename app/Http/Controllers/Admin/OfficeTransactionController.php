@@ -122,13 +122,11 @@ class OfficeTransactionController extends Controller
     }
   public function manageOfficeFund()
     {
-        // Initial list (active + latest first)
         $transactions = OfficeFund::query()
             ->active()
             ->orderBy('date', 'desc')
             ->get();
 
-        // Today total (independent of filter)
         $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
 
         $todayTotal = OfficeFund::query()
@@ -136,7 +134,6 @@ class OfficeTransactionController extends Controller
             ->whereDate('date', $today)
             ->sum('amount');
 
-        // Default (first load): show ALL-TIME total in the "Total Payment" card
         $rangeTotal = OfficeFund::query()
             ->active()
             ->sum('amount');
@@ -146,7 +143,7 @@ class OfficeTransactionController extends Controller
 
     public function filterOfficeFund(Request $request)
     {
-        // Manual validator so we ALWAYS return JSON and never a redirect/HTML
+        // Always return JSON (avoid redirect/HTML on errors)
         $v = Validator::make($request->query(), [
             'from_date' => ['nullable','date_format:Y-m-d'],
             'to_date'   => ['nullable','date_format:Y-m-d','after_or_equal:from_date'],
@@ -166,12 +163,10 @@ class OfficeTransactionController extends Controller
         $from = $request->query('from_date');
         $to   = $request->query('to_date');
 
-        // Base query with active() scope
         $base = OfficeFund::query()->active();
-
         $query = clone $base;
 
-        // Inclusive date range filtering (works for both DATE and DATETIME columns)
+        // Inclusive range; works for DATE/DATETIME columns
         if ($from && $to) {
             $query->whereDate('date', '>=', $from)
                   ->whereDate('date', '<=', $to);
@@ -183,24 +178,22 @@ class OfficeTransactionController extends Controller
 
         $transactions = $query->orderBy('date', 'desc')->get();
 
-        // Totals
         $rangeTotal = (clone $query)->sum('amount');
 
         $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
         $todayTotal = (clone $base)->whereDate('date', $today)->sum('amount');
 
-        // IMPORTANT: send 'amount' as a raw number, not "1,234.00"
         $rows = $transactions->map(function ($t, $idx) {
             return [
                 'sl'              => $idx + 1,
                 'date'            => Carbon::parse($t->date)->format('Y-m-d'),
-                'categories'      => $t->categories,
-                'amount'          => (float) $t->amount, // raw number for JS
-                'mode_of_payment' => (string) $t->mode_of_payment,
-                'paid_by'         => (string) $t->paid_by,
+                'categories'      => (string) $t->categories,
+                'amount'          => (float)  $t->amount,          // raw number (no commas)
+                'mode_of_payment' => (string) ($t->mode_of_payment ?? ''),
+                'paid_by'         => (string) ($t->paid_by ?? ''),
                 'received_by'     => (string) ($t->received_by ?? ''),
                 'description'     => (string) ($t->description ?? ''),
-                'id'              => (int) $t->id,
+                'id'              => (int)    $t->id,
             ];
         });
 
