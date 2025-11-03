@@ -858,12 +858,6 @@ Route::controller(OfficeTransactionController::class)->group(function () {
     Route::get('/office-transactions/filter', 'filterOfficeTransactions')
         ->name('officeTransactions.filter');
 
-    
-
-   Route::get('/admin/office-fund', 'manageOfficeFund')->name('officeFund.index');
-    Route::get('/admin/office-fund/filter', 'filterOfficeFund')->name('officeFund.filter'); // <-- GET for fetch()
-    /** ========= Office Fund ========= */
-
     // Manage page
     Route::get('/manage-office-fund', 'manageOfficeFund')
         ->name('manageOfficeFund');

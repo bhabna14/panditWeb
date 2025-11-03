@@ -12,26 +12,28 @@ class OfficeFund extends Model
     protected $table = 'office_fund_received';
 
     protected $fillable = [
-        'date',           // DATE or DATETIME column
+        'date',
         'categories',
-        'amount',         // DECIMAL(12,2) recommended
+        'amount',
         'mode_of_payment',
         'paid_by',
         'received_by',
         'description',
-        // 'status',       // Optional; include only if the column exists
+        // 'status', // only if you actually have this column
     ];
 
-    // If your DB column is DATE:       use 'date'
-    // If it is DATETIME/TIMESTAMP:     use 'datetime:Y-m-d H:i:s'
+    // If your DB column is DATE only, change to 'date'
     protected $casts = [
-        'date' => 'datetime:Y-m-d H:i:s',
+        'date'   => 'datetime:Y-m-d H:i:s',
         'amount' => 'decimal:2',
     ];
 
-    // Optional helper scope to apply "active" if present
-    public function scopeActive($q)
+    /** Use like: OfficeFund::query()->active() */
+    public function scopeActive($query)
     {
-        return $this->isFillable('status') ? $q->where('status', 'active') : $q;
+        $model = $query->getModel();
+        return $model->isFillable('status')
+            ? $query->where('status', 'active')
+            : $query;
     }
 }
