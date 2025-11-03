@@ -1,4 +1,5 @@
 <?php
+// app/Models/OfficeFund.php
 
 namespace App\Models;
 
@@ -19,12 +20,15 @@ class OfficeFund extends Model
         'paid_by',
         'received_by',
         'description',
-        // 'status', // only if you actually have this column
+        // 'status', // include only if your table actually has this column
     ];
 
-    // If your DB column is DATE only, change to 'date'
+    /**
+     * If your DB column is DATE, 'date' cast is ideal.
+     * If it's DATETIME and you need time precision, switch to 'datetime'.
+     */
     protected $casts = [
-        'date'   => 'datetime:Y-m-d H:i:s',
+        'date'   => 'date',        // <— change to 'datetime' if your column is datetime
         'amount' => 'decimal:2',
     ];
 
@@ -32,6 +36,7 @@ class OfficeFund extends Model
     public function scopeActive($query)
     {
         $model = $query->getModel();
+
         return $model->isFillable('status')
             ? $query->where('status', 'active')
             : $query;
