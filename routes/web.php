@@ -860,7 +860,8 @@ Route::controller(OfficeTransactionController::class)->group(function () {
 
     
 
-
+   Route::get('/admin/office-fund', 'manageOfficeFund')->name('officeFund.index');
+    Route::get('/admin/office-fund/filter', 'filterOfficeFund')->name('officeFund.filter'); // <-- GET for fetch()
     /** ========= Office Fund ========= */
 
     // Manage page
