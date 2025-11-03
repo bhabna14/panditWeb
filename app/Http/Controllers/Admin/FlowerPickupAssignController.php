@@ -35,27 +35,26 @@ class FlowerPickupAssignController extends Controller
         // name -> product_id
         $flowerNameToId = $flowers->pluck('product_id','name')->toArray();
 
-        // normalize unit names → canonical symbols and build map symbol -> unit_id
+        // canonical unit symbol -> unit_id
         $unitSymbolToId = [];
         foreach ($units as $u) {
             $key = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
             if ($key) $unitSymbolToId[$key] = $u->id;
         }
 
-        // ====== Live price index (FlowerDetails) for JS auto-pricing ===============
+        // ===== Live price index (for client-side preview) ==========================
         $fdIndexByName = FlowerDetails::query()
             ->select(['name','unit','price'])
             ->where('status', 'active')
             ->get()
-            ->keyBy(function ($fd) { return strtolower(trim((string)$fd->name)); });
+            ->keyBy(fn($fd) => strtolower(trim((string)$fd->name)));
 
-        // product_id → pricing (for client-side totals preview)
         $fdProductPricing = [];
         foreach ($flowers as $f) {
             $nameKey = strtolower(trim((string)$f->name));
             $fd = $fdIndexByName->get($nameKey);
             if ($fd) {
-                $sym = $this->normalizeUnitKey($fd->unit); // 'kg','g','l','ml','pcs'
+                $sym = $this->normalizeUnitKey($fd->unit);
                 $fdProductPricing[$f->product_id] = [
                     'fd_unit_symbol' => $sym,
                     'fd_unit_id'     => $unitSymbolToId[$sym] ?? null,
@@ -70,81 +69,157 @@ class FlowerPickupAssignController extends Controller
             }
         }
 
-        // ----------------------------------------------------------------------------
-        // 1) FLOWER REQUESTS for the selected date — aggregate flower-wise + unit-wise
-        // ----------------------------------------------------------------------------
+        $prefillRows = [];
+
+        // ==========================================================================
+        // 1) FLOWER REQUESTS (tomorrow) — aggregate flower-wise + unit-wise
+        // ==========================================================================
         $requests = FlowerRequest::with('flowerRequestItems')
             ->whereDate('date', $date->toDateString())
             ->whereNotIn('status', ['cancelled', 'rejected'])
             ->get();
 
-        $requestAgg = []; // key: "name|sym" => ['name','sym','qty','price']
+        $requestAgg = []; // key: name|sym
         foreach ($requests as $req) {
             foreach ($req->flowerRequestItems ?? [] as $ri) {
                 $name = trim((string)($ri->item_name ?? ''));
                 if ($name === '') continue;
 
-                // Normalize possible free-text units to canonical symbols (kg/g/l/ml/pcs)
                 $sym = $this->normalizeUnitKey((string)($ri->unit ?? 'pcs'));
-                $key = strtolower($name) . '|' . $sym;
+                $key = strtolower($name).'|'.$sym;
 
                 $qty   = (float)($ri->quantity ?? 0);
                 $price = isset($ri->price) ? (float)$ri->price : null;
 
                 if (!isset($requestAgg[$key])) {
-                    $requestAgg[$key] = ['name'=>$name, 'sym'=>$sym, 'qty'=>0.0, 'price'=>$price];
+                    $requestAgg[$key] = ['name'=>$name,'sym'=>$sym,'qty'=>0.0,'price'=>$price];
                 }
                 $requestAgg[$key]['qty'] += $qty;
-                if ($price !== null) {
-                    $requestAgg[$key]['price'] = $price; // keep most recent non-null price
+                if ($price !== null) $requestAgg[$key]['price'] = $price;
+            }
+        }
+
+        foreach ($requestAgg as $agg) {
+            $name   = $agg['name'];
+            $sym    = $agg['sym'];
+            $qty    = $agg['qty'];
+            $price  = $agg['price'];
+
+            $prefillRows[] = [
+                'flower_id'    => $flowerNameToId[$name] ?? null,
+                'est_quantity' => $qty,
+                'unit_id'      => $unitSymbolToId[$sym] ?? null,
+                'quantity'     => $qty,
+                'price'        => $price,
+                'flower_name'  => $name,
+                'unit_label'   => $sym,
+                'source'       => 'request',
+            ];
+        }
+
+        // ==========================================================================
+        // 2) CUSTOMIZE ORDERS (tomorrow) — aggregate flower-wise + unit-wise
+        //    Works with either \App\Models\CustomizeOrder or \App\Models\UserCustomizeOrder
+        // ==========================================================================
+        $customizeAgg = []; // key: name|sym
+
+        $coModel = null;
+        if (class_exists(\App\Models\CustomizeOrder::class)) {
+            $coModel = \App\Models\CustomizeOrder::class;
+        } elseif (class_exists(\App\Models\UserCustomizeOrder::class)) {
+            $coModel = \App\Models\UserCustomizeOrder::class;
+        }
+
+        if ($coModel) {
+            // try common relation names
+            $orders = $coModel::query()
+                ->when(true, function ($q) use ($date) {
+                    // flexible date field (date or delivery_date)
+                    $q->whereDate('date', $date->toDateString())
+                    ->orWhereDate('delivery_date', $date->toDateString());
+                })
+                ->when(schema_has_column((new $coModel)->getTable(), 'status'), function($q){
+                    // if status exists, exclude cancelled/rejected if present
+                    $q->whereNotIn('status', ['cancelled','rejected']);
+                })
+                ->with(['items','customizeOrderItems','orderItems','flowerRequestItems','flowerItems','lines'])
+                ->get();
+
+            foreach ($orders as $order) {
+                // pick the first existing items relation
+                $items = $order->items
+                    ?? $order->customizeOrderItems
+                    ?? $order->orderItems
+                    ?? $order->flowerRequestItems
+                    ?? $order->flowerItems
+                    ?? $order->lines
+                    ?? collect();
+
+                foreach ($items as $it) {
+                    // name from multiple possibilities
+                    $name = trim((string)(
+                        $it->item_name
+                        ?? $it->flower_name
+                        ?? $it->name
+                        ?? optional($it->flower)->name
+                        ?? ''
+                    ));
+                    if ($name === '') continue;
+
+                    $sym = $this->normalizeUnitKey((string)(
+                        $it->unit
+                        ?? $it->flower_unit
+                        ?? $it->unit_name
+                        ?? 'pcs'
+                    ));
+
+                    $qty = (float)(
+                        $it->quantity
+                        ?? $it->flower_quantity
+                        ?? 0
+                    );
+
+                    $price = isset($it->price) ? (float)$it->price : null;
+
+                    $key = strtolower($name).'|'.$sym;
+                    if (!isset($customizeAgg[$key])) {
+                        $customizeAgg[$key] = ['name'=>$name,'sym'=>$sym,'qty'=>0.0,'price'=>$price];
+                    }
+                    $customizeAgg[$key]['qty'] += $qty;
+                    if ($price !== null) $customizeAgg[$key]['price'] = $price;
                 }
             }
         }
 
-        $prefillRows = [];
-
-        // Convert aggregated request items into prefilled rows — show these FIRST
-        foreach ($requestAgg as $agg) {
-            $name     = $agg['name'];
-            $sym      = $agg['sym'];
-            $qty      = $agg['qty'];
-            $price    = $agg['price'];
-
-            $flowerId = $flowerNameToId[$name] ?? null;
-            $unitId   = $unitSymbolToId[$sym] ?? null;
+        foreach ($customizeAgg as $agg) {
+            $name   = $agg['name'];
+            $sym    = $agg['sym'];
+            $qty    = $agg['qty'];
+            $price  = $agg['price'];
 
             $prefillRows[] = [
-                'flower_id'    => $flowerId,
-                'est_quantity' => $qty,      // mirrors Actual in UI
-                'unit_id'      => $unitId,
-
-                // Seed Actual same as Est for convenience (editable)
+                'flower_id'    => $flowerNameToId[$name] ?? null,
+                'est_quantity' => $qty,
+                'unit_id'      => $unitSymbolToId[$sym] ?? null,
                 'quantity'     => $qty,
                 'price'        => $price,
-
-                // UX hints
                 'flower_name'  => $name,
                 'unit_label'   => $sym,
-
-                'source'       => 'request', // badge in UI
+                'source'       => 'customize', // <- badge in UI
             ];
         }
 
-        // ---------------------------------------------------------
-        // 2) SUBSCRIPTION ESTIMATE for the same date — append after
-        // ---------------------------------------------------------
+        // ==========================================================================
+        // 3) SUBSCRIPTION ESTIMATE (tomorrow) — append, skipping duplicates
+        // ==========================================================================
         $subs     = $this->fetchActiveSubsEffectiveOn($date);
         $estimate = $this->buildEstimateForSubsOnDate($subs, $date);
         $totals   = array_values($estimate['totals_by_item'] ?? []);
 
         foreach ($totals as $row) {
             $name     = trim($row['item_name'] ?? '');
-            $flowerId = $flowerNameToId[$name] ?? null;
-
-            // label from estimate aggregation (kg/g/L/ml/pcs)
             $dispUnit = strtolower((string)($row['total_unit_disp'] ?? ''));
 
-            // Avoid duplicate rows if a Request row already exists for same flower+unit
             $dupKey = strtolower($name) . '|' . $dispUnit;
             $exists = collect($prefillRows)->contains(function($r) use ($dupKey){
                 return strtolower((string)($r['flower_name'] ?? '')) . '|' . strtolower((string)($r['unit_label'] ?? '')) === $dupKey;
@@ -152,30 +227,21 @@ class FlowerPickupAssignController extends Controller
             if ($exists) continue;
 
             $prefillRows[] = [
-                'flower_id'    => $flowerId,
-
-                // ESTIMATE (prefill qty only; Est Unit mirrors Actual in UI)
+                'flower_id'    => $flowerNameToId[$name] ?? null,
                 'est_quantity' => $row['total_qty_disp'] ?? null,
-
-                // Prefill Actual unit from estimate label so both show immediately
                 'unit_id'      => $unitSymbolToId[$dispUnit] ?? null,
-
-                // Actual defaults
                 'quantity'     => null,
                 'price'        => null,
-
-                // UX hints
                 'flower_name'  => $name,
                 'unit_label'   => $dispUnit,
-
                 'source'       => 'estimate',
             ];
         }
 
-        // ====== Unit id → canonical symbol (for JS conversion) =====================
+        // ===== Unit id -> canonical symbol for JS ==================================
         $unitIdToSymbol = [];
         foreach ($units as $u) {
-            $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name); // 'kg','g','l','ml','pcs'
+            $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name);
         }
 
         return view('admin.reports.create-from-estimate', [
@@ -186,7 +252,6 @@ class FlowerPickupAssignController extends Controller
             'units'              => $units,
             'prefillRows'        => $prefillRows,
             'todayDate'          => Carbon::today()->toDateString(),
-            // for JS auto-pricing
             'fdProductPricing'   => $fdProductPricing,
             'unitIdToSymbol'     => $unitIdToSymbol,
         ]);
@@ -366,7 +431,7 @@ class FlowerPickupAssignController extends Controller
                 ->with('error', 'Something went wrong while saving pickups. Please try again.');
         }
     }
-    
+
     public function store(Request $request)
     {
         $request->validate([
