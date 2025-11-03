@@ -989,7 +989,6 @@ Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('user
 
 Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
-
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/manage-flower-pickup-details', [FlowerPickupController::class, 'manageflowerpickupdetails'])
         ->name('manageflowerpickupdetails');
