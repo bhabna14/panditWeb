@@ -92,8 +92,8 @@
                                         [
                                             'flower_id'    => null,
                                             'est_quantity' => null,
-                                            'unit_id'      => null,
-                                            'quantity'     => null,
+                                            'unit_id'      => null,   // initial Estimated Unit mirrors Actual Unit
+                                            'quantity'     => null,   // initial Actual mirrors Estimated Qty (set in controller)
                                             'price'        => null,
                                             'flower_name'  => null,
                                             'unit_label'   => null,
@@ -105,6 +105,7 @@
                                     $flowerVal = $oldFlowerIds[$i] ?? $default['flower_id'];
                                     $estQtyVal = $oldEstQtys[$i]   ?? $default['est_quantity'];
 
+                                    // Make Actual = Estimated on initial render to keep both SAME
                                     $qtyVal   = $oldQtys[$i] ?? ($default['quantity'] ?? $estQtyVal);
                                     $unitVal  = $oldUnitIds[$i] ?? $default['unit_id'];
                                     $priceVal = $oldPrices[$i]  ?? $default['price'];
@@ -331,8 +332,8 @@
             const estTotalEl = document.getElementById('estTotal');
             const actTotalEl = document.getElementById('actTotal');
 
-            const PRICING      = @json($fdProductPricing); // product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
-            const UNIT_SYMBOL  = @json($unitIdToSymbol);   // unit_id -> 'kg'|'g'|'l'|'ml'|'pcs'
+            const PRICING     = @json($fdProductPricing); // product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
+            const UNIT_SYMBOL = @json($unitIdToSymbol);   // unit_id -> 'kg'|'g'|'l'|'ml'|'pcs'
 
             function symbolToCategory(sym){
                 if (!sym) return 'count';
@@ -408,8 +409,8 @@
                 const frag = document.importNode(rowTpl.content, true);
                 rowsBody.appendChild(frag);
                 const tr = rowsBody.querySelector('tr[data-row]:last-of-type');
-                syncEstimateUnit(tr);
-                syncEstimateQty(tr);
+                syncEstimateUnit(tr);   // keep Est Unit == Actual Unit
+                syncEstimateQty(tr);    // keep Est Qty  == Actual Qty
                 computeTotals();
             });
 
@@ -432,7 +433,7 @@
             rowsBody.addEventListener('input', onRowFieldChange, true);
             rowsBody.addEventListener('change', onRowFieldChange, true);
 
-            // === INITIAL HYDRATION ===
+            // === INITIAL HYDRATION — ensure Est == Actual on load ===
             rowsBody.querySelectorAll('tr[data-row]').forEach(tr=>{
                 syncEstimateUnit(tr);
                 syncEstimateQty(tr);
