@@ -3,8 +3,6 @@
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
     <style>
         .table-items th,.table-items td{vertical-align:middle}
         .table-items select,.table-items input{min-width:120px}
@@ -13,7 +11,6 @@
         @media (max-width:768px){.totals-grid{grid-template-columns:1fr}}
         .small-muted{font-size:.875rem;color:#6b7280}
         .readonly-input{background:#f3f4f6}
-        .required:after{content:" *"; color:#dc2626;}
     </style>
 @endsection
 
@@ -75,11 +72,16 @@
                             <thead class="table-light">
                             <tr>
                                 <th style="width:18%">Flower</th>
+
+                                {{-- Estimate (READ-ONLY) --}}
                                 <th style="width:12%">Est. Unit</th>
                                 <th style="width:12%">Est. Qty</th>
+
+                                {{-- Actual (editable) --}}
                                 <th style="width:13%">Actual Unit</th>
                                 <th style="width:11%">Actual Qty</th>
                                 <th style="width:11%">Actual Price (₹)</th>
+
                                 <th style="width:12%">Vendor</th>
                                 <th style="width:12%">Rider</th>
                                 <th style="width:0%"></th>
@@ -91,13 +93,12 @@
                                     $default = array_merge(
                                         [
                                             'flower_id'    => null,
-                                            'est_quantity' => null,
-                                            'unit_id'      => null,   // Estimated Unit mirrors Actual Unit
-                                            'quantity'     => null,   // Actual mirrors Estimated Qty (set in controller)
+                                            'est_quantity' => null,   // server prefill qty (from estimate)
+                                            'unit_id'      => null,   // server prefill unit id (from estimate)
+                                            'quantity'     => null,
                                             'price'        => null,
                                             'flower_name'  => null,
                                             'unit_label'   => null,
-                                            'source'       => null, // 'request'
                                         ],
                                         $prefillRows[$i] ?? [],
                                     );
@@ -105,6 +106,7 @@
                                     $flowerVal = $oldFlowerIds[$i] ?? $default['flower_id'];
                                     $estQtyVal = $oldEstQtys[$i]   ?? $default['est_quantity'];
 
+                                    // If Actual Qty is empty, default it to the estimated qty so they start equal.
                                     $qtyVal   = $oldQtys[$i] ?? ($default['quantity'] ?? $estQtyVal);
                                     $unitVal  = $oldUnitIds[$i] ?? $default['unit_id'];
                                     $priceVal = $oldPrices[$i]  ?? $default['price'];
@@ -120,13 +122,8 @@
                                                 <option value="{{ $flower->product_id }}" @selected($flowerVal == $flower->product_id)>{{ $flower->name }}</option>
                                             @endforeach
                                         </select>
-
-                                        @if (($default['source'] ?? null) === 'request')
-                                            <span class="badge bg-info ms-1">Request</span>
-                                        @endif
-
                                         @if (!$flowerVal && ($default['flower_name'] ?? null))
-                                            <small class="text-muted ms-1">Unmatched: {{ $default['flower_name'] }}</small>
+                                            <small class="text-muted">Unmatched: {{ $default['flower_name'] }}</small>
                                         @endif
                                         @error('flower_id.' . $i)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </td>
@@ -142,13 +139,15 @@
                                         <input type="hidden" name="est_unit_id[]" value="{{ $unitVal }}">
                                     </td>
 
-                                    {{-- Est. Qty (disabled display + hidden submit; mirrors Actual Qty) --}}
+                                    {{-- Est. Qty (disabled display + hidden submit; MIRRORS Actual Qty) --}}
                                     <td>
-                                        <input type="number" class="form-control readonly-input" data-est-qty-display disabled value="{{ $qtyVal ?? $estQtyVal }}">
+                                        <input type="number" class="form-control readonly-input"
+                                               data-est-qty-display disabled
+                                               value="{{ $qtyVal ?? $estQtyVal }}">
                                         <input type="hidden" name="est_quantity[]" value="{{ $qtyVal ?? $estQtyVal }}">
                                     </td>
 
-                                    {{-- Actual Unit --}}
+                                    {{-- Actual Unit (editable) --}}
                                     <td>
                                         <select name="unit_id[]" class="form-control @error('unit_id.' . $i) is-invalid @enderror" data-actual-unit>
                                             <option value="" selected>Choose</option>
@@ -159,15 +158,21 @@
                                         @error('unit_id.' . $i)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </td>
 
-                                    {{-- Actual Qty --}}
+                                    {{-- Actual Qty (editable) --}}
                                     <td>
-                                        <input type="number" name="quantity[]" class="form-control @error('quantity.' . $i) is-invalid @enderror" inputmode="decimal" min="0.01" step="0.01" value="{{ $qtyVal }}">
+                                        <input type="number" name="quantity[]"
+                                               class="form-control @error('quantity.' . $i) is-invalid @enderror"
+                                               inputmode="decimal" min="0.01" step="0.01"
+                                               value="{{ $qtyVal }}">
                                         @error('quantity.' . $i)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </td>
 
-                                    {{-- Actual Price --}}
+                                    {{-- Actual Price (editable) --}}
                                     <td>
-                                        <input type="number" name="price[]" class="form-control @error('price.' . $i) is-invalid @enderror" inputmode="decimal" min="0" step="0.01" value="{{ $priceVal }}">
+                                        <input type="number" name="price[]"
+                                               class="form-control @error('price.' . $i) is-invalid @enderror"
+                                               inputmode="decimal" min="0" step="0.01"
+                                               value="{{ $priceVal }}">
                                         @error('price.' . $i)<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </td>
 
@@ -214,6 +219,8 @@
                                     @endforeach
                                 </select>
                             </td>
+
+                            {{-- Est. Unit (disabled display + hidden submit) --}}
                             <td>
                                 <select class="form-control readonly-input" data-est-unit-display disabled>
                                     <option value="" selected>Choose</option>
@@ -223,10 +230,13 @@
                                 </select>
                                 <input type="hidden" name="est_unit_id[]" value="">
                             </td>
+
+                            {{-- Est. Qty (disabled display + hidden submit; mirrors Actual Qty) --}}
                             <td>
                                 <input type="number" class="form-control readonly-input" data-est-qty-display disabled>
                                 <input type="hidden" name="est_quantity[]" value="">
                             </td>
+
                             <td>
                                 <select name="unit_id[]" class="form-control" data-actual-unit>
                                     <option value="" selected>Choose</option>
@@ -263,28 +273,18 @@
                         </tr>
                     </template>
 
-                    {{-- === UPDATED TOTALS BAR (includes Subscriptions) === --}}
                     <div class="mt-3 d-flex justify-content-between flex-wrap gap-2">
-                        <div class="small-muted">
-                            Estimated uses Est. Qty × price-per Actual Unit (live prices) for <strong>Request items</strong>.
-                            Also includes <strong>Tomorrow Subscriptions</strong> grand total.
-                            <span class="d-block mt-1">
-                                <em>Note:</em> Rows list only Flower Request items; subscription estimate isn’t shown as rows here.
-                            </span>
-                        </div>
+                        <div class="small-muted">Estimate Unit & Qty are read-only and mirror the Actual fields.</div>
                         <div class="totals-bar ms-auto">
                             <div class="totals-grid">
-                                <div>
-                                    <strong>Estimated Total (₹):</strong> <span id="estTotal">0.00</span>
-                                    <small class="text-muted d-block">
-                                        Incl. Subscriptions ₹<span id="estAddonNote">0.00</span>
-                                    </small>
-                                </div>
+                                <div><strong>Estimated Total (₹):</strong> <span id="estTotal">0.00</span></div>
                                 <div><strong>Actual Total (₹):</strong> <span id="actTotal">0.00</span></div>
                             </div>
+                            <small class="text-muted d-block mt-1">
+                                Estimated uses Est. Qty × price-per Actual Unit (live prices).
+                            </small>
                         </div>
                     </div>
-                    {{-- === /UPDATED TOTALS BAR === --}}
                 </div>
             </div>
 
@@ -301,55 +301,18 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    @if (session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                Swal.fire({ icon: 'success', title: 'Saved!', text: @json(session('success')), timer: 2200, showConfirmButton: false });
-            });
-        </script>
-    @endif
-    @if (session('error'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                Swal.fire({ icon: 'error', title: 'Oops!', text: @json(session('error')) });
-            });
-        </script>
-    @endif
-    @if ($errors->any())
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Please fix the following:',
-                    html: `{!! '<ul class="text-start" style="margin:0;padding-left:1.2rem">' .
-                        collect($errors->all())->map(fn($e)=>'<li>'.e($e).'</li>')->implode('') .
-                        '</ul>' !!}`
-                });
-            });
-        </script>
-    @endif
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const rowsBody     = document.getElementById('rowsBody');
-            const rowTpl       = document.getElementById('rowTemplate');
-            const addRowBtn    = document.getElementById('addRowBtn');
-            const estTotalEl   = document.getElementById('estTotal');
-            const actTotalEl   = document.getElementById('actTotal');
-            const estAddonNote = document.getElementById('estAddonNote');
+            const rowsBody   = document.getElementById('rowsBody');
+            const rowTpl     = document.getElementById('rowTemplate');
+            const addRowBtn  = document.getElementById('addRowBtn');
+            const estTotalEl = document.getElementById('estTotal');
+            const actTotalEl = document.getElementById('actTotal');
 
-            // Backend-provided: product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
-            const PRICING     = @json($fdProductPricing);
-            // unit_id -> 'kg'|'g'|'l'|'ml'|'pcs'
-            const UNIT_SYMBOL = @json($unitIdToSymbol);
-            // Subscriptions grand total (addon to Estimated Total)
-            const EXTERNAL_ADDON_SUBS = parseFloat(@json($estAddonSubs ?? 0));
-
-            if (estAddonNote) {
-                estAddonNote.textContent = (EXTERNAL_ADDON_SUBS || 0).toFixed(2);
-            }
+            // Pricing map from server: product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
+            const PRICING      = @json($fdProductPricing);
+            // Unit id -> canonical symbol ('kg','g','l','ml','pcs')
+            const UNIT_SYMBOL  = @json($unitIdToSymbol);
 
             function symbolToCategory(sym){
                 if (!sym) return 'count';
@@ -403,37 +366,37 @@
                 return fdUnitsCount * (parseFloat(info.fd_price) || 0);
             }
             function computeTotals(){
-                let estTotalFromRows = 0, actTotal = 0;
+                let estTotal = 0, actTotal = 0;
                 rowsBody.querySelectorAll('tr[data-row]').forEach(tr=>{
                     const productId = tr.querySelector('select[name="flower_id[]"]')?.value || '';
                     const estQty    = tr.querySelector('input[name="est_quantity[]"]')?.value || '';
                     const unitId    = tr.querySelector('select[name="unit_id[]"]')?.value || '';
 
                     if (productId && unitId && estQty){
-                        estTotalFromRows += computeEstimatedLineTotal(productId, estQty, unitId);
+                        estTotal += computeEstimatedLineTotal(productId, estQty, unitId);
                     }
                     const qty   = parseFloat(tr.querySelector('input[name="quantity[]"]')?.value || '0') || 0;
                     const price = parseFloat(tr.querySelector('input[name="price[]"]')?.value || '0') || 0;
                     if (qty > 0 && price >= 0) actTotal += qty * price;
                 });
-
-                // Add Subscriptions estimate to the displayed Estimated Total
-                const estTotal = estTotalFromRows + (EXTERNAL_ADDON_SUBS || 0);
-
                 estTotalEl.textContent = estTotal.toFixed(2);
                 actTotalEl.textContent = actTotal.toFixed(2);
             }
 
             // === EVENTING ===
+            // Add Row
             addRowBtn.addEventListener('click', function(){
                 const frag = document.importNode(rowTpl.content, true);
                 rowsBody.appendChild(frag);
                 const tr = rowsBody.querySelector('tr[data-row]:last-of-type');
-                syncEstimateUnit(tr);   // keep Est Unit == Actual Unit
-                syncEstimateQty(tr);    // keep Est Qty  == Actual Qty
+
+                // Start with empty Actual Qty; mirrors to empty Est Qty
+                syncEstimateUnit(tr);
+                syncEstimateQty(tr);
                 computeTotals();
             });
 
+            // Remove Row (delegated)
             rowsBody.addEventListener('click', function(e){
                 const btn = e.target.closest('.remove-row-btn');
                 if (!btn) return;
@@ -442,22 +405,32 @@
                 computeTotals();
             });
 
+            // Any change affecting mirroring or totals (delegated)
+            rowsBody.addEventListener('input', onRowFieldChange, true);
+            rowsBody.addEventListener('change', onRowFieldChange, true);
             function onRowFieldChange(e){
                 const tr = e.target.closest('tr[data-row]');
                 if (!tr) return;
+
+                // Always mirror unit & qty
                 if (e.target.name === 'quantity[]'){ syncEstimateQty(tr); }
                 if (e.target.name === 'unit_id[]'){  syncEstimateUnit(tr); }
+
+                // Recompute totals on relevant changes
                 const watched = ['quantity[]','price[]','est_quantity[]','unit_id[]','flower_id[]'];
                 if (watched.includes(e.target.name)) computeTotals();
             }
-            rowsBody.addEventListener('input', onRowFieldChange, true);
-            rowsBody.addEventListener('change', onRowFieldChange, true);
 
-            // === INITIAL HYDRATION — ensure Est == Actual on load ===
+            // === INITIAL HYDRATION ===
+            // 1) Ensure Est Unit & Qty mirror the initial Actual values
             rowsBody.querySelectorAll('tr[data-row]').forEach(tr=>{
+                // If actual qty empty but we rendered a prefill in Est display/hidden,
+                // we already defaulted Actual = Estimate on the server side.
+                // Mirror again in JS to be safe:
                 syncEstimateUnit(tr);
                 syncEstimateQty(tr);
             });
+            // 2) Compute initial totals
             computeTotals();
         });
     </script>
