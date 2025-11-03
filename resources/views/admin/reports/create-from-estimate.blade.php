@@ -92,12 +92,12 @@
                                         [
                                             'flower_id'    => null,
                                             'est_quantity' => null,
-                                            'unit_id'      => null,   // initial Estimated Unit mirrors Actual Unit
-                                            'quantity'     => null,   // initial Actual mirrors Estimated Qty (set in controller)
+                                            'unit_id'      => null,   // Estimated Unit mirrors Actual Unit
+                                            'quantity'     => null,   // Actual mirrors Estimated Qty (set in controller)
                                             'price'        => null,
                                             'flower_name'  => null,
                                             'unit_label'   => null,
-                                            'source'       => null, // 'estimate' | 'request' | 'customize'
+                                            'source'       => null, // 'request'
                                         ],
                                         $prefillRows[$i] ?? [],
                                     );
@@ -105,7 +105,6 @@
                                     $flowerVal = $oldFlowerIds[$i] ?? $default['flower_id'];
                                     $estQtyVal = $oldEstQtys[$i]   ?? $default['est_quantity'];
 
-                                    // Make Actual = Estimated on initial render to keep both SAME
                                     $qtyVal   = $oldQtys[$i] ?? ($default['quantity'] ?? $estQtyVal);
                                     $unitVal  = $oldUnitIds[$i] ?? $default['unit_id'];
                                     $priceVal = $oldPrices[$i]  ?? $default['price'];
@@ -124,8 +123,6 @@
 
                                         @if (($default['source'] ?? null) === 'request')
                                             <span class="badge bg-info ms-1">Request</span>
-                                        @elseif (($default['source'] ?? null) === 'customize')
-                                            <span class="badge bg-warning text-dark ms-1">Customize</span>
                                         @endif
 
                                         @if (!$flowerVal && ($default['flower_name'] ?? null))
@@ -266,18 +263,28 @@
                         </tr>
                     </template>
 
+                    {{-- === UPDATED TOTALS BAR (includes Subscriptions) === --}}
                     <div class="mt-3 d-flex justify-content-between flex-wrap gap-2">
-                        <div class="small-muted">Estimate Unit & Qty are read-only and mirror the Actual fields.</div>
+                        <div class="small-muted">
+                            Estimated uses Est. Qty × price-per Actual Unit (live prices) for <strong>Request items</strong>.
+                            Also includes <strong>Tomorrow Subscriptions</strong> grand total.
+                            <span class="d-block mt-1">
+                                <em>Note:</em> Rows list only Flower Request items; subscription estimate isn’t shown as rows here.
+                            </span>
+                        </div>
                         <div class="totals-bar ms-auto">
                             <div class="totals-grid">
-                                <div><strong>Estimated Total (₹):</strong> <span id="estTotal">0.00</span></div>
+                                <div>
+                                    <strong>Estimated Total (₹):</strong> <span id="estTotal">0.00</span>
+                                    <small class="text-muted d-block">
+                                        Incl. Subscriptions ₹<span id="estAddonNote">0.00</span>
+                                    </small>
+                                </div>
                                 <div><strong>Actual Total (₹):</strong> <span id="actTotal">0.00</span></div>
                             </div>
-                            <small class="text-muted d-block mt-1">
-                                Estimated uses Est. Qty × price-per Actual Unit (live prices).
-                            </small>
                         </div>
                     </div>
+                    {{-- === /UPDATED TOTALS BAR === --}}
                 </div>
             </div>
 
@@ -326,14 +333,23 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const rowsBody   = document.getElementById('rowsBody');
-            const rowTpl     = document.getElementById('rowTemplate');
-            const addRowBtn  = document.getElementById('addRowBtn');
-            const estTotalEl = document.getElementById('estTotal');
-            const actTotalEl = document.getElementById('actTotal');
+            const rowsBody     = document.getElementById('rowsBody');
+            const rowTpl       = document.getElementById('rowTemplate');
+            const addRowBtn    = document.getElementById('addRowBtn');
+            const estTotalEl   = document.getElementById('estTotal');
+            const actTotalEl   = document.getElementById('actTotal');
+            const estAddonNote = document.getElementById('estAddonNote');
 
-            const PRICING     = @json($fdProductPricing); // product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
-            const UNIT_SYMBOL = @json($unitIdToSymbol);   // unit_id -> 'kg'|'g'|'l'|'ml'|'pcs'
+            // Backend-provided: product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
+            const PRICING     = @json($fdProductPricing);
+            // unit_id -> 'kg'|'g'|'l'|'ml'|'pcs'
+            const UNIT_SYMBOL = @json($unitIdToSymbol);
+            // Subscriptions grand total (addon to Estimated Total)
+            const EXTERNAL_ADDON_SUBS = parseFloat(@json($estAddonSubs ?? 0));
+
+            if (estAddonNote) {
+                estAddonNote.textContent = (EXTERNAL_ADDON_SUBS || 0).toFixed(2);
+            }
 
             function symbolToCategory(sym){
                 if (!sym) return 'count';
@@ -387,19 +403,23 @@
                 return fdUnitsCount * (parseFloat(info.fd_price) || 0);
             }
             function computeTotals(){
-                let estTotal = 0, actTotal = 0;
+                let estTotalFromRows = 0, actTotal = 0;
                 rowsBody.querySelectorAll('tr[data-row]').forEach(tr=>{
                     const productId = tr.querySelector('select[name="flower_id[]"]')?.value || '';
                     const estQty    = tr.querySelector('input[name="est_quantity[]"]')?.value || '';
                     const unitId    = tr.querySelector('select[name="unit_id[]"]')?.value || '';
 
                     if (productId && unitId && estQty){
-                        estTotal += computeEstimatedLineTotal(productId, estQty, unitId);
+                        estTotalFromRows += computeEstimatedLineTotal(productId, estQty, unitId);
                     }
                     const qty   = parseFloat(tr.querySelector('input[name="quantity[]"]')?.value || '0') || 0;
                     const price = parseFloat(tr.querySelector('input[name="price[]"]')?.value || '0') || 0;
                     if (qty > 0 && price >= 0) actTotal += qty * price;
                 });
+
+                // Add Subscriptions estimate to the displayed Estimated Total
+                const estTotal = estTotalFromRows + (EXTERNAL_ADDON_SUBS || 0);
+
                 estTotalEl.textContent = estTotal.toFixed(2);
                 actTotalEl.textContent = actTotal.toFixed(2);
             }
