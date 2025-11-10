@@ -178,7 +178,8 @@ class AdminNotificationController extends Controller
             return back()->with('error', 'Failed to resend notification. Please try again later.');
         }
     }
- public function whatsappcreate(Request $request)
+
+    public function whatsappcreate(Request $request)
     {
         $users = User::query()
             ->select('id','name','email','mobile_number')
@@ -272,8 +273,6 @@ class AdminNotificationController extends Controller
             return back()->with('error', 'MSG91 bulk send error: '.$e->getMessage());
         }
     }
-
-    /* ---------- helpers ---------- */
 
     private function deriveDefaultCcDigitsFromNumber(string $integratedNumberDigits): string
     {

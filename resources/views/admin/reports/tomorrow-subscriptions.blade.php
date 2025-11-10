@@ -431,7 +431,6 @@
         }
     </style>
 @endsection
-
 @section('content')
     @php
         // Defaults in case controller didn't pass (for safety)
@@ -447,26 +446,15 @@ function renderSubsTable($rows)
     }
     echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
     echo '<thead class="table-light">';
-    echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th><th>View Profile</th></tr>';
+    // Added "Apartment" column
+    echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th>Apartment</th><th class="address-col">Address</th><th>View Profile</th></tr>';
     echo '</thead><tbody>';
-    foreach ($rows as $r) {
-        $status = strtolower($r['status'] ?? '');
-        $badgeClass = 'badge-soft';
-        if (in_array($status, ['active'])) {
-            $badgeClass = 'bg-success-subtle text-success';
-        }
-        if (in_array($status, ['paused'])) {
-            $badgeClass = 'bg-warning-subtle text-warning';
-        }
-        if (in_array($status, ['pending'])) {
-            $badgeClass = 'bg-info-subtle text-info';
-        }
-        if (in_array($status, ['expired', 'ended'])) {
-            $badgeClass = 'bg-danger-subtle text-danger';
-        }
 
+    foreach ($rows as $r) {
         $apt = $r['apartment_name'] ?? '';
-        $riderName = $r['rider_name'] ?? '—';
+        $rider = $r['rider_name'] ?? '—';
+        $address = trim((string) ($r['address'] ?? ''));
+        $hasAddr = $address !== '' && $address !== '—';
 
         echo '<tr class="row-item" ' .
             ' data-name="' .
@@ -479,10 +467,11 @@ function renderSubsTable($rows)
             e(strtolower($apt)) .
             '"' .
             ' data-rider="' .
-            e(strtolower($riderName)) .
+            e(strtolower($rider)) .
             '"' .
             '>';
 
+        // Customer (name + contact)
         echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
         if ($r['phone'] || $r['email']) {
             echo '<div class="text-muted small">' .
@@ -493,15 +482,26 @@ function renderSubsTable($rows)
         }
         echo '</td>';
 
-        echo '<td>' . e($riderName) . '</td>';
+        // Rider
+        echo '<td>' . e($rider) . '</td>';
 
-        $addrSafe = e($r['address'] ?? '—');
+        // Apartment (NEW)
+        echo '<td>' . ($apt ? e($apt) : '—') . '</td>';
+
+        // Address (button only if exists)
         echo '<td>';
-        echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-            $addrSafe .
-            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
+        if ($hasAddr) {
+            $addrSafe = e($address);
+            echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
+                $addrSafe .
+                '" data-bs-toggle="modal" data-bs-target="#addressModal">' .
+                '<i class="bi bi-geo-alt"></i> View</button>';
+        } else {
+            echo '—';
+        }
+        echo '</td>';
 
+        // Profile
         echo '<td>';
         $uid = $r['user_id'] ?? null;
         if ($uid) {
@@ -531,10 +531,9 @@ function renderCustomizeTable($rows)
     echo '</thead><tbody>';
     foreach ($rows as $r) {
         $apt = $r['apartment_name'] ?? '';
-        $riderName = $r['rider_name'] ?? '—';
+        $rider = $r['rider_name'] ?? '—';
         $reqId = $r['request_id'] ? '#' . $r['request_id'] : '—';
         $ordId = $r['order_id'] ? '#' . $r['order_id'] : null;
-
         $itemsJson = e(json_encode($r['items'] ?? []));
 
         echo '<tr class="row-item" ' .
@@ -548,7 +547,7 @@ function renderCustomizeTable($rows)
             e(strtolower($apt)) .
             '"' .
             ' data-rider="' .
-            e(strtolower($riderName)) .
+            e(strtolower($rider)) .
             '"' .
             '>';
 
@@ -573,18 +572,18 @@ function renderCustomizeTable($rows)
         echo '<td><span class="badge bg-info-subtle text-info">' . e($r['status'] ?? '—') . '</span></td>';
         echo '<td>' . e($r['date'] ?? '—') . '</td>';
         echo '<td>' . e($r['time'] ?? '—') . '</td>';
-        echo '<td>' . e($riderName) . '</td>';
+        echo '<td>' . e($rider) . '</td>';
 
         echo '<td><button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
             $itemsJson .
-            '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
-        echo '<i class="bi bi-list-ul"></i> Items</button></td>';
+            '" data-bs-toggle="modal" data-bs-target="#itemsModal">' .
+            '<i class="bi bi-list-ul"></i> Items</button></td>';
 
         $addrSafe = e($r['address'] ?? '—');
         echo '<td><button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
             $addrSafe .
-            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
+            '" data-bs-toggle="modal" data-bs-target="#addressModal">' .
+            '<i class="bi bi-geo-alt"></i> View</button></td>';
 
         echo '</tr>';
     }
@@ -814,14 +813,6 @@ function renderCustomizeTable($rows)
                                         'icon' => 'bi-truck',
                                         'btn' => 'btn-tab-active',
                                     ],
-                                    // If you also have “Starting Tomorrow (New Users)” tab, add here:
-                                    // [
-                                    //     'key'   => 'start-new',
-                                    //     'title' => 'Starting Tomorrow (New Users)',
-                                    //     'count' => count($startingTomorrowNew),
-                                    //     'icon'  => 'bi-person-plus',
-                                    //     'btn'   => 'btn-tab-active',
-                                    // ],
                                     [
                                         'key' => 'pause',
                                         'title' => 'Pausing from Tomorrow',
@@ -859,8 +850,7 @@ function renderCustomizeTable($rows)
                                         id="tab-{{ $s['key'] }}" data-bs-toggle="tab"
                                         data-bs-target="#pane-{{ $s['key'] }}" type="button" role="tab"
                                         aria-controls="pane-{{ $s['key'] }}"
-                                        aria-selected="{{ $i === 0 ? 'true' : 'false' }}"
-                                        data-ink-color="{{ $s['btn'] }}">
+                                        aria-selected="{{ $i === 0 ? 'true' : 'false' }}">
                                         <i class="bi {{ $s['icon'] }}"></i>
                                         <span>{{ $s['title'] }}</span>
                                         <span class="pill-count ms-1">{{ $s['count'] }}</span>
@@ -871,7 +861,6 @@ function renderCustomizeTable($rows)
                     </div>
                 </div>
             </div>
-
 
             {{-- TAB PANES --}}
             <div class="tab-content" id="sectionsContent">
@@ -1043,7 +1032,7 @@ function renderCustomizeTable($rows)
                 checkNowBtn && checkNowBtn.addEventListener('click', () => window.location.reload());
             }
 
-            // ===== Address & Items modals (only present on full page) =====
+            // ===== Address & Items modals =====
             const addressBody = document.getElementById('addressModalBody');
             const copyBtn = document.getElementById('copyAddressBtn');
 
@@ -1148,7 +1137,6 @@ function renderCustomizeTable($rows)
                 const left = btnRect.left - parentRect.left + tabs.scrollLeft;
                 const width = btnRect.width;
 
-                // Match ink color to active button gradient start
                 if (btn.classList.contains('btn-tab-active')) inkBar.style.background =
                     'linear-gradient(90deg,#22d3ee,#0ea5e9)';
                 if (btn.classList.contains('btn-tab-pause')) inkBar.style.background =
@@ -1164,17 +1152,14 @@ function renderCustomizeTable($rows)
                 inkBar.style.transform = `translateX(${left}px)`;
             };
 
-            // Initialize to current active
             const initActive = tabs.querySelector('.nav-link.active');
             if (initActive) setInkTo(initActive);
 
-            // Update on tab change
             tabs.addEventListener('shown.bs.tab', function(e) {
-                const btn = e.target; // newly activated tab
+                const btn = e.target;
                 setInkTo(btn);
             });
 
-            // Reposition on resize
             window.addEventListener('resize', () => {
                 const active = tabs.querySelector('.nav-link.active');
                 if (active) setInkTo(active);
