@@ -229,23 +229,16 @@ class WeeklyReportController extends Controller
         $vendorColumns = array_keys($vendorColumnsSet);
         sort($vendorColumns);
 
-        /* ================= Deliveries per rider (counts, by delivery date) ================= */
-        // Use COALESCE(delivery_time, created_at) so we always have a date.
-        $deliveryDateExpr = "DATE(CONVERT_TZ(COALESCE(delivery_time, created_at), '+00:00', '$tzOffset'))";
-
+        /* ================= Deliveries per rider (counts, by created_at date) ================= */
+        // created_at is full DATETIME (2025-11-20 07:42:04), so we use that for the date.
         $deliv = DeliveryHistory::query()
             ->select([
-                DB::raw("$deliveryDateExpr as d"),
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
                 'rider_id',
                 DB::raw("COUNT(*) as c"),
             ])
-            // Only records whose delivery-date lies in this month (in display TZ)
-            ->whereRaw("$deliveryDateExpr BETWEEN ? AND ?", [
-                $monthStart->toDateString(),
-                $monthEnd->toDateString(),
-            ])
-            // If you want only completed ones, keep this; otherwise remove it:
             ->where('delivery_status', 'delivered')
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
             ->groupBy('d', 'rider_id')
             ->get();
 
