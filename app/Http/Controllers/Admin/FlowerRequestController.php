@@ -17,14 +17,21 @@ use Carbon\Carbon;
 
 class FlowerRequestController extends Controller
 {
-
 public function showRequests(Request $request)
 {
     // First (initial) page render. Data is SSR.
     $filter = $request->query('filter', 'all');
 
-    $tz    = config('app.timezone');
-    $today = Carbon::today($tz)->toDateString();
+    $tz           = config('app.timezone');
+    $todayCarbon  = Carbon::today($tz);
+    $today        = $todayCarbon->toDateString();
+
+    // Next 3 days (excluding today)
+    $startDateCarbon = $todayCarbon->copy()->addDay();      // tomorrow
+    $endDateCarbon   = $todayCarbon->copy()->addDays(3);    // 3 days from today
+
+    $startDate = $startDateCarbon->toDateString();
+    $endDate   = $endDateCarbon->toDateString();
 
     $query = FlowerRequest::with([
         'order' => function ($q) {
@@ -40,16 +47,21 @@ public function showRequests(Request $request)
         case 'today':
             $query->whereDate('date', $today);
             break;
+
         case 'upcoming':
-            $query->whereBetween('date', [$today, Carbon::parse($today)->addDays(3)->toDateString()]);
+            // Exclude today, include next 3 days
+            $query->whereBetween('date', [$startDate, $endDate]);
             break;
+
         case 'paid':
             $query->where('status', 'paid');
             break;
+
         case 'rejected':
             // Support both spellings in DB
             $query->whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled']);
             break;
+
         case 'all':
         default:
             // no where
@@ -61,7 +73,11 @@ public function showRequests(Request $request)
     $todayCustomizeOrders  = FlowerRequest::whereDate('date', $today)->count();
     $paidCustomizeOrders   = FlowerRequest::where('status', 'paid')->count();
     $rejectCustomizeOrders = FlowerRequest::whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled'])->count();
-    $riders                = RiderDetails::where('status', 'active')->get();
+
+    // Upcoming = next 3 days excluding today
+    $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
+
+    $riders = RiderDetails::where('status', 'active')->get();
 
     return view('admin.flower-request.manage-flower-request', compact(
         'riders',
@@ -70,6 +86,7 @@ public function showRequests(Request $request)
         'todayCustomizeOrders',
         'paidCustomizeOrders',
         'rejectCustomizeOrders',
+        'upcomingCustomizeOrders',
         'filter'
     ));
 }

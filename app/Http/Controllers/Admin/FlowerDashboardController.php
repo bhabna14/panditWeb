@@ -265,8 +265,11 @@ class FlowerDashboardController extends Controller
             ->where('action', 'paused')->count();
 
         $today = Carbon::today($tz);
-        $threeDaysLater = Carbon::today($tz)->addDays(3);
-        $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$today, $threeDaysLater])->count();
+
+        $startDate = $today->copy()->addDay();      // tomorrow
+        $endDate   = $today->copy()->addDays(3);    // 3 days from today
+
+        $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
         $visitPlaceCountToday = MarketingVisitPlace::whereDate('created_at', Carbon::today($tz))->count();
 
