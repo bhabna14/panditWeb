@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+
 use App\Models\FlowerPayment;
 use App\Models\FlowerPickupDetails;
 use App\Models\DeliveryHistory;
@@ -14,7 +15,8 @@ use App\Models\Subscription;
 use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\SubscriptionPauseResumeLog;
-use App\Models\DeliveryCustomizeHistory;
+use App\Models\DeliveryCustomizeHistory; // keep if you still use it anywhere else
+use App\Models\FlowerRequest;            // NEW: for customize orders
 
 class WeeklyReportController extends Controller
 {
@@ -69,7 +71,9 @@ class WeeklyReportController extends Controller
             ->get();
 
         foreach ($payments as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['finance']['income'] = (float)$row->amt;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['income'] = (float)$row->amt;
+            }
         }
 
         // Expenditure per day (by pickup_date; this is a DATE column, keep as-is)
@@ -82,12 +86,18 @@ class WeeklyReportController extends Controller
             ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
             ->groupBy('d')
             ->get();
+
         foreach ($expend as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
+            }
         }
 
-        /* ================= Customer (UPDATED per your logic) ================= */
-        // NEW: users who have exactly one subscription overall, and that subscription was created that day with status='pending'
+        /* ================= Customer: NEW & RENEW ================= */
+
+        // NEW subscriptions:
+        // Users who have exactly ONE subscription overall
+        // and that subscription's created_at date (in tz) falls in the day.
         $firstTimeUserIds = Subscription::query()
             ->select('user_id')
             ->groupBy('user_id')
@@ -96,19 +106,22 @@ class WeeklyReportController extends Controller
         $newPerDay = Subscription::query()
             ->select([
                 DB::raw("$dateExpr as d"),
-                DB::raw("COUNT(*) as c"),
+                DB::raw("COUNT(*) as c"), // each user_id here only has one subscription anyway
             ])
-            ->where('status', 'pending')
             ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
             ->whereIn('user_id', $firstTimeUserIds)
             ->groupBy('d')
             ->get();
 
         foreach ($newPerDay as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int)$row->c;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['new'] = (int)$row->c;
+            }
         }
 
-        // RENEW: subscriptions created that day whose order_id appears more than once
+        // RENEW subscriptions:
+        // order_id that appears more than once across subscriptions (renewed)
+        // counted by created_at date.
         $renewOrderIds = Subscription::query()
             ->select('order_id')
             ->groupBy('order_id')
@@ -125,9 +138,12 @@ class WeeklyReportController extends Controller
             ->get();
 
         foreach ($renewPerDay as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int)$row->c;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['renew'] = (int)$row->c;
+            }
         }
 
+        /* ================= Customer: PAUSE ================= */
         // Pauses (prefer log)
         if (class_exists(SubscriptionPauseResumeLog::class)) {
             $pauses = SubscriptionPauseResumeLog::query()
@@ -137,27 +153,47 @@ class WeeklyReportController extends Controller
                 ])
                 ->where('action', 'paused')
                 ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-                ->groupBy('d')->get();
-            foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
+                ->groupBy('d')
+                ->get();
+
+            foreach ($pauses as $row) {
+                if (isset($days[$row->d])) {
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
+                }
+            }
         } else {
             $pauses = Subscription::query()
-                ->select([DB::raw("DATE(pause_start_date) as d"), DB::raw("COUNT(*) as c")])
-                ->whereNotNull('pause_start_date')
-                ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-                ->groupBy('d')->get();
-            foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
-        }
-
-        // Customizations (if tracked)
-        if (class_exists(DeliveryCustomizeHistory::class)) {
-            $customs = DeliveryCustomizeHistory::query()
                 ->select([
-                    DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                    DB::raw("DATE(pause_start_date) as d"),
                     DB::raw("COUNT(*) as c")
                 ])
-                ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-                ->groupBy('d')->get();
-            foreach ($customs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['customize'] = (int)$row->c;
+                ->whereNotNull('pause_start_date')
+                ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->groupBy('d')
+                ->get();
+
+            foreach ($pauses as $row) {
+                if (isset($days[$row->d])) {
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
+                }
+            }
+        }
+
+        /* ================= Customer: CUSTOMIZE (FlowerRequest) ================= */
+        // Customize orders = FlowerRequest created_at date wise
+        $customs = FlowerRequest::query()
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($customs as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['customize'] = (int)$row->c;
+            }
         }
 
         /* ================= Vendor daily (vendor-wise paid per day) ================= */
@@ -176,7 +212,9 @@ class WeeklyReportController extends Controller
         foreach ($vendorPaid as $row) {
             $name = $vendorMap[$row->vendor_id] ?? $row->vendor_id;
             $vendorColumnsSet[$name] = true;
-            if (isset($days[$row->d])) $days[$row->d]['vendors'][$name] = (float)$row->amt;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['vendors'][$name] = (float)$row->amt;
+            }
         }
         $vendorColumns = array_keys($vendorColumnsSet);
         sort($vendorColumns);
@@ -197,6 +235,7 @@ class WeeklyReportController extends Controller
         foreach ($deliv as $row) {
             $name = $riderMap[$row->rider_id] ?? $row->rider_id;
             $deliveryColsSet[$name] = true;
+
             if (isset($days[$row->d])) {
                 $days[$row->d]['riders'][$name] = (int)$row->c;
                 $days[$row->d]['total_delivery'] += (int)$row->c;
@@ -240,6 +279,7 @@ class WeeklyReportController extends Controller
                 'riders'  => array_fill_keys($deliveryCols, 0),
                 'total_delivery' => 0,
             ];
+
             foreach ($weekDays as $row) {
                 $weekTotals['income']      += $row['finance']['income'];
                 $weekTotals['expenditure'] += $row['finance']['expenditure'];
@@ -247,8 +287,14 @@ class WeeklyReportController extends Controller
                 $weekTotals['new']         += $row['customer']['new'];
                 $weekTotals['pause']       += $row['customer']['pause'];
                 $weekTotals['customize']   += $row['customer']['customize'];
-                foreach ($vendorColumns as $v) $weekTotals['vendors'][$v] += $row['vendors'][$v] ?? 0;
-                foreach ($deliveryCols as $r)  $weekTotals['riders'][$r]  += $row['riders'][$r] ?? 0;
+
+                foreach ($vendorColumns as $v) {
+                    $weekTotals['vendors'][$v] += $row['vendors'][$v] ?? 0;
+                }
+                foreach ($deliveryCols as $r) {
+                    $weekTotals['riders'][$r]  += $row['riders'][$r] ?? 0;
+                }
+
                 $weekTotals['total_delivery'] += $row['total_delivery'];
             }
 
@@ -270,6 +316,7 @@ class WeeklyReportController extends Controller
             'riders'      => array_fill_keys($deliveryCols, 0),
             'total_delivery' => 0,
         ];
+
         foreach ($days as $row) {
             $monthTotals['income']      += $row['finance']['income'];
             $monthTotals['expenditure'] += $row['finance']['expenditure'];
@@ -277,8 +324,14 @@ class WeeklyReportController extends Controller
             $monthTotals['new']         += $row['customer']['new'];
             $monthTotals['pause']       += $row['customer']['pause'];
             $monthTotals['customize']   += $row['customer']['customize'];
-            foreach ($vendorColumns as $v) $monthTotals['vendors'][$v] += $row['vendors'][$v] ?? 0;
-            foreach ($deliveryCols as $r)  $monthTotals['riders'][$r]  += $row['riders'][$r] ?? 0;
+
+            foreach ($vendorColumns as $v) {
+                $monthTotals['vendors'][$v] += $row['vendors'][$v] ?? 0;
+            }
+            foreach ($deliveryCols as $r) {
+                $monthTotals['riders'][$r]  += $row['riders'][$r] ?? 0;
+            }
+
             $monthTotals['total_delivery'] += $row['total_delivery'];
         }
 

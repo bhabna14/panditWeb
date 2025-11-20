@@ -22,7 +22,6 @@ class NotificationService
         $this->messaging = $factory->createMessaging();
     }
 
-    // One device
     public function sendNotification($deviceToken, $title, $body, array $data = [])
     {
         $message = CloudMessage::withTarget('token', $deviceToken)
@@ -32,7 +31,6 @@ class NotificationService
         return $this->messaging->send($message);
     }
 
-    // Many devices (batched)
     public function sendBulkNotifications(array $deviceTokens, $title, $body, array $data = [])
     {
         $messages = [];
