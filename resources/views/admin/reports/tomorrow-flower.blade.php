@@ -339,7 +339,7 @@
                         </div>
 
                         {{-- Products (native disclosure) --}}
-                        <div class="row g-3">
+                        {{-- <div class="row g-3">
                             @foreach ($tProducts as $pid => $row)
                                 @php
                                     $product = $row['product'];
@@ -417,7 +417,7 @@
                                     </details>
                                 </div>
                             @endforeach
-                        </div>
+                        </div> --}}
                     @endif
                 </div>
             </div>
