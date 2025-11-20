@@ -32,7 +32,7 @@
         /* Quick presets as pill chips */
         .preset-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
         .preset-chips .btn { border-radius: 999px; padding: .35rem .75rem; line-height: 1.1; }
-        .preset-chips .btn.active { font-weight: 700;color: white }
+        .preset-chips .btn.active {color: white }
 
         /* View segmented control */
         .segmented {
