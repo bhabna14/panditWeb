@@ -15,8 +15,7 @@ use App\Models\Subscription;
 use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\SubscriptionPauseResumeLog;
-use App\Models\DeliveryCustomizeHistory; // keep if you still use it anywhere else
-use App\Models\FlowerRequest;            // NEW: for customize orders
+use App\Models\FlowerRequest; // for customize orders
 
 class WeeklyReportController extends Controller
 {
@@ -46,7 +45,10 @@ class WeeklyReportController extends Controller
             $days[$d->toDateString()] = [
                 'date'     => $d->toDateString(),
                 'dow'      => $d->format('l'),
-                'finance'  => ['income' => 0, 'expenditure' => 0],
+                'finance'  => [
+                    'income'      => 0,  // from FlowerPayment
+                    'expenditure' => 0,  // "Purch" from FlowerPickupDetails total_price
+                ],
                 'customer' => ['renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0],
                 'vendors'  => [],   // vendor name => total paid to vendor that day
                 'riders'   => [],   // rider name  => delivered count that day
@@ -59,7 +61,7 @@ class WeeklyReportController extends Controller
         $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
 
         /* ================= Finance ================= */
-        // Income per day (by created_at)
+        // Income per day (by created_at in UTC → converted to local date)
         $payments = FlowerPayment::query()
             ->select([
                 DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
@@ -76,19 +78,24 @@ class WeeklyReportController extends Controller
             }
         }
 
-        // Expenditure per day (by pickup_date; this is a DATE column, keep as-is)
+        // PURCHASE / EXPENDITURE per day:
+        // Using FlowerPickupDetails.total_price grouped by pickup_date
         $expend = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
                 DB::raw("SUM(total_price) as amt"),
             ])
             ->where('payment_status', 'paid')
-            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->whereBetween('pickup_date', [
+                $monthStart->toDateString(),
+                $monthEnd->toDateString(),
+            ])
             ->groupBy('d')
             ->get();
 
         foreach ($expend as $row) {
             if (isset($days[$row->d])) {
+                // This is what shows in "Purch" column in the table
                 $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
             }
         }
@@ -96,8 +103,8 @@ class WeeklyReportController extends Controller
         /* ================= Customer: NEW & RENEW ================= */
 
         // NEW subscriptions:
-        // Users who have exactly ONE subscription overall
-        // and that subscription's created_at date (in tz) falls in the day.
+        // Users who have exactly ONE subscription overall,
+        // and that subscription's created_at date (in tz) is that day.
         $firstTimeUserIds = Subscription::query()
             ->select('user_id')
             ->groupBy('user_id')
@@ -106,7 +113,7 @@ class WeeklyReportController extends Controller
         $newPerDay = Subscription::query()
             ->select([
                 DB::raw("$dateExpr as d"),
-                DB::raw("COUNT(*) as c"), // each user_id here only has one subscription anyway
+                DB::raw("COUNT(*) as c"),
             ])
             ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
             ->whereIn('user_id', $firstTimeUserIds)
@@ -120,7 +127,7 @@ class WeeklyReportController extends Controller
         }
 
         // RENEW subscriptions:
-        // order_id that appears more than once across subscriptions (renewed)
+        // order_id that appears more than once across subscriptions (renewed),
         // counted by created_at date.
         $renewOrderIds = Subscription::query()
             ->select('order_id')
@@ -168,7 +175,10 @@ class WeeklyReportController extends Controller
                     DB::raw("COUNT(*) as c")
                 ])
                 ->whereNotNull('pause_start_date')
-                ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->whereBetween('pause_start_date', [
+                    $monthStart->toDateString(),
+                    $monthEnd->toDateString()
+                ])
                 ->groupBy('d')
                 ->get();
 
@@ -204,7 +214,10 @@ class WeeklyReportController extends Controller
                 DB::raw("SUM(total_price) as amt"),
             ])
             ->where('payment_status', 'paid')
-            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->whereBetween('pickup_date', [
+                $monthStart->toDateString(),
+                $monthEnd->toDateString()
+            ])
             ->groupBy('d', 'vendor_id')
             ->get();
 
@@ -219,15 +232,16 @@ class WeeklyReportController extends Controller
         $vendorColumns = array_keys($vendorColumnsSet);
         sort($vendorColumns);
 
-        /* ================= Deliveries per rider (counts, by created_at) ================= */
+        /* ================= Deliveries per rider (counts, by delivery_time) ================= */
+        // IMPORTANT: use delivery_time for the real delivered date.
         $deliv = DeliveryHistory::query()
             ->select([
-                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                DB::raw("DATE(CONVERT_TZ(delivery_time, '+00:00', '$tzOffset')) as d"),
                 'rider_id',
                 DB::raw("COUNT(*) as c"),
             ])
             ->where('delivery_status', 'delivered')
-            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('delivery_time', [$monthStartUtc, $monthEndUtc])
             ->groupBy('d', 'rider_id')
             ->get();
 

@@ -8,7 +8,6 @@ use Laravel\Sanctum\HasApiTokens;
 
 class RiderDetails extends Model
 {
-    // use HasFactory;
     use HasFactory, HasApiTokens;
 
     protected $table = 'flower__rider_details';
@@ -20,16 +19,20 @@ class RiderDetails extends Model
         'rider_img',
         'description',
     ];
+
     public function pickupDetails()
     {
         return $this->hasMany(FlowerPickupDetails::class, 'rider_id','rider_id');
     }
-// In RiderDetails.php model
-public function orders()
-{
-    return $this->hasMany(Order::class, 'rider_id', 'rider_id');
-}
 
-    
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'rider_id', 'rider_id');
+    }
 
+    // NEW: all deliveries done by this rider (can be used anywhere else)
+    public function deliveryHistories()
+    {
+        return $this->hasMany(DeliveryHistory::class, 'rider_id', 'rider_id');
+    }
 }
