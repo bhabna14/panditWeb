@@ -193,6 +193,37 @@
 @section('content')
     <div class="bg-light">
         <div class="container py-4">
+              @php
+                $tProducts = $tomorrowEstimate['products'] ?? [];
+                $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
+                $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
+
+                // Build Tomorrow summary (from product items)
+                $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
+                $distinctItems = [];
+                foreach ($tProducts as $row) {
+                    foreach ($row['items'] ?? [] as $it) {
+                        $cat = $it['category'] ?? 'count';
+                        $catBase[$cat] += (float) ($it['total_qty_base'] ?? 0);
+                        $distinctItems[strtolower(trim($it['item_name']))] = true;
+                    }
+                }
+                $tomorrowDistinctItemCount = count($distinctItems);
+
+                // Unit formatters for category totals
+                $fmtCat = function (float $qtyBase, string $cat): array {
+                    if ($cat === 'weight') {
+                        return $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'kg'] : [round($qtyBase, 3), 'g'];
+                    }
+                    if ($cat === 'volume') {
+                        return $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'L'] : [round($qtyBase, 3), 'ml'];
+                    }
+                    return [round($qtyBase, 3), 'pcs'];
+                };
+                [$wQty, $wUnit] = $fmtCat($catBase['weight'], 'weight');
+                [$vQty, $vUnit] = $fmtCat($catBase['volume'], 'volume');
+                [$cQty, $cUnit] = $fmtCat($catBase['count'], 'count');
+            @endphp
 
             <div class="filter-toolbar sticky">
                 <form class="card shadow-sm" method="get" action="{{ route('admin.flowerEstimate') }}">

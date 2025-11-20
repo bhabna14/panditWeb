@@ -179,7 +179,7 @@
             padding: .9rem 1rem 1.1rem;
         }
     </style>
-
+    
 @endsection
 
 @section('content')
@@ -338,6 +338,86 @@
                             </div>
                         </div>
 
+                        {{-- Products (native disclosure) --}}
+                        <div class="row g-3">
+                            @foreach ($tProducts as $pid => $row)
+                                @php
+                                    $product = $row['product'];
+                                    $subsCount = $row['subs_count'] ?? 0;
+                                    $items = $row['items'] ?? [];
+                                    $productTotal = $row['product_total'] ?? 0;
+                                    $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
+                                    $openFirst = $loop->first; // open only the first by default
+                                    $isRequests = ($product?->name ?? '') === 'On-demand Requests';
+                                @endphp
+
+                                <div class="col-12">
+                                    <details class="disclosure" {{ $openFirst ? 'open' : '' }}>
+                                        <summary>
+                                            <div class="summary-left">
+                                                <h6 class="mb-1">{{ $product?->name ?? 'Product #' . $pid }}</h6>
+                                                <div class="text-muted">
+                                                    <strong>{{ $subsCount }}</strong>
+                                                    {{ $isRequests ? 'request' : 'subscription' }}{{ $subsCount == 1 ? '' : 's' }}
+                                                    @if (!$isRequests && ($bundlePerSub ?? 0) > 0)
+                                                        <span class="ms-2">(Bundle / Sub:
+                                                            ₹{{ number_format($bundlePerSub, 2) }})</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div class="summary-right">
+                                                <span class="badge bg-primary">
+                                                    Product Total: <span
+                                                        class="money">₹{{ number_format($productTotal, 2) }}</span>
+                                                </span>
+                                                <i class="bi bi-chevron-down chev"></i>
+                                            </div>
+                                        </summary>
+
+                                        <div class="disclosure-body">
+                                            <div class="table-responsive mt-2">
+                                                <table class="table table-sm table-hover align-middle">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th style="width:30%">Item</th>
+                                                            <th class="text-end">Per-Sub Qty</th>
+                                                            <th>Per-Sub Unit</th>
+                                                            <th class="text-end">Item Price (₹)</th>
+                                                            <th class="text-end">Total Qty</th>
+                                                            <th class="text-end">Total Price (₹)</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @forelse($items as $it)
+                                                            <tr>
+                                                                <td>{{ $it['item_name'] }}</td>
+                                                                <td class="text-end">
+                                                                    {{ rtrim(rtrim(number_format($it['per_item_qty'], 3), '0'), '.') }}
+                                                                </td>
+                                                                <td>{{ strtoupper($it['per_item_unit']) }}</td>
+                                                                <td class="text-end money">
+                                                                    {{ number_format($it['item_price_per_sub'], 2) }}</td>
+                                                                <td class="text-end">
+                                                                    {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                                    {{ $it['total_unit_disp'] }}
+                                                                </td>
+                                                                <td class="text-end money">
+                                                                    {{ number_format($it['total_price'], 2) }}</td>
+                                                            </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td colspan="6" class="text-muted">No package items
+                                                                    configured.</td>
+                                                            </tr>
+                                                        @endforelse
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </details>
+                                </div>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
             </div>
