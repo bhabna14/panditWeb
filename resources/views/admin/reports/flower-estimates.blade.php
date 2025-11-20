@@ -30,9 +30,28 @@
         .date-wrap input[type="date"] { padding-left: 2rem; }
 
         /* Quick presets as pill chips */
-        .preset-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
-        .preset-chips .btn { border-radius: 999px; padding: .35rem .75rem; line-height: 1.1; }
-        .preset-chips .btn.active {color: white }
+      .preset-chips { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: .5rem; 
+}
+
+.preset-chips .btn { 
+    border-radius: 999px; 
+    padding: .35rem .75rem; 
+    line-height: 1.1; 
+}
+
+/* Active state fix */
+.preset-chips .btn.active,
+.preset-chips .btn.btn-outline-secondary.active,
+.preset-chips .btn.btn-outline-secondary:active {
+    font-weight: 700;
+    color: #fff !important;          /* make text visible */
+    background-color: #6c757d;       /* optional: match outline-secondary active bg */
+    border-color: #6c757d;           /* optional */
+}
+
 
         /* View segmented control */
         .segmented {
