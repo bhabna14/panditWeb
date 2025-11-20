@@ -930,6 +930,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-estimate', [FlowerEstimateController::class, 'index'])
     ->name('flowerEstimate');
+    Route::get('/reports/tomorrow-flower', [FlowerEstimateController::class, 'tomorrowFlower'])
+    ->name('tomorrowFlower');
+    Route::get('/reports/flower-package', [FlowerEstimateController::class, 'flowerPackage'])
+    ->name('flowerPackage');
 });
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-compare', [FlowerEstimateCompareController::class, 'index'])

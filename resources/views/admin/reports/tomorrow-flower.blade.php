@@ -93,7 +93,7 @@
             {{-- ===================================== --}}
             {{-- FILTER TOOLBAR (Redesigned & Sticky) --}}
             {{-- ===================================== --}}
-            <div class="filter-toolbar sticky">
+            {{-- <div class="filter-toolbar sticky">
                 <form class="card shadow-sm" method="get" action="{{ route('admin.flowerEstimate') }}">
                     <input type="hidden" name="mode" value="{{ $mode }}" />
                     <div class="card-body">
@@ -157,14 +157,14 @@
                                 </div>
                             </div>
                         </div>
-                    </div> {{-- /card-body --}}
+                    </div>
                 </form>
-            </div>
+            </div> --}}
 
             {{-- ================================ --}}
             {{-- SELECTED RANGE — GRAND TOTALS    --}}
             {{-- ================================ --}}
-            @php
+            {{-- @php
                 $rByCat = $rangeTotals['by_category'] ?? [];
                 $rByItem = $rangeTotals['by_item'] ?? [];
             @endphp
@@ -248,12 +248,12 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             {{-- ================================ --}}
             {{-- TOMORROW ESTIMATE (with details) --}}
             {{-- ================================ --}}
-            {{-- @php
+            @php
                 $tProducts = $tomorrowEstimate['products'] ?? [];
                 $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
                 $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
@@ -279,9 +279,9 @@
                 [$wQty, $wUnit] = $fmtCat($catBase['weight'], 'weight');
                 [$vQty, $vUnit] = $fmtCat($catBase['volume'], 'volume');
                 [$cQty, $cUnit] = $fmtCat($catBase['count'], 'count');
-            @endphp --}}
+            @endphp
 
-            {{-- <div class="card border-0 shadow-sm mt-4">
+            <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <h5 class="mb-0">Tomorrow Estimate —
@@ -301,6 +301,7 @@
                     @if (empty($tProducts))
                         <div class="alert alert-secondary">No active subscriptions tomorrow.</div>
                     @else
+                        {{-- Summary strip --}}
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-md-3">
                                 <div class="mini-stat p-3 bg-light border">
@@ -359,6 +360,7 @@
                             </div>
                         </div>
 
+                        {{-- Tomorrow Totals by Category --}}
                         @php
                             $catRows = [
                                 ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
@@ -393,6 +395,7 @@
                             </div>
                         </div>
 
+                        {{-- Products (native disclosure) --}}
                         <div class="row g-3">
                             @foreach ($tProducts as $pid => $row)
                                 @php
@@ -470,7 +473,7 @@
 
                     @endif
                 </div>
-            </div> --}}
+            </div>
 
             {{-- ================================ --}}
             {{-- DAY / MONTH VIEWS (unchanged)   --}}
@@ -478,9 +481,9 @@
             {{-- @php
                 $hasDaily = !empty($dailyEstimates) && count($dailyEstimates) > 0;
                 $hasMonthly = !empty($monthlyEstimates) && count($monthlyEstimates) > 0;
-            @endphp --}}
+            @endphp
 
-            {{-- @if ($mode === 'day')
+            @if ($mode === 'day')
                 @if (!$hasDaily)
                     <div class="alert alert-info mt-4">No data for the selected range.</div>
                 @else

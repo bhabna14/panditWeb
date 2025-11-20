@@ -157,14 +157,14 @@
                                 </div>
                             </div>
                         </div>
-                    </div> {{-- /card-body --}}
+                    </div>
                 </form>
             </div>
 
             {{-- ================================ --}}
             {{-- SELECTED RANGE — GRAND TOTALS    --}}
             {{-- ================================ --}}
-            @php
+            {{-- @php
                 $rByCat = $rangeTotals['by_category'] ?? [];
                 $rByItem = $rangeTotals['by_item'] ?? [];
             @endphp
@@ -248,7 +248,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
 
             {{-- ================================ --}}
             {{-- TOMORROW ESTIMATE (with details) --}}
@@ -475,12 +475,12 @@
             {{-- ================================ --}}
             {{-- DAY / MONTH VIEWS (unchanged)   --}}
             {{-- ================================ --}}
-            {{-- @php
+            @php
                 $hasDaily = !empty($dailyEstimates) && count($dailyEstimates) > 0;
                 $hasMonthly = !empty($monthlyEstimates) && count($monthlyEstimates) > 0;
-            @endphp --}}
+            @endphp
 
-            {{-- @if ($mode === 'day')
+            @if ($mode === 'day')
                 @if (!$hasDaily)
                     <div class="alert alert-info mt-4">No data for the selected range.</div>
                 @else
@@ -752,7 +752,7 @@
                         @endforeach
                     </div>
                 @endif
-            @endif --}}
+            @endif
 
         </div>
     </div>
