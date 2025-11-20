@@ -47,7 +47,7 @@ class WeeklyReportController extends Controller
                 'dow'      => $d->format('l'),
                 'finance'  => [
                     'income'      => 0,  // from FlowerPayment
-                    'expenditure' => 0,  // "Purch" from FlowerPickupDetails total_price
+                    'expenditure' => 0,  // Purch from FlowerPickupDetails.total_price
                 ],
                 'customer' => ['renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0],
                 'vendors'  => [],   // vendor name => total paid to vendor that day
@@ -80,12 +80,12 @@ class WeeklyReportController extends Controller
 
         // PURCHASE / EXPENDITURE per day:
         // Using FlowerPickupDetails.total_price grouped by pickup_date
+        // NOTE: NO payment_status filter – counts all purchases.
         $expend = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
                 DB::raw("SUM(total_price) as amt"),
             ])
-            ->where('payment_status', 'paid')
             ->whereBetween('pickup_date', [
                 $monthStart->toDateString(),
                 $monthEnd->toDateString(),
@@ -95,7 +95,6 @@ class WeeklyReportController extends Controller
 
         foreach ($expend as $row) {
             if (isset($days[$row->d])) {
-                // This is what shows in "Purch" column in the table
                 $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
             }
         }
@@ -151,7 +150,6 @@ class WeeklyReportController extends Controller
         }
 
         /* ================= Customer: PAUSE ================= */
-        // Pauses (prefer log)
         if (class_exists(SubscriptionPauseResumeLog::class)) {
             $pauses = SubscriptionPauseResumeLog::query()
                 ->select([
@@ -190,7 +188,6 @@ class WeeklyReportController extends Controller
         }
 
         /* ================= Customer: CUSTOMIZE (FlowerRequest) ================= */
-        // Customize orders = FlowerRequest created_at date wise
         $customs = FlowerRequest::query()
             ->select([
                 DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
@@ -207,13 +204,13 @@ class WeeklyReportController extends Controller
         }
 
         /* ================= Vendor daily (vendor-wise paid per day) ================= */
+        // Same as expenditure, but broken down by vendor
         $vendorPaid = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
                 'vendor_id',
                 DB::raw("SUM(total_price) as amt"),
             ])
-            ->where('payment_status', 'paid')
             ->whereBetween('pickup_date', [
                 $monthStart->toDateString(),
                 $monthEnd->toDateString()
@@ -232,16 +229,23 @@ class WeeklyReportController extends Controller
         $vendorColumns = array_keys($vendorColumnsSet);
         sort($vendorColumns);
 
-        /* ================= Deliveries per rider (counts, by delivery_time) ================= */
-        // IMPORTANT: use delivery_time for the real delivered date.
+        /* ================= Deliveries per rider (counts, by delivery date) ================= */
+        // Use COALESCE(delivery_time, created_at) so we always have a date.
+        $deliveryDateExpr = "DATE(CONVERT_TZ(COALESCE(delivery_time, created_at), '+00:00', '$tzOffset'))";
+
         $deliv = DeliveryHistory::query()
             ->select([
-                DB::raw("DATE(CONVERT_TZ(delivery_time, '+00:00', '$tzOffset')) as d"),
+                DB::raw("$deliveryDateExpr as d"),
                 'rider_id',
                 DB::raw("COUNT(*) as c"),
             ])
+            // Only records whose delivery-date lies in this month (in display TZ)
+            ->whereRaw("$deliveryDateExpr BETWEEN ? AND ?", [
+                $monthStart->toDateString(),
+                $monthEnd->toDateString(),
+            ])
+            // If you want only completed ones, keep this; otherwise remove it:
             ->where('delivery_status', 'delivered')
-            ->whereBetween('delivery_time', [$monthStartUtc, $monthEndUtc])
             ->groupBy('d', 'rider_id')
             ->get();
 
