@@ -32,7 +32,7 @@
         /* Quick presets as pill chips */
         .preset-chips { display: flex; flex-wrap: wrap; gap: .5rem; }
         .preset-chips .btn { border-radius: 999px; padding: .35rem .75rem; line-height: 1.1; }
-        .preset-chips .btn.active { font-weight: 700; }
+        .preset-chips .btn.active { font-weight: 700;color: white }
 
         /* View segmented control */
         .segmented {
@@ -171,7 +171,7 @@
             <div class="card border-0 shadow-sm mt-3">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <h5 class="mb-0">Selected Range — Grand Totals (Quantity)</h5>
+                        <h5 class="mb-0">Selected Range — Grand Totals (Flower Quantity)</h5>
                         <small class="text-muted">
                             From {{ \Carbon\Carbon::parse($start)->toFormattedDateString() }}
                             to {{ \Carbon\Carbon::parse($end)->toFormattedDateString() }}
