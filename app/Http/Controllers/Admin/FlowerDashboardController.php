@@ -226,12 +226,16 @@ class FlowerDashboardController extends Controller
             })
             ->where('status', 'active')->count();
 
-        $winStart = Carbon::today($tz)->startOfDay();
-        $winEnd   = (clone $winStart)->addDays(4)->endOfDay();
+            $tz     = config('app.timezone');
+        $today  = Carbon::today($tz);
+
+        $winStart = $today->copy()->addDay()->startOfDay();   // tomorrow 00:00:00
+        $winEnd   = $today->copy()->addDays(5)->endOfDay();   // 5th day from today 23:59:59
 
         $subscriptionEndFiveDays = Subscription::where('status', 'active')
             ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd])
             ->count();
+
 
         $monthStart = Carbon::now($tz)->startOfMonth();
         $monthEnd   = Carbon::now($tz)->endOfMonth();

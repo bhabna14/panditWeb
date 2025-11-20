@@ -67,12 +67,16 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'fivedays') {
-            $winStart   = Carbon::today($tz)->startOfDay();
-            $winEnd     = (clone $winStart)->addDays(4)->endOfDay();
+        $tz    = config('app.timezone');
+        $today = Carbon::today($tz);
 
-            $query->where('status', 'active')
-                ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd]);
-        }
+        $winStart = $today->copy()->addDay()->startOfDay();   // tomorrow
+        $winEnd   = $today->copy()->addDays(5)->endOfDay();   // today + 5 days
+
+        $query->where('status', 'active')
+            ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd]);
+    }
+
 
         if ($filter === 'tomorrowOrder') {
             $tomorrow = Carbon::tomorrow($tz)->toDateString();
