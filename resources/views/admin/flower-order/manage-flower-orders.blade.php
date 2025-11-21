@@ -10,11 +10,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+
     <style>
         .btn {
             text-align: center;
@@ -28,7 +28,6 @@
             transition: all 0.3s ease;
         }
 
-        /* View Button */
         .btn-view {
             background-color: #4CAF50;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -114,6 +113,8 @@
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 13px;
+            line-height: 1.6;
         }
 
         .order-details p {
@@ -205,16 +206,10 @@
             padding: 10px;
         }
 
-        /* Table styling */
         .table thead th {
             background: #f8f9fa;
             font-weight: 600;
             font-size: 14px;
-        }
-
-        .order-details {
-            font-size: 13px;
-            line-height: 1.6;
         }
 
         /* Modal improvements */
@@ -226,6 +221,45 @@
         .modal-header.bg-info,
         .modal-header.bg-warning {
             color: #fff;
+        }
+
+        /* New filter card design */
+        .filter-card {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+        }
+
+        .filter-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .filter-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .filter-actions .btn {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            padding: 4px 8px;
+        }
+
+        .select2-selection__rendered {
+            font-size: 13px;
+        }
+
+        .select2-selection__arrow {
+            height: 36px !important;
         }
     </style>
 @endsection
@@ -272,6 +306,69 @@
         @endforeach
     </div>
 
+    <!-- New Filter Section -->
+    <form id="filter-form" class="mb-4">
+        <div class="card filter-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <div class="filter-card-title">
+                        <i class="fas fa-filter me-2"></i> Filter Subscriptions
+                    </div>
+                    <div class="filter-actions d-flex gap-2">
+                        <button type="button" id="reset-filters" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-eraser me-1"></i> Reset
+                        </button>
+                        <button type="button" id="search-btn" class="btn btn-primary btn-sm">
+                            <i class="fas fa-search me-1"></i> Apply
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label">Customer Name</label>
+                        <select class="form-select" name="customer_name" id="customer_name">
+                            <option value="">All Customers</option>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->name }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label">Mobile Number</label>
+                        <select class="form-select" name="mobile_number" id="mobile_number">
+                            <option value="">All Mobiles</option>
+                            @foreach ($users as $user)
+                                <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label">Apartment Name</label>
+                        <select class="form-select" name="apartment_name" id="apartment_name">
+                            <option value="">All Apartments</option>
+                            @foreach ($apartmentNames as $name)
+                                <option value="{{ $name }}">{{ $name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-3 col-md-6">
+                        <label class="filter-label">Flat / Plot</label>
+                        <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
+                            <option value="">All Flats / Plots</option>
+                            @foreach ($apartmentNumbers as $num)
+                                <option value="{{ $num }}">{{ $num }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
     <!-- Row -->
     <div class="row row-sm">
         <div class="col-lg-12">
@@ -289,210 +386,162 @@
                         </div>
                     @endif
 
-                    <form id="filter-form" class="row g-2 align-items-end mb-4">
-                        <div class="col-md-3">
-                            <label class="form-label">Customer Name</label>
-                            <select class="form-select" name="customer_name" id="customer_name">
-                                <option value="">All</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->name }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Mobile Number</label>
-                            <select class="form-select" name="mobile_number" id="mobile_number">
-                                <option value="">All</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Apartment Name</label>
-                            <select class="form-select" name="apartment_name" id="apartment_name">
-                                <option value="">All</option>
-                                @foreach ($apartmentNames as $name)
-                                    <option value="{{ $name }}">{{ $name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label class="form-label">Apartment Number</label>
-                            <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
-                                <option value="">All</option>
-                                @foreach ($apartmentNumbers as $num)
-                                    <option value="{{ $num }}">{{ $num }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-2">
-                            <button type="button" id="search-btn" class="btn btn-primary w-100">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
-                    </form>
-
                     <div class="table-responsive">
-                        <div class="table-responsive">
-                            <table id="file-datatable" class="table table-bordered w-100">
-                                <thead>
-                                    <tr>
-                                        <th>Customer Details</th>
-                                        <th>First Purchase Date</th>
-                                        <th>Subscription Period</th>
-                                        <th>Subscription Price</th>
-                                        <th>Status</th>
-                                        <th>Assigned Rider</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{-- DataTables will load rows via AJAX --}}
-                                </tbody>
-                            </table>
-                        </div>
+                        <table id="file-datatable" class="table table-bordered w-100">
+                            <thead>
+                                <tr>
+                                    <th>Customer Details</th>
+                                    <th>First Purchase Date</th>
+                                    <th>Subscription Period</th>
+                                    <th>Subscription Price</th>
+                                    <th>Status</th>
+                                    <th>Assigned Rider</th>
+                                    <th>Address</th> <!-- Action replaced by Address -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{-- DataTables will load rows via AJAX --}}
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-status-form" method="POST"
-                                    action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
-                                    @csrf
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-info text-white">
-                                            <h5 class="modal-title">Update Subscription Status</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="status-sub-id">
-                                            <div class="mb-3">
-                                                <label for="status-select">Status</label>
-                                                <select class="form-select" name="status" id="status-select" required>
-                                                    <option value="active">Active</option>
-                                                    <option value="paused">Paused</option>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="expired">Expired</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Update</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
+                    {{-- Global Modals --}}
+                    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form id="edit-status-form" method="POST"
+                                  action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
+                                @csrf
+                                <div class="modal-content">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title">Update Subscription Status</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="subscription_id" id="status-sub-id">
+                                        <div class="mb-3">
+                                            <label for="status-select">Status</label>
+                                            <select class="form-select" name="status" id="status-select" required>
+                                                <option value="active">Active</option>
+                                                <option value="paused">Paused</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="expired">Expired</option>
+                                            </select>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-dates-form" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title">Edit Subscription Dates</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="sub-id">
-                                            <div class="mb-3">
-                                                <label>Start Date</label>
-                                                <input type="date" name="start_date" id="sub-start"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label>End Date</label>
-                                                <input type="date" name="end_date" id="sub-end"
-                                                    class="form-control" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Save</button>
-                                            <button type="button" class="btn btn-secondary"
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success">Update</button>
+                                        <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Cancel</button>
-                                        </div>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Global Edit Rider Modal -->
-                        <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-rider-form" method="POST">
-                                    @csrf @method('POST')
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-info text-white">
-                                            <h5 class="modal-title">Assign/Change Rider</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="rider-sub-id">
-                                            <div class="mb-3">
-                                                <label>Rider</label>
-                                                <select name="rider_id" id="rider-select" class="form-control" required>
-                                                    <option value="">Choose Rider</option>
-                                                    @foreach ($riders as $rider)
-                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Save</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-pause-form" method="POST" action="">
-                                    @csrf
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-warning text-dark">
-                                            <h5 class="modal-title">Edit Pause Dates</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="pause-sub-id">
-                                            <div class="mb-3">
-                                                <label for="pause-start">Pause Start Date</label>
-                                                <input type="date" name="pause_start_date" id="pause-start"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="pause-end">Pause End Date</label>
-                                                <input type="date" name="pause_end_date" id="pause-end"
-                                                    class="form-control" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Update</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                </div>
-            </div>
+
+                    <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form id="edit-dates-form" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <div class="modal-content">
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title">Edit Subscription Dates</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="subscription_id" id="sub-id">
+                                        <div class="mb-3">
+                                            <label>Start Date</label>
+                                            <input type="date" name="start_date" id="sub-start"
+                                                   class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label>End Date</label>
+                                            <input type="date" name="end_date" id="sub-end"
+                                                   class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success">Save</button>
+                                        <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Global Edit Rider Modal -->
+                    <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form id="edit-rider-form" method="POST">
+                                @csrf @method('POST')
+                                <div class="modal-content">
+                                    <div class="modal-header bg-info text-white">
+                                        <h5 class="modal-title">Assign/Change Rider</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="subscription_id" id="rider-sub-id">
+                                        <div class="mb-3">
+                                            <label>Rider</label>
+                                            <select name="rider_id" id="rider-select" class="form-control" required>
+                                                <option value="">Choose Rider</option>
+                                                @foreach ($riders as $rider)
+                                                    <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success">Save</button>
+                                        <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <form id="edit-pause-form" method="POST" action="">
+                                @csrf
+                                <div class="modal-content">
+                                    <div class="modal-header bg-warning text-dark">
+                                        <h5 class="modal-title">Edit Pause Dates</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="hidden" name="subscription_id" id="pause-sub-id">
+                                        <div class="mb-3">
+                                            <label for="pause-start">Pause Start Date</label>
+                                            <input type="date" name="pause_start_date" id="pause-start"
+                                                   class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="pause-end">Pause End Date</label>
+                                            <input type="date" name="pause_end_date" id="pause-end"
+                                                   class="form-control" required>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success">Update</button>
+                                        <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                </div> <!-- card-body -->
+            </div> <!-- card -->
         </div>
     </div>
     <!-- End Row -->
 @endsection
+
 @section('scripts')
     <!-- Dependencies -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -507,22 +556,27 @@
         $(document).ready(function() {
             $('#customer_name').select2({
                 placeholder: 'Select Customer',
-                allowClear: true
+                allowClear: true,
+                width: '100%'
             });
             $('#mobile_number').select2({
                 placeholder: 'Select Mobile',
-                allowClear: true
+                allowClear: true,
+                width: '100%'
             });
             $('#apartment_name').select2({
                 placeholder: 'Select Apartment',
-                allowClear: true
+                allowClear: true,
+                width: '100%'
             });
             $('#apartment_flat_plot').select2({
                 placeholder: 'Select Flat/Plot',
-                allowClear: true
+                allowClear: true,
+                width: '100%'
             });
         });
     </script>
+
     <script>
         $(function() {
             const table = $('#file-datatable').DataTable({
@@ -539,7 +593,8 @@
                     }
                 },
 
-                columns: [{
+                columns: [
+                    {
                         data: null,
                         name: 'users.name',
                         orderable: false,
@@ -553,20 +608,51 @@
                             const tooltip = `
                                 <p><i class='fas fa-map-marker-alt text-primary'></i> <strong>Address:</strong>
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
-                            `.replace(/"/g, '&quot;'); // Escape double quotes
+                            `.replace(/"/g, '&quot;');
+
+                            // Action buttons moved here
+                            const viewSubscriptionBtn =
+                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>`;
+
+                            let pauseResumeBtn = '';
+                            if (r.status === 'active') {
+                                pauseResumeBtn =
+                                    ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-pause"></i>
+                                      </a>`;
+                            } else if (r.status === 'paused') {
+                                pauseResumeBtn =
+                                    ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-outline-warning btn-sm">
+                                        <i class="fas fa-play"></i>
+                                      </a>`;
+                            }
 
                             return `
                                 <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
                                     <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
                                     <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
                                     <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}<br>
-                                    ${userId ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` : ''}
-                                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal${orderId}">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+
+                                    <div class="mt-2 d-flex flex-wrap gap-1">
+                                        ${userId
+                                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm">
+                                                 <i class="fas fa-user"></i>
+                                               </a>`
+                                            : ''
+                                        }
+                                        <button type="button" class="btn btn-outline-success btn-sm"
+                                                data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="modal" data-bs-target="#editAddressModal${orderId}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        ${viewSubscriptionBtn}
+                                        ${pauseResumeBtn}
+                                    </div>
                                 </div>
 
                                 <!-- View Address Modal -->
@@ -605,35 +691,44 @@
                                                 <div class="modal-body">
                                                     <div class="mb-3">
                                                         <label class="form-label">Flat/Plot</label>
-                                                        <input type="text" name="apartment_flat_plot" class="form-control" value="${address.apartment_flat_plot || ''}" />
+                                                        <input type="text" name="apartment_flat_plot" class="form-control"
+                                                               value="${address.apartment_flat_plot || ''}" />
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Apartment Name</label>
-                                                        <input type="text" name="apartment_name" class="form-control" value="${address.apartment_name || ''}" />
+                                                        <input type="text" name="apartment_name" class="form-control"
+                                                               value="${address.apartment_name || ''}" />
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Locality</label>
-                                                        <input type="text" name="locality_name" class="form-control" value="${address.locality || ''}" />
+                                                        <input type="text" name="locality_name" class="form-control"
+                                                               value="${address.locality || ''}" />
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Landmark</label>
-                                                        <input type="text" name="landmark" class="form-control" value="${address.landmark || ''}" />
+                                                        <input type="text" name="landmark" class="form-control"
+                                                               value="${address.landmark || ''}" />
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Pin Code</label>
-                                                        <input type="text" name="pincode" class="form-control" value="${address.pincode || ''}" />
+                                                        <input type="text" name="pincode" class="form-control"
+                                                               value="${address.pincode || ''}" />
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">City</label>
-                                                        <input type="text" name="city" class="form-control" value="${address.city || ''}" />
+                                                        <input type="text" name="city" class="form-control"
+                                                               value="${address.city || ''}" />
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">State</label>
-                                                        <input type="text" name="state" class="form-control" value="${address.state || ''}" />
+                                                        <input type="text" name="state" class="form-control"
+                                                               value="${address.state || ''}" />
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save"></i> Save Changes
+                                                    </button>
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                 </div>
                                             </form>
@@ -648,26 +743,27 @@
                         data: null,
                         name: 'created_at',
                         render: function(r) {
-                            const createdAt = r.created_at ? moment(r.created_at).format(
-                                'DD-MM-YYYY h:mm A') : 'N/A';
+                            const createdAt = r.created_at
+                                ? moment(r.created_at).format('DD-MM-YYYY h:mm A')
+                                : 'N/A';
 
                             if (r.status === 'paused') {
                                 const start = moment(r.pause_start_date).format('DD-MM-YYYY');
                                 const end = moment(r.pause_end_date).format('DD-MM-YYYY');
                                 return `
-                                ${createdAt}
-                                <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
-                                    <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
-                                    <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
-                                    <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
-                                        data-id="${r.id}"
-                                        data-start="${r.pause_start_date}"
-                                        data-end="${r.pause_end_date}"
-                                        data-bs-toggle="modal" data-bs-target="#editPauseModal">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </div>
-                            `;
+                                    ${createdAt}
+                                    <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
+                                        <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
+                                        <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
+                                        <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
+                                            data-id="${r.id}"
+                                            data-start="${r.pause_start_date}"
+                                            data-end="${r.pause_end_date}"
+                                            data-bs-toggle="modal" data-bs-target="#editPauseModal">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                `;
                             }
 
                             return createdAt;
@@ -679,12 +775,15 @@
                         name: 'start_date',
                         render: function(r) {
                             const start = moment(r.start_date).format('MMM D, YYYY');
-                            const end = r.new_date ? moment(r.new_date).format('MMM D, YYYY') :
-                                moment(r.end_date).format('MMM D, YYYY');
-                            return `${start}<br> — <br>${end}<br>
-                        <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>`;
+                            const end = r.new_date
+                                ? moment(r.new_date).format('MMM D, YYYY')
+                                : moment(r.end_date).format('MMM D, YYYY');
+                            return `
+                                ${start}<br> — <br>${end}<br>
+                                <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            `;
                         }
                     },
                     {
@@ -706,54 +805,76 @@
                                 pending: 'bg-danger',
                                 cancelled: 'bg-danger'
                             };
-                            return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
-                        <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
-                            data-bs-toggle="modal" data-bs-target="#editStatusModal"
-                            data-id="${r.id}" data-status="${s}">
-                            <i class="fas fa-edit"></i>
-                        </button>`;
+                            return `
+                                <span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
+                                <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
+                                    data-bs-toggle="modal" data-bs-target="#editStatusModal"
+                                    data-id="${r.id}" data-status="${s}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            `;
                         }
                     },
                     {
                         data: null,
                         name: 'order.rider_id',
                         render: function(r) {
-                            return `${r.order?.rider?.rider_name || 'Unassigned'}<br>
-                        <button class="btn btn-sm btn-outline-info edit-rider"
-                            data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
-                            <i class="fas fa-edit"></i>
-                        </button>`;
+                            return `
+                                ${r.order?.rider?.rider_name || 'Unassigned'}<br>
+                                <button class="btn btn-sm btn-outline-info edit-rider"
+                                    data-id="${r.id}" data-order-id="${r.order.id}"
+                                    data-rider-id="${r.order?.rider?.rider_id || ''}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            `;
                         }
                     },
                     {
                         data: null,
                         orderable: false,
+                        name: 'order.address.apartment_name',
                         render: function(r) {
-                            let btn =
-                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
-                            if (r.status === 'active')
-                                btn +=
-                                ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
-                            if (r.status === 'paused')
-                                btn +=
-                                ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                            const address = r.order?.address || {};
+                            const locality = r.order?.address?.localityDetails?.locality_name || '';
 
-                            return btn;
+                            const flat = address.apartment_flat_plot || '';
+                            const apt = address.apartment_name || '';
+                            let line1 = '';
+
+                            if (flat && apt) {
+                                line1 = `${flat}, ${apt}`;
+                            } else if (apt) {
+                                line1 = apt;
+                            } else if (flat) {
+                                line1 = flat;
+                            }
+
+                            return `
+                                <div class="small">
+                                    ${line1 ? `<div>${line1}</div>` : ''}
+                                    ${locality ? `<div class="text-muted">${locality}</div>` : ''}
+                                </div>
+                            `;
                         }
                     }
                 ],
-                order: [
-                    [1, 'desc']
-                ]
+                order: [[1, 'desc']]
             });
 
             table.on('draw', function() {
-                // Re-initialize all Bootstrap tooltips
                 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
                 tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
             });
 
             $('#search-btn').on('click', function() {
+                table.ajax.reload();
+            });
+
+            $('#reset-filters').on('click', function() {
+                $('#customer_name').val(null).trigger('change');
+                $('#mobile_number').val(null).trigger('change');
+                $('#apartment_name').val(null).trigger('change');
+                $('#apartment_flat_plot').val(null).trigger('change');
                 table.ajax.reload();
             });
 
@@ -850,7 +971,7 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                location.reload(); // 🔄 Auto-refresh the page
+                                location.reload();
                             });
                         }
                     },
@@ -873,35 +994,6 @@
                     }
                 });
             });
-
-
-            // // -- Edit Pause Dates --
-            // $('#file-datatable').on('click', '.edit-pause-dates', function() {
-            //     const id = $(this).data('id');
-            //     const start = $(this).data('start');
-            //     const end = $(this).data('end');
-            //     $('#pause-sub-id').val(id);
-            //     $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
-            //     $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
-            //     $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
-            //     new bootstrap.Modal($('#editPauseModal')[0]).show();
-            // });
-
-            // $('#edit-pause-form').submit(function(e) {
-            //     e.preventDefault();
-            //     $.ajax({
-            //         url: this.action,
-            //         type: 'POST',
-            //         data: $(this).serialize(),
-            //         success: () => {
-            //             Swal.fire('Updated', 'Pause dates updated.', 'success');
-            //             $('#editPauseModal').modal('hide');
-            //             table.ajax.reload(null, false);
-            //         },
-            //         error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
-            //     });
-            // });
-
 
             $('#file-datatable').on('click', '.edit-pause-dates', function() {
                 const id = $(this).data('id');

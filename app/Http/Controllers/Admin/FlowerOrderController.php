@@ -28,52 +28,49 @@ use App\Models\UserDevice; // ✅ add this
 
 class FlowerOrderController extends Controller
 {
-    
+
     public function showOrders(Request $request)
-    {
-        // TZ-safe "today"
-        $tz         = config('app.timezone');
-        $todayStart = Carbon::today($tz)->startOfDay();
-        $todayEnd   = (clone $todayStart)->endOfDay();
+{
+    // TZ-safe "today"
+    $tz         = config('app.timezone');
+    $todayStart = Carbon::today($tz)->startOfDay();
+    $todayEnd   = (clone $todayStart)->endOfDay();
 
-        // Base query + eager loads
-        $query = Subscription::with([
-            'order.address.localityDetails',
-            'flowerPayments',
-            'users',
-            'flowerProducts',
-            'pauseResumeLog',
-            'order.rider',
-        ])->orderByDesc('id');
+    // Base query + eager loads
+    $query = Subscription::with([
+        'order.address.localityDetails',
+        'flowerPayments',
+        'users',
+        'flowerProducts',
+        'pauseResumeLog',
+        'order.rider',
+    ])->orderByDesc('id');
 
-        $filter = $request->query('filter');
+    $filter = $request->query('filter');
 
-        if ($filter === 'rider') {
-            $query->where('status', 'active')
-                ->whereHas('order', function ($q) {
-                    $q->whereNull('rider_id')->orWhere('rider_id', '');
-                });
-        }
+    if ($filter === 'rider') {
+        $query->where('status', 'active')
+            ->whereHas('order', function ($q) {
+                $q->whereNull('rider_id')->orWhere('rider_id', '');
+            });
+    }
 
-        if ($filter === 'end') {
-    $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
+    if ($filter === 'end') {
+        $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
             $dateQuery->where(function ($sq) use ($todayStart, $todayEnd) {
-                    // Case 1: new_date is today
                     $sq->whereNotNull('new_date')
                        ->whereBetween('new_date', [$todayStart, $todayEnd]);
                 })
                 ->orWhere(function ($sq) use ($todayStart, $todayEnd) {
-                    // Case 2: new_date is null => end_date is today
                     $sq->whereNull('new_date')
                        ->whereBetween('end_date', [$todayStart, $todayEnd]);
                 });
         })
         ->where('status', 'active')
-        ->withoutOtherActiveOrPending();   // 👈 same scope here
-}
+        ->withoutOtherActiveOrPending();
+    }
 
-
-        if ($filter === 'fivedays') {
+    if ($filter === 'fivedays') {
         $tz    = config('app.timezone');
         $today = Carbon::today($tz);
 
@@ -84,175 +81,168 @@ class FlowerOrderController extends Controller
             ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd]);
     }
 
-
-        if ($filter === 'tomorrowOrder') {
-            $tomorrow = Carbon::tomorrow($tz)->toDateString();
-            $query->where('status', 'pending')
-                ->whereDate('start_date', $tomorrow);
-        }
-
-        if ($filter === 'todayrequest') {
-            $query->whereIn('subscription_id', function ($sub) use ($todayStart, $todayEnd) {
-                $sub->select('subscription_id')
-                    ->from('subscription_pause_resume_logs')
-                    ->where('action', 'paused')
-                    ->whereBetween('created_at', [$todayStart, $todayEnd]);
-            })->distinct('subscription_id');
-        }
-
-        if ($filter === 'new') {
-            // first-ever subscription for a user created today
-            $firstRowsSub = DB::table('subscriptions as s1')
-                ->join(
-                    DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
-                            FROM subscriptions
-                            GROUP BY user_id) f'),
-                    function ($join) {
-                        $join->on('s1.user_id', '=', 'f.user_id')
-                            ->on('s1.created_at', '=', 'f.first_created_at');
-                    }
-                )
-                ->whereBetween('s1.created_at', [$todayStart, $todayEnd])
-                ->select('s1.id');
-
-            $query->whereIn('id', $firstRowsSub);
-        }
-
-        if ($filter === 'renewed') {
-            // created today for users who had any subscription before today
-            $query->whereBetween('created_at', [$todayStart, $todayEnd])
-                ->where('status','pending')
-                ->whereExists(function ($q) use ($todayStart) {
-                    $q->select(DB::raw(1))
-                        ->from('subscriptions as prev')
-                        ->whereColumn('prev.user_id', 'subscriptions.user_id')
-                        ->where('prev.created_at', '<', $todayStart);
-                });
-        }
-
-        if ($filter === 'active') {
-            $query->where('status', 'active');
-        }
-
-        if ($filter === 'expired') {
-            $monthStart = Carbon::now($tz)->startOfMonth();
-            $monthEnd   = Carbon::now($tz)->endOfMonth();
-
-            $latestPerUserIds = DB::table('subscriptions as s1')
-                ->selectRaw('MAX(s1.id) as id')
-                ->groupBy('s1.user_id');
-
-            $query->whereIn('id', $latestPerUserIds)
-                ->where('status', 'expired')
-                ->whereNotNull('end_date')
-                ->whereBetween('end_date', [$monthStart, $monthEnd]);
-        }
-
-        if ($filter === 'discontinued') {
-            $twoMonthsAgo = Carbon::now($tz)->subMonths(2);
-            $liveStatuses = ['active', 'paused', 'resume'];
-
-            $query->where('status', 'expired')
-                ->whereNotExists(function ($q) use ($liveStatuses) {
-                    $q->select(DB::raw(1))
-                    ->from('subscriptions as s2')
-                    ->whereColumn('s2.user_id', 'subscriptions.user_id')
-                    ->whereIn('s2.status', $liveStatuses);
-                })
-                ->whereNotExists(function ($q) use ($liveStatuses) {
-                    $q->select(DB::raw(1))
-                    ->from('subscriptions as s3')
-                    ->whereColumn('s3.order_id', 'subscriptions.order_id')
-                    ->whereIn('s3.status', $liveStatuses);
-                })
-                ->where(function ($q) use ($twoMonthsAgo) {
-                    $q->whereNull('end_date')
-                    ->orWhere('end_date', '<', $twoMonthsAgo);
-                })
-                ->whereIn('id', function ($sub) {
-                    $sub->select(DB::raw('MAX(id)'))
-                        ->from('subscriptions')
-                        ->groupBy('user_id'); // one latest row per user
-                });
-        }
-
-        if ($filter === 'paused') {
-            $query->where('status', 'paused');
-        }
-
-        $tomorrowStart = (clone $todayStart)->addDay();
-        $tomorrowEnd   = (clone $tomorrowStart)->endOfDay();
-
-        if ($filter === 'tommorow') { // keeping your existing key
-            $query->where('status', 'active')
-                ->whereBetween('pause_start_date', [$tomorrowStart, $tomorrowEnd]);
-        }
-
-        if ($filter === 'nextdayresumed') {
-            $query->where('status', 'active')
-                ->whereBetween('pause_end_date', [$tomorrowStart, $tomorrowEnd]);
-        }
-
-        // ---- Search fields ----
-        if ($request->filled('customer_name')) {
-            $name = $request->customer_name;
-            $query->whereHas('users', fn($q) => $q->where('name', $name));
-            // for partial match: ->where('name', 'LIKE', "%{$name}%")
-        }
-
-        if ($request->filled('mobile_number')) {
-            $mobile = $request->mobile_number;
-            $query->whereHas('users', fn($q) => $q->where('mobile_number', $mobile));
-        }
-
-        if ($request->filled('apartment_name')) {
-            $apt = $request->apartment_name;
-            $query->whereHas('order.address', fn($q) => $q->where('apartment_name', $apt));
-        }
-
-        if ($request->filled('apartment_flat_plot')) {
-            $flat = $request->apartment_flat_plot;
-            $query->whereHas('order.address', fn($q) => $q->where('apartment_flat_plot', $flat));
-        }
-
-        // DataTables
-        if ($request->ajax()) {
-            return datatables()->eloquent($query)->toJson();
-        }
-
-        // Sidebar counts (unchanged)
-        $activeSubscriptions  = Subscription::where('status', 'active')->count();
-        $pausedSubscriptions  = Subscription::where('status', 'paused')->count();
-        $ordersRequestedToday = Subscription::whereBetween('created_at', [$todayStart, $todayEnd])->count();
-        $riders               = RiderDetails::where('status', 'active')->get();
-
-        $users = User::select('name', 'mobile_number')->distinct()->orderBy('name')->get();
-
-        // ✅ Distinct dropdown data (trimmed, non-null/non-empty, sorted)
-        $apartmentNames = UserAddress::query()
-            ->whereNotNull('apartment_name')
-            ->where('apartment_name', '!=', '')
-            ->selectRaw('DISTINCT TRIM(apartment_name) AS apartment_name')
-            ->orderBy('apartment_name')
-            ->pluck('apartment_name');
-
-        $apartmentNumbers = UserAddress::query()
-            ->whereNotNull('apartment_flat_plot')
-            ->where('apartment_flat_plot', '!=', '')
-            ->selectRaw('DISTINCT TRIM(apartment_flat_plot) AS apartment_flat_plot')
-            ->orderBy('apartment_flat_plot')
-            ->pluck('apartment_flat_plot');
-
-        return view('admin.flower-order.manage-flower-orders', compact(
-            'riders',
-            'activeSubscriptions',
-            'pausedSubscriptions',
-            'ordersRequestedToday',
-            'users',
-            'apartmentNames',
-            'apartmentNumbers'
-        ));
+    if ($filter === 'tomorrowOrder') {
+        $tomorrow = Carbon::tomorrow($tz)->toDateString();
+        $query->where('status', 'pending')
+            ->whereDate('start_date', $tomorrow);
     }
+
+    if ($filter === 'todayrequest') {
+        $query->whereIn('subscription_id', function ($sub) use ($todayStart, $todayEnd) {
+            $sub->select('subscription_id')
+                ->from('subscription_pause_resume_logs')
+                ->where('action', 'paused')
+                ->whereBetween('created_at', [$todayStart, $todayEnd]);
+        })->distinct('subscription_id');
+    }
+
+    if ($filter === 'new') {
+        $firstRowsSub = DB::table('subscriptions as s1')
+            ->join(
+                DB::raw('(SELECT user_id, MIN(created_at) AS first_created_at
+                        FROM subscriptions
+                        GROUP BY user_id) f'),
+                function ($join) {
+                    $join->on('s1.user_id', '=', 'f.user_id')
+                        ->on('s1.created_at', '=', 'f.first_created_at');
+                }
+            )
+            ->whereBetween('s1.created_at', [$todayStart, $todayEnd])
+            ->select('s1.id');
+
+        $query->whereIn('id', $firstRowsSub);
+    }
+
+    if ($filter === 'renewed') {
+        $query->whereBetween('created_at', [$todayStart, $todayEnd])
+            ->where('status', 'pending')
+            ->whereExists(function ($q) use ($todayStart) {
+                $q->select(DB::raw(1))
+                    ->from('subscriptions as prev')
+                    ->whereColumn('prev.user_id', 'subscriptions.user_id')
+                    ->where('prev.created_at', '<', $todayStart);
+            });
+    }
+
+    if ($filter === 'active') {
+        $query->where('status', 'active');
+    }
+
+    if ($filter === 'expired') {
+        $monthStart = Carbon::now($tz)->startOfMonth();
+        $monthEnd   = Carbon::now($tz)->endOfMonth();
+
+        $latestPerUserIds = DB::table('subscriptions as s1')
+            ->selectRaw('MAX(s1.id) as id')
+            ->groupBy('s1.user_id');
+
+        $query->whereIn('id', $latestPerUserIds)
+            ->where('status', 'expired')
+            ->whereNotNull('end_date')
+            ->whereBetween('end_date', [$monthStart, $monthEnd]);
+    }
+
+    if ($filter === 'discontinued') {
+        $twoMonthsAgo = Carbon::now($tz)->subMonths(2);
+        $liveStatuses = ['active', 'paused', 'resume'];
+
+        $query->where('status', 'expired')
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                ->from('subscriptions as s2')
+                ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                ->whereIn('s2.status', $liveStatuses);
+            })
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                ->from('subscriptions as s3')
+                ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                ->whereIn('s3.status', $liveStatuses);
+            })
+            ->where(function ($q) use ($twoMonthsAgo) {
+                $q->whereNull('end_date')
+                ->orWhere('end_date', '<', $twoMonthsAgo);
+            })
+            ->whereIn('id', function ($sub) {
+                $sub->select(DB::raw('MAX(id)'))
+                    ->from('subscriptions')
+                    ->groupBy('user_id');
+            });
+    }
+
+    if ($filter === 'paused') {
+        $query->where('status', 'paused');
+    }
+
+    $tomorrowStart = (clone $todayStart)->addDay();
+    $tomorrowEnd   = (clone $tomorrowStart)->endOfDay();
+
+    if ($filter === 'tommorow') {
+        $query->where('status', 'active')
+            ->whereBetween('pause_start_date', [$tomorrowStart, $tomorrowEnd]);
+    }
+
+    if ($filter === 'nextdayresumed') {
+        $query->where('status', 'active')
+            ->whereBetween('pause_end_date', [$tomorrowStart, $tomorrowEnd]);
+    }
+
+    // ---- Search fields ----
+    if ($request->filled('customer_name')) {
+        $name = $request->customer_name;
+        $query->whereHas('users', fn($q) => $q->where('name', $name));
+    }
+
+    if ($request->filled('mobile_number')) {
+        $mobile = $request->mobile_number;
+        $query->whereHas('users', fn($q) => $q->where('mobile_number', $mobile));
+    }
+
+    if ($request->filled('apartment_name')) {
+        $apt = $request->apartment_name;
+        $query->whereHas('order.address', fn($q) => $q->where('apartment_name', $apt));
+    }
+
+    if ($request->filled('apartment_flat_plot')) {
+        $flat = $request->apartment_flat_plot;
+        $query->whereHas('order.address', fn($q) => $q->where('apartment_flat_plot', $flat));
+    }
+
+    if ($request->ajax()) {
+        return datatables()->eloquent($query)->toJson();
+    }
+
+    $activeSubscriptions  = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions  = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday = Subscription::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+    $riders               = RiderDetails::where('status', 'active')->get();
+
+    $users = User::select('name', 'mobile_number')->distinct()->orderBy('name')->get();
+
+    $apartmentNames = UserAddress::query()
+        ->whereNotNull('apartment_name')
+        ->where('apartment_name', '!=', '')
+        ->selectRaw('DISTINCT TRIM(apartment_name) AS apartment_name')
+        ->orderBy('apartment_name')
+        ->pluck('apartment_name');
+
+    $apartmentNumbers = UserAddress::query()
+        ->whereNotNull('apartment_flat_plot')
+        ->where('apartment_flat_plot', '!=', '')
+        ->selectRaw('DISTINCT TRIM(apartment_flat_plot) AS apartment_flat_plot')
+        ->orderBy('apartment_flat_plot')
+        ->pluck('apartment_flat_plot');
+
+    return view('admin.flower-order.manage-flower-orders', compact(
+        'riders',
+        'activeSubscriptions',
+        'pausedSubscriptions',
+        'ordersRequestedToday',
+        'users',
+        'apartmentNames',
+        'apartmentNumbers'
+    ));
+}
 
     public function updateDates(Request $request, $id)
     {
@@ -409,7 +399,7 @@ class FlowerOrderController extends Controller
         return view('admin.layouts.components.app-header', compact('notifications'));
     }
         
-   public function showCustomerDetails($userid)
+    public function showCustomerDetails($userid)
     {
         // User by business key `userid`
         $user = User::where('userid', $userid)->firstOrFail();
@@ -489,67 +479,67 @@ class FlowerOrderController extends Controller
         );
     }
 
-public function showorderdetails($id)
-{
-    $order = Subscription::with([
-        'order',
-        'flowerPayments',
-        'users',
-        'flowerProducts',
-        'pauseResumeLogs',
-    ])->findOrFail($id);
+    public function showorderdetails($id)
+    {
+        $order = Subscription::with([
+            'order',
+            'flowerPayments',
+            'users',
+            'flowerProducts',
+            'pauseResumeLogs',
+        ])->findOrFail($id);
 
-    // Compute subscription window: start_date → (new_date if present else end_date)
-    $periodStart = $order->start_date ? Carbon::parse($order->start_date)->startOfDay() : null;
-    $periodEndRaw = $order->new_date ?: $order->end_date;
-    $periodEnd = $periodEndRaw ? Carbon::parse($periodEndRaw)->endOfDay() : null;
+        // Compute subscription window: start_date → (new_date if present else end_date)
+        $periodStart = $order->start_date ? Carbon::parse($order->start_date)->startOfDay() : null;
+        $periodEndRaw = $order->new_date ?: $order->end_date;
+        $periodEnd = $periodEndRaw ? Carbon::parse($periodEndRaw)->endOfDay() : null;
 
-    // Filter toggle: ?range=period (default) or ?range=all
-    $range = request()->string('range')->lower()->value();
-    if (!in_array($range, ['period', 'all'], true)) {
-        $range = 'period';
-    }
-
-    $deliveriesQuery = DeliveryHistory::with('rider')
-        ->where('order_id', $order->order_id)
-        ->orderByDesc('created_at');
-
-    if ($range === 'period') {
-        if ($periodStart && $periodEnd) {
-            $deliveriesQuery->whereBetween('created_at', [$periodStart, $periodEnd]);
-        } elseif ($periodStart) {
-            $deliveriesQuery->where('created_at', '>=', $periodStart);
-        } elseif ($periodEnd) {
-            $deliveriesQuery->where('created_at', '<=', $periodEnd);
+        // Filter toggle: ?range=period (default) or ?range=all
+        $range = request()->string('range')->lower()->value();
+        if (!in_array($range, ['period', 'all'], true)) {
+            $range = 'period';
         }
+
+        $deliveriesQuery = DeliveryHistory::with('rider')
+            ->where('order_id', $order->order_id)
+            ->orderByDesc('created_at');
+
+        if ($range === 'period') {
+            if ($periodStart && $periodEnd) {
+                $deliveriesQuery->whereBetween('created_at', [$periodStart, $periodEnd]);
+            } elseif ($periodStart) {
+                $deliveriesQuery->where('created_at', '>=', $periodStart);
+            } elseif ($periodEnd) {
+                $deliveriesQuery->where('created_at', '<=', $periodEnd);
+            }
+        }
+
+        $deliveries = $deliveriesQuery->get();
+
+        // Aggregates for UI
+        $totalDeliveries = $deliveries->count();
+        $lastStatus = optional($deliveries->first())->delivery_status;
+
+        // Group deliveries by date (Y-m-d) for date headers in the timeline
+        $groupedDeliveries = $deliveries->groupBy(function ($d) {
+            return Carbon::parse($d->created_at)->format('Y-m-d');
+        });
+
+        // Status counts
+        $statusCounts = $deliveries->groupBy('delivery_status')->map->count();
+
+        return view('admin.flower-order.show-order-details', compact(
+            'order',
+            'periodStart',
+            'periodEnd',
+            'deliveries',
+            'groupedDeliveries',
+            'totalDeliveries',
+            'lastStatus',
+            'statusCounts',
+            'range'
+        ));
     }
-
-    $deliveries = $deliveriesQuery->get();
-
-    // Aggregates for UI
-    $totalDeliveries = $deliveries->count();
-    $lastStatus = optional($deliveries->first())->delivery_status;
-
-    // Group deliveries by date (Y-m-d) for date headers in the timeline
-    $groupedDeliveries = $deliveries->groupBy(function ($d) {
-        return Carbon::parse($d->created_at)->format('Y-m-d');
-    });
-
-    // Status counts
-    $statusCounts = $deliveries->groupBy('delivery_status')->map->count();
-
-    return view('admin.flower-order.show-order-details', compact(
-        'order',
-        'periodStart',
-        'periodEnd',
-        'deliveries',
-        'groupedDeliveries',
-        'totalDeliveries',
-        'lastStatus',
-        'statusCounts',
-        'range'
-    ));
-}
 
     public function showActiveSubscriptions()
     {
@@ -647,85 +637,85 @@ public function showorderdetails($id)
         return redirect()->back()->with('success', 'Rider updated successfully.');
     }
 
-public function mngdeliveryhistory(Request $request)
-{
-    try {
-        $filter = $request->input('filter', 'all');
-        $tz     = config('app.timezone', 'Asia/Kolkata');
+    public function mngdeliveryhistory(Request $request)
+    {
+        try {
+            $filter = $request->input('filter', 'all');
+            $tz     = config('app.timezone', 'Asia/Kolkata');
 
-        // ----- Resolve date range -----
-        // Priority: explicit from/to -> predefined filter -> default last 7 days (including today)
-        $from = null;
-        $to   = null;
+            // ----- Resolve date range -----
+            // Priority: explicit from/to -> predefined filter -> default last 7 days (including today)
+            $from = null;
+            $to   = null;
 
-        if ($request->filled('from_date') && $request->filled('to_date')) {
-            $from = Carbon::parse($request->input('from_date'), $tz)->startOfDay();
-            $to   = Carbon::parse($request->input('to_date'),   $tz)->endOfDay();
-        } else {
-            // Predefined filter short-hands (optional, kept for compatibility)
-            switch ($filter) {
-                case 'todaydelivery':
-                    $from = Carbon::now($tz)->startOfDay();
-                    $to   = Carbon::now($tz)->endOfDay();
-                    break;
-                case 'monthlydelivery':
-                    $from = Carbon::now($tz)->startOfMonth();
-                    $to   = Carbon::now($tz)->endOfMonth();
-                    break;
-                default:
-                    // DEFAULT: last 7 days including today
-                    $from = Carbon::now($tz)->subDays(6)->startOfDay();
-                    $to   = Carbon::now($tz)->endOfDay();
-                    break;
+            if ($request->filled('from_date') && $request->filled('to_date')) {
+                $from = Carbon::parse($request->input('from_date'), $tz)->startOfDay();
+                $to   = Carbon::parse($request->input('to_date'),   $tz)->endOfDay();
+            } else {
+                // Predefined filter short-hands (optional, kept for compatibility)
+                switch ($filter) {
+                    case 'todaydelivery':
+                        $from = Carbon::now($tz)->startOfDay();
+                        $to   = Carbon::now($tz)->endOfDay();
+                        break;
+                    case 'monthlydelivery':
+                        $from = Carbon::now($tz)->startOfMonth();
+                        $to   = Carbon::now($tz)->endOfMonth();
+                        break;
+                    default:
+                        // DEFAULT: last 7 days including today
+                        $from = Carbon::now($tz)->subDays(6)->startOfDay();
+                        $to   = Carbon::now($tz)->endOfDay();
+                        break;
+                }
             }
+
+            // ----- Base query -----
+            $query = DeliveryHistory::with([
+                'order.user',
+                'order.flowerProduct',
+                'order.flowerPayments',
+                'order.address.localityDetails',
+                'rider',
+            ])->whereBetween('created_at', [$from, $to])
+            ->orderBy('created_at', 'desc');
+
+            // Rider filter
+            if ($request->filled('rider_id')) {
+                $query->where('rider_id', $request->input('rider_id'));
+            }
+
+            $deliveryHistory = $query->get();
+
+            // Totals for today (useful KPI)
+            $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::now($tz)->toDateString())->count();
+
+            // Riders for dropdown
+            $riders = RiderDetails::where('status', 'active')->orderBy('rider_name')->get();
+
+            // Compute lightweight metrics for top tiles
+            $metrics = [
+                'total'   => $deliveryHistory->count(),
+                'delivered' => $deliveryHistory->filter(fn($h) => in_array(strtolower($h->delivery_status ?? ''), ['delivered', 'completed']))->count(),
+                'unique_riders' => $deliveryHistory->pluck('rider.rider_name')->filter()->unique()->count(),
+            ];
+
+            // Pass resolved dates back to the view for inputs to reflect
+            $from_date = $from->toDateString();
+            $to_date   = $to->toDateString();
+
+            return view('admin.flower-order.manage-delivery-history', compact(
+                'deliveryHistory',
+                'totalDeliveriesToday',
+                'riders',
+                'metrics',
+                'from_date',
+                'to_date'
+            ));
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
         }
-
-        // ----- Base query -----
-        $query = DeliveryHistory::with([
-            'order.user',
-            'order.flowerProduct',
-            'order.flowerPayments',
-            'order.address.localityDetails',
-            'rider',
-        ])->whereBetween('created_at', [$from, $to])
-          ->orderBy('created_at', 'desc');
-
-        // Rider filter
-        if ($request->filled('rider_id')) {
-            $query->where('rider_id', $request->input('rider_id'));
-        }
-
-        $deliveryHistory = $query->get();
-
-        // Totals for today (useful KPI)
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::now($tz)->toDateString())->count();
-
-        // Riders for dropdown
-        $riders = RiderDetails::where('status', 'active')->orderBy('rider_name')->get();
-
-        // Compute lightweight metrics for top tiles
-        $metrics = [
-            'total'   => $deliveryHistory->count(),
-            'delivered' => $deliveryHistory->filter(fn($h) => in_array(strtolower($h->delivery_status ?? ''), ['delivered', 'completed']))->count(),
-            'unique_riders' => $deliveryHistory->pluck('rider.rider_name')->filter()->unique()->count(),
-        ];
-
-        // Pass resolved dates back to the view for inputs to reflect
-        $from_date = $from->toDateString();
-        $to_date   = $to->toDateString();
-
-        return view('admin.flower-order.manage-delivery-history', compact(
-            'deliveryHistory',
-            'totalDeliveriesToday',
-            'riders',
-            'metrics',
-            'from_date',
-            'to_date'
-        ));
-    } catch (\Exception $e) {
-        return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
     }
-}
 
     public function showRiderDetails($id)
     {
