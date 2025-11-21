@@ -124,14 +124,14 @@ class Subscription extends Model
      * Scope: exclude subscriptions where the same user
      * has another subscription with status 'active' or 'pending'.
      */
-    public function scopeWithoutOtherActiveOrPending(Builder $query): Builder
-    {
-        return $query->whereDoesntExist(function ($sub) {
-            $sub->select(DB::raw(1))
-                ->from('subscriptions as s2')
-                ->whereColumn('s2.user_id', 'subscriptions.user_id') // same user
-                ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different subscription
-                ->whereIn('s2.status', ['active', 'pending']);        // other sub is active/pending
-        });
-    }
+   public function scopeWithoutOtherActiveOrPending($query)
+{
+    return $query->whereNotExists(function ($sub) {
+        $sub->select(DB::raw(1))
+            ->from('subscriptions as s2')
+            ->whereColumn('s2.user_id', 'subscriptions.user_id') // same user
+            ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different subscription
+            ->whereIn('s2.status', ['active', 'pending']);        // other sub is active/pending
+    });
+}
 }

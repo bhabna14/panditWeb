@@ -219,20 +219,23 @@ class FlowerDashboardController extends Controller
         $todayDate = $today->toDateString();
 
       $todayEndSubscription = Subscription::where(function ($q) use ($todayDate) {
-            $q->where(function ($subQuery) use ($todayDate) {
-                    // Case 1: new_date is set and equals today
-                    $subQuery->whereNotNull('new_date')
-                             ->whereDate('new_date', $todayDate);
-                })
-                ->orWhere(function ($subQuery) use ($todayDate) {
-                    // Case 2: new_date is null -> check end_date = today
-                    $subQuery->whereNull('new_date')
-                             ->whereDate('end_date', $todayDate);
-                });
-        })
-        ->where('status', 'active')
-        ->withoutOtherActiveOrPending()
-        ->count();
+
+        $q->where(function ($subQuery) use ($todayDate) {
+                // Case 1: new_date is set and equals today
+                $subQuery->whereNotNull('new_date')
+                         ->whereDate('new_date', $todayDate);
+            })
+            ->orWhere(function ($subQuery) use ($todayDate) {
+                // Case 2: new_date is null -> check end_date = today
+                $subQuery->whereNull('new_date')
+                         ->whereDate('end_date', $todayDate);
+            });
+
+    })
+    ->where('status', 'active')
+    ->withoutOtherActiveOrPending()   // now uses whereNotExists() internally
+    ->count();
+
 
 
         $winStart = $today->copy()->addDay()->startOfDay();   // tomorrow 00:00:00
