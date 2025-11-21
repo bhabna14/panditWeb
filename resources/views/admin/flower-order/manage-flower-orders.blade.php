@@ -212,7 +212,6 @@
             font-size: 14px;
         }
 
-        /* Modal improvements */
         .modal-header {
             border-bottom: 0;
         }
@@ -269,22 +268,22 @@
         @php
             $cards = [
                 [
-                    'title' => 'Subscriptions Placed Today',
-                    'value' => $ordersRequestedToday,
-                    'filter' => 'renewed',
-                    'icon' => 'fa-calendar-plus',
+                    'title'  => 'Subscriptions Placed Today',
+                    'value'  => $ordersRequestedToday,
+                    'filter' => 'today',           // 🔹 CHANGED from 'renew' to 'today'
+                    'icon'   => 'fa-calendar-plus',
                 ],
                 [
-                    'title' => 'Active Subscriptions',
-                    'value' => $activeSubscriptions,
+                    'title'  => 'Active Subscriptions',
+                    'value'  => $activeSubscriptions,
                     'filter' => 'active',
-                    'icon' => 'fa-check-circle',
+                    'icon'   => 'fa-check-circle',
                 ],
                 [
-                    'title' => 'Paused Subscriptions',
-                    'value' => $pausedSubscriptions,
+                    'title'  => 'Paused Subscriptions',
+                    'value'  => $pausedSubscriptions,
                     'filter' => 'paused',
-                    'icon' => 'fa-pause-circle',
+                    'icon'   => 'fa-pause-circle',
                 ],
             ];
         @endphp
@@ -306,7 +305,7 @@
         @endforeach
     </div>
 
-    <!-- New Filter Section -->
+    <!-- Filter Section -->
     <form id="filter-form" class="mb-4">
         <div class="card filter-card">
             <div class="card-body">
@@ -396,16 +395,18 @@
                                     <th>Subscription Price</th>
                                     <th>Status</th>
                                     <th>Assigned Rider</th>
-                                    <th>Address</th> <!-- Action replaced by Address -->
+                                    <th>Address</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {{-- DataTables will load rows via AJAX --}}
+                                {{-- DataTables via AJAX --}}
                             </tbody>
                         </table>
                     </div>
 
-                    {{-- Global Modals --}}
+                    {{-- Modals: Status, Dates, Rider, Pause --}}
+                    {{-- (same as your current version, unchanged) --}}
+                    <!-- editStatusModal -->
                     <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <form id="edit-status-form" method="POST"
@@ -438,6 +439,7 @@
                         </div>
                     </div>
 
+                    <!-- editDatesModal -->
                     <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <form id="edit-dates-form" method="POST">
@@ -471,7 +473,7 @@
                         </div>
                     </div>
 
-                    <!-- Global Edit Rider Modal -->
+                    <!-- editRiderModal -->
                     <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <form id="edit-rider-form" method="POST">
@@ -503,6 +505,7 @@
                         </div>
                     </div>
 
+                    <!-- editPauseModal -->
                     <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
                             <form id="edit-pause-form" method="POST" action="">
@@ -539,7 +542,6 @@
             </div> <!-- card -->
         </div>
     </div>
-    <!-- End Row -->
 @endsection
 
 @section('scripts')
@@ -585,10 +587,10 @@
                 ajax: {
                     url: "{{ route('admin.orders.index') }}",
                     data: function(d) {
-                        d.filter = '{{ request('filter', '') }}';
-                        d.customer_name = $('#customer_name').val();
-                        d.mobile_number = $('#mobile_number').val();
-                        d.apartment_name = $('#apartment_name').val();
+                        d.filter              = '{{ request('filter', '') }}';
+                        d.customer_name       = $('#customer_name').val();
+                        d.mobile_number       = $('#mobile_number').val();
+                        d.apartment_name      = $('#apartment_name').val();
                         d.apartment_flat_plot = $('#apartment_flat_plot').val();
                     }
                 },
@@ -600,9 +602,9 @@
                         orderable: false,
                         searchable: false,
                         render: function(r) {
-                            const userId = r.users?.userid || '';
-                            const orderId = r.id;
-                            const address = r.order?.address || {};
+                            const userId   = r.users?.userid || '';
+                            const orderId  = r.id;
+                            const address  = r.order?.address || {};
                             const locality = r.order?.address?.localityDetails?.locality_name || '';
 
                             const tooltip = `
@@ -610,7 +612,6 @@
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
                             `.replace(/"/g, '&quot;');
 
-                            // Action buttons moved here
                             const viewSubscriptionBtn =
                                 `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-eye"></i>
@@ -749,7 +750,7 @@
 
                             if (r.status === 'paused') {
                                 const start = moment(r.pause_start_date).format('DD-MM-YYYY');
-                                const end = moment(r.pause_end_date).format('DD-MM-YYYY');
+                                const end   = moment(r.pause_end_date).format('DD-MM-YYYY');
                                 return `
                                     ${createdAt}
                                     <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
@@ -775,7 +776,7 @@
                         name: 'start_date',
                         render: function(r) {
                             const start = moment(r.start_date).format('MMM D, YYYY');
-                            const end = r.new_date
+                            const end   = r.new_date
                                 ? moment(r.new_date).format('MMM D, YYYY')
                                 : moment(r.end_date).format('MMM D, YYYY');
                             return `
@@ -834,12 +835,12 @@
                         orderable: false,
                         name: 'order.address.apartment_name',
                         render: function(r) {
-                            const address = r.order?.address || {};
+                            const address  = r.order?.address || {};
                             const locality = r.order?.address?.localityDetails?.locality_name || '';
 
                             const flat = address.apartment_flat_plot || '';
-                            const apt = address.apartment_name || '';
-                            let line1 = '';
+                            const apt  = address.apartment_name || '';
+                            let line1  = '';
 
                             if (flat && apt) {
                                 line1 = `${flat}, ${apt}`;
@@ -878,6 +879,7 @@
                 table.ajax.reload();
             });
 
+            // Edit dates
             $('#file-datatable').on('click', '.edit-dates', function() {
                 const row = table.row($(this).closest('tr')).data();
                 $('#sub-id').val(row.id);
@@ -922,7 +924,7 @@
                 });
             });
 
-            // -- Edit Rider --
+            // Edit rider
             $('#file-datatable').on('click', '.edit-rider', function() {
                 const row = table.row($(this).closest('tr')).data();
                 $('#rider-sub-id').val(row.id);
@@ -946,9 +948,9 @@
                 });
             });
 
-            // -- Edit Status --
+            // Edit status
             $('#file-datatable').on('click', '.edit-status-btn', function() {
-                const id = $(this).data('id');
+                const id     = $(this).data('id');
                 const status = $(this).data('status');
                 $('#status-sub-id').val(id);
                 $('#status-select').val(status);
@@ -995,10 +997,11 @@
                 });
             });
 
+            // Edit pause dates
             $('#file-datatable').on('click', '.edit-pause-dates', function() {
-                const id = $(this).data('id');
+                const id    = $(this).data('id');
                 const start = $(this).data('start');
-                const end = $(this).data('end');
+                const end   = $(this).data('end');
 
                 $('#pause-sub-id').val(id);
                 $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
