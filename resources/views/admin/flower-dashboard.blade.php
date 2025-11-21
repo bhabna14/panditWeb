@@ -87,7 +87,7 @@
         }
 
         /* ========= NEW: background blink using a pseudo-element =========
-                                       This wins against gradients and !important backgrounds */
+                                           This wins against gradients and !important backgrounds */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
@@ -184,7 +184,6 @@
         }
     </style>
     @endsection @section('content')
-    
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
@@ -267,7 +266,8 @@
                                 </div>
                             </div>
                         </div>
-                    </a> </div>
+                    </a>
+                </div>
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
                         href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
@@ -370,7 +370,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
@@ -389,8 +389,9 @@
                             </div>
                         </div>
                     </a>
-                 </div> <!-- Today Total Income -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a href="{{ route('admin.payments.index') }}" target="_blank">
+                </div> <!-- Today Total Income -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a href="{{ route('admin.payments.index') }}"
+                        target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
@@ -445,8 +446,8 @@
             <div class="row">
                 @foreach ($ridersData as $data)
                     <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
-                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
-                            class="text-decoration-none">
+                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}"
+                            target="_blank" class="text-decoration-none">
                             <div class="sales-card"
                                 style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgb(186,185,185);">
                                 <div class="row">

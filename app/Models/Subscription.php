@@ -28,6 +28,12 @@ class Subscription extends Model
         'status'
     ];
 
+    
+    public function users()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'userid');
+    }
+
     public function flowerPayments()
     {
         return $this->hasMany(FlowerPayment::class, 'order_id', 'order_id');
@@ -78,10 +84,6 @@ class Subscription extends Model
         return $this->hasMany(SubscriptionPauseResumeLog::class, 'order_id', 'order_id');
     }
 
-    public function users()
-    {
-        return $this->belongsTo(User::class, 'user_id', 'userid');
-    }
 
     // public function scopeActiveOn($q, Carbon $date)
     // {
@@ -132,5 +134,16 @@ class Subscription extends Model
                   ->orWhereDate('pause_start_date', '>', $d)
                   ->orWhereDate('pause_end_date', '<', $d);
             });
+    }
+
+    public function scopeWithoutOtherActiveOrPending(Builder $query): Builder
+    {
+        return $query->whereDoesntExist(function ($sub) {
+            $sub->select(DB::raw(1))
+                ->from('subscriptions as s2')
+                ->whereColumn('s2.user_id', 'subscriptions.user_id') // same user
+                ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different record
+                ->whereIn('s2.status', ['active', 'pending']);        // other sub is active/pending
+        });
     }
 }

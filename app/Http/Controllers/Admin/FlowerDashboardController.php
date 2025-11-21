@@ -214,20 +214,26 @@ class FlowerDashboardController extends Controller
         })
         ->count();
 
-        $todayEndSubscription = Subscription::where(function ($query) use ($tz) {
-                $query->where(function ($subQuery) use ($tz) {
-                        $subQuery->whereNotNull('new_date')
-                                ->whereDate('new_date', Carbon::today($tz));
-                    })
-                    ->orWhere(function ($subQuery) use ($tz) {
-                        $subQuery->whereNull('new_date')
-                                ->whereDate('end_date', Carbon::today($tz));
-                    });
-            })
-            ->where('status', 'active')->count();
+        $tz        = config('app.timezone');
+        $today     = Carbon::today($tz);
+        $todayDate = $today->toDateString();
 
-            $tz     = config('app.timezone');
-        $today  = Carbon::today($tz);
+      $todayEndSubscription = Subscription::where(function ($q) use ($todayDate) {
+            $q->where(function ($subQuery) use ($todayDate) {
+                    // Case 1: new_date is set and equals today
+                    $subQuery->whereNotNull('new_date')
+                             ->whereDate('new_date', $todayDate);
+                })
+                ->orWhere(function ($subQuery) use ($todayDate) {
+                    // Case 2: new_date is null -> check end_date = today
+                    $subQuery->whereNull('new_date')
+                             ->whereDate('end_date', $todayDate);
+                });
+        })
+        ->where('status', 'active')
+        ->withoutOtherActiveOrPending()
+        ->count();
+
 
         $winStart = $today->copy()->addDay()->startOfDay();   // tomorrow 00:00:00
         $winEnd   = $today->copy()->addDays(5)->endOfDay();   // 5th day from today 23:59:59
