@@ -22,16 +22,22 @@ class AdminNotificationController extends Controller
 
         // map of userid => display name (fallback to userid if name null)
         $userIndex = User::query()
-            ->select('userid','name')
+            ->select('userid', 'name')
             ->get()
-            ->pluck('name','userid');
+            ->pluck('name', 'userid');
 
         $platforms     = ['android', 'ios', 'web'];
-        $users         = User::orderBy('name')->select('userid','name','mobile_number','email')->get();
+        $users         = User::orderBy('name')
+            ->select('userid', 'name', 'mobile_number', 'email')
+            ->get();
         $prefillUserId = $request->query('user'); // e.g., "USER30382"
 
         return view('admin.fcm-notification.send-notification', compact(
-            'notifications', 'platforms', 'users', 'prefillUserId', 'userIndex'
+            'notifications',
+            'platforms',
+            'users',
+            'prefillUserId',
+            'userIndex'
         ));
     }
 
@@ -58,18 +64,20 @@ class AdminNotificationController extends Controller
         $userIds   = null;
         $platforms = null;
 
+        // Snapshot audience
         if ($audience === 'all') {
-            $userIds = ['ALL']; // snapshot “ALL”
+            $userIds = ['ALL']; // snapshot “ALL” for history
         } elseif ($audience === 'users') {
             $userIds = collect($validated['users'])
-                ->map(fn($v) => is_string($v) ? trim($v) : (string)$v)
+                ->map(fn($v) => is_string($v) ? trim($v) : (string) $v)
                 ->filter(fn($v) => $v !== '')
-                ->values()->all();
+                ->values()
+                ->all();
 
             if (empty($userIds)) {
                 return back()->withErrors(['users' => 'Please select at least one valid user.']);
             }
-        } else { // platform
+        } else { // audience === 'platform'
             $platforms = array_values(array_unique($validated['platform']));
         }
 
@@ -86,25 +94,33 @@ class AdminNotificationController extends Controller
             'failure_count' => 0,
         ]);
 
-        // build device tokens query
+        // build device tokens query (RESPECT audience)
         $tokensQuery = UserDevice::query()
             ->authorized()
             ->whereNotNull('device_id');
 
         if ($audience === 'users') {
-            $tokensQuery->whereIn('user_id', $userIds); // user_id holds "USERxxxxx"
+            // IMPORTANT: user_id column must store your string userid (e.g. "USER30382")
+            $tokensQuery->whereIn('user_id', $userIds);
         } elseif ($audience === 'platform') {
             $tokensQuery->whereIn('platform', $platforms);
         }
+        // audience = all → no extra filter
 
         $deviceTokens = $tokensQuery->distinct()->pluck('device_id')->toArray();
 
         if (empty($deviceTokens)) {
-            \Log::warning('No device tokens found for the selected audience.', [
-                'audience' => $audience, 'users' => $userIds, 'platform' => $platforms,
+            Log::warning('No device tokens found for the selected audience.', [
+                'audience' => $audience,
+                'users'    => $userIds,
+                'platform' => $platforms,
             ]);
+
             $notification->update(['status' => 'failed']);
+
             return back()->with('error', 'No valid device tokens found for the selected audience.');
+            ;
+
         }
 
         try {
@@ -113,11 +129,15 @@ class AdminNotificationController extends Controller
                 $deviceTokens,
                 $notification->title,
                 $notification->description,
-                ['image' => $notification->image ? asset('storage/'.$notification->image) : '']
+                ['image' => $notification->image ? asset('storage/' . $notification->image) : '']
             );
 
-            $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : 0;
-            $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : 0;
+            $success = $resp && method_exists($resp, 'successes')
+                ? count($resp->successes()->getItems())
+                : 0;
+            $failure = $resp && method_exists($resp, 'failures')
+                ? count($resp->failures()->getItems())
+                : 0;
 
             $notification->update([
                 'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
@@ -127,16 +147,16 @@ class AdminNotificationController extends Controller
 
             return back()->with('success', 'App notification sent to the selected audience successfully!');
         } catch (\Throwable $e) {
-            \Log::error('FCM send error: '.$e->getMessage());
-            $notification->update(['status' => 'failed']);
-            return back()->with('error', 'Failed to send notification. '.$e->getMessage());
-        }
-    }
+            Log::error('FCM send error: ' . $e->getMessage(), [
+                'audience' => $audience,
+                'users'    => $userIds,
+                'platform' => $platforms,
+            ]);
 
-    public function delete($id)
-    {
-        FCMNotification::findOrFail($id)->delete();
-        return redirect()->route('admin.notification.create')->with('success', 'Notification deleted successfully!');
+            $notification->update(['status' => 'failed']);
+
+            return back()->with('error', 'Failed to send notification. ' . $e->getMessage());
+        }
     }
 
     public function resend($id)
@@ -144,14 +164,51 @@ class AdminNotificationController extends Controller
         try {
             $notification = FCMNotification::findOrFail($id);
 
-            $deviceTokens = UserDevice::authorized()
-                ->whereNotNull('device_id')
-                ->distinct()
-                ->pluck('device_id')
-                ->toArray();
+            $audience  = $notification->audience ?? 'all';
+            $userIds   = $notification->user_ids ?? null;      // cast to array in model
+            $platforms = $notification->platforms ?? null;     // cast to array in model
+
+            // build tokens query based on ORIGINAL audience snapshot
+            $tokensQuery = UserDevice::authorized()
+                ->whereNotNull('device_id');
+
+            if ($audience === 'users') {
+                if (empty($userIds) || !is_array($userIds)) {
+                    Log::warning('Resend attempted with users audience, but no user_ids snapshot.', [
+                        'notification_id' => $id,
+                    ]);
+
+                    return back()->with(
+                        'error',
+                        'Original selected users are missing, cannot resend user-wise.'
+                    );
+                }
+
+                $tokensQuery->whereIn('user_id', $userIds);
+            } elseif ($audience === 'platform') {
+                if (empty($platforms) || !is_array($platforms)) {
+                    Log::warning('Resend attempted with platform audience, but no platforms snapshot.', [
+                        'notification_id' => $id,
+                    ]);
+
+                    return back()->with(
+                        'error',
+                        'Original platforms are missing, cannot resend platform-wise.'
+                    );
+                }
+
+                $tokensQuery->whereIn('platform', $platforms);
+            }
+            // audience === 'all' → no extra filter (send to all authorized devices)
+
+            $deviceTokens = $tokensQuery->distinct()->pluck('device_id')->toArray();
 
             if (empty($deviceTokens)) {
-                Log::warning('No valid device tokens found for resending.', ['notification_id' => $id]);
+                Log::warning('No valid device tokens found for resending.', [
+                    'notification_id' => $id,
+                    'audience'        => $audience,
+                ]);
+
                 return back()->with('error', 'No valid device tokens found. Notification could not be resent.');
             }
 
@@ -163,9 +220,14 @@ class AdminNotificationController extends Controller
                 ['image' => $notification->image ? asset('storage/' . $notification->image) : '']
             );
 
-            $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
-            $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
+            $success = $resp && method_exists($resp, 'successes')
+                ? count($resp->successes()->getItems())
+                : 0;
+            $failure = $resp && method_exists($resp, 'failures')
+                ? count($resp->failures()->getItems())
+                : 0;
 
+            // overwrite with latest resend attempt
             $notification->update([
                 'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
                 'success_count' => $success,
@@ -173,10 +235,19 @@ class AdminNotificationController extends Controller
             ]);
 
             return back()->with('success', 'Notification resent successfully!');
-        } catch (\Exception $e) {
-            Log::error('Error resending notification: ' . $e->getMessage(), ['notification_id' => $id]);
+        } catch (\Throwable $e) {
+            Log::error('Error resending notification: ' . $e->getMessage(), [
+                'notification_id' => $id,
+            ]);
+
             return back()->with('error', 'Failed to resend notification. Please try again later.');
         }
+    }
+
+    public function delete($id)
+    {
+        FCMNotification::findOrFail($id)->delete();
+        return redirect()->route('admin.notification.create')->with('success', 'Notification deleted successfully!');
     }
 
     public function whatsappcreate(Request $request)

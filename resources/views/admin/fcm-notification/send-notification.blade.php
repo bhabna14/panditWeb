@@ -1,4 +1,4 @@
-{{-- resources/views/admin/notifications/create.blade.php --}}
+{{-- resources/views/admin/fcm-notification/send-notification.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -152,8 +152,9 @@
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div>
                     <h3 class="nu-title mb-1">Send Notification</h3>
-                    <div class="text-muted">Push a rich app notification to your users. Choose audience, attach an image, and
-                        preview.</div>
+                    <div class="text-muted">
+                        Push a rich app notification to your users. Choose audience, attach an image, and preview.
+                    </div>
                 </div>
                 <div class="d-flex gap-2">
                     <a class="btn btn-outline-primary" href="{{ route('whatsapp-notification.create') }}">
@@ -220,8 +221,9 @@
                             <select class="form-control" name="users[]" id="users" multiple
                                 data-placeholder="Search users…">
                                 @foreach ($users as $u)
-                                    <option value="{{ $u->userid }}">{{ $u->name }} —
-                                        {{ $u->email ?? $u->mobile_number }}</option>
+                                    <option value="{{ $u->userid }}">
+                                        {{ $u->name }} — {{ $u->email ?? $u->mobile_number }}
+                                    </option>
                                 @endforeach
                             </select>
                             <div class="form-hint">Multi-select. Start typing a name, email, or number.</div>
@@ -233,7 +235,7 @@
                             @enderror
                         </div>
 
-                        {{-- Platforms (FIXED: proper dropdown with Select2, placeholder, allowClear) --}}
+                        {{-- Platforms --}}
                         <div class="mb-3 d-none" id="platformWrap">
                             <label class="form-label fw-semibold">Platform</label>
                             <select class="form-select" name="platform[]" id="platform" multiple
@@ -307,7 +309,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Title</th>
-                                    <th>Target</th> {{-- NEW --}}
+                                    <th>Target</th>
                                     <th>Status</th>
                                     <th>Success</th>
                                     <th>Fail</th>
@@ -329,12 +331,10 @@
                                             $targetHtml = e(implode(', ', array_map('ucfirst', $plats)));
                                         } elseif ($aud === 'users') {
                                             $ids = $notification->user_ids ?? [];
-                                            // "ALL" marker (just in case historical rows)
                                             if (in_array('ALL', $ids, true)) {
                                                 $targetHtml =
                                                     '<span class="badge-status badge-queued">All Users</span>';
                                             } else {
-                                                // map userids -> display names
                                                 $names = collect($ids)
                                                     ->map(function ($id) use ($userIndex) {
                                                         $n = $userIndex[$id] ?? null;
@@ -343,7 +343,6 @@
                                                     ->values()
                                                     ->all();
 
-                                                // Pretty render with limit + tooltip
                                                 if (count($names) > 3) {
                                                     $short = implode(', ', array_slice($names, 0, 3));
                                                     $more = implode(', ', $names);
@@ -371,14 +370,14 @@
                                                 {{ \Illuminate\Support\Str::limit($notification->description, 80) }}
                                             </div>
                                         </td>
-                                        <td>{!! $targetHtml !!}</td> {{-- NEW: audience/target display --}}
+                                        <td>{!! $targetHtml !!}</td>
 
                                         <td>
                                             @if ($s === 'sent')
                                                 <span class="badge-status badge-sent">Sent</span>
-                                            @elseif($s === 'partial')
+                                            @elseif ($s === 'partial')
                                                 <span class="badge-status badge-partial">Partial</span>
-                                            @elseif($s === 'failed')
+                                            @elseif ($s === 'failed')
                                                 <span class="badge-status badge-failed">Failed</span>
                                             @else
                                                 <span class="badge-status badge-queued">Queued</span>
@@ -398,13 +397,16 @@
                                         <td class="text-nowrap">
                                             <form action="{{ route('admin.notifications.delete', $notification->id) }}"
                                                 method="POST" class="d-inline" onsubmit="return confirmDelete(event)">
-                                                @csrf @method('DELETE')
+                                                @csrf
+                                                @method('DELETE')
                                                 <button class="btn btn-sm btn-outline-danger">Delete</button>
                                             </form>
 
                                             <form id="resend-form-{{ $notification->id }}"
                                                 action="{{ route('admin.notifications.resend', $notification->id) }}"
-                                                method="POST" class="d-none">@csrf</form>
+                                                method="POST" class="d-none">
+                                                @csrf
+                                            </form>
                                             <button class="btn btn-sm btn-outline-primary"
                                                 onclick="resendNotification({{ $notification->id }})">
                                                 Resend
@@ -417,9 +419,9 @@
                     </div>
 
                 </div>
-            </div> {{-- /col --}}
-        </div> {{-- /row --}}
-    </div> {{-- /container --}}
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -485,7 +487,7 @@
                 placeholder: $('#platform').data('placeholder') || 'Choose platform(s)',
                 width: '100%',
                 allowClear: true,
-                minimumResultsForSearch: -1 // small list - still shows dropdown; remove to always show search
+                minimumResultsForSearch: -1
             });
 
             // ---------- Audience toggle ----------
@@ -499,7 +501,7 @@
                 platformWrap.classList.toggle('d-none', val !== 'platform');
             }
             audRadios.forEach(r => r.addEventListener('change', syncAudienceUI));
-            syncAudienceUI(); // initial
+            syncAudienceUI();
 
             // ---------- Counters ----------
             const title = document.getElementById('title');
@@ -538,9 +540,9 @@
                     audienceDetail = 'Platforms → ' + (sel.length ? sel.join(', ') : '(none selected)');
                 }
 
-                const imgEl = imgPreview && !imgPreview.classList.contains('d-none') ?
-                    `<img src="${imgPreview.src}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb;margin-top:10px"/>` :
-                    '';
+                const imgEl = imgPreview && !imgPreview.classList.contains('d-none')
+                    ? `<img src="${imgPreview.src}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb;margin-top:10px"/>`
+                    : '';
 
                 Swal.fire({
                     title: 'Preview',
@@ -557,7 +559,7 @@
                 });
             });
 
-            // ---------- Prefill single user (from Payment Collection etc.) ----------
+            // ---------- Prefill single user ----------
             (function prefillSingleUser() {
                 const prefill = window.__PREFILL_USER_ID__;
                 if (!prefill) return;
@@ -566,12 +568,11 @@
                 if (radioUsers) radioUsers.checked = true;
                 syncAudienceUI();
 
-                const exists = Array.from(document.querySelectorAll('#users option')).some(o => o.value ===
-                prefill);
+                const exists = Array.from(document.querySelectorAll('#users option'))
+                    .some(o => o.value === prefill);
                 if (exists) {
                     $usersSel.val([prefill]).trigger('change');
                 } else {
-                    // if not present in list, inject it
                     const newOpt = new Option(prefill, prefill, true, true);
                     $usersSel.append(newOpt).trigger('change');
                 }

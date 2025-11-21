@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+
 class FCMNotification extends Model
 {
     use HasFactory;
@@ -27,7 +29,7 @@ class FCMNotification extends Model
         'platforms' => 'array',
     ];
 
-      // Expose computed field in JSON
+    // Expose computed field in JSON
     protected $appends = ['image_url'];
 
     public function getImageUrlAttribute(): ?string
@@ -36,13 +38,13 @@ class FCMNotification extends Model
             return null;
         }
 
-        // If already absolute (e.g., you stored a CDN URL), return as-is
+        // If already absolute (e.g. CDN URL), return as-is
         if (preg_match('#^https?://#i', $this->image)) {
             return $this->image;
         }
 
         // Otherwise, build a public URL from storage ("public" disk)
-        // Requires the file to be stored via ->store('notifications','public')
+        // File should be stored via ->store('notifications', 'public')
         return Storage::disk('public')->url($this->image);
     }
 }
