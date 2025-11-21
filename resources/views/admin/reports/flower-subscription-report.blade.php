@@ -23,195 +23,227 @@
 
     <style>
         :root {
-            --pf-subtle: #F5F7FC;
-            --pf-surface: #FFF;
-            --pf-border: #E7E9F1;
+            --pf-bg: #F3F4F6;
+            --pf-surface: #FFFFFF;
+            --pf-border: #E5E7EB;
             --pf-text: #111827;
             --pf-muted: #6B7280;
-            --pf-primary: #7570FE;
-            --pf-primary-600: #6B63F5;
-            --pf-accent: #8151FB;
-            --pf-action: #FF4D61;
-            --pf-action-600: #E43E52;
-            --pf-success-bg: #E8F5EE;
+            --pf-primary: #0EA5E9;
+            --pf-primary-600: #0284C7;
+            --pf-primary-soft: #E0F2FE;
+            --pf-action: #10B981;
+            --pf-action-600: #059669;
+            --pf-success-bg: #DCFCE7;
             --pf-success-fg: #166534;
-            --pf-warning-bg: #FFF7E6;
+            --pf-warning-bg: #FEF9C3;
             --pf-warning-fg: #92400E;
-            --pf-danger-bg: #FDE8E8;
+            --pf-danger-bg: #FEE2E2;
             --pf-danger-fg: #B91C1C;
-            --pf-info-bg: #E6F0FF;
+            --pf-info-bg: #DBEAFE;
             --pf-info-fg: #1D4ED8;
-            --pf-shadow-sm: 0 2px 10px rgba(15, 23, 42, .05);
-            --pf-shadow-md: 0 10px 24px rgba(2, 6, 23, .08);
+            --pf-shadow-sm: 0 2px 6px rgba(15, 23, 42, .06);
+            --pf-shadow-md: 0 8px 18px rgba(15, 23, 42, .08);
         }
 
         body {
             font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif !important;
             color: var(--pf-text);
-            background:
-                radial-gradient(1200px 600px at 10% -10%, rgba(129, 81, 251, .08), transparent 60%),
-                radial-gradient(1200px 600px at 110% 10%, rgba(117, 112, 254, .10), transparent 55%),
-                var(--pf-subtle);
+            background: var(--pf-bg);
         }
 
         .kpi-card {
-            border-radius: 16px;
-            padding: 18px 20px;
-            background: linear-gradient(180deg, #fff, #FAFBFF);
+            border-radius: 14px;
+            padding: 16px 18px;
+            background: var(--pf-surface);
             box-shadow: var(--pf-shadow-md);
             border: 1px solid var(--pf-border);
-            transition: transform .18s, box-shadow .18s;
-            height: 100%
+            transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+            height: 100%;
         }
 
         .kpi-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 16px 30px rgba(2, 6, 23, .1)
+            box-shadow: 0 10px 25px rgba(15, 23, 42, .12);
+            background: #F9FAFB;
         }
 
         .kpi-label {
             font-size: .85rem;
             color: var(--pf-muted);
-            margin-bottom: 6px
+            margin-bottom: 4px;
         }
 
         .kpi-value {
             font-weight: 800;
-            font-size: 1.35rem;
-            color: var(--pf-text)
+            font-size: 1.4rem;
+            color: var(--pf-text);
         }
 
         .kpi-icon {
-            color: var(--pf-accent);
-            opacity: .9
+            color: var(--pf-primary);
+            opacity: .95;
         }
 
         .filter-card {
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1px solid var(--pf-border);
             box-shadow: var(--pf-shadow-sm);
-            background: var(--pf-surface)
+            background: var(--pf-surface);
         }
 
         .range-btns .btn {
             border-radius: 999px;
             border-color: var(--pf-border);
-            color: var(--pf-primary);
-            background: #fff
+            color: var(--pf-muted);
+            background: #FFFFFF;
+            font-weight: 500;
         }
 
         .range-btns .btn:hover {
-            border-color: var(--pf-primary)
+            border-color: var(--pf-primary);
+            color: var(--pf-primary-600);
+            background: #F9FAFB;
         }
 
         .range-btns .btn.active {
             background: var(--pf-primary);
             border-color: var(--pf-primary);
-            color: #fff
+            color: #FFFFFF;
         }
 
         .btn-go {
             background: var(--pf-action);
             border-color: var(--pf-action);
-            color: #fff
+            color: #FFFFFF;
+            font-weight: 600;
         }
 
         .btn-go:hover {
             background: var(--pf-action-600);
             border-color: var(--pf-action-600);
-            color: #fff
+            color: #FFFFFF;
         }
 
         .form-control {
             border-radius: 10px;
-            border-color: var(--pf-border)
+            border-color: var(--pf-border);
+            box-shadow: none !important;
+        }
+
+        .form-control:focus {
+            border-color: var(--pf-primary);
+            box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.2) !important;
         }
 
         .form-label {
             color: var(--pf-muted);
-            font-weight: 600
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .table {
-            border-color: var(--pf-border) !important
+            border-color: var(--pf-border) !important;
+            font-size: 0.9rem;
         }
 
         .table thead.table-light th {
-            background: #F3F6FF !important;
-            color: #0F172A !important;
+            background: #F9FAFB !important;
+            color: #111827 !important;
             border-bottom: 1px solid var(--pf-border) !important;
-            font-weight: 700
+            font-weight: 700;
         }
 
         table.dataTable tbody td {
-            vertical-align: middle
+            vertical-align: middle;
         }
 
         .table-hover tbody tr:hover {
-            background: #F8FBFF
+            background: #F3F4F6;
         }
 
         .status-badge {
-            padding: .38rem .65rem;
+            padding: .38rem .7rem;
             border-radius: 999px;
             font-size: .75rem;
             font-weight: 700;
             text-transform: capitalize;
-            border: 1px solid transparent
+            border: 1px solid transparent;
         }
 
         .status-active {
             background: var(--pf-success-bg);
             color: var(--pf-success-fg);
-            border-color: #cdebd7
+            border-color: #BBF7D0;
         }
 
         .status-paused {
             background: var(--pf-warning-bg);
             color: var(--pf-warning-fg);
-            border-color: #ffe3b3
+            border-color: #FDE68A;
         }
 
         .status-expired {
             background: var(--pf-danger-bg);
             color: var(--pf-danger-fg);
-            border-color: #fac6c6
+            border-color: #FCA5A5;
         }
 
         .status-resume {
             background: var(--pf-info-bg);
             color: var(--pf-info-fg);
-            border-color: #c9daff
+            border-color: #BFDBFE;
         }
 
         .customer-meta small {
-            color: var(--pf-muted)
-        }
-
-        .action-btns .btn {
-            border-radius: 10px
-        }
-
-        /* Tabs styling */
-        .subs-tabs .nav-link {
-            border-radius: 999px;
-            margin: 0 .25rem;
-            border: 1px solid transparent;
-            font-weight: 600;
             color: var(--pf-muted);
         }
 
+        .action-btns .btn {
+            border-radius: 999px;
+            font-size: 0.75rem;
+        }
+
+        /* Tabs styling */
+        .subs-tabs {
+            background: #E5E7EB;
+            border-radius: 999px;
+            padding: .25rem;
+        }
+
+        .subs-tabs .nav-link {
+            border-radius: 999px;
+            margin: 0 .25rem;
+            border: 0;
+            font-weight: 600;
+            color: var(--pf-muted);
+            padding: .4rem .75rem;
+        }
+
+        .subs-tabs .nav-link i {
+            font-size: 0.95rem;
+        }
+
         .subs-tabs .nav-link.active {
-            background: var(--pf-primary);
-            color: #fff;
-            border-color: var(--pf-primary);
+            background: #FFFFFF;
+            color: var(--pf-primary-600);
             box-shadow: var(--pf-shadow-sm);
         }
 
-        .subs-tabs {
-            background: #F3F4FF;
+        .card.main-card {
+            border-radius: 14px;
+            border: 1px solid var(--pf-border);
+            box-shadow: var(--pf-shadow-sm);
+            background: var(--pf-surface);
+        }
+
+        .card-header-simple {
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .btn-outline-primary.btn-sm,
+        .btn-outline-secondary.btn-sm {
             border-radius: 999px;
-            padding: .2rem;
         }
     </style>
 @endsection
@@ -306,7 +338,7 @@
         </div>
 
         {{-- Tabs + Tables --}}
-        <div class="card" style="border-radius:16px; border:1px solid var(--pf-border); box-shadow: var(--pf-shadow-sm);">
+        <div class="card main-card">
             <div class="card-body">
 
                 {{-- Tabs full width --}}
