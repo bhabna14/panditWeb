@@ -124,14 +124,20 @@ class Subscription extends Model
      * Scope: exclude subscriptions where the same user
      * has another subscription with status 'active' or 'pending'.
      */
-   public function scopeWithoutOtherActiveOrPending($query)
+ public function scopeWithoutOtherActiveOrPending($query)
 {
-    return $query->whereNotExists(function ($sub) {
+    // Use app timezone if you want to stay consistent
+    $tz    = config('app.timezone');
+    $today = \Carbon\Carbon::today($tz)->toDateString();
+
+    return $query->whereNotExists(function ($sub) use ($today) {
         $sub->select(DB::raw(1))
             ->from('subscriptions as s2')
             ->whereColumn('s2.user_id', 'subscriptions.user_id') // same user
             ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different subscription
-            ->whereIn('s2.status', ['active', 'pending']);        // other sub is active/pending
+            ->whereIn('s2.status', ['active', 'pending'])         // other sub is active/pending
+            ->whereDate('s2.start_date', '>', $today);            // and starts in the future (> today)
     });
 }
+
 }
