@@ -271,7 +271,7 @@
                 [
                     'title' => 'Subscriptions Placed Today',
                     'value' => $ordersRequestedToday,
-                    'filter' => 'renew',
+                    'filter' => 'renewed',
                     'icon' => 'fa-calendar-plus',
                 ],
                 [
