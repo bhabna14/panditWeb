@@ -10,7 +10,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- INTERNAL Select2 css -->
@@ -29,6 +28,7 @@
             transition: all 0.3s ease;
         }
 
+        /* View Button */
         .btn-view {
             background-color: #4CAF50;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -205,6 +205,7 @@
             padding: 10px;
         }
 
+        /* Table styling */
         .table thead th {
             background: #f8f9fa;
             font-weight: 600;
@@ -216,6 +217,7 @@
             line-height: 1.6;
         }
 
+        /* Modal improvements */
         .modal-header {
             border-bottom: 0;
         }
@@ -224,13 +226,6 @@
         .modal-header.bg-info,
         .modal-header.bg-warning {
             color: #fff;
-        }
-
-        /* Bigger & clearer Select2 clear (×) icon */
-        .select2-selection__clear {
-            font-size: 18px !important;
-            font-weight: 700 !important;
-            margin-right: 4px;
         }
     </style>
 @endsection
@@ -294,13 +289,11 @@
                         </div>
                     @endif
 
-                    {{-- FILTER FORM --}}
                     <form id="filter-form" class="row g-2 align-items-end mb-4">
                         <div class="col-md-3">
                             <label class="form-label">Customer Name</label>
-                            <select class="form-select filter-select" name="customer_name" id="customer_name"
-                                data-placeholder="Select Customer">
-                                <option value=""></option>
+                            <select class="form-select" name="customer_name" id="customer_name">
+                                <option value="">All</option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->name }}">{{ $user->name }}</option>
                                 @endforeach
@@ -309,9 +302,8 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Mobile Number</label>
-                            <select class="form-select filter-select" name="mobile_number" id="mobile_number"
-                                data-placeholder="Select Mobile">
-                                <option value=""></option>
+                            <select class="form-select" name="mobile_number" id="mobile_number">
+                                <option value="">All</option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
                                 @endforeach
@@ -320,9 +312,8 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Apartment Name</label>
-                            <select class="form-select filter-select" name="apartment_name" id="apartment_name"
-                                data-placeholder="Select Apartment">
-                                <option value=""></option>
+                            <select class="form-select" name="apartment_name" id="apartment_name">
+                                <option value="">All</option>
                                 @foreach ($apartmentNames as $name)
                                     <option value="{{ $name }}">{{ $name }}</option>
                                 @endforeach
@@ -331,9 +322,8 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Apartment Number</label>
-                            <select class="form-select filter-select" name="apartment_flat_plot" id="apartment_flat_plot"
-                                data-placeholder="Select Flat/Plot">
-                                <option value=""></option>
+                            <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
+                                <option value="">All</option>
                                 @foreach ($apartmentNumbers as $num)
                                     <option value="{{ $num }}">{{ $num }}</option>
                                 @endforeach
@@ -367,7 +357,6 @@
                             </table>
                         </div>
 
-                        {{-- MODALS --}}
                         <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-status-form" method="POST"
@@ -433,6 +422,7 @@
                             </div>
                         </div>
 
+                        <!-- Global Edit Rider Modal -->
                         <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-rider-form" method="POST">
@@ -497,11 +487,12 @@
                             </div>
                         </div>
 
-                    </div> {{-- .table-responsive --}}
+                    </div> <!-- table responsive -->
                 </div>
             </div>
         </div>
     </div>
+    <!-- End Row -->
 @endsection
 
 @section('scripts')
@@ -514,62 +505,46 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    {{-- Select2 + single-filter logic + working clear (×) --}}
     <script>
         $(document).ready(function() {
-            const filterIds = ['#customer_name', '#mobile_number', '#apartment_name', '#apartment_flat_plot'];
-
-            // global variable so DataTables ajax can read it
-            window.currentActiveFilter = null;
-
             // Init Select2
-            $('.filter-select').each(function() {
-                $(this).select2({
-                    placeholder: $(this).data('placeholder'),
-                    allowClear: true,
-                    width: '100%'
-                });
+            $('#customer_name').select2({
+                placeholder: 'Select Customer',
+                allowClear: true,
+                width: '100%'
+            });
+            $('#mobile_number').select2({
+                placeholder: 'Select Mobile',
+                allowClear: true,
+                width: '100%'
+            });
+            $('#apartment_name').select2({
+                placeholder: 'Select Apartment',
+                allowClear: true,
+                width: '100%'
+            });
+            $('#apartment_flat_plot').select2({
+                placeholder: 'Select Flat/Plot',
+                allowClear: true,
+                width: '100%'
             });
 
-            function refreshFilterStates() {
-                if (!window.currentActiveFilter) {
-                    // nothing selected -> all enabled
-                    filterIds.forEach(function(id) {
-                        $(id).prop('disabled', false);
-                    });
-                } else {
-                    const activeSelector = '#' + window.currentActiveFilter;
-                    filterIds.forEach(function(id) {
-                        $(id).prop('disabled', id !== activeSelector);
-                    });
-                }
-            }
+            // *** Allow only ONE filter at a time ***
+            const filterFields = ['#customer_name', '#mobile_number', '#apartment_name', '#apartment_flat_plot'];
 
-            filterIds.forEach(function(id) {
-                // change event (user selects or manually clears)
-                $(id).on('change', function() {
-                    const val = $(this).val();
-                    if (val && val !== '') {
-                        // this is now the only active filter
-                        window.currentActiveFilter = this.id;
-                    } else {
-                        // cleared via keyboard / etc.
-                        window.currentActiveFilter = null;
-                    }
-                    refreshFilterStates();
-                });
-
-                // clear via Select2 × button
-                $(id).on('select2:clear', function() {
-                    $(this).val(null); // make sure value is removed
-                    window.currentActiveFilter = null; // no active filter
-                    refreshFilterStates(); // enable all others
+            filterFields.forEach(selector => {
+                $(selector).on('change', function() {
+                    const currentId = '#' + this.id;
+                    filterFields.forEach(other => {
+                        if (other !== currentId) {
+                            $(other).val('').trigger('change'); // clear other filters
+                        }
+                    });
                 });
             });
         });
     </script>
 
-    {{-- DataTables + AJAX + modal actions --}}
     <script>
         $(function() {
             const table = $('#file-datatable').DataTable({
@@ -579,13 +554,10 @@
                     url: "{{ route('admin.orders.index') }}",
                     data: function(d) {
                         d.filter = '{{ request('filter', '') }}';
-
-                        // Only send value for the currently active filter
-                        const active = window.currentActiveFilter || null;
-                        d.customer_name = active === 'customer_name' ? $('#customer_name').val() : '';
-                        d.mobile_number = active === 'mobile_number' ? $('#mobile_number').val() : '';
-                        d.apartment_name = active === 'apartment_name' ? $('#apartment_name').val() : '';
-                        d.apartment_flat_plot = active === 'apartment_flat_plot' ? $('#apartment_flat_plot').val() : '';
+                        d.customer_name = $('#customer_name').val();
+                        d.mobile_number = $('#mobile_number').val();
+                        d.apartment_name = $('#apartment_name').val();
+                        d.apartment_flat_plot = $('#apartment_flat_plot').val();
                     }
                 },
 
@@ -603,7 +575,7 @@
                             const tooltip = `
                                 <p><i class='fas fa-map-marker-alt text-primary'></i> <strong>Address:</strong>
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
-                            `.replace(/"/g, '&quot;');
+                            `.replace(/"/g, '&quot;'); // Escape double quotes
 
                             return `
                                 <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
@@ -619,6 +591,7 @@
                                     </button>
                                 </div>
 
+                                <!-- View Address Modal -->
                                 <div class="modal fade" id="addressModal${orderId}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -640,6 +613,7 @@
                                     </div>
                                 </div>
 
+                                <!-- Edit Address Modal -->
                                 <div class="modal fade" id="editAddressModal${orderId}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -691,12 +665,12 @@
                             `;
                         }
                     },
+
                     {
                         data: null,
                         name: 'created_at',
                         render: function(r) {
-                            const createdAt = r.created_at ? moment(r.created_at).format(
-                                'DD-MM-YYYY h:mm A') : 'N/A';
+                            const createdAt = r.created_at ? moment(r.created_at).format('DD-MM-YYYY h:mm A') : 'N/A';
 
                             if (r.status === 'paused') {
                                 const start = moment(r.pause_start_date).format('DD-MM-YYYY');
@@ -720,6 +694,7 @@
                             return createdAt;
                         }
                     },
+
                     {
                         data: null,
                         name: 'start_date',
@@ -775,14 +750,11 @@
                         data: null,
                         orderable: false,
                         render: function(r) {
-                            let btn =
-                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
+                            let btn = `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
                             if (r.status === 'active')
-                                btn +=
-                                ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
+                                btn += ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
                             if (r.status === 'paused')
-                                btn +=
-                                ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                                btn += ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
 
                             return btn;
                         }
@@ -846,10 +818,11 @@
                 });
             });
 
+            // -- Edit Rider --
             $('#file-datatable').on('click', '.edit-rider', function() {
                 const row = table.row($(this).closest('tr')).data();
                 $('#rider-sub-id').val(row.id);
-                $('#rider-select').val(row.order.rider?.rider_id || '');
+                $('#rider-select').val(row.order.rider?.rider_id || '').trigger('change');
                 $('#edit-rider-form').attr('action', `/admin/orders/${row.order.id}/updateRider`);
                 new bootstrap.Modal($('#editRiderModal')[0]).show();
             });
@@ -869,6 +842,7 @@
                 });
             });
 
+            // -- Edit Status --
             $('#file-datatable').on('click', '.edit-status-btn', function() {
                 const id = $(this).data('id');
                 const status = $(this).data('status');
@@ -917,6 +891,7 @@
                 });
             });
 
+            // -- Edit Pause Dates --
             $('#file-datatable').on('click', '.edit-pause-dates', function() {
                 const id = $(this).data('id');
                 const start = $(this).data('start');
