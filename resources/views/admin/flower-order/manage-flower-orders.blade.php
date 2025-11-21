@@ -10,11 +10,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
-
     <style>
         .btn {
             text-align: center;
@@ -330,7 +330,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2 mt-2">
+                        <div class="col-md-2">
                             <button type="button" id="search-btn" class="btn btn-primary w-100">
                                 <i class="fas fa-search"></i> Search
                             </button>
@@ -486,15 +486,13 @@
                                 </form>
                             </div>
                         </div>
-
-                    </div> <!-- table responsive -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- End Row -->
 @endsection
-
 @section('scripts')
     <!-- Dependencies -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -507,44 +505,24 @@
 
     <script>
         $(document).ready(function() {
-            // Init Select2
             $('#customer_name').select2({
                 placeholder: 'Select Customer',
-                allowClear: true,
-                width: '100%'
+                allowClear: true
             });
             $('#mobile_number').select2({
                 placeholder: 'Select Mobile',
-                allowClear: true,
-                width: '100%'
+                allowClear: true
             });
             $('#apartment_name').select2({
                 placeholder: 'Select Apartment',
-                allowClear: true,
-                width: '100%'
+                allowClear: true
             });
             $('#apartment_flat_plot').select2({
                 placeholder: 'Select Flat/Plot',
-                allowClear: true,
-                width: '100%'
-            });
-
-            // *** Allow only ONE filter at a time ***
-            const filterFields = ['#customer_name', '#mobile_number', '#apartment_name', '#apartment_flat_plot'];
-
-            filterFields.forEach(selector => {
-                $(selector).on('change', function() {
-                    const currentId = '#' + this.id;
-                    filterFields.forEach(other => {
-                        if (other !== currentId) {
-                            $(other).val('').trigger('change'); // clear other filters
-                        }
-                    });
-                });
+                allowClear: true
             });
         });
     </script>
-
     <script>
         $(function() {
             const table = $('#file-datatable').DataTable({
@@ -670,25 +648,26 @@
                         data: null,
                         name: 'created_at',
                         render: function(r) {
-                            const createdAt = r.created_at ? moment(r.created_at).format('DD-MM-YYYY h:mm A') : 'N/A';
+                            const createdAt = r.created_at ? moment(r.created_at).format(
+                                'DD-MM-YYYY h:mm A') : 'N/A';
 
                             if (r.status === 'paused') {
                                 const start = moment(r.pause_start_date).format('DD-MM-YYYY');
                                 const end = moment(r.pause_end_date).format('DD-MM-YYYY');
                                 return `
-                                    ${createdAt}
-                                    <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
-                                        <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
-                                        <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
-                                        <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
-                                            data-id="${r.id}"
-                                            data-start="${r.pause_start_date}"
-                                            data-end="${r.pause_end_date}"
-                                            data-bs-toggle="modal" data-bs-target="#editPauseModal">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </div>
-                                `;
+                                ${createdAt}
+                                <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
+                                    <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
+                                    <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
+                                    <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
+                                        data-id="${r.id}"
+                                        data-start="${r.pause_start_date}"
+                                        data-end="${r.pause_end_date}"
+                                        data-bs-toggle="modal" data-bs-target="#editPauseModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            `;
                             }
 
                             return createdAt;
@@ -703,9 +682,9 @@
                             const end = r.new_date ? moment(r.new_date).format('MMM D, YYYY') :
                                 moment(r.end_date).format('MMM D, YYYY');
                             return `${start}<br> — <br>${end}<br>
-                                <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
-                                    <i class="fas fa-edit"></i>
-                                </button>`;
+                        <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>`;
                         }
                     },
                     {
@@ -728,11 +707,11 @@
                                 cancelled: 'bg-danger'
                             };
                             return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
-                                <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
-                                    data-bs-toggle="modal" data-bs-target="#editStatusModal"
-                                    data-id="${r.id}" data-status="${s}">
-                                    <i class="fas fa-edit"></i>
-                                </button>`;
+                        <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
+                            data-bs-toggle="modal" data-bs-target="#editStatusModal"
+                            data-id="${r.id}" data-status="${s}">
+                            <i class="fas fa-edit"></i>
+                        </button>`;
                         }
                     },
                     {
@@ -740,21 +719,24 @@
                         name: 'order.rider_id',
                         render: function(r) {
                             return `${r.order?.rider?.rider_name || 'Unassigned'}<br>
-                                <button class="btn btn-sm btn-outline-info edit-rider"
-                                    data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
-                                    <i class="fas fa-edit"></i>
-                                </button>`;
+                        <button class="btn btn-sm btn-outline-info edit-rider"
+                            data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
+                            <i class="fas fa-edit"></i>
+                        </button>`;
                         }
                     },
                     {
                         data: null,
                         orderable: false,
                         render: function(r) {
-                            let btn = `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
+                            let btn =
+                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
                             if (r.status === 'active')
-                                btn += ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
+                                btn +=
+                                ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
                             if (r.status === 'paused')
-                                btn += ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                                btn +=
+                                ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
 
                             return btn;
                         }
@@ -766,6 +748,7 @@
             });
 
             table.on('draw', function() {
+                // Re-initialize all Bootstrap tooltips
                 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
                 tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
             });
@@ -822,7 +805,7 @@
             $('#file-datatable').on('click', '.edit-rider', function() {
                 const row = table.row($(this).closest('tr')).data();
                 $('#rider-sub-id').val(row.id);
-                $('#rider-select').val(row.order.rider?.rider_id || '').trigger('change');
+                $('#rider-select').val(row.order.rider?.rider_id || '');
                 $('#edit-rider-form').attr('action', `/admin/orders/${row.order.id}/updateRider`);
                 new bootstrap.Modal($('#editRiderModal')[0]).show();
             });
@@ -867,7 +850,7 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                location.reload();
+                                location.reload(); // 🔄 Auto-refresh the page
                             });
                         }
                     },
@@ -891,7 +874,35 @@
                 });
             });
 
-            // -- Edit Pause Dates --
+
+            // // -- Edit Pause Dates --
+            // $('#file-datatable').on('click', '.edit-pause-dates', function() {
+            //     const id = $(this).data('id');
+            //     const start = $(this).data('start');
+            //     const end = $(this).data('end');
+            //     $('#pause-sub-id').val(id);
+            //     $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
+            //     $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
+            //     $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
+            //     new bootstrap.Modal($('#editPauseModal')[0]).show();
+            // });
+
+            // $('#edit-pause-form').submit(function(e) {
+            //     e.preventDefault();
+            //     $.ajax({
+            //         url: this.action,
+            //         type: 'POST',
+            //         data: $(this).serialize(),
+            //         success: () => {
+            //             Swal.fire('Updated', 'Pause dates updated.', 'success');
+            //             $('#editPauseModal').modal('hide');
+            //             table.ajax.reload(null, false);
+            //         },
+            //         error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
+            //     });
+            // });
+
+
             $('#file-datatable').on('click', '.edit-pause-dates', function() {
                 const id = $(this).data('id');
                 const start = $(this).data('start');
