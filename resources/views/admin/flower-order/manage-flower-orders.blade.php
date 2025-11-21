@@ -518,9 +518,11 @@
     <script>
         $(document).ready(function() {
             const filterIds = ['#customer_name', '#mobile_number', '#apartment_name', '#apartment_flat_plot'];
-            let isUpdating = false;
 
-            // Init select2
+            // global variable so DataTables ajax can read it
+            window.currentActiveFilter = null;
+
+            // Init Select2
             $('.filter-select').each(function() {
                 $(this).select2({
                     placeholder: $(this).data('placeholder'),
@@ -529,57 +531,39 @@
                 });
             });
 
-            function enforceSingleFilter(changedSelector) {
-                if (isUpdating) return;
-                isUpdating = true;
-
-                const $changed = $(changedSelector);
-                const hasValue = $changed.val() && $changed.val() !== '';
-
-                // If one got a value, clear others
-                if (hasValue) {
+            function refreshFilterStates() {
+                if (!window.currentActiveFilter) {
+                    // nothing selected -> all enabled
                     filterIds.forEach(function(id) {
-                        if (id !== changedSelector) {
-                            $(id).val(null).trigger('change.select2');
-                        }
-                    });
-                }
-
-                // Now recompute active filters
-                let activeCount = 0;
-                let activeId = null;
-
-                filterIds.forEach(function(id) {
-                    const val = $(id).val();
-                    if (val !== null && val !== '') {
-                        activeCount++;
-                        activeId = id;
-                    }
-                });
-
-                if (activeCount === 1) {
-                    // exactly one active -> disable others
-                    filterIds.forEach(function(id) {
-                        $(id).prop('disabled', id !== activeId).trigger('change.select2');
+                        $(id).prop('disabled', false);
                     });
                 } else {
-                    // none active (or somehow multiple) -> enable all
+                    const activeSelector = '#' + window.currentActiveFilter;
                     filterIds.forEach(function(id) {
-                        $(id).prop('disabled', false).trigger('change.select2');
+                        $(id).prop('disabled', id !== activeSelector);
                     });
                 }
-
-                isUpdating = false;
             }
 
             filterIds.forEach(function(id) {
+                // change event (user selects or manually clears)
                 $(id).on('change', function() {
-                    enforceSingleFilter('#' + this.id);
+                    const val = $(this).val();
+                    if (val && val !== '') {
+                        // this is now the only active filter
+                        window.currentActiveFilter = this.id;
+                    } else {
+                        // cleared via keyboard / etc.
+                        window.currentActiveFilter = null;
+                    }
+                    refreshFilterStates();
                 });
 
-                // handle click on × clear explicitly
+                // clear via Select2 × button
                 $(id).on('select2:clear', function() {
-                    enforceSingleFilter('#' + this.id);
+                    $(this).val(null); // make sure value is removed
+                    window.currentActiveFilter = null; // no active filter
+                    refreshFilterStates(); // enable all others
                 });
             });
         });
@@ -595,10 +579,13 @@
                     url: "{{ route('admin.orders.index') }}",
                     data: function(d) {
                         d.filter = '{{ request('filter', '') }}';
-                        d.customer_name = $('#customer_name').val();
-                        d.mobile_number = $('#mobile_number').val();
-                        d.apartment_name = $('#apartment_name').val();
-                        d.apartment_flat_plot = $('#apartment_flat_plot').val();
+
+                        // Only send value for the currently active filter
+                        const active = window.currentActiveFilter || null;
+                        d.customer_name = active === 'customer_name' ? $('#customer_name').val() : '';
+                        d.mobile_number = active === 'mobile_number' ? $('#mobile_number').val() : '';
+                        d.apartment_name = active === 'apartment_name' ? $('#apartment_name').val() : '';
+                        d.apartment_flat_plot = active === 'apartment_flat_plot' ? $('#apartment_flat_plot').val() : '';
                     }
                 },
 
