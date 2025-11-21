@@ -225,6 +225,13 @@
         .modal-header.bg-warning {
             color: #fff;
         }
+
+        /* Bigger & clearer Select2 clear (×) icon */
+        .select2-selection__clear {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            margin-right: 4px;
+        }
     </style>
 @endsection
 
@@ -287,7 +294,7 @@
                         </div>
                     @endif
 
-                    {{-- UPDATED FILTER FORM --}}
+                    {{-- FILTER FORM --}}
                     <form id="filter-form" class="row g-2 align-items-end mb-4">
                         <div class="col-md-3">
                             <label class="form-label">Customer Name</label>
@@ -360,7 +367,7 @@
                             </table>
                         </div>
 
-                        {{-- MODALS (same as before, unchanged) --}}
+                        {{-- MODALS --}}
                         <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-status-form" method="POST"
@@ -507,12 +514,13 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    {{-- NEW: Select2 + "only one filter at a time" logic --}}
+    {{-- Select2 + single-filter logic + working clear (×) --}}
     <script>
         $(document).ready(function() {
             const filterIds = ['#customer_name', '#mobile_number', '#apartment_name', '#apartment_flat_plot'];
+            let isUpdating = false;
 
-            // Init select2 with placeholder + clear support
+            // Init select2
             $('.filter-select').each(function() {
                 $(this).select2({
                     placeholder: $(this).data('placeholder'),
@@ -521,30 +529,57 @@
                 });
             });
 
-            function updateFilterStates(changedSelector) {
+            function enforceSingleFilter(changedSelector) {
+                if (isUpdating) return;
+                isUpdating = true;
+
                 const $changed = $(changedSelector);
                 const hasValue = $changed.val() && $changed.val() !== '';
 
+                // If one got a value, clear others
                 if (hasValue) {
-                    // disable and clear all other filters
                     filterIds.forEach(function(id) {
                         if (id !== changedSelector) {
-                            $(id).val(null).trigger('change');
-                            $(id).prop('disabled', true);
+                            $(id).val(null).trigger('change.select2');
                         }
                     });
-                } else {
-                    // no value -> enable all filters
+                }
+
+                // Now recompute active filters
+                let activeCount = 0;
+                let activeId = null;
+
+                filterIds.forEach(function(id) {
+                    const val = $(id).val();
+                    if (val !== null && val !== '') {
+                        activeCount++;
+                        activeId = id;
+                    }
+                });
+
+                if (activeCount === 1) {
+                    // exactly one active -> disable others
                     filterIds.forEach(function(id) {
-                        $(id).prop('disabled', false);
+                        $(id).prop('disabled', id !== activeId).trigger('change.select2');
+                    });
+                } else {
+                    // none active (or somehow multiple) -> enable all
+                    filterIds.forEach(function(id) {
+                        $(id).prop('disabled', false).trigger('change.select2');
                     });
                 }
+
+                isUpdating = false;
             }
 
-            // When any filter changes (including when cleared with the × icon)
             filterIds.forEach(function(id) {
                 $(id).on('change', function() {
-                    updateFilterStates('#' + this.id);
+                    enforceSingleFilter('#' + this.id);
+                });
+
+                // handle click on × clear explicitly
+                $(id).on('select2:clear', function() {
+                    enforceSingleFilter('#' + this.id);
                 });
             });
         });
