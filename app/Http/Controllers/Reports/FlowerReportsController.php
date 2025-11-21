@@ -18,28 +18,32 @@ use App\Models\LocalityDetails;
 use App\Models\PauseResumeLog;
 use App\Models\Rider;
 use Carbon\Carbon;
-
-use Illuminate\Support\Facades\DB; // ✅ needed for DB::raw
+use Illuminate\Support\Facades\DB;
 
 class FlowerReportsController extends Controller
 {
- public function subscriptionReport(Request $request)
-    {
-        // ✅ CSV trigger: allow ?export=csv
-        $wantsCsv = $request->get('export') === 'csv';
 
-        if ($request->ajax() || $wantsCsv) {
-            // ---------- DATE FILTER (single source of truth) ----------
-            $from = $request->filled('from_date')
-                ? Carbon::parse($request->from_date)->startOfDay()
-                : Carbon::now()->startOfMonth();
 
-            $to = $request->filled('to_date')
-                ? Carbon::parse($request->to_date)->endOfDay()
-                : Carbon::now()->endOfMonth();
+public function subscriptionReport(Request $request)
+{
+    // ✅ CSV trigger: allow ?export=csv
+    $wantsCsv = $request->get('export') === 'csv';
 
-            // ---------- BASE QUERY FOR TABLE (filter by purchase period = start_date) ----------
-            $baseQuery = Subscription::with([
+    if ($request->ajax() || $wantsCsv) {
+        // ---------- DATE FILTER (single source of truth) ----------
+        $from = $request->filled('from_date')
+            ? Carbon::parse($request->from_date)->startOfDay()
+            : Carbon::now()->startOfMonth();
+
+        $to = $request->filled('to_date')
+            ? Carbon::parse($request->to_date)->endOfDay()
+            : Carbon::now()->endOfMonth();
+
+        // Tab filter: "new" or "renew" (for separate lists)
+        $type = $request->get('type'); // null | 'new' | 'renew'
+
+        // ---------- BASE QUERY (for ALL subs in range; used for KPIs) ----------
+        $baseQuery = Subscription::with([
                 'order.address.localityDetails',
                 'flowerPayments',
                 'users.addressDetails',
@@ -50,138 +54,172 @@ class FlowerReportsController extends Controller
             ->whereBetween('start_date', [$from, $to])
             ->orderBy('id', 'desc');
 
-            // Materialize rows for KPI math (clone so DataTables can still use original builder)
-            $subscriptions = (clone $baseQuery)->get();
+        // Materialize rows for KPI math (ALL subs in range)
+        $subscriptions = (clone $baseQuery)->get();
 
-            // ---------- MAP: user_id => first-ever subscription id ----------
-            $firstIds = Subscription::select('user_id', DB::raw('MIN(id) as first_id'))
-                ->groupBy('user_id')
-                ->pluck('first_id', 'user_id'); // [user_id => first_id]
+        // ---------- MAP: user_id => first-ever subscription id ----------
+        $firstIds = Subscription::select('user_id', DB::raw('MIN(id) as first_id'))
+            ->groupBy('user_id')
+            ->pluck('first_id', 'user_id'); // [user_id => first_id]
 
-            // ---------- KPI COMPUTATION (guaranteed add up) ----------
-            $totalPrice = 0.0;
-            $newUserPrice = 0.0;    // first-ever subs falling in the filtered range
-            $renewUserPrice = 0.0;  // all other subs falling in the filtered range
+        $firstIdValues = $firstIds->values(); // collection of subscription IDs that are "NEW"
 
-            foreach ($subscriptions as $sub) {
-                $price = (float) ($sub->order->total_price ?? 0);
-                $totalPrice += $price;
+        // ---------- KPI COMPUTATION (for all rows in range) ----------
+        $totalPrice     = 0.0;
+        $newUserPrice   = 0.0;
+        $renewUserPrice = 0.0;
 
-                $isFirstEver = isset($firstIds[$sub->user_id]) && ((int)$firstIds[$sub->user_id] === (int)$sub->id);
-                if ($isFirstEver) {
-                    $newUserPrice += $price;
-                } else {
-                    $renewUserPrice += $price;
-                }
+        foreach ($subscriptions as $sub) {
+            $price = (float) ($sub->order->total_price ?? 0);
+            $totalPrice += $price;
+
+            $isFirstEver = isset($firstIds[$sub->user_id]) && ((int) $firstIds[$sub->user_id] === (int) $sub->id);
+            if ($isFirstEver) {
+                $newUserPrice += $price;
+            } else {
+                $renewUserPrice += $price;
             }
-
-            // ---------- OPTIONAL: CSV EXPORT FOR THE SAME FILTER ----------
-            if ($wantsCsv) {
-                $filename = 'subscription-report-' . $from->toDateString() . '_to_' . $to->toDateString() . '.csv';
-
-                $headers = [
-                    'Content-Type'        => 'text/csv',
-                    'Content-Disposition' => "attachment; filename=\"$filename\"",
-                ];
-
-                $callback = function () use ($subscriptions, $firstIds, $totalPrice, $newUserPrice, $renewUserPrice) {
-                    $out = fopen('php://output', 'w');
-
-                    // Header rows with KPIs
-                    fputcsv($out, ['Total Subscription Revenue', number_format($totalPrice, 2, '.', '')]);
-                    fputcsv($out, ['Renew Customers Revenue', number_format($renewUserPrice, 2, '.', '')]);
-                    fputcsv($out, ['New Subscriptions Revenue', number_format($newUserPrice, 2, '.', '')]);
-                    fputcsv($out, []); // blank line
-
-                    // Table header
-                    fputcsv($out, [
-                        'Customer Name', 'Mobile', 'Apartment/Flat No', 'Apartment Name', 'Locality',
-                        'Purchase Start', 'Purchase End', 'Duration (days, inclusive)',
-                        'Payment Method', 'Price', 'Status', 'Type (NEW/RENEW)'
-                    ]);
-
-                    foreach ($subscriptions as $row) {
-                        $user   = $row->users;
-                        $addr   = $user?->addressDetails;
-                        $start  = $row->start_date ? Carbon::parse($row->start_date) : null;
-                        $end    = $row->end_date ? Carbon::parse($row->end_date) : null;
-                        $days   = ($start && $end) ? $start->diffInDays($end) + 1 : 0;
-                        $method = $row->latestPaidPayment->payment_method
-                                  ?? $row->latestPayment->payment_method
-                                  ?? null;
-                        $price  = (float) ($row->order->total_price ?? 0);
-                        $type   = (isset($firstIds[$row->user_id]) && ((int)$firstIds[$row->user_id] === (int)$row->id)) ? 'NEW' : 'RENEW';
-
-                        fputcsv($out, [
-                            $user->name ?? 'N/A',
-                            $user->mobile_number ?? 'N/A',
-                            $addr->apartment_flat_plot ?? '',
-                            $addr->apartment_name ?? '',
-                            $addr->locality ?? '',
-                            $start?->format('Y-m-d') ?? '',
-                            $end?->format('Y-m-d') ?? '',
-                            $days,
-                            $method ?: '',
-                            number_format($price, 2, '.', ''),
-                            ucfirst($row->status ?? ''),
-                            $type,
-                        ]);
-                    }
-
-                    fclose($out);
-                };
-
-                return response()->stream($callback, 200, $headers);
-            }
-
-            // ---------- DATATABLES (serverSide) ----------
-            $dataTable = DataTables::of($baseQuery)
-                ->addColumn('user', function ($row) {
-                    $user = $row->users;
-                    return [
-                        'userid' => $user->userid ?? null,
-                        'name' => $user->name ?? 'N/A',
-                        'mobile_number' => $user->mobile_number ?? 'N/A',
-                        'address_details' => $user?->addressDetails ? [
-                            'apartment_flat_plot' => $user->addressDetails->apartment_flat_plot ?? '',
-                            'apartment_name'      => $user->addressDetails->apartment_name ?? '',
-                            'locality'            => $user->addressDetails->locality ?? '',
-                            'landmark'            => $user->addressDetails->landmark ?? '',
-                            'pincode'             => $user->addressDetails->pincode ?? '',
-                            'city'                => $user->addressDetails->city ?? '',
-                            'state'               => $user->addressDetails->state ?? '',
-                        ] : null
-                    ];
-                })
-                ->addColumn('purchase_date', fn($row) => [
-                    'start' => $row->start_date,
-                    'end'   => $row->end_date
-                ])
-                ->addColumn('duration', fn($row) =>
-                    Carbon::parse($row->start_date)->diffInDays(Carbon::parse($row->end_date)) + 1
-                )
-                ->addColumn('price', fn($row) => (float)($row->order->total_price ?? 0))
-                ->addColumn('payment_method', function ($row) {
-                    return $row->latestPaidPayment->payment_method
-                        ?? $row->latestPayment->payment_method
-                        ?? null;
-                })
-                ->addColumn('status', fn($row) => ucfirst($row->status));
-
-            // NOTE: Do not call ->make(true) yet; we need to inject KPIs first via getData(true)
-            $json = $dataTable->make(true)->getData(true);
-
-            // Inject KPIs (these always add up: total = new + renew)
-            $json['total_price']       = round($totalPrice, 2);
-            $json['new_user_price']    = round($newUserPrice, 2);
-            $json['renew_user_price']  = round($renewUserPrice, 2);
-
-            return response()->json($json);
         }
 
-        // Initial page (Blade)
-        return view('admin.reports.flower-subscription-report');
+        // ---------- DATA QUERY (filtered by type for tabs / CSV) ----------
+        $dataQuery = (clone $baseQuery);
+
+        if ($type === 'new') {
+            // Only first-ever subscriptions
+            if ($firstIdValues->isNotEmpty()) {
+                $dataQuery->whereIn('id', $firstIdValues);
+            } else {
+                // No new subs at all
+                $dataQuery->whereRaw('1=0');
+            }
+        } elseif ($type === 'renew') {
+            // Subscriptions that are NOT first-ever
+            if ($firstIdValues->isNotEmpty()) {
+                $dataQuery->whereNotIn('id', $firstIdValues);
+            }
+            // if there are somehow no firstIds, everything is effectively "renew",
+            // but practically that won't happen
+        }
+
+        // ---------- OPTIONAL: CSV EXPORT (respects "type" filter) ----------
+        if ($wantsCsv) {
+            $filename = 'subscription-report-' . $from->toDateString() . '_to_' . $to->toDateString();
+
+            if ($type === 'new') {
+                $filename .= '-new.csv';
+            } elseif ($type === 'renew') {
+                $filename .= '-renew.csv';
+            } else {
+                $filename .= '.csv';
+            }
+
+            $headers = [
+                'Content-Type'        => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
+
+            $exportSubs = (clone $dataQuery)->get();
+
+            $callback = function () use ($exportSubs, $firstIds, $totalPrice, $newUserPrice, $renewUserPrice) {
+                $out = fopen('php://output', 'w');
+
+                // Header rows with KPIs (for WHOLE range, not just filtered list)
+                fputcsv($out, ['Total Subscription Revenue', number_format($totalPrice, 2, '.', '')]);
+                fputcsv($out, ['Renew Customers Revenue', number_format($renewUserPrice, 2, '.', '')]);
+                fputcsv($out, ['New Subscriptions Revenue', number_format($newUserPrice, 2, '.', '')]);
+                fputcsv($out, []); // blank line
+
+                // Table header
+                fputcsv($out, [
+                    'Customer Name', 'Mobile', 'Apartment/Flat No', 'Apartment Name', 'Locality',
+                    'Purchase Start', 'Purchase End', 'Duration (days, inclusive)',
+                    'Payment Method', 'Price', 'Status', 'Type (NEW/RENEW)'
+                ]);
+
+                foreach ($exportSubs as $row) {
+                    $user   = $row->users;
+                    $addr   = $user?->addressDetails;
+                    $start  = $row->start_date ? Carbon::parse($row->start_date) : null;
+                    $end    = $row->end_date ? Carbon::parse($row->end_date) : null;
+                    $days   = ($start && $end) ? $start->diffInDays($end) + 1 : 0;
+                    $method = $row->latestPaidPayment->payment_method
+                        ?? $row->latestPayment->payment_method
+                        ?? null;
+                    $price  = (float) ($row->order->total_price ?? 0);
+                    $type   = (isset($firstIds[$row->user_id]) && ((int) $firstIds[$row->user_id] === (int) $row->id))
+                        ? 'NEW'
+                        : 'RENEW';
+
+                    fputcsv($out, [
+                        $user->name ?? 'N/A',
+                        $user->mobile_number ?? 'N/A',
+                        $addr->apartment_flat_plot ?? '',
+                        $addr->apartment_name ?? '',
+                        $addr->locality ?? '',
+                        $start?->format('Y-m-d') ?? '',
+                        $end?->format('Y-m-d') ?? '',
+                        $days,
+                        $method ?: '',
+                        number_format($price, 2, '.', ''),
+                        ucfirst($row->status ?? ''),
+                        $type,
+                    ]);
+                }
+
+                fclose($out);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        }
+
+        // ---------- DATATABLES (serverSide, separate list per tab) ----------
+        $dataTable = DataTables::of($dataQuery)
+            ->addColumn('user', function ($row) {
+                $user = $row->users;
+                return [
+                    'userid' => $user->userid ?? null,
+                    'name' => $user->name ?? 'N/A',
+                    'mobile_number' => $user->mobile_number ?? 'N/A',
+                    'address_details' => $user?->addressDetails ? [
+                        'apartment_flat_plot' => $user->addressDetails->apartment_flat_plot ?? '',
+                        'apartment_name'      => $user->addressDetails->apartment_name ?? '',
+                        'locality'            => $user->addressDetails->locality ?? '',
+                        'landmark'            => $user->addressDetails->landmark ?? '',
+                        'pincode'             => $user->addressDetails->pincode ?? '',
+                        'city'                => $user->addressDetails->city ?? '',
+                        'state'               => $user->addressDetails->state ?? '',
+                    ] : null
+                ];
+            })
+            ->addColumn('purchase_date', fn($row) => [
+                'start' => $row->start_date,
+                'end'   => $row->end_date
+            ])
+            ->addColumn('duration', fn($row) =>
+                Carbon::parse($row->start_date)->diffInDays(Carbon::parse($row->end_date)) + 1
+            )
+            ->addColumn('price', fn($row) => (float) ($row->order->total_price ?? 0))
+            ->addColumn('payment_method', function ($row) {
+                return $row->latestPaidPayment->payment_method
+                    ?? $row->latestPayment->payment_method
+                    ?? null;
+            })
+            ->addColumn('status', fn($row) => ucfirst($row->status));
+
+        $json = $dataTable->make(true)->getData(true);
+
+        // Inject KPIs (always same regardless of tab/type)
+        $json['total_price']      = round($totalPrice, 2);
+        $json['new_user_price']   = round($newUserPrice, 2);
+        $json['renew_user_price'] = round($renewUserPrice, 2);
+
+        return response()->json($json);
     }
+
+    // Initial page (Blade)
+    return view('admin.reports.flower-subscription-report');
+}
+
 public function reportCustomize(Request $request)
 {
     if ($request->ajax()) {

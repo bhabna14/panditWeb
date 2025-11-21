@@ -191,6 +191,28 @@
         .action-btns .btn {
             border-radius: 10px
         }
+
+        /* Tabs styling */
+        .subs-tabs .nav-link {
+            border-radius: 999px;
+            margin: 0 .25rem;
+            border: 1px solid transparent;
+            font-weight: 600;
+            color: var(--pf-muted);
+        }
+
+        .subs-tabs .nav-link.active {
+            background: var(--pf-primary);
+            color: #fff;
+            border-color: var(--pf-primary);
+            box-shadow: var(--pf-shadow-sm);
+        }
+
+        .subs-tabs {
+            background: #F3F4FF;
+            border-radius: 999px;
+            padding: .2rem;
+        }
     </style>
 @endsection
 
@@ -283,24 +305,68 @@
             </div>
         </div>
 
-        {{-- Table --}}
+        {{-- Tabs + Tables --}}
         <div class="card" style="border-radius:16px; border:1px solid var(--pf-border); box-shadow: var(--pf-shadow-sm);">
             <div class="card-body">
-                <div class="table-responsive">
-                    <table id="file-datatable" class="table table-bordered table-hover w-100">
-                        <thead class="table-light">
-                            <tr>
-                                <th style="min-width:280px">Customer</th>
-                                <th>Purchase Period</th>
-                                <th>Duration</th>
-                                <th>Payment Method</th>
-                                <th class="text-end">Price</th>
-                                <th class="text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+
+                {{-- Tabs full width --}}
+                <ul class="nav nav-pills nav-fill subs-tabs mb-3" id="subsTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="renew-tab" data-bs-toggle="tab"
+                            data-bs-target="#renew-pane" type="button" role="tab"
+                            aria-controls="renew-pane" aria-selected="true" data-type="renew">
+                            <i class="bi bi-arrow-repeat me-1"></i> Renew Subscriptions
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="new-tab" data-bs-toggle="tab"
+                            data-bs-target="#new-pane" type="button" role="tab"
+                            aria-controls="new-pane" aria-selected="false" data-type="new">
+                            <i class="bi bi-person-plus me-1"></i> New Subscriptions
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="subsTabContent">
+                    {{-- Renew list --}}
+                    <div class="tab-pane fade show active" id="renew-pane" role="tabpanel" aria-labelledby="renew-tab">
+                        <div class="table-responsive">
+                            <table id="renew-table" class="table table-bordered table-hover w-100">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="min-width:280px">Customer</th>
+                                        <th>Purchase Period</th>
+                                        <th>Duration</th>
+                                        <th>Payment Method</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    {{-- New list --}}
+                    <div class="tab-pane fade" id="new-pane" role="tabpanel" aria-labelledby="new-tab">
+                        <div class="table-responsive">
+                            <table id="new-table" class="table table-bordered table-hover w-100">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th style="min-width:280px">Customer</th>
+                                        <th>Purchase Period</th>
+                                        <th>Duration</th>
+                                        <th>Payment Method</th>
+                                        <th class="text-end">Price</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
                 <div class="d-flex justify-content-end gap-2 mt-3">
                     <button id="refreshBtn" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-clockwise me-1"></i>Refresh
@@ -367,189 +433,214 @@
             }
             setQuickRange('today');
 
-            const table = $('#file-datatable').DataTable({
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                order: [
-                    [1, 'desc']
-                ],
-                ajax: {
-                    url: "{{ route('subscription.report') }}",
-                    data: function(d) {
-                        d.from_date = $from.val();
-                        d.to_date = $to.val();
-                        d.range = $('.range-quick.active').data('range');
-                    },
-                    dataSrc: function(json) {
-                        const total = parseFloat(json.total_price || 0);
-                        const renewTotal = parseFloat(json.renew_user_price || 0);
-                        const newUserTotal = parseFloat(json.new_user_price || 0);
-                        $('#totalPrice').text('₹' + total.toFixed(2));
-                        $('#renewCustomerTotalPrice').text('₹' + renewTotal.toFixed(2));
-                        $('#newUserTotalPrice').text('₹' + newUserTotal.toFixed(2));
-                        return json.data || [];
-                    },
-                    error: function() {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to load data. Please try again.'
-                        });
+            // Common columns setup used by both tables
+            const columns = [{
+                    data: null,
+                    orderable: false,
+                    searchable: true,
+                    render: function(data, type, row) {
+                        const user = row.user || {};
+                        const address = (user.address_details || {});
+                        const userId = user.userid ?? null;
+
+                        const tooltip = `
+                            <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
+                            <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
+                        `.trim();
+
+                        const modalId =
+                            `addressModal${userId || Math.random().toString(36).slice(2)}`;
+
+                        const viewBtn = userId ?
+                            `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm" title="View Customer">
+                                    <i class="fas fa-eye"></i>
+                               </a>` :
+                            '';
+
+                        const addressHtml = `
+                            <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog"><div class="modal-content">
+                                    <div class="modal-header text-white" style="background: var(--pf-primary);">
+                                        <h5 class="modal-title"><i class="fas fa-home me-2"></i>Address Details</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="mb-1"><strong>Address:</strong> ${(address.apartment_flat_plot || '')}, ${(address.apartment_name || '')}, ${(address.locality || '')}</p>
+                                        <p class="mb-1"><strong>Landmark:</strong> ${(address.landmark || '')}</p>
+                                        <p class="mb-1"><strong>Pin Code:</strong> ${(address.pincode || '')}</p>
+                                        <p class="mb-1"><strong>City:</strong> ${(address.city || '')}</p>
+                                        <p class="mb-0"><strong>State:</strong> ${(address.state || '')}</p>
+                                    </div>
+                                </div></div>
+                            </div>
+                        `;
+
+                        return `
+                            <div class="customer-meta" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
+                                <div class="fw-semibold">${user.name || 'N/A'}</div>
+                                <small><i class="bi bi-telephone me-1"></i>${user.mobile_number || 'N/A'}</small>
+                                <div class="mt-2 d-flex gap-2 action-btns">
+                                    ${viewBtn}
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Show Address">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            ${addressHtml}
+                        `;
                     }
                 },
-                columns: [{
-                        data: null,
-                        orderable: false,
-                        searchable: true,
-                        render: function(data, type, row) {
-                            const user = row.user || {};
-                            const address = (user.address_details || {});
-                            const userId = user.userid ?? null;
-
-                            const tooltip = `
-                                <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
-                                <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
-                            `.trim();
-
-                            const modalId =
-                                `addressModal${userId || Math.random().toString(36).slice(2)}`;
-
-                            const viewBtn = userId ?
-                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm" title="View Customer">
-                                        <i class="fas fa-eye"></i>
-                                   </a>` :
-                                '';
-
-                            const addressHtml = `
-                                <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog"><div class="modal-content">
-                                        <div class="modal-header text-white" style="background: var(--pf-primary);">
-                                            <h5 class="modal-title"><i class="fas fa-home me-2"></i>Address Details</h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p class="mb-1"><strong>Address:</strong> ${(address.apartment_flat_plot || '')}, ${(address.apartment_name || '')}, ${(address.locality || '')}</p>
-                                            <p class="mb-1"><strong>Landmark:</strong> ${(address.landmark || '')}</p>
-                                            <p class="mb-1"><strong>Pin Code:</strong> ${(address.pincode || '')}</p>
-                                            <p class="mb-1"><strong>City:</strong> ${(address.city || '')}</p>
-                                            <p class="mb-0"><strong>State:</strong> ${(address.state || '')}</p>
-                                        </div>
-                                    </div></div>
-                                </div>
-                            `;
-
-                            return `
-                                <div class="customer-meta" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
-                                    <div class="fw-semibold">${user.name || 'N/A'}</div>
-                                    <small><i class="bi bi-telephone me-1"></i>${user.mobile_number || 'N/A'}</small>
-                                    <div class="mt-2 d-flex gap-2 action-btns">
-                                        ${viewBtn}
-                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Show Address">
-                                            <i class="fas fa-map-marker-alt"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                ${addressHtml}
-                            `;
-                        }
-                    },
-                    {
-                        data: 'purchase_date',
-                        render: function(data, type, row) {
-                            const start = (row.purchase_date && row.purchase_date.start) ? row
-                                .purchase_date.start : (row.start_date || data?.start || data);
-                            const end = (row.purchase_date && row.purchase_date.end) ? row
-                                .purchase_date.end : (row.end_date || data?.end || data);
-                            const s = start ? moment(start).format('DD MMM YYYY') : '-';
-                            const e = end ? moment(end).format('DD MMM YYYY') : '-';
-                            return `${s} — ${e}`;
-                        }
-                    },
-                    {
-                        data: 'duration',
-                        className: 'text-center',
-                        render: function(data, type, row) {
-                            let days = parseInt(data || 0, 10);
-                            if (!days || isNaN(days)) {
-                                const start = row?.purchase_date?.start;
-                                const end = row?.purchase_date?.end;
-                                if (start && end && moment(start).isValid() && moment(end)
-                                .isValid()) {
-                                    days = moment(end).diff(moment(start), 'days') + 1; // inclusive
-                                }
-                            }
-                            return `${isNaN(days) ? 0 : days} days`;
-                        }
-                    },
-                    {
-                        data: 'payment_method',
-                        className: 'text-nowrap',
-                        render: function(val) {
-                            return (val && val !== '') ? val : '—';
-                        }
-                    },
-                    {
-                        data: 'price',
-                        className: 'text-end',
-                        render: function(data) {
-                            const val = parseFloat(data || 0);
-                            return '₹' + (isNaN(val) ? '0.00' : val.toFixed(2));
-                        }
-                    },
-                    {
-                        data: 'status',
-                        className: 'text-center',
-                        render: function(data) {
-                            const s = (data || '').toString().toLowerCase();
-                            let cls = 'status-active';
-                            if (s === 'paused') cls = 'status-paused';
-                            if (s === 'expired') cls = 'status-expired';
-                            if (s === 'resume') cls = 'status-resume';
-                            return `<span class="status-badge ${cls}">${s || 'n/a'}</span>`;
-                        }
+                {
+                    data: 'purchase_date',
+                    render: function(data, type, row) {
+                        const start = (row.purchase_date && row.purchase_date.start) ? row
+                            .purchase_date.start : (row.start_date || data?.start || data);
+                        const end = (row.purchase_date && row.purchase_date.end) ? row
+                            .purchase_date.end : (row.end_date || data?.end || data);
+                        const s = start ? moment(start).format('DD MMM YYYY') : '-';
+                        const e = end ? moment(end).format('DD MMM YYYY') : '-';
+                        return `${s} — ${e}`;
                     }
-                ]
-            });
+                },
+                {
+                    data: 'duration',
+                    className: 'text-center',
+                    render: function(data, type, row) {
+                        let days = parseInt(data || 0, 10);
+                        if (!days || isNaN(days)) {
+                            const start = row?.purchase_date?.start;
+                            const end = row?.purchase_date?.end;
+                            if (start && end && moment(start).isValid() && moment(end).isValid()) {
+                                days = moment(end).diff(moment(start), 'days') + 1; // inclusive
+                            }
+                        }
+                        return `${isNaN(days) ? 0 : days} days`;
+                    }
+                },
+                {
+                    data: 'payment_method',
+                    className: 'text-nowrap',
+                    render: function(val) {
+                        return (val && val !== '') ? val : '—';
+                    }
+                },
+                {
+                    data: 'price',
+                    className: 'text-end',
+                    render: function(data) {
+                        const val = parseFloat(data || 0);
+                        return '₹' + (isNaN(val) ? '0.00' : val.toFixed(2));
+                    }
+                },
+                {
+                    data: 'status',
+                    className: 'text-center',
+                    render: function(data) {
+                        const s = (data || '').toString().toLowerCase();
+                        let cls = 'status-active';
+                        if (s === 'paused') cls = 'status-paused';
+                        if (s === 'expired') cls = 'status-expired';
+                        if (s === 'resume') cls = 'status-resume';
+                        return `<span class="status-badge ${cls}">${s || 'n/a'}</span>`;
+                    }
+                }
+            ];
+
+            function buildDataTable(selector, type) {
+                return $(selector).DataTable({
+                    processing: true,
+                    serverSide: true,
+                    responsive: true,
+                    order: [
+                        [1, 'desc']
+                    ],
+                    ajax: {
+                        url: "{{ route('subscription.report') }}",
+                        data: function(d) {
+                            d.from_date = $from.val();
+                            d.to_date = $to.val();
+                            d.range = $('.range-quick.active').data('range');
+                            d.type = type; // 'new' or 'renew'
+                        },
+                        dataSrc: function(json) {
+                            // KPIs same for both tables (whole range)
+                            const total = parseFloat(json.total_price || 0);
+                            const renewTotal = parseFloat(json.renew_user_price || 0);
+                            const newUserTotal = parseFloat(json.new_user_price || 0);
+                            $('#totalPrice').text('₹' + total.toFixed(2));
+                            $('#renewCustomerTotalPrice').text('₹' + renewTotal.toFixed(2));
+                            $('#newUserTotalPrice').text('₹' + newUserTotal.toFixed(2));
+                            return json.data || [];
+                        },
+                        error: function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Failed to load data. Please try again.'
+                            });
+                        }
+                    },
+                    columns: columns
+                });
+            }
+
+            const renewTable = buildDataTable('#renew-table', 'renew');
+            const newTable = buildDataTable('#new-table', 'new');
+
+            function reloadAllTables() {
+                renewTable.ajax.reload();
+                newTable.ajax.reload();
+                updateExportLink();
+            }
 
             // Quick range buttons
             $('.range-quick').on('click', function() {
                 $('.range-quick').removeClass('active');
                 $(this).addClass('active');
                 setQuickRange($(this).data('range'));
-                table.ajax.reload();
-                updateExportLink();
+                reloadAllTables();
             });
 
             // Manual date change (only when custom)
             $('#from_date, #to_date').on('change', function() {
                 if ($('.range-quick.active').data('range') === 'custom') {
-                    table.ajax.reload();
-                    updateExportLink();
+                    reloadAllTables();
                 }
             });
 
             // Go / Refresh
             $('#searchBtn').on('click', function() {
-                table.ajax.reload();
-                updateExportLink();
+                reloadAllTables();
             });
             $('#refreshBtn').on('click', function() {
-                table.ajax.reload(null, false);
+                const activeType = $('.subs-tabs .nav-link.active').data('type');
+                if (activeType === 'renew') {
+                    renewTable.ajax.reload(null, false);
+                } else {
+                    newTable.ajax.reload(null, false);
+                }
             });
 
+            // Update export link to respect range + active tab type
             function updateExportLink() {
+                const activeType = $('.subs-tabs .nav-link.active').data('type'); // 'new' or 'renew'
                 const params = new URLSearchParams({
                     export: 'csv',
                     from_date: $('#from_date').val() || '',
-                    to_date: $('#to_date').val() || ''
+                    to_date: $('#to_date').val() || '',
+                    type: activeType || ''
                 });
                 $('#exportCsv').attr('href', "{{ route('subscription.report') }}?" + params.toString());
             }
             updateExportLink();
 
-            // Re-init tooltips after table draw
-            $('#file-datatable').on('draw.dt', function() {
+            // When switching tabs, update export link
+            $('#subsTab button[data-bs-toggle="tab"]').on('shown.bs.tab', function() {
+                updateExportLink();
+            });
+
+            // Re-init tooltips after any table draw
+            $('#renew-table, #new-table').on('draw.dt', function() {
                 $('[data-bs-toggle="tooltip"]').each(function() {
                     const t = bootstrap.Tooltip.getInstance(this);
                     if (t) t.dispose();
