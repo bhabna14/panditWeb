@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;   // 👈 ADD THIS LINE
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -28,7 +29,6 @@ class Subscription extends Model
         'status'
     ];
 
-    
     public function users()
     {
         return $this->belongsTo(User::class, 'user_id', 'userid');
@@ -54,7 +54,7 @@ class Subscription extends Model
     
             Log::info('Subscription expired', [
                 'order_id' => $subscription->order_id,
-                'user_id' => $subscription->user_id,
+                'user_id'  => $subscription->user_id,
             ]);
         }
     }
@@ -66,12 +66,12 @@ class Subscription extends Model
 
     public function relatedOrder()
     {
-        return $this->belongsTo(Order::class, 'order_id', 'order_id');  // Adjust 'order_id' if necessary
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
     }
 
     public function order()
     {
-        return $this->belongsTo(Order::class, 'order_id', 'order_id');  // Adjust 'order_id' if necessary
+        return $this->belongsTo(Order::class, 'order_id', 'order_id');
     }
 
     public function flowerProducts()
@@ -83,22 +83,6 @@ class Subscription extends Model
     {
         return $this->hasMany(SubscriptionPauseResumeLog::class, 'order_id', 'order_id');
     }
-
-
-    // public function scopeActiveOn($q, Carbon $date)
-    // {
-    //     return $q->where(function ($q) {
-    //             $q->where('status', 'active')->orWhere('is_active', 1);
-    //         })
-    //         ->whereDate('start_date', '<=', $date->toDateString())
-    //         ->whereDate('end_date', '>=', $date->toDateString())
-    //         ->where(function ($q) use ($date) {
-    //             $q->whereNull('pause_start_date')
-    //             ->orWhereNull('pause_end_date')
-    //             ->orWhereDate('pause_end_date', '<', $date->toDateString())
-    //             ->orWhereDate('pause_start_date', '>', $date->toDateString());
-    //         });
-    // }
 
     public function latestPayment()
     {
@@ -136,13 +120,17 @@ class Subscription extends Model
             });
     }
 
+    /**
+     * Scope: exclude subscriptions where the same user
+     * has another subscription with status 'active' or 'pending'.
+     */
     public function scopeWithoutOtherActiveOrPending(Builder $query): Builder
     {
         return $query->whereDoesntExist(function ($sub) {
             $sub->select(DB::raw(1))
                 ->from('subscriptions as s2')
                 ->whereColumn('s2.user_id', 'subscriptions.user_id') // same user
-                ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different record
+                ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different subscription
                 ->whereIn('s2.status', ['active', 'pending']);        // other sub is active/pending
         });
     }

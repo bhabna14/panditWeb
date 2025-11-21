@@ -55,22 +55,22 @@ class FlowerOrderController extends Controller
                 });
         }
 
-         if ($filter === 'end') {
-        $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
-                $dateQuery->where(function ($sq) use ($todayStart, $todayEnd) {
-                        // Case 1: new_date in today
-                        $sq->whereNotNull('new_date')
-                           ->whereBetween('new_date', [$todayStart, $todayEnd]);
-                    })
-                    ->orWhere(function ($sq) use ($todayStart, $todayEnd) {
-                        // Case 2: new_date null -> end_date in today
-                        $sq->whereNull('new_date')
-                           ->whereBetween('end_date', [$todayStart, $todayEnd]);
-                    });
-            })
-            ->where('status', 'active')
-            ->withoutOtherActiveOrPending();
-    }
+        if ($filter === 'end') {
+    $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
+            $dateQuery->where(function ($sq) use ($todayStart, $todayEnd) {
+                    // Case 1: new_date is today
+                    $sq->whereNotNull('new_date')
+                       ->whereBetween('new_date', [$todayStart, $todayEnd]);
+                })
+                ->orWhere(function ($sq) use ($todayStart, $todayEnd) {
+                    // Case 2: new_date is null => end_date is today
+                    $sq->whereNull('new_date')
+                       ->whereBetween('end_date', [$todayStart, $todayEnd]);
+                });
+        })
+        ->where('status', 'active')
+        ->withoutOtherActiveOrPending();   // 👈 same scope here
+}
 
 
         if ($filter === 'fivedays') {
