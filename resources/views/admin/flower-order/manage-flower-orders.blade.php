@@ -15,6 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+
     <style>
         .btn {
             text-align: center;
@@ -28,7 +29,6 @@
             transition: all 0.3s ease;
         }
 
-        /* View Button */
         .btn-view {
             background-color: #4CAF50;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -205,7 +205,6 @@
             padding: 10px;
         }
 
-        /* Table styling */
         .table thead th {
             background: #f8f9fa;
             font-weight: 600;
@@ -217,7 +216,6 @@
             line-height: 1.6;
         }
 
-        /* Modal improvements */
         .modal-header {
             border-bottom: 0;
         }
@@ -289,11 +287,13 @@
                         </div>
                     @endif
 
+                    {{-- UPDATED FILTER FORM --}}
                     <form id="filter-form" class="row g-2 align-items-end mb-4">
                         <div class="col-md-3">
                             <label class="form-label">Customer Name</label>
-                            <select class="form-select" name="customer_name" id="customer_name">
-                                <option value="">All</option>
+                            <select class="form-select filter-select" name="customer_name" id="customer_name"
+                                data-placeholder="Select Customer">
+                                <option value=""></option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->name }}">{{ $user->name }}</option>
                                 @endforeach
@@ -302,8 +302,9 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Mobile Number</label>
-                            <select class="form-select" name="mobile_number" id="mobile_number">
-                                <option value="">All</option>
+                            <select class="form-select filter-select" name="mobile_number" id="mobile_number"
+                                data-placeholder="Select Mobile">
+                                <option value=""></option>
                                 @foreach ($users as $user)
                                     <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
                                 @endforeach
@@ -312,8 +313,9 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Apartment Name</label>
-                            <select class="form-select" name="apartment_name" id="apartment_name">
-                                <option value="">All</option>
+                            <select class="form-select filter-select" name="apartment_name" id="apartment_name"
+                                data-placeholder="Select Apartment">
+                                <option value=""></option>
                                 @foreach ($apartmentNames as $name)
                                     <option value="{{ $name }}">{{ $name }}</option>
                                 @endforeach
@@ -322,15 +324,16 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Apartment Number</label>
-                            <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
-                                <option value="">All</option>
+                            <select class="form-select filter-select" name="apartment_flat_plot" id="apartment_flat_plot"
+                                data-placeholder="Select Flat/Plot">
+                                <option value=""></option>
                                 @foreach ($apartmentNumbers as $num)
                                     <option value="{{ $num }}">{{ $num }}</option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-md-2 mt-2">
                             <button type="button" id="search-btn" class="btn btn-primary w-100">
                                 <i class="fas fa-search"></i> Search
                             </button>
@@ -357,6 +360,7 @@
                             </table>
                         </div>
 
+                        {{-- MODALS (same as before, unchanged) --}}
                         <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-status-form" method="POST"
@@ -422,7 +426,6 @@
                             </div>
                         </div>
 
-                        <!-- Global Edit Rider Modal -->
                         <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-rider-form" method="POST">
@@ -486,13 +489,14 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
+
+                    </div> {{-- .table-responsive --}}
                 </div>
             </div>
         </div>
     </div>
-    <!-- End Row -->
 @endsection
+
 @section('scripts')
     <!-- Dependencies -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -503,26 +507,50 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    {{-- NEW: Select2 + "only one filter at a time" logic --}}
     <script>
         $(document).ready(function() {
-            $('#customer_name').select2({
-                placeholder: 'Select Customer',
-                allowClear: true
+            const filterIds = ['#customer_name', '#mobile_number', '#apartment_name', '#apartment_flat_plot'];
+
+            // Init select2 with placeholder + clear support
+            $('.filter-select').each(function() {
+                $(this).select2({
+                    placeholder: $(this).data('placeholder'),
+                    allowClear: true,
+                    width: '100%'
+                });
             });
-            $('#mobile_number').select2({
-                placeholder: 'Select Mobile',
-                allowClear: true
-            });
-            $('#apartment_name').select2({
-                placeholder: 'Select Apartment',
-                allowClear: true
-            });
-            $('#apartment_flat_plot').select2({
-                placeholder: 'Select Flat/Plot',
-                allowClear: true
+
+            function updateFilterStates(changedSelector) {
+                const $changed = $(changedSelector);
+                const hasValue = $changed.val() && $changed.val() !== '';
+
+                if (hasValue) {
+                    // disable and clear all other filters
+                    filterIds.forEach(function(id) {
+                        if (id !== changedSelector) {
+                            $(id).val(null).trigger('change');
+                            $(id).prop('disabled', true);
+                        }
+                    });
+                } else {
+                    // no value -> enable all filters
+                    filterIds.forEach(function(id) {
+                        $(id).prop('disabled', false);
+                    });
+                }
+            }
+
+            // When any filter changes (including when cleared with the × icon)
+            filterIds.forEach(function(id) {
+                $(id).on('change', function() {
+                    updateFilterStates('#' + this.id);
+                });
             });
         });
     </script>
+
+    {{-- DataTables + AJAX + modal actions --}}
     <script>
         $(function() {
             const table = $('#file-datatable').DataTable({
@@ -553,7 +581,7 @@
                             const tooltip = `
                                 <p><i class='fas fa-map-marker-alt text-primary'></i> <strong>Address:</strong>
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
-                            `.replace(/"/g, '&quot;'); // Escape double quotes
+                            `.replace(/"/g, '&quot;');
 
                             return `
                                 <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
@@ -569,7 +597,6 @@
                                     </button>
                                 </div>
 
-                                <!-- View Address Modal -->
                                 <div class="modal fade" id="addressModal${orderId}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -591,7 +618,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Edit Address Modal -->
                                 <div class="modal fade" id="editAddressModal${orderId}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -643,7 +669,6 @@
                             `;
                         }
                     },
-
                     {
                         data: null,
                         name: 'created_at',
@@ -655,25 +680,24 @@
                                 const start = moment(r.pause_start_date).format('DD-MM-YYYY');
                                 const end = moment(r.pause_end_date).format('DD-MM-YYYY');
                                 return `
-                                ${createdAt}
-                                <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
-                                    <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
-                                    <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
-                                    <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
-                                        data-id="${r.id}"
-                                        data-start="${r.pause_start_date}"
-                                        data-end="${r.pause_end_date}"
-                                        data-bs-toggle="modal" data-bs-target="#editPauseModal">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                </div>
-                            `;
+                                    ${createdAt}
+                                    <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
+                                        <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
+                                        <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
+                                        <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
+                                            data-id="${r.id}"
+                                            data-start="${r.pause_start_date}"
+                                            data-end="${r.pause_end_date}"
+                                            data-bs-toggle="modal" data-bs-target="#editPauseModal">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </div>
+                                `;
                             }
 
                             return createdAt;
                         }
                     },
-
                     {
                         data: null,
                         name: 'start_date',
@@ -682,9 +706,9 @@
                             const end = r.new_date ? moment(r.new_date).format('MMM D, YYYY') :
                                 moment(r.end_date).format('MMM D, YYYY');
                             return `${start}<br> — <br>${end}<br>
-                        <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>`;
+                                <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>`;
                         }
                     },
                     {
@@ -707,11 +731,11 @@
                                 cancelled: 'bg-danger'
                             };
                             return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
-                        <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
-                            data-bs-toggle="modal" data-bs-target="#editStatusModal"
-                            data-id="${r.id}" data-status="${s}">
-                            <i class="fas fa-edit"></i>
-                        </button>`;
+                                <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
+                                    data-bs-toggle="modal" data-bs-target="#editStatusModal"
+                                    data-id="${r.id}" data-status="${s}">
+                                    <i class="fas fa-edit"></i>
+                                </button>`;
                         }
                     },
                     {
@@ -719,10 +743,10 @@
                         name: 'order.rider_id',
                         render: function(r) {
                             return `${r.order?.rider?.rider_name || 'Unassigned'}<br>
-                        <button class="btn btn-sm btn-outline-info edit-rider"
-                            data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
-                            <i class="fas fa-edit"></i>
-                        </button>`;
+                                <button class="btn btn-sm btn-outline-info edit-rider"
+                                    data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
+                                    <i class="fas fa-edit"></i>
+                                </button>`;
                         }
                     },
                     {
@@ -748,7 +772,6 @@
             });
 
             table.on('draw', function() {
-                // Re-initialize all Bootstrap tooltips
                 const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
                 tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
             });
@@ -801,7 +824,6 @@
                 });
             });
 
-            // -- Edit Rider --
             $('#file-datatable').on('click', '.edit-rider', function() {
                 const row = table.row($(this).closest('tr')).data();
                 $('#rider-sub-id').val(row.id);
@@ -825,7 +847,6 @@
                 });
             });
 
-            // -- Edit Status --
             $('#file-datatable').on('click', '.edit-status-btn', function() {
                 const id = $(this).data('id');
                 const status = $(this).data('status');
@@ -850,7 +871,7 @@
                                 timer: 1500,
                                 showConfirmButton: false
                             }).then(() => {
-                                location.reload(); // 🔄 Auto-refresh the page
+                                location.reload();
                             });
                         }
                     },
@@ -873,35 +894,6 @@
                     }
                 });
             });
-
-
-            // // -- Edit Pause Dates --
-            // $('#file-datatable').on('click', '.edit-pause-dates', function() {
-            //     const id = $(this).data('id');
-            //     const start = $(this).data('start');
-            //     const end = $(this).data('end');
-            //     $('#pause-sub-id').val(id);
-            //     $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
-            //     $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
-            //     $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
-            //     new bootstrap.Modal($('#editPauseModal')[0]).show();
-            // });
-
-            // $('#edit-pause-form').submit(function(e) {
-            //     e.preventDefault();
-            //     $.ajax({
-            //         url: this.action,
-            //         type: 'POST',
-            //         data: $(this).serialize(),
-            //         success: () => {
-            //             Swal.fire('Updated', 'Pause dates updated.', 'success');
-            //             $('#editPauseModal').modal('hide');
-            //             table.ajax.reload(null, false);
-            //         },
-            //         error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
-            //     });
-            // });
-
 
             $('#file-datatable').on('click', '.edit-pause-dates', function() {
                 const id = $(this).data('id');
