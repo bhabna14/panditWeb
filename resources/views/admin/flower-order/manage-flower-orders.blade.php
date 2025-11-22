@@ -595,6 +595,7 @@
                 },
 
                 columns: [
+                    // 1) Customer Details
                     {
                         data: null,
                         name: 'users.name',
@@ -611,13 +612,13 @@
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
                             `.replace(/"/g, '&quot;');
 
-                            // View subscription button (with delivery icon + eye icon)
+                            // View subscription button with delivery icon
                             const viewSubscriptionBtn =
                                 `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm" title="View subscription">
-                                    <i class="fas fa-truck me-1"></i>
+                                    <i class="fas fa-truck"></i>
                                 </a>`;
 
-                            // Notify button (opens notification create with user pre-selected)
+                            // Notify button
                             const notifyBtn = userId
                                 ? `<a href="{{ route('admin.notification.create') }}?user=${userId}"
                                        class="btn btn-outline-primary btn-sm"
@@ -688,6 +689,7 @@
                         }
                     },
 
+                    // 2) Address (second column)
                     {
                         data: null,
                         orderable: false,
@@ -715,8 +717,9 @@
                                 </div>
                             `;
                         }
-                    }
+                    },
 
+                    // 3) First Purchase Date
                     {
                         data: null,
                         name: 'created_at',
@@ -748,6 +751,7 @@
                         }
                     },
 
+                    // 4) Subscription Period
                     {
                         data: null,
                         name: 'start_date',
@@ -764,6 +768,8 @@
                             `;
                         }
                     },
+
+                    // 5) Subscription Price
                     {
                         data: 'order.total_price',
                         name: 'order.total_price',
@@ -771,6 +777,8 @@
                             return `₹ ${parseFloat(p).toFixed(2)}`;
                         }
                     },
+
+                    // 6) Status
                     {
                         data: 'status',
                         name: 'status',
@@ -793,6 +801,8 @@
                             `;
                         }
                     },
+
+                    // 7) Assigned Rider
                     {
                         data: null,
                         name: 'order.rider_id',
@@ -806,10 +816,10 @@
                                 </button>
                             `;
                         }
-                    },
-                   
+                    }
                 ],
-                order: [[1, 'desc']]
+                // Sort by First Purchase Date column (index 2)
+                order: [[2, 'desc']]
             });
 
             table.on('draw', function() {
