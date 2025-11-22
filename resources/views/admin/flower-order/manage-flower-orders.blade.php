@@ -270,7 +270,7 @@
                 [
                     'title'  => 'Subscriptions Placed Today',
                     'value'  => $ordersRequestedToday,
-                    'filter' => 'today',           // 🔹 CHANGED from 'renew' to 'today'
+                    'filter' => 'today',
                     'icon'   => 'fa-calendar-plus',
                 ],
                 [
@@ -405,7 +405,6 @@
                     </div>
 
                     {{-- Modals: Status, Dates, Rider, Pause --}}
-                    {{-- (same as your current version, unchanged) --}}
                     <!-- editStatusModal -->
                     <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog">
@@ -612,20 +611,30 @@
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
                             `.replace(/"/g, '&quot;');
 
+                            // View subscription button (with delivery icon + eye icon)
                             const viewSubscriptionBtn =
-                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-eye"></i>
+                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm" title="View subscription">
+                                    <i class="fas fa-truck me-1"></i><i class="fas fa-eye"></i>
                                 </a>`;
+
+                            // Notify button (opens notification create with user pre-selected)
+                            const notifyBtn = userId
+                                ? `<a href="{{ route('admin.notification.create') }}?user=${userId}"
+                                       class="btn btn-outline-primary btn-sm"
+                                       title="Send notification to ${r.users?.name || ''}">
+                                       <i class="fas fa-bell"></i>
+                                   </a>`
+                                : '';
 
                             let pauseResumeBtn = '';
                             if (r.status === 'active') {
                                 pauseResumeBtn =
-                                    ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-outline-warning btn-sm">
+                                    ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-outline-warning btn-sm" title="Pause subscription">
                                         <i class="fas fa-pause"></i>
                                       </a>`;
                             } else if (r.status === 'paused') {
                                 pauseResumeBtn =
-                                    ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-outline-warning btn-sm">
+                                    ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-outline-warning btn-sm" title="Resume subscription">
                                         <i class="fas fa-play"></i>
                                       </a>`;
                             }
@@ -638,19 +647,17 @@
 
                                     <div class="mt-2 d-flex flex-wrap gap-1">
                                         ${userId
-                                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm">
+                                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm" title="View customer">
                                                  <i class="fas fa-user"></i>
                                                </a>`
                                             : ''
                                         }
                                         <button type="button" class="btn btn-outline-success btn-sm"
-                                                data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
+                                                data-bs-toggle="modal" data-bs-target="#addressModal${orderId}"
+                                                title="View address">
                                             <i class="fas fa-map-marker-alt"></i>
                                         </button>
-                                        <button class="btn btn-outline-secondary btn-sm"
-                                                data-bs-toggle="modal" data-bs-target="#editAddressModal${orderId}">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
+                                        ${notifyBtn}
                                         ${viewSubscriptionBtn}
                                         ${pauseResumeBtn}
                                     </div>
@@ -674,65 +681,6 @@
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Edit Address Modal -->
-                                <div class="modal fade" id="editAddressModal${orderId}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <form method="POST" action="/admin/orders/${address.id}/update-address">
-                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                                                <input type="hidden" name="_method" value="PUT">
-                                                <div class="modal-header bg-primary text-white">
-                                                    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Address</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Flat/Plot</label>
-                                                        <input type="text" name="apartment_flat_plot" class="form-control"
-                                                               value="${address.apartment_flat_plot || ''}" />
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Apartment Name</label>
-                                                        <input type="text" name="apartment_name" class="form-control"
-                                                               value="${address.apartment_name || ''}" />
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Locality</label>
-                                                        <input type="text" name="locality_name" class="form-control"
-                                                               value="${address.locality || ''}" />
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Landmark</label>
-                                                        <input type="text" name="landmark" class="form-control"
-                                                               value="${address.landmark || ''}" />
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Pin Code</label>
-                                                        <input type="text" name="pincode" class="form-control"
-                                                               value="${address.pincode || ''}" />
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">City</label>
-                                                        <input type="text" name="city" class="form-control"
-                                                               value="${address.city || ''}" />
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">State</label>
-                                                        <input type="text" name="state" class="form-control"
-                                                               value="${address.state || ''}" />
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="submit" class="btn btn-primary">
-                                                        <i class="fas fa-save"></i> Save Changes
-                                                    </button>
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                </div>
-                                            </form>
                                         </div>
                                     </div>
                                 </div>
