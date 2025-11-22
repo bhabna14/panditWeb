@@ -133,18 +133,26 @@ public function showOrders(Request $request)
     }
 
     if ($filter === 'expired') {
-        $monthStart = Carbon::now($tz)->startOfMonth();
-        $monthEnd   = Carbon::now($tz)->endOfMonth();
+    $monthStart = Carbon::now($tz)->startOfMonth();
+    $monthEnd   = Carbon::now($tz)->endOfMonth();
 
-        $latestPerUserIds = DB::table('subscriptions as s1')
-            ->selectRaw('MAX(s1.id) as id')
-            ->groupBy('s1.user_id');
+    // subquery returning latest subscription id per user
+    $latestPerUserIds = DB::table('subscriptions as s1')
+        ->selectRaw('MAX(s1.id) as id')
+        ->groupBy('s1.user_id');
 
-        $query->whereIn('id', $latestPerUserIds)
-            ->where('status', 'expired')
-            ->whereNotNull('end_date')
-            ->whereBetween('end_date', [$monthStart, $monthEnd]);
-    }
+    $query->whereIn('id', $latestPerUserIds)
+        ->where('status', 'expired')
+        ->whereNotNull('end_date')
+        ->whereBetween('end_date', [$monthStart, $monthEnd])
+        ->whereRaw('DATE_ADD(end_date, INTERVAL 30 DAY) <= ?', [$monthEnd->toDateString()])
+        ->whereHas('user', function ($q) {
+            $q->where(function ($q2) {
+                $q2->where('status', '!=', 'active')
+                   ->orWhere('is_active', false);
+            });
+        });
+}
 
     if ($filter === 'discontinued') {
         $twoMonthsAgo = Carbon::now($tz)->subMonths(2);

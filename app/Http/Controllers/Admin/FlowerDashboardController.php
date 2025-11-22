@@ -139,7 +139,7 @@ class FlowerDashboardController extends Controller
 
         $totalIncomeToday = 0;
 
-      $totalIncomeToday = FlowerPayment::query()
+        $totalIncomeToday = FlowerPayment::query()
         ->whereDate('created_at', Carbon::today())
         ->where('payment_status', 'paid')
         ->sum('paid_amount');
@@ -147,7 +147,7 @@ class FlowerDashboardController extends Controller
         $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today($tz))->sum('total_price');
 
         $riders = RiderDetails::where('status', 'active')->get();
-    $assignedRiderIds = Order::query()
+        $assignedRiderIds = Order::query()
         ->whereNotNull('rider_id')
         ->whereHas('subscription', function ($q) {
             // keep your current intent: count only orders tied to an ACTIVE subscription
@@ -253,12 +253,16 @@ class FlowerDashboardController extends Controller
             ->selectRaw('MAX(s1.id) as id')
             ->groupBy('s1.user_id');
 
-        $expiredSubscriptions = Subscription::query()
-            ->whereIn('id', $latestPerUserIds)
-            ->where('status', 'expired')
-            ->whereNotNull('end_date')
-            ->whereBetween('end_date', [$monthStart, $monthEnd])
-            ->count();
+        $expiredSubscriptions = \App\Models\Subscription::query()
+        ->whereIn('id', $latestPerUserIds)              // your latest-per-user ids
+        ->where('status', 'expired')
+        ->whereNotNull('end_date')
+        ->whereBetween('end_date', [$monthStart, $monthEnd])
+        ->whereRaw('DATE_ADD(end_date, INTERVAL 30 DAY) <= ?', [$monthEnd->toDateString()])
+        ->whereHas('user', function ($q) {
+            $q->where('status', '!=', 'active');
+        })
+        ->count();
 
         $nonAssignedRidersCount = Subscription::where('status', 'active')
             ->whereHas('order', fn($q) => $q->whereNull('rider_id')->orWhere('rider_id', ''))
