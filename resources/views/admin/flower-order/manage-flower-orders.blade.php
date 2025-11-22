@@ -390,12 +390,12 @@
                             <thead>
                                 <tr>
                                     <th>Customer Details</th>
+                                    <th>Address</th>
                                     <th>First Purchase Date</th>
                                     <th>Subscription Period</th>
                                     <th>Subscription Price</th>
                                     <th>Status</th>
                                     <th>Assigned Rider</th>
-                                    <th>Address</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -690,6 +690,35 @@
 
                     {
                         data: null,
+                        orderable: false,
+                        name: 'order.address.apartment_name',
+                        render: function(r) {
+                            const address  = r.order?.address || {};
+                            const locality = r.order?.address?.localityDetails?.locality_name || '';
+
+                            const flat = address.apartment_flat_plot || '';
+                            const apt  = address.apartment_name || '';
+                            let line1  = '';
+
+                            if (flat && apt) {
+                                line1 = `${flat}, ${apt}`;
+                            } else if (apt) {
+                                line1 = apt;
+                            } else if (flat) {
+                                line1 = flat;
+                            }
+
+                            return `
+                                <div class="small">
+                                    ${line1 ? `<div>${line1}</div>` : ''}
+                                    ${locality ? `<div class="text-muted">${locality}</div>` : ''}
+                                </div>
+                            `;
+                        }
+                    }
+
+                    {
+                        data: null,
                         name: 'created_at',
                         render: function(r) {
                             const createdAt = r.created_at
@@ -778,34 +807,7 @@
                             `;
                         }
                     },
-                    {
-                        data: null,
-                        orderable: false,
-                        name: 'order.address.apartment_name',
-                        render: function(r) {
-                            const address  = r.order?.address || {};
-                            const locality = r.order?.address?.localityDetails?.locality_name || '';
-
-                            const flat = address.apartment_flat_plot || '';
-                            const apt  = address.apartment_name || '';
-                            let line1  = '';
-
-                            if (flat && apt) {
-                                line1 = `${flat}, ${apt}`;
-                            } else if (apt) {
-                                line1 = apt;
-                            } else if (flat) {
-                                line1 = flat;
-                            }
-
-                            return `
-                                <div class="small">
-                                    ${line1 ? `<div>${line1}</div>` : ''}
-                                    ${locality ? `<div class="text-muted">${locality}</div>` : ''}
-                                </div>
-                            `;
-                        }
-                    }
+                   
                 ],
                 order: [[1, 'desc']]
             });
