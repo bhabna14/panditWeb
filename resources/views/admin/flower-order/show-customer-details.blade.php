@@ -587,11 +587,20 @@
                                         <div class="card addr-card h-100 shadow-sm">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <h6 class="mb-0 fw-bold">{{ $address->address_type ?? 'Address' }}
-                                                    </h6>
-                                                    @if ($address->default == 1)
-                                                        <span class="badge bg-success">Default</span>
-                                                    @endif
+                                                    <h6 class="mb-0 fw-bold">{{ $address->address_type ?? 'Address' }}</h6>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        @if ($address->default == 1)
+                                                            <span class="badge bg-success">Default</span>
+                                                        @endif
+                                                        <!-- Edit Address Icon -->
+                                                        <button type="button"
+                                                                class="btn btn-sm icon-btn"
+                                                                title="Edit Address"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#editAddressModal{{ $address->id }}">
+                                                            <i class="bi bi-pencil-square"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                                 <div class="text-muted small">
                                                     <div><strong>Address:</strong>
@@ -606,6 +615,94 @@
                                                     <div><strong>State:</strong> {{ $address->state ?? '' }}</div>
                                                     <div><strong>PIN:</strong> {{ $address->pincode ?? '' }}</div>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Edit Address Modal for this address -->
+                                    <div class="modal fade" id="editAddressModal{{ $address->id }}" tabindex="-1"
+                                         aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <form method="POST"
+                                                      action="{{ route('admin.customer.address.update', $address->id) }}">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div class="modal-header bg-primary text-white">
+                                                        <h5 class="modal-title">
+                                                            <i class="bi bi-geo-alt me-1"></i> Edit Address
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                                aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Address Type</label>
+                                                            <input type="text" name="address_type"
+                                                                   class="form-control"
+                                                                   value="{{ $address->address_type ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Flat / Plot</label>
+                                                            <input type="text" name="apartment_flat_plot"
+                                                                   class="form-control"
+                                                                   value="{{ $address->apartment_flat_plot ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Apartment Name</label>
+                                                            <input type="text" name="apartment_name"
+                                                                   class="form-control"
+                                                                   value="{{ $address->apartment_name ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Locality</label>
+                                                            <input type="text" name="locality_name"
+                                                                   class="form-control"
+                                                                   value="{{ optional($address->localityDetails)->locality_name ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">Landmark</label>
+                                                            <input type="text" name="landmark"
+                                                                   class="form-control"
+                                                                   value="{{ $address->landmark ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">City</label>
+                                                            <input type="text" name="city"
+                                                                   class="form-control"
+                                                                   value="{{ $address->city ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">State</label>
+                                                            <input type="text" name="state"
+                                                                   class="form-control"
+                                                                   value="{{ $address->state ?? '' }}">
+                                                        </div>
+                                                        <div class="mb-2">
+                                                            <label class="form-label">PIN Code</label>
+                                                            <input type="text" name="pincode"
+                                                                   class="form-control"
+                                                                   value="{{ $address->pincode ?? '' }}">
+                                                        </div>
+                                                        <div class="form-check mt-2">
+                                                            <input class="form-check-input" type="checkbox"
+                                                                   value="1" id="defaultAddress{{ $address->id }}"
+                                                                   name="default"
+                                                                {{ $address->default == 1 ? 'checked' : '' }}>
+                                                            <label class="form-check-label"
+                                                                   for="defaultAddress{{ $address->id }}">
+                                                                Make this default address
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-bs-dismiss="modal">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="bi bi-save me-1"></i> Save Changes
+                                                        </button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
