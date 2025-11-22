@@ -185,7 +185,7 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
         Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
         Route::get('editaddress/{id}',  'editAddress')->name('editAddress');
-        Route::post('updateaddress', 'updateAddress')->name('admin.customer.address.update');
+        Route::post('updateaddress', 'updateAddress')->name('updateaddress');
         Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
         Route::get('/booking-history', 'orderhistory')->name('booking.history');
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
@@ -324,7 +324,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'showorderdetails'])->name('admin.orders.show');
 
-    Route::put('/orders/{id}/update-address', [FlowerOrderController::class, 'updateAddress'])->name('admin.orders.updateAddress');
+    Route::put('/orders/{id}/update-address', [FlowerOrderController::class, 'updateAddress'])->name('admin.customer.address.update');
 
     Route::put('/orders/{id}/update-price', [FlowerOrderController::class, 'updatePrice'])->name('admin.orders.updatePrice');
 
