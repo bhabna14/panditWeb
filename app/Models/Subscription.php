@@ -34,6 +34,11 @@ class Subscription extends Model
         return $this->belongsTo(User::class, 'user_id', 'userid');
     }
 
+    public function user()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
+
     public function flowerPayments()
     {
         return $this->hasMany(FlowerPayment::class, 'order_id', 'order_id');
