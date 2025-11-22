@@ -127,14 +127,35 @@
             @endif
         </td>
 
+        {{-- ADDRESS (NULL-SAFE) --}}
         <td>
-            <small>{{ $request->address->apartment_flat_plot ?? '' }}{{ $request->address->apartment_flat_plot ? ',' : '' }}
-                {{ $request->address->apartment_name ?? '' }}{{ $request->address->apartment_name ? ',' : '' }}
-                {{ $request->address->locality_name ?? '' }}</small><br>
-            <small class="text-muted">{{ $request->address->city ?? '' }}{{ $request->address->city ? ',' : '' }}
-                {{ $request->address->state ?? '' }}{{ $request->address->state ? ',' : '' }}
-                {{ $request->address->pincode ?? '' }}</small><br>
-            <small class="text-muted">Landmark: {{ $request->address->landmark ?? 'N/A' }}</small>
+            @if ($request->address)
+                <small>
+                    {{ $request->address->apartment_flat_plot ?? '' }}
+                    @if(!empty($request->address->apartment_flat_plot)),@endif
+
+                    {{ $request->address->apartment_name ?? '' }}
+                    @if(!empty($request->address->apartment_name)),@endif
+
+                    {{ $request->address->locality_name ?? '' }}
+                </small><br>
+
+                <small class="text-muted">
+                    {{ $request->address->city ?? '' }}
+                    @if(!empty($request->address->city)),@endif
+
+                    {{ $request->address->state ?? '' }}
+                    @if(!empty($request->address->state)),@endif
+
+                    {{ $request->address->pincode ?? '' }}
+                </small><br>
+
+                <small class="text-muted">
+                    Landmark: {{ $request->address->landmark ?? 'N/A' }}
+                </small>
+            @else
+                <small class="text-muted">Address not available</small>
+            @endif
         </td>
 
         <td>
