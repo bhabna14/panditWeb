@@ -324,7 +324,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'showorderdetails'])->name('admin.orders.show');
 
-    Route::put('/orders/{id}/update-address', [FlowerOrderController::class, 'updateAddress'])->name('admin.orders.updateAddress');
+    Route::put('/orders/{id}/update-address', [FlowerOrderController::class, 'updateAddress'])->name('admin.customer.address.update');
 
     Route::put('/orders/{id}/update-price', [FlowerOrderController::class, 'updatePrice'])->name('admin.orders.updatePrice');
 
