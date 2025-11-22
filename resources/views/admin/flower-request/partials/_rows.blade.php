@@ -66,23 +66,23 @@
             @switch($request->status)
                 @case('pending')
                     <span class="badge bg-warning">Pending</span>
-                @break
+                    @break
 
                 @case('approved')
                     <span class="badge bg-info">Approved</span>
-                @break
+                    @break
 
                 @case('paid')
                     <span class="badge bg-success">Paid</span>
-                @break
+                    @break
 
                 @case('cancelled')
                     <span class="badge bg-danger">Cancelled</span>
-                @break
+                    @break
 
                 @case('rejected')
                     <span class="badge bg-danger">Rejected</span>
-                @break
+                    @break
 
                 @default
                     <span class="badge bg-secondary">Unknown</span>
@@ -110,10 +110,6 @@
             @if ($request->status == 'paid' && $request->order && $request->order->total_price)
                 @if ($request->order->rider_id)
                     <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
-                    {{-- <a href="#" class="btn btn-sm btn-outline-info mt-2" data-bs-toggle="modal"
-                   data-bs-target="#editRiderModal{{ $request->order->id }}">
-                    Edit Rider
-                </a> --}}
                 @else
                     <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
                         @csrf
@@ -132,11 +128,11 @@
         </td>
 
         <td>
-            <small>{{ $request->address->apartment_flat_plot ?? '' }},
-                {{ $request->address->apartment_name ?? '' }},
+            <small>{{ $request->address->apartment_flat_plot ?? '' }}{{ $request->address->apartment_flat_plot ? ',' : '' }}
+                {{ $request->address->apartment_name ?? '' }}{{ $request->address->apartment_name ? ',' : '' }}
                 {{ $request->address->locality_name ?? '' }}</small><br>
-            <small class="text-muted">{{ $request->address->city ?? '' }},
-                {{ $request->address->state ?? '' }},
+            <small class="text-muted">{{ $request->address->city ?? '' }}{{ $request->address->city ? ',' : '' }}
+                {{ $request->address->state ?? '' }}{{ $request->address->state ? ',' : '' }}
                 {{ $request->address->pincode ?? '' }}</small><br>
             <small class="text-muted">Landmark: {{ $request->address->landmark ?? 'N/A' }}</small>
         </td>
@@ -169,13 +165,22 @@
                 @endif
             </form>
 
+            {{-- NEW: Notify button --}}
+            @if (!empty($request->user) && !empty($request->user->userid))
+                <a href="{{ route('admin.notification.create') }}?user={{ $request->user->userid }}"
+                    class="btn btn-outline-primary btn-sm w-100 mt-2"
+                    title="Send notification to {{ $request->user->name ?? '' }}">
+                    Notify
+                </a>
+            @endif
+
             <button class="btn btn-outline-dark btn-sm w-100 mt-2" data-bs-toggle="modal"
                 data-bs-target="#detailsModal{{ $request->id }}">
                 Details
             </button>
 
             <a href="{{ route('reorderCustomizeOrder', ['id' => $request->id]) }}"
-                class="btn btn-sm btn-secondary">
+                class="btn btn-sm btn-secondary w-100 mt-2">
                 Re-order
             </a>
 

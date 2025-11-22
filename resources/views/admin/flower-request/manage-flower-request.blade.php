@@ -133,7 +133,6 @@
         </div>
     </div>
 
-
     {{-- table --}}
     <div class="card custom-card">
         <div class="card-body">
@@ -164,7 +163,7 @@
             </div>
         </div>
     </div>
-   
+
 @endsection
 
 @section('scripts')
