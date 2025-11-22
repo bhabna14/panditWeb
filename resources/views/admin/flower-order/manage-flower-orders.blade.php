@@ -614,7 +614,7 @@
                             // View subscription button (with delivery icon + eye icon)
                             const viewSubscriptionBtn =
                                 `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm" title="View subscription">
-                                    <i class="fas fa-truck me-1"></i><i class="fas fa-eye"></i>
+                                    <i class="fas fa-truck me-1"></i>
                                 </a>`;
 
                             // Notify button (opens notification create with user pre-selected)
