@@ -185,7 +185,7 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
         Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
         Route::get('editaddress/{id}',  'editAddress')->name('editAddress');
-        Route::post('updateaddress', 'updateAddress')->name('updateaddress');
+        Route::post('updateaddress', 'updateAddress')->name('admin.customer.address.update');
         Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
         Route::get('/booking-history', 'orderhistory')->name('booking.history');
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
