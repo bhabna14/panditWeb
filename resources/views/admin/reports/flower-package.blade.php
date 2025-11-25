@@ -678,7 +678,7 @@
             @endif
 
             {{-- ============== TOMORROW DISCLOSURE (bottom) ================= --}}
-            <div class="row g-3 mt-4">
+            {{-- <div class="row g-3 mt-4">
                 @foreach ($tProducts as $pid => $row)
                     @php
                         $product = $row['product'];
@@ -767,7 +767,7 @@
                         </details>
                     </div>
                 @endforeach
-            </div>
+            </div> --}}
 
         </div>
     </div>
