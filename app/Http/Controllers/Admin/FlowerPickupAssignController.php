@@ -300,8 +300,13 @@ class FlowerPickupAssignController extends Controller
             'rider_id'      => 'nullable|exists:flower__rider_details,rider_id',
 
             // Items
-            'flower_id'     => 'required|array|min:1',
-            'flower_id.*'   => 'required|exists:flower_products,product_id',
+            'flower_id'   => 'required|array|min:1',
+            // 👇 allow nullable here (garland rows may not have a product)
+            'flower_id.*' => 'nullable|exists:flower_products,product_id',
+
+            // Garland flag
+            'is_garland'   => 'sometimes|array',
+            'is_garland.*' => 'nullable|boolean',
 
             // ESTIMATE
             'est_unit_id'    => 'sometimes|array',
@@ -310,12 +315,12 @@ class FlowerPickupAssignController extends Controller
             'est_quantity.*' => 'nullable|numeric|min:0.01',
 
             // ACTUAL
-            'unit_id'       => 'sometimes|array',
-            'unit_id.*'     => 'nullable|exists:pooja_units,id',
-            'quantity'      => 'sometimes|array',
-            'quantity.*'    => 'nullable|numeric|min:0.01',
-            'price'         => 'sometimes|array',
-            'price.*'       => 'nullable|numeric|min:0',
+            'unit_id'    => 'sometimes|array',
+            'unit_id.*'  => 'nullable|exists:pooja_units,id',
+            'quantity'   => 'sometimes|array',
+            'quantity.*' => 'nullable|numeric|min:0.01',
+            'price'      => 'sometimes|array',
+            'price.*'    => 'nullable|numeric|min:0',
 
             // Per-row grouping helpers (not stored on items)
             'row_vendor_id'   => 'sometimes|array',
@@ -324,17 +329,28 @@ class FlowerPickupAssignController extends Controller
             'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
         ]);
 
-        // Custom rule: each row must resolve to a vendor (from row or header).
+        // Custom rules:
         $validator->after(function ($v) use ($request) {
             $flowerIds    = $request->input('flower_id', []);
             $rowVendors   = $request->input('row_vendor_id', []);
             $headerVendor = $request->input('vendor_id');
+            $isGarlands   = $request->input('is_garland', []);
 
             foreach ($flowerIds as $i => $fid) {
+                $flagGarland = !empty($isGarlands[$i]); // 1 => garland row
+
+                // 1) Vendor must resolve (for ALL rows)
                 $resolvedVendor = $rowVendors[$i] ?? $headerVendor;
                 if (empty($resolvedVendor)) {
                     $v->errors()->add("row_vendor_id.$i", 'Vendor is required (set per-row or select a header vendor).');
                 }
+
+                // 2) For NON-garland rows, flower_id is mandatory
+                if (!$flagGarland && empty($fid)) {
+                    $v->errors()->add("flower_id.$i", 'Flower is required for non-garland rows.');
+                }
+
+                // For garland rows we allow flower_id to be empty (handled separately)
             }
         });
 
@@ -349,6 +365,7 @@ class FlowerPickupAssignController extends Controller
         $prices      = $request->input('price', []);
         $rowVendors  = $request->input('row_vendor_id', []);
         $rowRiders   = $request->input('row_rider_id', []);
+        $isGarlands  = $request->input('is_garland', []); // new
 
         $headerVendorId = $request->input('vendor_id');
         $headerRiderId  = $request->input('rider_id');
@@ -358,16 +375,20 @@ class FlowerPickupAssignController extends Controller
         foreach ($flowerIds as $i => $flowerId) {
             $vendorId = $rowVendors[$i] ?? $headerVendorId; // ensured by validator
             $rowRider = $rowRiders[$i] ?? null;             // optional hint for header rider
+            $flagGarland = !empty($isGarlands[$i]);
 
             if (!isset($groups[$vendorId])) {
                 $groups[$vendorId] = ['rows' => [], 'row_riders' => []];
             }
 
             $groups[$vendorId]['rows'][] = [
-                'flower_id'    => $flowerId,
+                'flower_id'    => $flowerId ?: null,
+                'is_garland'   => $flagGarland,
+
                 // Estimate
                 'est_unit_id'  => $estUnits[$i]   ?? null,
                 'est_quantity' => isset($estQtys[$i]) ? (float)$estQtys[$i] : null,
+
                 // Actual
                 'unit_id'      => $unitIds[$i]    ?? null,
                 'quantity'     => isset($qtys[$i])   ? (float)$qtys[$i]   : null,
@@ -379,7 +400,7 @@ class FlowerPickupAssignController extends Controller
             }
         }
 
-        // 4) Save per vendor (one header per vendor). Rider goes on header only.
+        // 4) Save per vendor
         DB::transaction(function () use ($request, $groups, $headerRiderId) {
             foreach ($groups as $vendorId => $bundle) {
                 $rows     = $bundle['rows'];
@@ -388,7 +409,6 @@ class FlowerPickupAssignController extends Controller
                 // pick header rider for this vendor
                 $headerRiderForVendor = $headerRiderId ?: ($riderIds[0] ?? null);
 
-                // If DB requires NOT NULL rider_id, enforce here
                 if (is_null($headerRiderForVendor)) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         'rider_id' => ['Rider is required (set a header rider or at least one per-row rider for each vendor).']
@@ -413,6 +433,12 @@ class FlowerPickupAssignController extends Controller
                 $vendorTotal = 0.0;
 
                 foreach ($rows as $row) {
+                    // 👉 If you do NOT want to store garlands in this table, skip them:
+                    if ($row['is_garland']) {
+                        // You can later move garland rows to a separate table if needed.
+                        continue;
+                    }
+
                     $itemTotal = (!is_null($row['price']) && !is_null($row['quantity']))
                         ? ($row['price'] * $row['quantity'])
                         : null;
@@ -430,7 +456,6 @@ class FlowerPickupAssignController extends Controller
                         'quantity'         => $row['quantity'] ?? 0,
                         'price'            => $row['price'],
 
-                        // no vendor_id / rider_id on items
                         'item_total_price' => $itemTotal,
                     ]);
 
