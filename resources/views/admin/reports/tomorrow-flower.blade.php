@@ -79,6 +79,24 @@
             border-top: 1px solid #e9ecef;
             padding: .9rem 1rem 1.1rem;
         }
+
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+            padding: .15rem .5rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            border: 1px solid #e5e7eb;
+            background-color: #f8fafc;
+        }
+
+        .tag-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background-color: #22c55e;
+        }
     </style>
 @endsection
 
@@ -90,6 +108,7 @@
                 $tProducts = $tomorrowEstimate['products'] ?? [];
                 $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
                 $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
+                $tTotalsDetailed = $tomorrowEstimate['totals_by_item_detailed'] ?? [];
 
                 // Build Tomorrow summary (from product items)
                 $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
@@ -116,6 +135,10 @@
                 [$wQty, $wUnit] = $fmtCat($catBase['weight'], 'weight');
                 [$vQty, $vUnit] = $fmtCat($catBase['volume'], 'volume');
                 [$cQty, $cUnit] = $fmtCat($catBase['count'], 'count');
+
+                $fmtNum = function ($v) {
+                    return rtrim(rtrim(number_format($v, 3), '0'), '.');
+                };
             @endphp
 
             <div class="card border-0 shadow-sm mt-4">
@@ -151,7 +174,7 @@
                                 <div class="mini-stat p-3 bg-light border">
                                     <div class="text-muted">Total Weight</div>
                                     <div class="fs-4 fw-bold">
-                                        {{ rtrim(rtrim(number_format($wQty, 3), '0'), '.') }} {{ $wUnit }}
+                                        {{ $fmtNum($wQty) }} {{ $wUnit }}
                                     </div>
                                 </div>
                             </div>
@@ -159,7 +182,7 @@
                                 <div class="mini-stat p-3 bg-light border">
                                     <div class="text-muted">Total Volume</div>
                                     <div class="fs-4 fw-bold">
-                                        {{ rtrim(rtrim(number_format($vQty, 3), '0'), '.') }} {{ $vUnit }}
+                                        {{ $fmtNum($vQty) }} {{ $vUnit }}
                                     </div>
                                 </div>
                             </div>
@@ -167,15 +190,24 @@
                                 <div class="mini-stat p-3 bg-light border">
                                     <div class="text-muted">Total Count</div>
                                     <div class="fs-4 fw-bold">
-                                        {{ rtrim(rtrim(number_format($cQty, 3), '0'), '.') }} {{ $cUnit }}
+                                        {{ $fmtNum($cQty) }} {{ $cUnit }}
                                     </div>
                                 </div>
                             </div>
                         </div>
 
+                        {{-- NEW: Item-wise split (Subscriptions vs Customize) --}}
                         <div class="card border-0 shadow-sm mt-3">
-                            <div class="card-header bg-white">
-                                <strong>Tomorrow — Totals by Item (All Products)</strong>
+                            <div
+                                class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <strong>Tomorrow — Totals by Item</strong>
+                                    <div class="text-muted small">Break-up by Subscriptions vs Customize Orders</div>
+                                </div>
+                                <span class="tag-pill">
+                                    <span class="dot"></span>
+                                    <span>Values auto-scale (kg/g, L/ml, pcs)</span>
+                                </span>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -183,21 +215,61 @@
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Item</th>
-                                                <th class="text-end">Total Qty</th>
+                                                <th class="text-end">
+                                                    <span class="d-inline-flex align-items-center gap-1">
+                                                        <i class="bi bi-box-seam"></i>
+                                                        <span>Subscriptions</span>
+                                                    </span>
+                                                </th>
+                                                <th class="text-end">
+                                                    <span class="d-inline-flex align-items-center gap-1">
+                                                        <i class="bi bi-sliders2"></i>
+                                                        <span>Customize Orders</span>
+                                                    </span>
+                                                </th>
+                                                <th class="text-end">
+                                                    <span class="d-inline-flex align-items-center gap-1">
+                                                        <i class="bi bi-sum"></i>
+                                                        <span>Total</span>
+                                                    </span>
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse($tTotals as $it)
+                                            @forelse($tTotalsDetailed as $it)
+                                                @php
+                                                    $unit = $it['unit_disp'] ?? '';
+                                                    $subs = (float) ($it['subs_qty_disp'] ?? 0);
+                                                    $req = (float) ($it['req_qty_disp'] ?? 0);
+                                                    $total = (float) ($it['total_qty_disp'] ?? 0);
+                                                @endphp
                                                 <tr>
                                                     <td>{{ $it['item_name'] }}</td>
-                                                    <td class="text-end">
-                                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                        {{ $it['total_unit_disp'] }}
+                                                    <td class="text-end text-nowrap">
+                                                        @if ($subs > 0)
+                                                            {{ $fmtNum($subs) }} {{ $unit }}
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-end text-nowrap">
+                                                        @if ($req > 0)
+                                                            {{ $fmtNum($req) }} {{ $unit }}
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-end text-nowrap fw-semibold">
+                                                        @if ($total > 0)
+                                                            {{ $fmtNum($total) }} {{ $unit }}
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="2" class="text-muted">No items.</td>
+                                                    <td colspan="4" class="text-muted text-center">No items.</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
@@ -230,8 +302,7 @@
                                                 <tr>
                                                     <td>{{ $r['label'] }}</td>
                                                     <td class="text-end">
-                                                        {{ rtrim(rtrim(number_format($r['qty'], 3), '0'), '.') }}
-                                                        {{ $r['unit'] }}
+                                                        {{ $fmtNum($r['qty']) }} {{ $r['unit'] }}
                                                     </td>
                                                 </tr>
                                             @endforeach

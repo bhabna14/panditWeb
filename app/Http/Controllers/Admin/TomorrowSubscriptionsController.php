@@ -288,8 +288,6 @@ class TomorrowSubscriptionsController extends Controller
         return view('admin.reports.tomorrow-subscriptions', $data);
     }
 
-    // ===== Helpers for totals by item =====
-
     protected function computeTomorrowTotalsByItem($activeTomorrow): array
     {
         if ($activeTomorrow->isEmpty()) return [];
