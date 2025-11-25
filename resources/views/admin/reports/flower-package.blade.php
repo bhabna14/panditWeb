@@ -381,7 +381,7 @@
                                                                     <table class="table table-sm table-hover align-middle">
                                                                         <thead class="table-light">
                                                                             <tr>
-                                                                                <th style="width:30%">Item</th>
+                                                                                <th style="width:30%">Flowers</th>
                                                                                 <th class="text-end">Per-Sub Qty</th>
                                                                                 <th>Per-Sub Unit</th>
                                                                                 <th class="text-end">Item Price (₹)</th>
