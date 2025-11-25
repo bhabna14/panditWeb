@@ -358,61 +358,58 @@ class FlowerEstimateController extends Controller
             'tomorrowEstimate' => $tomorrowEstimate,
         ]);
     }
-    
-public function tomorrowFlower(Request $request)
-{
-    // ---- FlowerDetails live price index (name → {unit, price}) ----------
-    $fdIndex = FlowerDetails::query()
-        ->select(['name', 'unit', 'price'])
-        ->where('status', 'active')
-        ->get()
-        ->keyBy(function ($fd) {
-            return strtolower(trim((string) $fd->name));
-        });
 
-    // ---- Tomorrow (with effective end & pause handling + FLOWER REQUESTS) ----
-    $tomorrow = Carbon::tomorrow()->startOfDay();
+    public function tomorrowFlower(Request $request)
+    {
+        // ---- FlowerDetails live price index (name → {unit, price}) ----------
+        $fdIndex = FlowerDetails::query()
+            ->select(['name', 'unit', 'price'])
+            ->where('status', 'active')
+            ->get()
+            ->keyBy(function ($fd) {
+                return strtolower(trim((string) $fd->name));
+            });
 
-    // subscriptions estimate (using your canonical logic)
-    $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
-    $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow, $fdIndex);
+        // ---- Tomorrow (with effective end & pause handling + FLOWER REQUESTS) ----
+        $tomorrow = Carbon::tomorrow()->startOfDay();
 
-    // merge ad-hoc Flower Requests scheduled for tomorrow
-    [$requestsProductBlock, $requestsGrand] = $this->buildRequestsProductBlock($tomorrow, $fdIndex);
+        // subscriptions estimate (using your canonical logic)
+        $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
+        $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow, $fdIndex);
 
-    if (!empty($requestsProductBlock['items'])) {
-        // Add synthetic "On-demand Requests" card into tomorrow products
-        $tomorrowEstimate['products']['__requests__'] = $requestsProductBlock;
+        // merge ad-hoc Flower Requests scheduled for tomorrow
+        [$requestsProductBlock, $requestsGrand] = $this->buildRequestsProductBlock($tomorrow, $fdIndex);
 
-        // Grand total should include priced flower lines from requests
-        $tomorrowEstimate['grand_total_amount'] = round(
-            (float) ($tomorrowEstimate['grand_total_amount'] ?? 0) + (float) $requestsGrand,
-            2
-        );
+        if (!empty($requestsProductBlock['items'])) {
+            // Add synthetic "On-demand Requests" card into tomorrow products
+            $tomorrowEstimate['products']['__requests__'] = $requestsProductBlock;
 
-        // Recompute Totals By Item to include requests
-        $tomorrowEstimate['totals_by_item'] =
-            $this->recomputeTotalsByItemFromProducts($tomorrowEstimate['products']);
+            // Grand total should include priced flower lines from requests
+            $tomorrowEstimate['grand_total_amount'] = round(
+                (float) ($tomorrowEstimate['grand_total_amount'] ?? 0) + (float) $requestsGrand,
+                2
+            );
+
+            // Recompute Totals By Item to include requests
+            $tomorrowEstimate['totals_by_item'] =
+                $this->recomputeTotalsByItemFromProducts($tomorrowEstimate['products']);
+        }
+
+        // detailed per-item breakdown (subs vs customize requests)
+        $products = $tomorrowEstimate['products'] ?? [];
+        $tomorrowEstimate['totals_by_item_detailed'] = $this->buildDetailedTotalsByItem($products);
+
+        // garland totals from customize orders only
+        $requestsForTomorrow = $this->fetchRequestsForDate($tomorrow);
+        $garlandTotals       = $this->buildGarlandTotalsFromRequests($requestsForTomorrow);
+
+        return view('admin.reports.tomorrow-flower', [
+            'tomorrowDate'     => $tomorrow->toDateString(),
+            'tomorrowEstimate' => $tomorrowEstimate,
+            'garlandTotals'    => $garlandTotals,
+        ]);
     }
 
-    // 👉 detailed per-item breakdown (subs vs customize requests)
-    $products = $tomorrowEstimate['products'] ?? [];
-    $tomorrowEstimate['totals_by_item_detailed'] = $this->buildDetailedTotalsByItem($products);
-
-    // 👉 NEW: garland totals from customize orders only
-    $requestsForTomorrow = $this->fetchRequestsForDate($tomorrow);
-    $garlandTotals       = $this->buildGarlandTotalsFromRequests($requestsForTomorrow);
-
-    return view('admin.reports.tomorrow-flower', [
-        'tomorrowDate'     => $tomorrow->toDateString(),
-        'tomorrowEstimate' => $tomorrowEstimate,
-        'garlandTotals'    => $garlandTotals,
-    ]);
-}
-
-/**
- * Existing helper you already had (unchanged)
- */
 private function fetchRequestsForDate(Carbon $date): Collection
 {
     return FlowerRequest::with('flowerRequestItems')
@@ -421,12 +418,6 @@ private function fetchRequestsForDate(Carbon $date): Collection
         ->get();
 }
 
-/**
- * Build per-item detailed totals:
- *  - subscription quantity
- *  - customize request quantity
- *  - total
- */
 private function buildDetailedTotalsByItem(array $products): array
 {
     $map = [];
@@ -476,7 +467,6 @@ private function buildDetailedTotalsByItem(array $products): array
         $reqBase   = $row['req_base'];
         $totalBase = $subsBase + $reqBase;
 
-        // Convert from base to display units (kg/g, L/ml, pcs)
         [$subsDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($subsBase, $category);
         [$reqDisp, ]           = $this->formatQtyByCategoryFromBase($reqBase, $category);
         [$totalDisp, ]         = $this->formatQtyByCategoryFromBase($totalBase, $category);
@@ -496,16 +486,9 @@ private function buildDetailedTotalsByItem(array $products): array
     return $rows;
 }
 
-/**
- * Convert base quantity into user-facing unit:
- *  - weight: base in grams → kg/g
- *  - volume: base in ml   → L/ml
- *  - count : pcs
- */
 private function formatQtyByCategoryFromBase(float $base, string $category): array
 {
     if ($base <= 0) {
-        // keep unit consistent even for 0 values
         if ($category === 'weight') return [0, 'g'];
         if ($category === 'volume') return [0, 'ml'];
         return [0, 'pcs'];
@@ -527,11 +510,6 @@ private function formatQtyByCategoryFromBase(float $base, string $category): arr
     return [round($base, 3), 'pcs'];
 }
 
-/**
- * NEW:
- * Build totals for GARLANDS from customize orders (FlowerRequestItem)
- * Uses: garland_name, garland_size, garland_quantity
- */
 private function buildGarlandTotalsFromRequests(Collection $requests): array
 {
     $acc = [];
@@ -574,6 +552,7 @@ private function buildGarlandTotalsFromRequests(Collection $requests): array
 
     return $rows;
 }
+
 
 
     private function buildRequestsProductBlock(Carbon $date, Collection $fdIndex): array

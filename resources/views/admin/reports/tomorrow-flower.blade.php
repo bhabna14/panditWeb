@@ -279,7 +279,7 @@
                             </div>
                         </div>
 
-                        {{-- NEW: Customize Garlands Totals --}}
+                        {{-- Customize Garlands Totals --}}
                         <div class="card border-0 shadow-sm mt-3">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <div>
@@ -299,7 +299,7 @@
                                                 <tr>
                                                     <th>Garland</th>
                                                     <th>Size</th>
-                                                    <th class="text-end">Total Qty (pcs)</th>
+                                                    <th class="text-end">Total Qty (Garlands)</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -308,7 +308,8 @@
                                                         <td>{{ $g['garland_name'] }}</td>
                                                         <td>{{ $g['garland_size'] ?: '—' }}</td>
                                                         <td class="text-end">
-                                                            {{ $fmtNum($g['total_qty']) }} pcs
+                                                            {{-- show as "X Garlands" instead of pcs --}}
+                                                            {{ $fmtNum($g['total_qty']) }} Garlands
                                                         </td>
                                                     </tr>
                                                 @endforeach
