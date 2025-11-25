@@ -27,11 +27,11 @@
             box-shadow: 0 2px 10px rgba(16, 24, 40, .04);
         }
 
-        details.disclosure+details.disclosure {
+        details.disclosure + details.disclosure {
             margin-top: .75rem;
         }
 
-        details.disclosure>summary {
+        details.disclosure > summary {
             list-style: none;
             cursor: pointer;
             padding: .9rem 1rem;
@@ -41,7 +41,7 @@
             gap: .75rem;
         }
 
-        details.disclosure>summary::-webkit-details-marker {
+        details.disclosure > summary::-webkit-details-marker {
             display: none;
         }
 
@@ -105,11 +105,10 @@
         <div class="container py-4">
 
             @php
-                $tProducts = $tomorrowEstimate['products'] ?? [];
-                $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
-                $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
+                $tProducts       = $tomorrowEstimate['products'] ?? [];
+                $tGrand          = $tomorrowEstimate['grand_total_amount'] ?? 0;
                 $tTotalsDetailed = $tomorrowEstimate['totals_by_item_detailed'] ?? [];
-                $garlandTotals = $garlandTotals ?? [];
+                $garlandTotals   = $garlandTotals ?? [];
 
                 // Build Tomorrow summary (from product items)
                 $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
@@ -145,11 +144,13 @@
             <div class="card border-0 shadow-sm mt-4">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <h5 class="mb-0">Tomorrow Estimate —
-                            {{ \Carbon\Carbon::parse($tomorrowDate)->toFormattedDateString() }}</h5>
+                        <h5 class="mb-0">
+                            Tomorrow Estimate —
+                            {{ \Carbon\Carbon::parse($tomorrowDate)->toFormattedDateString() }}
+                        </h5>
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('admin.assignPickupForm', ['date' => $tomorrowDate]) }}"
-                                class="btn btn-warning">
+                               class="btn btn-warning">
                                 <i class="bi bi-truck"></i> Assign Vendor
                             </a>
                             <span class="badge bg-success fs-6">
@@ -203,99 +204,94 @@
                                 class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div>
                                     <strong>Tomorrow — Totals by Item</strong>
-                                    <div class="text-muted small">Break-up by Subscriptions vs Customize Orders</div>
+                                    <div class="text-muted small">
+                                        Break-up by Subscriptions vs Customize Orders
+                                    </div>
                                 </div>
                                 <span class="tag-pill">
                                     <span class="dot"></span>
-                                    <span>Values auto-scale (kg/g, L/ml, pcs)</span>
+                                    <span>Values auto-scale (kg/g, L/ml, pcs, Garlands)</span>
                                 </span>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm align-middle">
                                         <thead class="table-light">
-                                            <tr>
-                                                <th>Item</th>
-                                                <th class="text-end">
-                                                    <span class="d-inline-flex align-items-center gap-1">
-                                                        <i class="bi bi-box-seam"></i>
-                                                        <span>Subscriptions</span>
-                                                    </span>
-                                                </th>
-                                                <th class="text-end">
-                                                    <span class="d-inline-flex align-items-center gap-1">
-                                                        <i class="bi bi-sliders2"></i>
-                                                        <span>Customize Orders</span>
-                                                    </span>
-                                                </th>
-                                                <th class="text-end">
-                                                    <span class="d-inline-flex align-items-center gap-1">
-                                                        <i class="bi bi-sum"></i>
-                                                        <span>Total</span>
-                                                    </span>
-                                                </th>
-                                            </tr>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-end">
+                                                <span class="d-inline-flex align-items-center gap-1">
+                                                    <i class="bi bi-box-seam"></i>
+                                                    <span>Subscriptions</span>
+                                                </span>
+                                            </th>
+                                            <th class="text-end">
+                                                <span class="d-inline-flex align-items-center gap-1">
+                                                    <i class="bi bi-sliders2"></i>
+                                                    <span>Customize Orders</span>
+                                                </span>
+                                            </th>
+                                            <th class="text-end">
+                                                <span class="d-inline-flex align-items-center gap-1">
+                                                    <i class="bi bi-sum"></i>
+                                                    <span>Total</span>
+                                                </span>
+                                            </th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            @forelse($tTotalsDetailed as $it)
-                                                @php
-                                                    // Original values
-                                                    $unit = $it['unit_disp'] ?? '';
-                                                    $subs = (float) ($it['subs_qty_disp'] ?? 0);
-                                                    $req = (float) ($it['req_qty_disp'] ?? 0);
-                                                    $total = (float) ($it['total_qty_disp'] ?? 0);
-
-                                                    // Detect garland rows and override unit label
-                                                    $nameLower = strtolower($it['item_name'] ?? '');
-                                                    $displayUnit = $unit;
-
-                                                    // If unit is pcs and item name looks like a garland, show "Garlands"
-                                                    if ($unit === 'pcs' && str_contains($nameLower, 'garland')) {
-                                                        $displayUnit = 'Garlands';
-                                                    }
-                                                @endphp
-                                                <tr>
-                                                    <td>{{ $it['item_name'] }}</td>
-                                                    <td class="text-end text-nowrap">
-                                                        @if ($subs > 0)
-                                                            {{ $fmtNum($subs) }} {{ $displayUnit }}
-                                                        @else
-                                                            <span class="text-muted">—</span>
-                                                        @endif
-                                                    </td>
-                                                    <td class="text-end text-nowrap">
-                                                        @if ($req > 0)
-                                                            {{ $fmtNum($req) }} {{ $displayUnit }}
-                                                        @else
-                                                            <span class="text-muted">—</span>
-                                                        @endif
-                                                    </td>
-                                                    <td class="text-end text-nowrap fw-semibold">
-                                                        @if ($total > 0)
-                                                            {{ $fmtNum($total) }} {{ $displayUnit }}
-                                                        @else
-                                                            <span class="text-muted">—</span>
-                                                        @endif
-                                                    </td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="4" class="text-muted text-center">No items.</td>
-                                                </tr>
-                                            @endforelse
+                                        @forelse($tTotalsDetailed as $it)
+                                            @php
+                                                $unit  = $it['unit_disp'] ?? '';
+                                                $subs  = (float) ($it['subs_qty_disp'] ?? 0);
+                                                $req   = (float) ($it['req_qty_disp'] ?? 0);
+                                                $total = (float) ($it['total_qty_disp'] ?? 0);
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $it['item_name'] }}</td>
+                                                <td class="text-end text-nowrap">
+                                                    @if ($subs > 0)
+                                                        {{ $fmtNum($subs) }} {{ $unit }}
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-end text-nowrap">
+                                                    @if ($req > 0)
+                                                        {{ $fmtNum($req) }} {{ $unit }}
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                                <td class="text-end text-nowrap fw-semibold">
+                                                    @if ($total > 0)
+                                                        {{ $fmtNum($total) }} {{ $unit }}
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="text-muted text-center">
+                                                    No items.
+                                                </td>
+                                            </tr>
+                                        @endforelse
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
                         </div>
 
-
                         {{-- Customize Garlands Totals --}}
                         <div class="card border-0 shadow-sm mt-3">
                             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong>Tomorrow — Customize Garlands</strong>
-                                    <div class="text-muted small">Garlands from tomorrow’s customize orders</div>
+                                    <div class="text-muted small">
+                                        Garlands from tomorrow’s customize orders
+                                    </div>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -307,23 +303,22 @@
                                     <div class="table-responsive">
                                         <table class="table table-sm align-middle">
                                             <thead class="table-light">
-                                                <tr>
-                                                    <th>Garland</th>
-                                                    <th>Size</th>
-                                                    <th class="text-end">Total Qty (Garlands)</th>
-                                                </tr>
+                                            <tr>
+                                                <th>Garland</th>
+                                                <th>Size</th>
+                                                <th class="text-end">Total Qty (Garlands)</th>
+                                            </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($garlandTotals as $g)
-                                                    <tr>
-                                                        <td>{{ $g['garland_name'] }}</td>
-                                                        <td>{{ $g['garland_size'] ?: '—' }}</td>
-                                                        <td class="text-end">
-                                                            {{-- show as "X Garlands" instead of pcs --}}
-                                                            {{ $fmtNum($g['total_qty']) }} Garlands
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
+                                            @foreach ($garlandTotals as $g)
+                                                <tr>
+                                                    <td>{{ $g['garland_name'] }}</td>
+                                                    <td>{{ $g['garland_size'] ?: '—' }}</td>
+                                                    <td class="text-end">
+                                                        {{ $fmtNum($g['total_qty']) }} Garlands
+                                                    </td>
+                                                </tr>
+                                            @endforeach
                                             </tbody>
                                         </table>
                                     </div>
@@ -340,28 +335,32 @@
                             ];
                         @endphp
                         <div class="card border-0 shadow-sm mt-3">
-                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
+                            <div class="card-header bg-white">
+                                <strong>Tomorrow — Totals by Category</strong>
+                            </div>
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <table class="table table-sm align-middle">
                                         <thead class="table-light">
-                                            <tr>
-                                                <th>Category</th>
-                                                <th class="text-end">Total Qty</th>
-                                            </tr>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th class="text-end">Total Qty</th>
+                                        </tr>
                                         </thead>
                                         <tbody>
-                                            @foreach ($catRows as $r)
-                                                <tr>
-                                                    <td>{{ $r['label'] }}</td>
-                                                    <td class="text-end">
-                                                        {{ $fmtNum($r['qty']) }} {{ $r['unit'] }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
+                                        @foreach ($catRows as $r)
+                                            <tr>
+                                                <td>{{ $r['label'] }}</td>
+                                                <td class="text-end">
+                                                    {{ $fmtNum($r['qty']) }} {{ $r['unit'] }}
+                                                </td>
+                                            </tr>
+                                        @endforeach
                                         </tbody>
                                     </table>
-                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                    <small class="text-muted">
+                                        Units auto-scale (kg/g, L/ml, pcs).
+                                    </small>
                                 </div>
                             </div>
                         </div>
