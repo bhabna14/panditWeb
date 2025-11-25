@@ -138,7 +138,7 @@ class FlowerOrderController extends Controller
         if ($filter === 'tomorrow') {
             $tomorrow = Carbon::tomorrow($tz)->toDateString();
             $query->where('status', 'active')
-                ->whereDate('pause_start_date', $tomorrowDate);
+                ->whereDate('pause_start_date', $tomorrow);
         }
 
         if ($filter === 'todayrequest') {
