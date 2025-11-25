@@ -384,7 +384,7 @@
                                                                                 <th style="width:30%">Flowers</th>
                                                                                 <th class="text-end">Qty</th>
                                                                                 <th>Unit</th>
-                                                                                <th class="text-end">Unit Price (₹)</th>
+                                                                                <th class="text-center">Unit Price (₹)</th>
                                                                                 <th class="text-end">Total Qty</th>
                                                                                 <th class="text-end">Total Price (₹)</th>
                                                                             </tr>
