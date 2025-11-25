@@ -362,14 +362,15 @@
                                                                             {{ $product?->name ?? 'Product #' . $pid }}
                                                                         </h5>
                                                                         <div class="text-muted">
+                                                                            <span class="badge bg-warning text-uppercase me-2">Subscription</span>
                                                                             <strong>{{ $subsCount }}</strong>
                                                                             subscription{{ $subsCount == 1 ? '' : 's' }}
-                                                                            <span class="ms-2">(Flower Cost:
-                                                                                ₹{{ number_format($bundlePerSub, 2) }})</span>
                                                                         </div>
                                                                     </div>
                                                                     <div>
                                                                         <span class="badge bg-primary fs-6">
+                                                                            <span class="ms-2">Flower Cost:
+                                                                                ₹{{ number_format($bundlePerSub, 2) }}</span>
                                                                             Product Total: <span
                                                                                 class="money">₹{{ number_format($productTotal, 2) }}</span>
                                                                         </span>
