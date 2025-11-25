@@ -358,10 +358,11 @@
                                                                     class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                                                                     <div>
                                                                         <h5 class="mb-1">
+                                                                            <span class="badge bg-secondary text-uppercase me-2">Package Name</span>
                                                                             {{ $product?->name ?? 'Product #' . $pid }}
                                                                         </h5>
                                                                         <div class="text-muted">
-                                                                            <strong>{{ $subsCount }}</strong> active
+                                                                            <strong>{{ $subsCount }}</strong>
                                                                             subscription{{ $subsCount == 1 ? '' : 's' }}
                                                                             <span class="ms-2">(Flower Cost:
                                                                                 ₹{{ number_format($bundlePerSub, 2) }})</span>
