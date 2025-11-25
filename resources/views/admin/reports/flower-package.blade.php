@@ -426,8 +426,7 @@
                                             </div>
 
                                             <div class="card border-0 shadow-sm mt-3">
-                                                <div class="card-header bg-white"><strong>Totals by Item (All
-                                                        Products)</strong></div>
+                                                <div class="card-header bg-white"><strong>Total Types and Quantity of Flower Needed for Tomorrow Delivery</strong></div>
                                                 <div class="card-body">
                                                     <div class="table-responsive">
                                                         <table class="table table-sm align-middle">
