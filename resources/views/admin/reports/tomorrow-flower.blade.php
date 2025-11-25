@@ -278,40 +278,7 @@
                             </div>
                         </div>
 
-                        {{-- Tomorrow Totals by Category --}}
-                        @php
-                            $catRows = [
-                                ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
-                                ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit],
-                                ['label' => 'Count', 'qty' => $cQty, 'unit' => $cUnit],
-                            ];
-                        @endphp
-                        <div class="card border-0 shadow-sm mt-3">
-                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
-                            <div class="card-body">
-                                <div class="table-responsive">
-                                    <table class="table table-sm align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Category</th>
-                                                <th class="text-end">Total Qty</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($catRows as $r)
-                                                <tr>
-                                                    <td>{{ $r['label'] }}</td>
-                                                    <td class="text-end">
-                                                        {{ $fmtNum($r['qty']) }} {{ $r['unit'] }}
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
-                                </div>
-                            </div>
-                        </div>
+                       
                     @endif
                 </div>
             </div>
