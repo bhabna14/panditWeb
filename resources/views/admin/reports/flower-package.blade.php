@@ -382,9 +382,9 @@
                                                                         <thead class="table-light">
                                                                             <tr>
                                                                                 <th style="width:30%">Flowers</th>
-                                                                                <th class="text-end">Per-Sub Qty</th>
-                                                                                <th>Per-Sub Unit</th>
-                                                                                <th class="text-end">Item Price (₹)</th>
+                                                                                <th class="text-end">Qty</th>
+                                                                                <th>Unit</th>
+                                                                                <th class="text-end">Unit Price (₹)</th>
                                                                                 <th class="text-end">Total Qty</th>
                                                                                 <th class="text-end">Total Price (₹)</th>
                                                                             </tr>
