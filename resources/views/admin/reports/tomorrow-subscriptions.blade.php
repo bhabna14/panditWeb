@@ -435,160 +435,160 @@
 @section('content')
     @php
         // Defaults in case controller didn't pass (for safety)
-$canView = $canView ?? true;
-$role = $role ?? 'super_admin';
+        $canView = $canView ?? true;
+        $role    = $role ?? 'super_admin';
 
-// Helper renderers as local functions:
-function renderSubsTable($rows)
-{
-    if (empty($rows)) {
-        echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>';
-        return;
-    }
-    echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
-    echo '<thead class="table-light">';
-    echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th><th>View Profile</th></tr>';
-    echo '</thead><tbody>';
-    foreach ($rows as $r) {
-        $status = strtolower($r['status'] ?? '');
-        $badgeClass = 'badge-soft';
-        if (in_array($status, ['active'])) {
-            $badgeClass = 'bg-success-subtle text-success';
+        // Helper renderers as local functions:
+        function renderSubsTable($rows)
+        {
+            if (empty($rows)) {
+                echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>';
+                return;
+            }
+            echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
+            echo '<thead class="table-light">';
+            echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th><th>View Profile</th></tr>';
+            echo '</thead><tbody>';
+            foreach ($rows as $r) {
+                $status = strtolower($r['status'] ?? '');
+                $badgeClass = 'badge-soft';
+                if (in_array($status, ['active'])) {
+                    $badgeClass = 'bg-success-subtle text-success';
+                }
+                if (in_array($status, ['paused'])) {
+                    $badgeClass = 'bg-warning-subtle text-warning';
+                }
+                if (in_array($status, ['pending'])) {
+                    $badgeClass = 'bg-info-subtle text-info';
+                }
+                if (in_array($status, ['expired', 'ended'])) {
+                    $badgeClass = 'bg-danger-subtle text-danger';
+                }
+
+                $apt       = $r['apartment_name'] ?? '';
+                $riderName = $r['rider_name'] ?? '—';
+
+                echo '<tr class="row-item" ' .
+                    ' data-name="' .
+                    e(strtolower($r['customer'] ?? '')) .
+                    '"' .
+                    ' data-mobile="' .
+                    e(strtolower($r['phone'] ?? '')) .
+                    '"' .
+                    ' data-apt="' .
+                    e(strtolower($apt)) .
+                    '"' .
+                    ' data-rider="' .
+                    e(strtolower($riderName)) .
+                    '"' .
+                    '>';
+
+                echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
+                if ($r['phone'] || $r['email']) {
+                    echo '<div class="text-muted small">' .
+                        e($r['phone'] ?? '') .
+                        ($r['phone'] && $r['email'] ? ' • ' : '') .
+                        e($r['email'] ?? '') .
+                        '</div>';
+                }
+                echo '</td>';
+
+                echo '<td>' . e($riderName) . '</td>';
+
+                $addrSafe = e($r['address'] ?? '—');
+                echo '<td>';
+                echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
+                    $addrSafe .
+                    '" data-bs-toggle="modal" data-bs-target="#addressModal">';
+                echo '<i class="bi bi-geo-alt"></i> View</button></td>';
+
+                echo '<td>';
+                $uid = $r['user_id'] ?? null;
+                if ($uid) {
+                    $profileUrl = route('showCustomerDetails', $uid);
+                    echo '<a class="btn btn-warning btn-sm text-center" href="' .
+                        e($profileUrl) .
+                        '" target="_blank" rel="noopener">View Details</a>';
+                } else {
+                    echo '—';
+                }
+                echo '</td>';
+
+                echo '</tr>';
+            }
+            echo '</tbody></table></div>';
         }
-        if (in_array($status, ['paused'])) {
-            $badgeClass = 'bg-warning-subtle text-warning';
-        }
-        if (in_array($status, ['pending'])) {
-            $badgeClass = 'bg-info-subtle text-info';
-        }
-        if (in_array($status, ['expired', 'ended'])) {
-            $badgeClass = 'bg-danger-subtle text-danger';
-        }
 
-        $apt = $r['apartment_name'] ?? '';
-        $riderName = $r['rider_name'] ?? '—';
+        function renderCustomizeTable($rows)
+        {
+            if (empty($rows)) {
+                echo '<div class="alert alert-secondary mb-0">No customize orders found for tomorrow.</div>';
+                return;
+            }
+            echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
+            echo '<thead class="table-light">';
+            echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th>Items</th><th class="address-col">Address</th></tr>';
+            echo '</thead><tbody>';
+            foreach ($rows as $r) {
+                $apt       = $r['apartment_name'] ?? '';
+                $riderName = $r['rider_name'] ?? '—';
+                $reqId     = $r['request_id'] ? '#' . $r['request_id'] : '—';
+                $ordId     = $r['order_id'] ? '#' . $r['order_id'] : null;
 
-        echo '<tr class="row-item" ' .
-            ' data-name="' .
-            e(strtolower($r['customer'] ?? '')) .
-            '"' .
-            ' data-mobile="' .
-            e(strtolower($r['phone'] ?? '')) .
-            '"' .
-            ' data-apt="' .
-            e(strtolower($apt)) .
-            '"' .
-            ' data-rider="' .
-            e(strtolower($riderName)) .
-            '"' .
-            '>';
+                $itemsJson = e(json_encode($r['items'] ?? []));
 
-        echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
-        if ($r['phone'] || $r['email']) {
-            echo '<div class="text-muted small">' .
-                e($r['phone'] ?? '') .
-                ($r['phone'] && $r['email'] ? ' • ' : '') .
-                e($r['email'] ?? '') .
-                '</div>';
-        }
-        echo '</td>';
+                echo '<tr class="row-item" ' .
+                    ' data-name="' .
+                    e(strtolower($r['customer'] ?? '')) .
+                    '"' .
+                    ' data-mobile="' .
+                    e(strtolower($r['phone'] ?? '')) .
+                    '"' .
+                    ' data-apt="' .
+                    e(strtolower($apt)) .
+                    '"' .
+                    ' data-rider="' .
+                    e(strtolower($riderName)) .
+                    '"' .
+                    '>';
 
-        echo '<td>' . e($riderName) . '</td>';
+                echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
+                if ($r['phone'] || $r['email']) {
+                    echo '<div class="text-muted small">' .
+                        e($r['phone'] ?? '') .
+                        ($r['phone'] && $r['email'] ? ' • ' : '') .
+                        e($r['email'] ?? '') .
+                        '</div>';
+                }
+                echo '</td>';
 
-        $addrSafe = e($r['address'] ?? '—');
-        echo '<td>';
-        echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-            $addrSafe .
-            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
+                echo '<td>';
+                echo e($reqId);
+                if ($ordId) {
+                    echo ' <span class="text-muted small">(&nbsp;Order ' . e($ordId) . '&nbsp;)</span>';
+                }
+                echo '</td>';
 
-        echo '<td>';
-        $uid = $r['user_id'] ?? null;
-        if ($uid) {
-            $profileUrl = route('showCustomerDetails', $uid);
-            echo '<a class="btn btn-warning btn-sm text-center" href="' .
-                e($profileUrl) .
-                '" target="_blank" rel="noopener">View Details</a>';
-        } else {
-            echo '—';
-        }
-        echo '</td>';
+                echo '<td>' . e($r['product'] ?? '—') . '</td>';
+                echo '<td><span class="badge bg-info-subtle text-info">' . e($r['status'] ?? '—') . '</span></td>';
+                echo '<td>' . e($r['date'] ?? '—') . '</td>';
+                echo '<td>' . e($r['time'] ?? '—') . '</td>';
+                echo '<td>' . e($riderName) . '</td>';
 
-        echo '</tr>';
-    }
-    echo '</tbody></table></div>';
-}
+                echo '<td><button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
+                    $itemsJson .
+                    '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
+                echo '<i class="bi bi-list-ul"></i> Items</button></td>';
 
-function renderCustomizeTable($rows)
-{
-    if (empty($rows)) {
-        echo '<div class="alert alert-secondary mb-0">No customize orders found for tomorrow.</div>';
-        return;
-    }
-    echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
-    echo '<thead class="table-light">';
-    echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th>Items</th><th class="address-col">Address</th></tr>';
-    echo '</thead><tbody>';
-    foreach ($rows as $r) {
-        $apt = $r['apartment_name'] ?? '';
-        $riderName = $r['rider_name'] ?? '—';
-        $reqId = $r['request_id'] ? '#' . $r['request_id'] : '—';
-        $ordId = $r['order_id'] ? '#' . $r['order_id'] : null;
+                $addrSafe = e($r['address'] ?? '—');
+                echo '<td><button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
+                    $addrSafe .
+                    '" data-bs-toggle="modal" data-bs-target="#addressModal">';
+                echo '<i class="bi bi-geo-alt"></i> View</button></td>';
 
-        $itemsJson = e(json_encode($r['items'] ?? []));
-
-        echo '<tr class="row-item" ' .
-            ' data-name="' .
-            e(strtolower($r['customer'] ?? '')) .
-            '"' .
-            ' data-mobile="' .
-            e(strtolower($r['phone'] ?? '')) .
-            '"' .
-            ' data-apt="' .
-            e(strtolower($apt)) .
-            '"' .
-            ' data-rider="' .
-            e(strtolower($riderName)) .
-            '"' .
-            '>';
-
-        echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
-        if ($r['phone'] || $r['email']) {
-            echo '<div class="text-muted small">' .
-                e($r['phone'] ?? '') .
-                ($r['phone'] && $r['email'] ? ' • ' : '') .
-                e($r['email'] ?? '') .
-                '</div>';
-        }
-        echo '</td>';
-
-        echo '<td>';
-        echo e($reqId);
-        if ($ordId) {
-            echo ' <span class="text-muted small">(&nbsp;Order ' . e($ordId) . '&nbsp;)</span>';
-        }
-        echo '</td>';
-
-        echo '<td>' . e($r['product'] ?? '—') . '</td>';
-        echo '<td><span class="badge bg-info-subtle text-info">' . e($r['status'] ?? '—') . '</span></td>';
-        echo '<td>' . e($r['date'] ?? '—') . '</td>';
-        echo '<td>' . e($r['time'] ?? '—') . '</td>';
-        echo '<td>' . e($riderName) . '</td>';
-
-        echo '<td><button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
-            $itemsJson .
-            '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
-        echo '<i class="bi bi-list-ul"></i> Items</button></td>';
-
-        $addrSafe = e($r['address'] ?? '—');
-        echo '<td><button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-            $addrSafe .
-            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
-
-        echo '</tr>';
-    }
-    echo '</tbody></table></div>';
+                echo '</tr>';
+            }
+            echo '</tbody></table></div>';
         }
     @endphp
 
@@ -732,7 +732,7 @@ function renderCustomizeTable($rows)
             {{-- Totals grid (cards) --}}
             <div class="card border-0 shadow-sm mt-3">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <strong>Tomorrow — Totals by Item (All Products)</strong>
+                    <strong>Tomorrow — Totals by Item (All Products & Customize Orders)</strong>
                 </div>
 
                 <div class="card-body">
@@ -757,7 +757,7 @@ function renderCustomizeTable($rows)
                         <div class="totals-grid" id="totalsGrid">
                             @foreach ($tTotals as $it)
                                 @php
-                                    $unit = strtoupper($it['total_unit_disp'] ?? '');
+                                    $unit     = strtoupper($it['total_unit_disp'] ?? '');
                                     $category = $inferCategory($unit);
                                     $chipClass =
                                         $category === 'weight'
@@ -808,47 +808,39 @@ function renderCustomizeTable($rows)
                             @php
                                 $sections = [
                                     [
-                                        'key' => 'active',
+                                        'key'   => 'active',
                                         'title' => 'Tomorrow Delivery',
                                         'count' => count($activeTomorrow),
-                                        'icon' => 'bi-truck',
-                                        'btn' => 'btn-tab-active',
+                                        'icon'  => 'bi-truck',
+                                        'btn'   => 'btn-tab-active',
                                     ],
-                                    // If you also have “Starting Tomorrow (New Users)” tab, add here:
-                                    // [
-                                    //     'key'   => 'start-new',
-                                    //     'title' => 'Starting Tomorrow (New Users)',
-                                    //     'count' => count($startingTomorrowNew),
-                                    //     'icon'  => 'bi-person-plus',
-                                    //     'btn'   => 'btn-tab-active',
-                                    // ],
                                     [
-                                        'key' => 'pause',
+                                        'key'   => 'pause',
                                         'title' => 'Pausing from Tomorrow',
                                         'count' => count($pausingTomorrow),
-                                        'icon' => 'bi-pause-circle',
-                                        'btn' => 'btn-tab-pause',
+                                        'icon'  => 'bi-pause-circle',
+                                        'btn'   => 'btn-tab-pause',
                                     ],
                                     [
-                                        'key' => 'custom',
+                                        'key'   => 'custom',
                                         'title' => 'Tomorrow Customize Orders',
                                         'count' => count($customizeTomorrow),
-                                        'icon' => 'bi-sliders2',
-                                        'btn' => 'btn-tab-custom',
+                                        'icon'  => 'bi-sliders2',
+                                        'btn'   => 'btn-tab-custom',
                                     ],
                                     [
-                                        'key' => 'resume',
+                                        'key'   => 'resume',
                                         'title' => 'Pause → Active (Tomorrow)',
                                         'count' => count($resumingTomorrow),
-                                        'icon' => 'bi-play-circle',
-                                        'btn' => 'btn-tab-resume',
+                                        'icon'  => 'bi-play-circle',
+                                        'btn'   => 'btn-tab-resume',
                                     ],
                                     [
-                                        'key' => 'expired-today',
+                                        'key'   => 'expired-today',
                                         'title' => 'Expired Today Users',
                                         'count' => count($expiredTodayUsers),
-                                        'icon' => 'bi-calendar-x',
-                                        'btn' => 'btn-tab-expired',
+                                        'icon'  => 'bi-calendar-x',
+                                        'btn'   => 'btn-tab-expired',
                                     ],
                                 ];
                             @endphp
@@ -859,8 +851,7 @@ function renderCustomizeTable($rows)
                                         id="tab-{{ $s['key'] }}" data-bs-toggle="tab"
                                         data-bs-target="#pane-{{ $s['key'] }}" type="button" role="tab"
                                         aria-controls="pane-{{ $s['key'] }}"
-                                        aria-selected="{{ $i === 0 ? 'true' : 'false' }}"
-                                        data-ink-color="{{ $s['btn'] }}">
+                                        aria-selected="{{ $i === 0 ? 'true' : 'false' }}">
                                         <i class="bi {{ $s['icon'] }}"></i>
                                         <span>{{ $s['title'] }}</span>
                                         <span class="pill-count ms-1">{{ $s['count'] }}</span>
@@ -871,7 +862,6 @@ function renderCustomizeTable($rows)
                     </div>
                 </div>
             </div>
-
 
             {{-- TAB PANES --}}
             <div class="tab-content" id="sectionsContent">
@@ -1148,7 +1138,6 @@ function renderCustomizeTable($rows)
                 const left = btnRect.left - parentRect.left + tabs.scrollLeft;
                 const width = btnRect.width;
 
-                // Match ink color to active button gradient start
                 if (btn.classList.contains('btn-tab-active')) inkBar.style.background =
                     'linear-gradient(90deg,#22d3ee,#0ea5e9)';
                 if (btn.classList.contains('btn-tab-pause')) inkBar.style.background =
@@ -1164,17 +1153,14 @@ function renderCustomizeTable($rows)
                 inkBar.style.transform = `translateX(${left}px)`;
             };
 
-            // Initialize to current active
             const initActive = tabs.querySelector('.nav-link.active');
             if (initActive) setInkTo(initActive);
 
-            // Update on tab change
             tabs.addEventListener('shown.bs.tab', function(e) {
-                const btn = e.target; // newly activated tab
+                const btn = e.target;
                 setInkTo(btn);
             });
 
-            // Reposition on resize
             window.addEventListener('resize', () => {
                 const active = tabs.querySelector('.nav-link.active');
                 if (active) setInkTo(active);
