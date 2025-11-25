@@ -370,7 +370,7 @@
                                                                     <div>
                                                                         <span class="badge bg-primary fs-6">
                                                                             <span class="ms-2">Flower Cost:
-                                                                                ₹{{ number_format($bundlePerSub, 2) }}</span>
+                                                                                ₹{{ number_format($bundlePerSub, 2) }}</span><br>
                                                                             Product Total: <span
                                                                                 class="money">₹{{ number_format($productTotal, 2) }}</span>
                                                                         </span>
