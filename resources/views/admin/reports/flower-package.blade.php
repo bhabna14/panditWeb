@@ -358,7 +358,7 @@
                                                                     class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                                                                     <div>
                                                                         <h5 class="mb-1">
-                                                                            <span class="badge text-uppercase me-2">Package Name</span>
+                                                                            <span class="badge bg-warning text-uppercase me-2">Package Name</span>
                                                                             {{ $product?->name ?? 'Product #' . $pid }}
                                                                         </h5>
                                                                         <div class="text-muted">
