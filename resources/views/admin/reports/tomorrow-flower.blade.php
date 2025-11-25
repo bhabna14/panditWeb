@@ -105,10 +105,11 @@
         <div class="container py-4">
 
             @php
-                $tProducts = $tomorrowEstimate['products'] ?? [];
-                $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
-                $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
+                $tProducts       = $tomorrowEstimate['products'] ?? [];
+                $tGrand          = $tomorrowEstimate['grand_total_amount'] ?? 0;
+                $tTotals         = $tomorrowEstimate['totals_by_item'] ?? [];
                 $tTotalsDetailed = $tomorrowEstimate['totals_by_item_detailed'] ?? [];
+                $garlandTotals   = $garlandTotals ?? [];
 
                 // Build Tomorrow summary (from product items)
                 $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
@@ -148,7 +149,7 @@
                             {{ \Carbon\Carbon::parse($tomorrowDate)->toFormattedDateString() }}</h5>
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('admin.assignPickupForm', ['date' => $tomorrowDate]) }}"
-                                class="btn btn-warning">
+                               class="btn btn-warning">
                                 <i class="bi bi-truck"></i> Assign Vendor
                             </a>
                             <span class="badge bg-success fs-6">
@@ -196,7 +197,7 @@
                             </div>
                         </div>
 
-                        {{-- NEW: Item-wise split (Subscriptions vs Customize) --}}
+                        {{-- Item-wise split (Subscriptions vs Customize) --}}
                         <div class="card border-0 shadow-sm mt-3">
                             <div
                                 class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -238,9 +239,9 @@
                                         <tbody>
                                             @forelse($tTotalsDetailed as $it)
                                                 @php
-                                                    $unit = $it['unit_disp'] ?? '';
-                                                    $subs = (float) ($it['subs_qty_disp'] ?? 0);
-                                                    $req = (float) ($it['req_qty_disp'] ?? 0);
+                                                    $unit  = $it['unit_disp'] ?? '';
+                                                    $subs  = (float) ($it['subs_qty_disp'] ?? 0);
+                                                    $req   = (float) ($it['req_qty_disp'] ?? 0);
                                                     $total = (float) ($it['total_qty_disp'] ?? 0);
                                                 @endphp
                                                 <tr>
@@ -278,7 +279,80 @@
                             </div>
                         </div>
 
-                       
+                        {{-- NEW: Customize Garlands Totals --}}
+                        <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>Tomorrow — Customize Garlands</strong>
+                                    <div class="text-muted small">Garlands from tomorrow’s customize orders</div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                @if (empty($garlandTotals))
+                                    <div class="alert alert-secondary mb-0">
+                                        No garland items in customize orders for tomorrow.
+                                    </div>
+                                @else
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Garland</th>
+                                                    <th>Size</th>
+                                                    <th class="text-end">Total Qty (pcs)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($garlandTotals as $g)
+                                                    <tr>
+                                                        <td>{{ $g['garland_name'] }}</td>
+                                                        <td>{{ $g['garland_size'] ?: '—' }}</td>
+                                                        <td class="text-end">
+                                                            {{ $fmtNum($g['total_qty']) }} pcs
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- Tomorrow Totals by Category --}}
+                        @php
+                            $catRows = [
+                                ['label' => 'Weight', 'qty' => $wQty, 'unit' => $wUnit],
+                                ['label' => 'Volume', 'qty' => $vQty, 'unit' => $vUnit],
+                                ['label' => 'Count', 'qty' => $cQty, 'unit' => $cUnit],
+                            ];
+                        @endphp
+                        <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-header bg-white"><strong>Tomorrow — Totals by Category</strong></div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Category</th>
+                                                <th class="text-end">Total Qty</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($catRows as $r)
+                                                <tr>
+                                                    <td>{{ $r['label'] }}</td>
+                                                    <td class="text-end">
+                                                        {{ $fmtNum($r['qty']) }} {{ $r['unit'] }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
