@@ -385,8 +385,8 @@
                                                                                 <th class="text-end">Qty</th>
                                                                                 <th>Unit</th>
                                                                                 <th class="text-center">Unit Price (₹)</th>
-                                                                                <th class="text-end">Total Qty</th>
-                                                                                <th class="text-end">Total Price (₹)</th>
+                                                                                <th class="text-center">Total Qty</th>
+                                                                                <th class="text-center">Total Price (₹)</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -401,11 +401,11 @@
                                                                                     <td class="text-center money">
                                                                                         {{ number_format($it['item_price_per_sub'], 2) }}
                                                                                     </td>
-                                                                                    <td class="text-end">
+                                                                                    <td class="text-center">
                                                                                         {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
                                                                                         {{ $it['total_unit_disp'] }}
                                                                                     </td>
-                                                                                    <td class="text-end money">
+                                                                                    <td class="text-center money">
                                                                                         {{ number_format($it['total_price'], 2) }}
                                                                                     </td>
                                                                                 </tr>
