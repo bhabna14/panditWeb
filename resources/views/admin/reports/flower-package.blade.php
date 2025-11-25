@@ -363,7 +363,7 @@
                                                                         <div class="text-muted">
                                                                             <strong>{{ $subsCount }}</strong> active
                                                                             subscription{{ $subsCount == 1 ? '' : 's' }}
-                                                                            <span class="ms-2">(Bundle / Sub:
+                                                                            <span class="ms-2">(Flower Cost:
                                                                                 ₹{{ number_format($bundlePerSub, 2) }})</span>
                                                                         </div>
                                                                     </div>
