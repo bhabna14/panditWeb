@@ -730,7 +730,7 @@ function renderCustomizeTable($rows)
             </div>
 
             {{-- Totals grid (cards) --}}
-            <div class="card border-0 shadow-sm mt-3">
+            {{-- <div class="card border-0 shadow-sm mt-3">
                 <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <strong>Tomorrow — Totals by Item (All Products)</strong>
                 </div>
@@ -794,7 +794,7 @@ function renderCustomizeTable($rows)
                         </div>
                     @endif
                 </div>
-            </div>
+            </div> --}}
 
             {{-- TABS --}}
             <div class="card shadow-sm mb-3 mt-3">
