@@ -90,7 +90,7 @@
                 $oldUnitIds   = old('unit_id', []);
                 $oldQtys      = old('quantity', []);
                 $oldPrices    = old('price', []);
-                $oldEstQtys   = old('est_quantity', []); // no longer used to change estimate, but kept for row count
+                $oldEstQtys   = old('est_quantity', []);
                 $oldVendors   = old('row_vendor_id', []);
                 $oldRiders    = old('row_rider_id', []);
 
@@ -143,8 +143,8 @@
                                     $default = array_merge(
                                         [
                                             'flower_id'     => null,
-                                            'est_quantity'  => null, // server prefill qty (from estimate)
-                                            'unit_id'       => null, // server prefill unit id (from estimate)
+                                            'est_quantity'  => null,
+                                            'unit_id'       => null,
                                             'quantity'      => null,
                                             'price'         => null,
                                             'flower_name'   => null,
@@ -155,17 +155,14 @@
 
                                     $flowerVal = $oldFlowerIds[$i] ?? $default['flower_id'];
 
-                                    // ESTIMATE is CONSTANT (from server prefill)
                                     $estQtyConst  = $default['est_quantity'];
                                     $estUnitConst = $default['unit_id'];
 
-                                    // Actual fields: can be edited by user
-                                    // If Actual Qty is empty, default it to the estimated qty so they start equal visually.
-                                    $qtyVal   = $oldQtys[$i]   ?? ($default['quantity'] ?? $estQtyConst);
-                                    $unitVal  = $oldUnitIds[$i] ?? $default['unit_id'];
-                                    $priceVal = $oldPrices[$i] ?? $default['price'];
+                                    $qtyVal    = $oldQtys[$i]    ?? ($default['quantity'] ?? $estQtyConst);
+                                    $unitVal   = $oldUnitIds[$i] ?? $default['unit_id'];
+                                    $priceVal  = $oldPrices[$i]  ?? $default['price'];
                                     $vendorVal = $oldVendors[$i] ?? null;
-                                    $riderVal  = $oldRiders[$i] ?? null;
+                                    $riderVal  = $oldRiders[$i]  ?? null;
                                 @endphp
                                 <tr data-row>
                                     {{-- Flower --}}
@@ -191,7 +188,7 @@
                                         @enderror
                                     </td>
 
-                                    {{-- Est. Unit (disabled display + hidden submit, CONSTANT) --}}
+                                    {{-- Est. Unit (disabled) --}}
                                     <td>
                                         <select class="form-control readonly-input" data-est-unit-display disabled>
                                             <option value="" {{ $estUnitConst ? '' : 'selected' }}>Choose</option>
@@ -205,7 +202,7 @@
                                         <input type="hidden" name="est_unit_id[]" value="{{ $estUnitConst }}">
                                     </td>
 
-                                    {{-- Est. Qty (disabled display + hidden submit, CONSTANT) --}}
+                                    {{-- Est. Qty (disabled) --}}
                                     <td>
                                         <input type="number" class="form-control readonly-input"
                                                data-est-qty-display disabled
@@ -213,7 +210,7 @@
                                         <input type="hidden" name="est_quantity[]" value="{{ $estQtyConst }}">
                                     </td>
 
-                                    {{-- Actual Unit (editable) --}}
+                                    {{-- Actual Unit --}}
                                     <td>
                                         <select name="unit_id[]"
                                                 class="form-control @error('unit_id.' . $i) is-invalid @enderror"
@@ -231,7 +228,7 @@
                                         @enderror
                                     </td>
 
-                                    {{-- Actual Qty (editable) --}}
+                                    {{-- Actual Qty --}}
                                     <td>
                                         <input type="number" name="quantity[]"
                                                class="form-control @error('quantity.' . $i) is-invalid @enderror"
@@ -242,7 +239,7 @@
                                         @enderror
                                     </td>
 
-                                    {{-- Actual Price (editable) --}}
+                                    {{-- Actual Price --}}
                                     <td>
                                         <input type="number" name="price[]"
                                                class="form-control @error('price.' . $i) is-invalid @enderror"
@@ -313,7 +310,6 @@
                                 </select>
                             </td>
 
-                            {{-- Est. Unit (disabled display + hidden submit, BLANK for manual rows) --}}
                             <td>
                                 <select class="form-control readonly-input" data-est-unit-display disabled>
                                     <option value="" selected>Choose</option>
@@ -324,14 +320,12 @@
                                 <input type="hidden" name="est_unit_id[]" value="">
                             </td>
 
-                            {{-- Est. Qty (disabled display + hidden submit; stays empty) --}}
                             <td>
                                 <input type="number" class="form-control readonly-input"
                                        data-est-qty-display disabled>
                                 <input type="hidden" name="est_quantity[]" value="">
                             </td>
 
-                            {{-- Actual Unit (editable) --}}
                             <td>
                                 <select name="unit_id[]" class="form-control" data-actual-unit>
                                     <option value="" selected>Choose</option>
@@ -341,19 +335,16 @@
                                 </select>
                             </td>
 
-                            {{-- Actual Qty (editable) --}}
                             <td>
                                 <input type="number" name="quantity[]" class="form-control"
                                        inputmode="decimal" min="0.01" step="0.01">
                             </td>
 
-                            {{-- Actual Price (editable) --}}
                             <td>
                                 <input type="number" name="price[]" class="form-control"
                                        inputmode="decimal" min="0" step="0.01">
                             </td>
 
-                            {{-- Vendor --}}
                             <td>
                                 <select name="row_vendor_id[]" class="form-control">
                                     <option value="" selected>Choose vendor</option>
@@ -363,7 +354,6 @@
                                 </select>
                             </td>
 
-                            {{-- Rider --}}
                             <td>
                                 <select name="row_rider_id[]" class="form-control row-rider" data-row-rider>
                                     <option value="" selected>Choose rider</option>
@@ -373,7 +363,6 @@
                                 </select>
                             </td>
 
-                            {{-- Remove --}}
                             <td class="text-end">
                                 <button type="button"
                                         class="btn btn-outline-danger btn-sm remove-row-btn">
@@ -385,7 +374,8 @@
 
                     <div class="mt-3 d-flex justify-content-between flex-wrap gap-2">
                         <div class="small-muted">
-                            Estimate Unit & Qty are read-only (from system estimate) and do not change when you edit Actual.
+                            Estimate Unit & Qty are read-only (from system estimate) and do not change when you edit
+                            Actual. Garlands will appear as separate rows (e.g. <em>Gendu Garland</em>).
                         </div>
                         <div class="totals-bar ms-auto">
                             <div class="totals-grid">
@@ -425,15 +415,14 @@
             const estTotalEl = document.getElementById('estTotal');
             const actTotalEl = document.getElementById('actTotal');
 
-            // Pricing map from server: product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
             const PRICING     = @json($fdProductPricing);
-            // Unit id -> canonical symbol ('kg','g','l','ml','pcs')
             const UNIT_SYMBOL = @json($unitIdToSymbol);
 
             function symbolToCategory(sym) {
                 if (!sym) return 'count';
                 if (sym === 'kg' || sym === 'g') return 'weight';
                 if (sym === 'l' || sym === 'ml') return 'volume';
+                if (sym === 'garland') return 'garland';
                 return 'count';
             }
 
@@ -443,12 +432,13 @@
                     case 'g':  return 1;
                     case 'l':  return 1000;
                     case 'ml': return 1;
+                    // garland & pcs: 1:1
+                    case 'garland':
                     case 'pcs':
                     default:   return 1;
                 }
             }
 
-            // === ESTIMATED TOTAL (uses ESTIMATE unit & qty, NOT Actual) ===
             function computeEstimatedLineTotal(productId, estQty, estUnitId) {
                 const info = PRICING[String(productId)];
                 if (!info || !estQty || !estUnitId) return 0;
@@ -456,13 +446,20 @@
                 const estSym = UNIT_SYMBOL[String(estUnitId)];
                 const fdSym  = info.fd_unit_symbol;
 
-                // Don't try to convert between weight/volume/count categories
+                if (!estSym || !fdSym) return 0;
+
+                // No auto-price for garland category (usually no FlowerDetails)
+                if (symbolToCategory(estSym) === 'garland' ||
+                    symbolToCategory(fdSym) === 'garland') {
+                    return 0;
+                }
+
+                // Don't convert across weight/volume/count categories
                 if (symbolToCategory(estSym) !== symbolToCategory(fdSym)) return 0;
 
                 const estBase = toBaseFactor(estSym);
                 const fdBase  = toBaseFactor(fdSym);
 
-                // Convert Estimate Qty (in its unit) into FlowerDetails base units
                 const fdUnitsCount = (parseFloat(estQty) * estBase) / fdBase;
                 return fdUnitsCount * (parseFloat(info.fd_price) || 0);
             }
@@ -476,12 +473,10 @@
                     const estQty     = tr.querySelector('input[name="est_quantity[]"]')?.value || '';
                     const estUnitId  = tr.querySelector('input[name="est_unit_id[]"]')?.value || '';
 
-                    // Estimated total uses CONSTANT estimate fields
                     if (productId && estUnitId && estQty) {
                         estTotal += computeEstimatedLineTotal(productId, estQty, estUnitId);
                     }
 
-                    // Actual total uses Actual Qty × Price (editable)
                     const qty   = parseFloat(tr.querySelector('input[name="quantity[]"]')?.value || '0') || 0;
                     const price = parseFloat(tr.querySelector('input[name="price[]"]')?.value || '0') || 0;
 
@@ -494,16 +489,12 @@
                 actTotalEl.textContent = actTotal.toFixed(2);
             }
 
-            // === EVENTS ===
-
-            // Add Row: new row has no estimate (so does not affect Estimated Total)
             addRowBtn.addEventListener('click', function() {
                 const frag = document.importNode(rowTpl.content, true);
                 rowsBody.appendChild(frag);
                 computeTotals();
             });
 
-            // Remove Row (delegated)
             rowsBody.addEventListener('click', function(e) {
                 const btn = e.target.closest('.remove-row-btn');
                 if (!btn) return;
@@ -512,12 +503,9 @@
                 computeTotals();
             });
 
-            // Any change affecting totals (delegated)
             function onRowFieldChange(e) {
                 const tr = e.target.closest('tr[data-row]');
                 if (!tr) return;
-
-                // Only these fields impact totals
                 const watched = ['quantity[]', 'price[]', 'flower_id[]', 'unit_id[]'];
                 if (watched.includes(e.target.name)) {
                     computeTotals();
@@ -527,7 +515,6 @@
             rowsBody.addEventListener('input', onRowFieldChange, true);
             rowsBody.addEventListener('change', onRowFieldChange, true);
 
-            // === INITIAL TOTALS ===
             computeTotals();
         });
     </script>
