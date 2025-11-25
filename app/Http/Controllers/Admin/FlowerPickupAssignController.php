@@ -288,7 +288,7 @@ class FlowerPickupAssignController extends Controller
 
         return null;
     }
-
+        
     public function saveFlowerPickupAssignRider(Request $request)
     {
         // 1) Validate inputs
@@ -472,6 +472,7 @@ class FlowerPickupAssignController extends Controller
             ->back()
             ->with('success', 'Flower pickups saved vendor-wise (vendor & rider stored on header only).');
     }
+
 
     public function store(Request $request)
     {
