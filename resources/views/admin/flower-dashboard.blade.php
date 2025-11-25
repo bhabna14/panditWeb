@@ -342,7 +342,8 @@
                                 </div>
                             </div>
                         </div>
-                    </a> </div>
+                    </a> 
+                </div>
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
                         href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
@@ -355,7 +356,8 @@
                                 </div>
                             </div>
                         </div>
-                    </a> </div>
+                    </a>
+                </div>
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
                         href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
