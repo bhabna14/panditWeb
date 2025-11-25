@@ -398,7 +398,7 @@
                                                                                     </td>
                                                                                     <td>{{ strtoupper($it['per_item_unit']) }}
                                                                                     </td>
-                                                                                    <td class="text-end money">
+                                                                                    <td class="text-center money">
                                                                                         {{ number_format($it['item_price_per_sub'], 2) }}
                                                                                     </td>
                                                                                     <td class="text-end">
