@@ -61,6 +61,7 @@
             padding-left: 2rem;
         }
 
+        /* Quick presets as pill chips */
         .preset-chips {
             display: flex;
             flex-wrap: wrap;
@@ -234,7 +235,7 @@
                                         <div class="date-wrap">
                                             <i class="bi bi-calendar-event"></i>
                                             <input type="date" name="start_date" class="form-control"
-                                                value="{{ $start }}">
+                                                   value="{{ $start }}">
                                         </div>
                                     </div>
                                     <div class="col-6 col-md-4">
@@ -242,18 +243,18 @@
                                         <div class="date-wrap">
                                             <i class="bi bi-calendar-check"></i>
                                             <input type="date" name="end_date" class="form-control"
-                                                value="{{ $end }}">
+                                                   value="{{ $end }}">
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-4">
                                         <label class="form-label mb-1">View</label>
                                         <div class="segmented w-100">
                                             <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'day'])) }}"
-                                                class="{{ $mode === 'day' ? 'active' : '' }}">
+                                               class="{{ $mode === 'day' ? 'active' : '' }}">
                                                 <i class="bi bi-calendar-day"></i> Day
                                             </a>
                                             <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'month'])) }}"
-                                                class="{{ $mode === 'month' ? 'active' : '' }}">
+                                               class="{{ $mode === 'month' ? 'active' : '' }}">
                                                 <i class="bi bi-calendar3"></i> Month
                                             </a>
                                         </div>
@@ -276,16 +277,16 @@
                                 <label class="form-label mb-1">Quick presets</label>
                                 <div class="preset-chips">
                                     <button type="submit" name="preset" value="today"
-                                        class="btn btn-outline-secondary {{ $preset === 'today' ? 'active' : '' }}">Today</button>
+                                            class="btn btn-outline-secondary {{ $preset === 'today' ? 'active' : '' }}">Today</button>
                                     <button type="submit" name="preset" value="yesterday"
-                                        class="btn btn-outline-secondary {{ $preset === 'yesterday' ? 'active' : '' }}">Yesterday</button>
+                                            class="btn btn-outline-secondary {{ $preset === 'yesterday' ? 'active' : '' }}">Yesterday</button>
                                     <button type="submit" name="preset" value="tomorrow"
-                                        class="btn btn-outline-secondary {{ $preset === 'tomorrow' ? 'active' : '' }}">Tomorrow</button>
+                                            class="btn btn-outline-secondary {{ $preset === 'tomorrow' ? 'active' : '' }}">Tomorrow</button>
                                     <button type="submit" name="preset" value="this_month"
-                                        class="btn btn-outline-secondary {{ $preset === 'this_month' ? 'active' : '' }}">This
+                                            class="btn btn-outline-secondary {{ $preset === 'this_month' ? 'active' : '' }}">This
                                         Month</button>
                                     <button type="submit" name="preset" value="last_month"
-                                        class="btn btn-outline-secondary {{ $preset === 'last_month' ? 'active' : '' }}">Last
+                                            class="btn btn-outline-secondary {{ $preset === 'last_month' ? 'active' : '' }}">Last
                                         Month</button>
                                 </div>
                             </div>
@@ -316,9 +317,9 @@
                             <div class="accordion-item shadow-sm mb-3">
                                 <h2 class="accordion-header" id="{{ $dayId }}-header">
                                     <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#{{ $dayId }}-body"
-                                        aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
-                                        aria-controls="{{ $dayId }}-body">
+                                            data-bs-toggle="collapse" data-bs-target="#{{ $dayId }}-body"
+                                            aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
+                                            aria-controls="{{ $dayId }}-body">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
                                                 <strong>{{ \Carbon\Carbon::parse($date)->format('D, d M Y') }}</strong>
@@ -333,8 +334,8 @@
                                     </button>
                                 </h2>
                                 <div id="{{ $dayId }}-body"
-                                    class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}"
-                                    aria-labelledby="{{ $dayId }}-header" data-bs-parent="#daysAccordion">
+                                     class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}"
+                                     aria-labelledby="{{ $dayId }}-header" data-bs-parent="#daysAccordion">
                                     <div class="accordion-body bg-white">
                                         @if (empty($products))
                                             <div class="alert alert-secondary">No active subscriptions on this day.</div>
@@ -349,71 +350,116 @@
                                                         $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
                                                     @endphp
 
-                                                    <div
-                                                        class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
-                                                        {{-- LEFT: Package info --}}
-                                                        <div class="d-flex align-items-start gap-3">
-                                                            {{-- Icon bubble --}}
-                                                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0"
-                                                                style="width: 42px; height: 42px;">
-                                                                <i class="bi bi-box-seam-fill"></i>
-                                                            </div>
+                                                    <div class="col-12">
+                                                        <div class="card product-card border-0 shadow-sm">
+                                                            <div class="card-body">
+                                                                {{-- Header block with new layout + per_day_price --}}
+                                                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                                                                    {{-- LEFT: Package info --}}
+                                                                    <div class="d-flex align-items-start gap-3">
+                                                                        {{-- Icon bubble --}}
+                                                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0"
+                                                                             style="width: 42px; height: 42px;">
+                                                                            <i class="bi bi-box-seam-fill"></i>
+                                                                        </div>
 
-                                                            <div>
-                                                                {{-- Package name + label --}}
-                                                                <div
-                                                                    class="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                                                    <span
-                                                                        class="badge rounded-pill bg-warning text-dark text-uppercase small fw-semibold">
-                                                                        Package
-                                                                    </span>
-                                                                    <h5 class="mb-0">
-                                                                        {{ $product?->name ?? 'Product #' . $pid }}
-                                                                    </h5>
+                                                                        <div>
+                                                                            {{-- Package name + label --}}
+                                                                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                                                                <span class="badge rounded-pill bg-warning text-dark text-uppercase small fw-semibold">
+                                                                                    Package
+                                                                                </span>
+                                                                                <h5 class="mb-0">
+                                                                                    {{ $product?->name ?? 'Product #' . $pid }}
+                                                                                </h5>
+                                                                            </div>
+
+                                                                            {{-- Subscriptions + package cost --}}
+                                                                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                                                                <span class="badge rounded-pill bg-light text-secondary border small">
+                                                                                    <i class="bi bi-people-fill me-1"></i>
+                                                                                    {{ $subsCount }}
+                                                                                    subscription{{ $subsCount == 1 ? '' : 's' }}
+                                                                                </span>
+
+                                                                                @if (!empty($product?->per_day_price))
+                                                                                    <span class="badge rounded-pill bg-info-subtle text-info-emphasis border-0 small">
+                                                                                        <i class="bi bi-currency-rupee me-1"></i>
+                                                                                        Package Cost / day:
+                                                                                        <span class="money">
+                                                                                            ₹{{ number_format($product->per_day_price, 2) }}
+                                                                                        </span>
+                                                                                    </span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {{-- RIGHT: Flower cost (computed) --}}
+                                                                    <div class="text-md-end">
+                                                                        <div class="small text-muted mb-1">Computed flower cost</div>
+                                                                        <div class="d-flex flex-column align-items-md-end gap-2">
+                                                                            <span class="badge bg-primary-subtle text-primary fw-semibold">
+                                                                                <i class="bi bi-flower1 me-1"></i>
+                                                                                Per subscription:
+                                                                                <span class="money">
+                                                                                    ₹{{ number_format($bundlePerSub, 2) }}
+                                                                                </span>
+                                                                            </span>
+
+                                                                            <span class="badge bg-success-subtle text-success fw-semibold">
+                                                                                <i class="bi bi-wallet2 me-1"></i>
+                                                                                Total flower cost:
+                                                                                <span class="money">
+                                                                                    ₹{{ number_format($productTotal, 2) }}
+                                                                                </span>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
 
-                                                                {{-- Subscriptions + package cost --}}
-                                                                <div
-                                                                    class="d-flex flex-wrap align-items-center gap-2 mt-1">
-                                                                    <span
-                                                                        class="badge rounded-pill bg-light text-secondary border small">
-                                                                        <i class="bi bi-people-fill me-1"></i>
-                                                                        {{ $subsCount }}
-                                                                        subscription{{ $subsCount == 1 ? '' : 's' }}
-                                                                    </span>
-
-                                                                    @if (!empty($product?->per_day_price))
-                                                                        <span
-                                                                            class="badge rounded-pill bg-info-subtle text-info-emphasis border-0 small">
-                                                                            <i class="bi bi-currency-rupee me-1"></i>
-                                                                            Package Cost / day:
-                                                                            <span
-                                                                                class="money">₹{{ number_format($product->per_day_price, 2) }}</span>
-                                                                        </span>
-                                                                    @endif
+                                                                {{-- Items table --}}
+                                                                <div class="table-responsive mt-3">
+                                                                    <table class="table table-sm table-hover align-middle">
+                                                                        <thead class="table-light">
+                                                                            <tr>
+                                                                                <th style="width:30%">Flowers</th>
+                                                                                <th class="text-end">Qty</th>
+                                                                                <th>Unit</th>
+                                                                                <th class="text-center">Unit Price (₹)</th>
+                                                                                <th class="text-center">Total Qty</th>
+                                                                                <th class="text-center">Total Price (₹)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @forelse($items as $it)
+                                                                                <tr>
+                                                                                    <td>{{ $it['item_name'] }}</td>
+                                                                                    <td class="text-end">
+                                                                                        {{ rtrim(rtrim(number_format($it['per_item_qty'], 3), '0'), '.') }}
+                                                                                    </td>
+                                                                                    <td>{{ strtoupper($it['per_item_unit']) }}</td>
+                                                                                    <td class="text-center money">
+                                                                                        {{ number_format($it['item_price_per_sub'], 2) }}
+                                                                                    </td>
+                                                                                    <td class="text-center">
+                                                                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                                                        {{ $it['total_unit_disp'] }}
+                                                                                    </td>
+                                                                                    <td class="text-center money">
+                                                                                        {{ number_format($it['total_price'], 2) }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @empty
+                                                                                <tr>
+                                                                                    <td colspan="6" class="text-muted">
+                                                                                        No package items configured for this product.
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforelse
+                                                                        </tbody>
+                                                                    </table>
                                                                 </div>
-                                                            </div>
-                                                        </div>
-
-                                                        {{-- RIGHT: Flower cost (computed) --}}
-                                                        <div class="text-md-end">
-                                                            <div class="small text-muted mb-1">Computed flower cost</div>
-                                                            <div class="d-flex flex-column align-items-md-end gap-2">
-                                                                <span
-                                                                    class="badge bg-primary-subtle text-primary fw-semibold">
-                                                                    <i class="bi bi-flower1 me-1"></i>
-                                                                    Per subscription:
-                                                                    <span
-                                                                        class="money">₹{{ number_format($bundlePerSub, 2) }}</span>
-                                                                </span>
-
-                                                                <span
-                                                                    class="badge bg-success-subtle text-success fw-semibold">
-                                                                    <i class="bi bi-wallet2 me-1"></i>
-                                                                    Total flower cost:
-                                                                    <span
-                                                                        class="money">₹{{ number_format($productTotal, 2) }}</span>
-                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -422,8 +468,7 @@
 
                                             <div class="card border-0 shadow-sm mt-3">
                                                 <div class="card-header bg-white">
-                                                    <strong>Total Types and Quantity of Flower Needed for Tomorrow
-                                                        Delivery</strong>
+                                                    <strong>Total Types and Quantity of Flower Needed for Tomorrow Delivery</strong>
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="table-responsive">
@@ -445,8 +490,7 @@
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
-                                                                        <td colspan="2" class="text-muted">No items.
-                                                                        </td>
+                                                                        <td colspan="2" class="text-muted">No items.</td>
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
@@ -476,9 +520,9 @@
                             <div class="accordion-item shadow-sm mb-3">
                                 <h2 class="accordion-header" id="{{ $monthId }}-header">
                                     <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#{{ $monthId }}-body"
-                                        aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
-                                        aria-controls="{{ $monthId }}-body">
+                                            data-bs-toggle="collapse" data-bs-target="#{{ $monthId }}-body"
+                                            aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
+                                            aria-controls="{{ $monthId }}-body">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
                                                 <strong>{{ $mblock['month_label'] }}</strong>
@@ -493,8 +537,8 @@
                                     </button>
                                 </h2>
                                 <div id="{{ $monthId }}-body"
-                                    class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}"
-                                    aria-labelledby="{{ $monthId }}-header" data-bs-parent="#monthsAccordion">
+                                     class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}"
+                                     aria-labelledby="{{ $monthId }}-header" data-bs-parent="#monthsAccordion">
                                     <div class="accordion-body bg-white">
                                         @if (empty($products))
                                             <div class="alert alert-secondary">No active subscriptions in this month.</div>
@@ -510,19 +554,43 @@
                                                     <div class="col-12">
                                                         <div class="card product-card border-0 shadow-sm">
                                                             <div class="card-body">
-                                                                <div
-                                                                    class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                                                                    <div>
-                                                                        <h5 class="mb-1">
-                                                                            {{ $product?->name ?? 'Product #' . $pid }}
-                                                                        </h5>
-                                                                        <div class="text-muted">
-                                                                            <strong>{{ $subsDays }}</strong>
-                                                                            subscription-days
+                                                                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                                                                    {{-- LEFT: Package info --}}
+                                                                    <div class="d-flex align-items-start gap-3">
+                                                                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0"
+                                                                             style="width: 42px; height: 42px;">
+                                                                            <i class="bi bi-box-seam-fill"></i>
+                                                                        </div>
+                                                                        <div>
+                                                                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                                                                <span class="badge rounded-pill bg-warning text-dark text-uppercase small fw-semibold">
+                                                                                    Package
+                                                                                </span>
+                                                                                <h5 class="mb-0">
+                                                                                    {{ $product?->name ?? 'Product #' . $pid }}
+                                                                                </h5>
+                                                                            </div>
+                                                                            <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                                                                <span class="badge rounded-pill bg-light text-secondary border small">
+                                                                                    <i class="bi bi-calendar-week me-1"></i>
+                                                                                    {{ $subsDays }} subscription-days
+                                                                                </span>
+                                                                                @if (!empty($product?->per_day_price))
+                                                                                    <span class="badge rounded-pill bg-info-subtle text-info-emphasis border-0 small">
+                                                                                        <i class="bi bi-currency-rupee me-1"></i>
+                                                                                        Package Cost / day:
+                                                                                        <span class="money">
+                                                                                            ₹{{ number_format($product->per_day_price, 2) }}
+                                                                                        </span>
+                                                                                    </span>
+                                                                                @endif
+                                                                            </div>
                                                                         </div>
                                                                     </div>
-                                                                    <div>
-                                                                        <span class="badge bg-primary fs-6">
+
+                                                                    {{-- RIGHT: product total --}}
+                                                                    <div class="text-md-end">
+                                                                        <span class="badge bg-primary-subtle text-primary fw-semibold">
                                                                             Product Total:
                                                                             <span class="money">
                                                                                 ₹{{ number_format($productTotal, 2) }}
@@ -592,8 +660,7 @@
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
-                                                                        <td colspan="2" class="text-muted">No items.
-                                                                        </td>
+                                                                        <td colspan="2" class="text-muted">No items.</td>
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
@@ -628,12 +695,24 @@
                             <summary>
                                 <div class="summary-left">
                                     <h6 class="mb-1">{{ $product?->name ?? 'Product #' . $pid }}</h6>
-                                    <div class="text-muted">
-                                        <strong>{{ $subsCount }}</strong>
-                                        {{ $isRequests ? 'request' : 'subscription' }}{{ $subsCount == 1 ? '' : 's' }}
+                                    <div class="d-flex flex-wrap align-items-center gap-2 text-muted">
+                                        <span>
+                                            <strong>{{ $subsCount }}</strong>
+                                            {{ $isRequests ? 'request' : 'subscription' }}{{ $subsCount == 1 ? '' : 's' }}
+                                        </span>
+
                                         @if (!$isRequests && ($bundlePerSub ?? 0) > 0)
-                                            <span class="ms-2">(Bundle / Sub:
-                                                ₹{{ number_format($bundlePerSub, 2) }})</span>
+                                            <span class="badge bg-light text-secondary border small">
+                                                Bundle / Sub:
+                                                <span class="money">₹{{ number_format($bundlePerSub, 2) }}</span>
+                                            </span>
+                                        @endif
+
+                                        @if (!empty($product?->per_day_price))
+                                            <span class="badge bg-info-subtle text-info-emphasis border-0 small">
+                                                Package Cost / day:
+                                                <span class="money">₹{{ number_format($product->per_day_price, 2) }}</span>
+                                            </span>
                                         @endif
                                     </div>
                                 </div>
@@ -678,8 +757,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="text-muted">No package items configured.
-                                                    </td>
+                                                    <td colspan="6" class="text-muted">No package items configured.</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
