@@ -149,11 +149,13 @@
                                             'price'         => null,
                                             'flower_name'   => null,
                                             'unit_label'    => null,
+                                            'is_garland'    => false,
                                         ],
                                         $prefillRows[$i] ?? [],
                                     );
 
-                                    $flowerVal = $oldFlowerIds[$i] ?? $default['flower_id'];
+                                    $flowerVal  = $oldFlowerIds[$i] ?? $default['flower_id'];
+                                    $isGarland  = (bool) $default['is_garland'];
 
                                     $estQtyConst  = $default['est_quantity'];
                                     $estUnitConst = $default['unit_id'];
@@ -178,11 +180,14 @@
                                                 </option>
                                             @endforeach
                                         </select>
-                                        @if (!$flowerVal && ($default['flower_name'] ?? null))
+
+                                        {{-- Only show "Unmatched" for non-garland items --}}
+                                        @if (!$isGarland && !$flowerVal && ($default['flower_name'] ?? null))
                                             <small class="text-muted">
                                                 Unmatched: {{ $default['flower_name'] }}
                                             </small>
                                         @endif
+
                                         @error('flower_id.' . $i)
                                         <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
@@ -375,7 +380,7 @@
                     <div class="mt-3 d-flex justify-content-between flex-wrap gap-2">
                         <div class="small-muted">
                             Estimate Unit & Qty are read-only (from system estimate) and do not change when you edit
-                            Actual. Garlands will appear as separate rows (e.g. <em>Gendu Garland</em>).
+                            Actual. Garlands will appear as separate rows.
                         </div>
                         <div class="totals-bar ms-auto">
                             <div class="totals-grid">
@@ -415,7 +420,9 @@
             const estTotalEl = document.getElementById('estTotal');
             const actTotalEl = document.getElementById('actTotal');
 
+            // Pricing map from server: product_id -> {fd_unit_symbol, fd_unit_id, fd_price}
             const PRICING     = @json($fdProductPricing);
+            // Unit id -> canonical symbol ('kg','g','l','ml','pcs','garland')
             const UNIT_SYMBOL = @json($unitIdToSymbol);
 
             function symbolToCategory(sym) {
@@ -439,6 +446,7 @@
                 }
             }
 
+            // Estimated total uses CONSTANT estimate fields (not Actual)
             function computeEstimatedLineTotal(productId, estQty, estUnitId) {
                 const info = PRICING[String(productId)];
                 if (!info || !estQty || !estUnitId) return 0;
@@ -454,7 +462,7 @@
                     return 0;
                 }
 
-                // Don't convert across weight/volume/count categories
+                // Don't convert across different categories
                 if (symbolToCategory(estSym) !== symbolToCategory(fdSym)) return 0;
 
                 const estBase = toBaseFactor(estSym);
@@ -489,12 +497,14 @@
                 actTotalEl.textContent = actTotal.toFixed(2);
             }
 
+            // Add Row
             addRowBtn.addEventListener('click', function() {
                 const frag = document.importNode(rowTpl.content, true);
                 rowsBody.appendChild(frag);
                 computeTotals();
             });
 
+            // Remove Row
             rowsBody.addEventListener('click', function(e) {
                 const btn = e.target.closest('.remove-row-btn');
                 if (!btn) return;
@@ -503,6 +513,7 @@
                 computeTotals();
             });
 
+            // Any change affecting totals
             function onRowFieldChange(e) {
                 const tr = e.target.closest('tr[data-row]');
                 if (!tr) return;
@@ -515,6 +526,7 @@
             rowsBody.addEventListener('input', onRowFieldChange, true);
             rowsBody.addEventListener('change', onRowFieldChange, true);
 
+            // Initial totals
             computeTotals();
         });
     </script>

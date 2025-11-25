@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Validator;
 
 class FlowerPickupAssignController extends Controller
 {
-
     public function createFromEstimate(Request $request)
     {
         $date = $request->filled('date')
@@ -35,8 +34,7 @@ class FlowerPickupAssignController extends Controller
         // name -> product_id
         $flowerNameToId = $flowers->pluck('product_id', 'name')->toArray();
 
-        // normalize unit names → canonical symbols and build map symbol -> unit_id
-        // canonical symbols: kg, g, l, ml, pcs, garland
+        // unit symbol -> unit_id (kg,g,l,ml,pcs,garland)
         $unitSymbolToId = [];
         foreach ($units as $u) {
             $key = $this->normalizeUnitKey($u->unit_name);
@@ -45,13 +43,12 @@ class FlowerPickupAssignController extends Controller
             }
         }
 
-        // ---------- Subscription estimate (existing) ----------
+        // ---------- Subscription estimate ----------
         $subs     = $this->fetchActiveSubsEffectiveOn($date);
         $estimate = $this->buildEstimateForSubsOnDate($subs, $date);
-        // each row: item_name, total_qty_disp, total_unit_disp (kg/g/l/ml/pcs)
         $estimateTotals = array_values($estimate['totals_by_item'] ?? []);
 
-        // ---------- NEW: pull Flower Requests for the chosen date ----------
+        // ---------- Flower Requests for this date ----------
         $requestDate = $date->toDateString();
 
         $requests = FlowerRequest::query()
@@ -72,7 +69,7 @@ class FlowerPickupAssignController extends Controller
             ->get();
 
         // Aggregate request items → totals keyed by (name, unit_symbol)
-        $requestTotalsMap = []; // ["rose|kg" => ['item_name'=>'Rose','total_qty'=>12.5,'unit_symbol'=>'kg']]
+        $requestTotalsMap = []; // ["gendu|garland" => [...], "gendu|kg" => [...]]
 
         foreach ($requests as $req) {
             foreach ($req->flowerRequestItems as $it) {
@@ -80,30 +77,31 @@ class FlowerPickupAssignController extends Controller
 
                 // ---------- GARLAND ROWS ----------
                 if ($type === 'garland') {
-                    $garlandName = trim((string) ($it->garland_name ?? ''));
+                    $garlandName = trim((string) ($it->garland_name ?? ''));   // e.g. "Gendu"
                     $gQty        = (float) ($it->garland_quantity ?? 0);
 
                     if ($garlandName !== '' && $gQty > 0) {
-                        // Distinct item label so it does NOT merge with loose flower
-                        $displayName = $garlandName . ' Garland';
+                        // IMPORTANT: name = "Gendu" (no "Garland" suffix)
+                        $displayName = $garlandName;
 
                         // Canonical symbol for garlands
-                        $sym = 'garland'; // will map to PoojaUnit with unit_name like "Garland"
+                        $sym = 'garland';
 
                         $key = mb_strtolower($displayName) . '|' . $sym;
 
                         if (!isset($requestTotalsMap[$key])) {
                             $requestTotalsMap[$key] = [
-                                'item_name'   => $displayName,
+                                'item_name'   => $displayName,   // "Gendu"
                                 'total_qty'   => 0.0,
-                                'unit_symbol' => $sym,
+                                'unit_symbol' => $sym,           // 'garland'
+                                'is_garland'  => true,
                             ];
                         }
 
                         $requestTotalsMap[$key]['total_qty'] += $gQty;
                     }
 
-                    // skip flower_name fields for pure garland rows
+                    // skip flower_name for pure garland rows
                     continue;
                 }
 
@@ -124,44 +122,50 @@ class FlowerPickupAssignController extends Controller
                         'item_name'   => $name,
                         'total_qty'   => 0.0,
                         'unit_symbol' => $sym,
+                        'is_garland'  => false,
                     ];
                 }
                 $requestTotalsMap[$key]['total_qty'] += $qty;
             }
         }
 
-        // Convert requestTotalsMap to array with display fields compatible with estimate rows
+        // Convert requestTotalsMap → array (same shape as estimate rows + is_garland)
         $requestTotals = [];
         foreach ($requestTotalsMap as $row) {
             $requestTotals[] = [
                 'item_name'       => $row['item_name'],
                 'total_qty_disp'  => $row['total_qty'],
-                'total_unit_disp' => $row['unit_symbol'], // 'kg','g','l','ml','pcs','garland'
+                'total_unit_disp' => $row['unit_symbol'], // kg,g,l,ml,pcs,garland
+                'is_garland'      => (bool) ($row['is_garland'] ?? false),
             ];
         }
 
-        // ---------- MERGE: subscription estimate + request totals ----------
-        // Merge on (item_name, unit_symbol). If both exist, sum quantities.
+        // ---------- MERGE subscription estimate + request totals ----------
         $mergedMap = [];
 
         $pushRow = function (array $src) use (&$mergedMap) {
             $name = trim((string) ($src['item_name'] ?? ''));
             $unit = strtolower((string) ($src['total_unit_disp'] ?? 'pcs'));
             $qty  = (float) ($src['total_qty_disp'] ?? 0);
+            $isG  = (bool) ($src['is_garland'] ?? false);
 
             if ($name === '' || $qty <= 0) {
                 return;
             }
 
             $key = mb_strtolower($name) . '|' . $unit;
+
             if (!isset($mergedMap[$key])) {
                 $mergedMap[$key] = [
                     'item_name'       => $name,
                     'total_unit_disp' => $unit,
                     'total_qty_disp'  => 0.0,
+                    'is_garland'      => $isG,
                 ];
             }
+
             $mergedMap[$key]['total_qty_disp'] += $qty;
+            $mergedMap[$key]['is_garland'] = $mergedMap[$key]['is_garland'] || $isG;
         };
 
         foreach ($estimateTotals as $r) {
@@ -173,7 +177,7 @@ class FlowerPickupAssignController extends Controller
 
         $totals = array_values($mergedMap);
 
-        // ---------- Live price index (FlowerDetails) for JS auto-pricing ----------
+        // ---------- FlowerDetails price index ----------
         $fdIndexByName = FlowerDetails::query()
             ->select(['name', 'unit', 'price'])
             ->where('status', 'active')
@@ -182,21 +186,19 @@ class FlowerPickupAssignController extends Controller
                 return strtolower(trim((string) $fd->name));
             });
 
-        // product_id → pricing
         $fdProductPricing = [];
         foreach ($flowers as $f) {
             $nameKey = strtolower(trim((string) $f->name));
             $fd      = $fdIndexByName->get($nameKey);
 
             if ($fd) {
-                $sym = $this->normalizeUnitKey($fd->unit); // 'kg','g','l','ml','pcs','garland' (if any)
+                $sym = $this->normalizeUnitKey($fd->unit);
                 $fdProductPricing[$f->product_id] = [
                     'fd_unit_symbol' => $sym ?: 'pcs',
                     'fd_unit_id'     => $sym ? ($unitSymbolToId[$sym] ?? null) : null,
                     'fd_price'       => (float) $fd->price,
                 ];
             } else {
-                // No FlowerDetails → no auto-price; user enters manually
                 $fdProductPricing[$f->product_id] = [
                     'fd_unit_symbol' => 'pcs',
                     'fd_unit_id'     => $unitSymbolToId['pcs'] ?? null,
@@ -205,38 +207,31 @@ class FlowerPickupAssignController extends Controller
             }
         }
 
-        // ---------- Prefill rows for the UI ----------
+        // ---------- Prefill rows for UI ----------
         $prefillRows = [];
         foreach ($totals as $row) {
-            $name = trim($row['item_name'] ?? '');
+            $name            = trim($row['item_name'] ?? '');
+            $dispUnitSymbol  = strtolower((string) ($row['total_unit_disp'] ?? ''));
+            $isGarland       = (bool) ($row['is_garland'] ?? false);
 
-            // For garland lines like "Gendu Garland" there usually WON'T be a FlowerProduct
+            // IMPORTANT: garland rows ALSO try to map to FlowerProduct ("Gendu")
             $flowerId = $flowerNameToId[$name] ?? null;
 
-            // unit label from the merged totals
-            $dispUnitSymbol = strtolower((string) ($row['total_unit_disp'] ?? ''));
-            $unitId         = $unitSymbolToId[$dispUnitSymbol] ?? null;
+            $unitId = $unitSymbolToId[$dispUnitSymbol] ?? null;
 
             $prefillRows[] = [
                 'flower_id'    => $flowerId,
-
-                // ESTIMATE (prefill qty only; Est Unit mirrors Actual in UI)
                 'est_quantity' => $row['total_qty_disp'] ?? null,
-
-                // Est/Actual unit id: from canonical symbol (kg/g/l/ml/pcs/garland)
                 'unit_id'      => $unitId,
-
-                // Actual values initially = estimated qty, price empty
                 'quantity'     => null,
                 'price'        => null,
-
-                // UX hints
-                'flower_name'  => $name,
+                'flower_name'  => $name,         // for info
                 'unit_label'   => $dispUnitSymbol,
+                'is_garland'   => $isGarland,    // just a flag for display if you want
             ];
         }
 
-        // unitId -> canonical symbol for JS conversions
+        // unitId -> canonical symbol for JS
         $unitIdToSymbol = [];
         foreach ($units as $u) {
             $unitIdToSymbol[$u->id] = $this->normalizeUnitKey($u->unit_name);
@@ -278,7 +273,7 @@ class FlowerPickupAssignController extends Controller
             return 'ml';
         }
 
-        // garland units (PoojaUnit.unit_name like "Garland", "Garlands", etc.)
+        // garlands
         if (str_contains($u, 'garland')) {
             return 'garland';
         }
