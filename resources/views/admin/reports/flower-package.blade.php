@@ -266,8 +266,7 @@
                                     <button type="submit" class="btn btn-success">
                                         <i class="bi bi-funnel"></i> Apply
                                     </button>
-                                    <a href="{{ route('admin.flowerPackage') }}"
-                                        class="btn btn-outline-secondary">Reset</a>
+                                    <a href="{{ route('admin.flowerPackage') }}" class="btn btn-outline-secondary">Reset</a>
                                 </div>
                             </div>
                         </div>
@@ -350,83 +349,71 @@
                                                         $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
                                                     @endphp
 
-                                                    <div class="col-12">
-                                                        <div class="card product-card border-0 shadow-sm">
-                                                            <div class="card-body">
+                                                    <div
+                                                        class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                                                        {{-- LEFT: Package info --}}
+                                                        <div class="d-flex align-items-start gap-3">
+                                                            {{-- Icon bubble --}}
+                                                            <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0"
+                                                                style="width: 42px; height: 42px;">
+                                                                <i class="bi bi-box-seam-fill"></i>
+                                                            </div>
+
+                                                            <div>
+                                                                {{-- Package name + label --}}
                                                                 <div
-                                                                    class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                                                                    <div>
-                                                                        <h5 class="mb-1">
-                                                                            <span class="badge bg-warning text-uppercase me-2">
-                                                                                Package Name
-                                                                            </span>
-                                                                            {{ $product?->name ?? 'Product #' . $pid }}
-                                                                        </h5>
-                                                                        <div class="text-muted">
-                                                                            <span class="badge bg-warning text-uppercase me-2">
-                                                                                Subscription
-                                                                            </span>
-                                                                            <strong>{{ $subsCount }}</strong>
-                                                                            subscription{{ $subsCount == 1 ? '' : 's' }}
-                                                                        </div>
-                                                                    </div>
-                                                                    <div>
-                                                                        <span class="badge bg-primary fs-6">
-                                                                            <span class="ms-2">
-                                                                                Flower Cost:
-                                                                                ₹{{ number_format($bundlePerSub, 2) }}
-                                                                            </span><br>
-                                                                            Total Flower Cost:
-                                                                            <span class="money">
-                                                                                ₹{{ number_format($productTotal, 2) }}
-                                                                            </span>
-                                                                        </span>
-                                                                    </div>
+                                                                    class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                                                    <span
+                                                                        class="badge rounded-pill bg-warning text-dark text-uppercase small fw-semibold">
+                                                                        Package
+                                                                    </span>
+                                                                    <h5 class="mb-0">
+                                                                        {{ $product?->name ?? 'Product #' . $pid }}
+                                                                    </h5>
                                                                 </div>
 
-                                                                <div class="table-responsive mt-3">
-                                                                    <table class="table table-sm table-hover align-middle">
-                                                                        <thead class="table-light">
-                                                                            <tr>
-                                                                                <th style="width:30%">Flowers</th>
-                                                                                <th class="text-end">Qty</th>
-                                                                                <th>Unit</th>
-                                                                                <th class="text-center">Unit Price (₹)</th>
-                                                                                <th class="text-center">Total Qty</th>
-                                                                                <th class="text-center">Total Price (₹)</th>
-                                                                            </tr>
-                                                                        </thead>
-                                                                        <tbody>
-                                                                            @forelse($items as $it)
-                                                                                <tr>
-                                                                                    <td>{{ $it['item_name'] }}</td>
-                                                                                    <td class="text-end">
-                                                                                        {{ rtrim(rtrim(number_format($it['per_item_qty'], 3), '0'), '.') }}
-                                                                                    </td>
-                                                                                    <td>{{ strtoupper($it['per_item_unit']) }}
-                                                                                    </td>
-                                                                                    <td class="text-center money">
-                                                                                        {{ number_format($it['item_price_per_sub'], 2) }}
-                                                                                    </td>
-                                                                                    <td class="text-center">
-                                                                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                                                        {{ $it['total_unit_disp'] }}
-                                                                                    </td>
-                                                                                    <td class="text-center money">
-                                                                                        {{ number_format($it['total_price'], 2) }}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            @empty
-                                                                                <tr>
-                                                                                    <td colspan="6" class="text-muted">
-                                                                                        No package items configured for this
-                                                                                        product.
-                                                                                    </td>
-                                                                                </tr>
-                                                                            @endforelse
-                                                                        </tbody>
-                                                                    </table>
+                                                                {{-- Subscriptions + package cost --}}
+                                                                <div
+                                                                    class="d-flex flex-wrap align-items-center gap-2 mt-1">
+                                                                    <span
+                                                                        class="badge rounded-pill bg-light text-secondary border small">
+                                                                        <i class="bi bi-people-fill me-1"></i>
+                                                                        {{ $subsCount }}
+                                                                        subscription{{ $subsCount == 1 ? '' : 's' }}
+                                                                    </span>
+
+                                                                    @if (!empty($product?->per_day_price))
+                                                                        <span
+                                                                            class="badge rounded-pill bg-info-subtle text-info-emphasis border-0 small">
+                                                                            <i class="bi bi-currency-rupee me-1"></i>
+                                                                            Package Cost / day:
+                                                                            <span
+                                                                                class="money">₹{{ number_format($product->per_day_price, 2) }}</span>
+                                                                        </span>
+                                                                    @endif
                                                                 </div>
+                                                            </div>
+                                                        </div>
+
+                                                        {{-- RIGHT: Flower cost (computed) --}}
+                                                        <div class="text-md-end">
+                                                            <div class="small text-muted mb-1">Computed flower cost</div>
+                                                            <div class="d-flex flex-column align-items-md-end gap-2">
+                                                                <span
+                                                                    class="badge bg-primary-subtle text-primary fw-semibold">
+                                                                    <i class="bi bi-flower1 me-1"></i>
+                                                                    Per subscription:
+                                                                    <span
+                                                                        class="money">₹{{ number_format($bundlePerSub, 2) }}</span>
+                                                                </span>
+
+                                                                <span
+                                                                    class="badge bg-success-subtle text-success fw-semibold">
+                                                                    <i class="bi bi-wallet2 me-1"></i>
+                                                                    Total flower cost:
+                                                                    <span
+                                                                        class="money">₹{{ number_format($productTotal, 2) }}</span>
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -435,7 +422,8 @@
 
                                             <div class="card border-0 shadow-sm mt-3">
                                                 <div class="card-header bg-white">
-                                                    <strong>Total Types and Quantity of Flower Needed for Tomorrow Delivery</strong>
+                                                    <strong>Total Types and Quantity of Flower Needed for Tomorrow
+                                                        Delivery</strong>
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="table-responsive">
@@ -457,7 +445,8 @@
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
-                                                                        <td colspan="2" class="text-muted">No items.</td>
+                                                                        <td colspan="2" class="text-muted">No items.
+                                                                        </td>
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
@@ -603,7 +592,8 @@
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
-                                                                        <td colspan="2" class="text-muted">No items.</td>
+                                                                        <td colspan="2" class="text-muted">No items.
+                                                                        </td>
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
@@ -688,7 +678,8 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="text-muted">No package items configured.</td>
+                                                    <td colspan="6" class="text-muted">No package items configured.
+                                                    </td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
