@@ -350,47 +350,76 @@ class FlowerPickupController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'vendor_id' => 'required',
+            'vendor_id'   => 'required',
             'pickup_date' => 'required|date',
+
+            'flower_id'   => 'required|array|min:1',
             'flower_id.*' => 'required',
-            'unit_id.*' => 'required',
-            'quantity.*' => 'required|numeric',
-            // 'price.*' => 'required|numeric',
-            'rider_id' => 'required',
+
+            'unit_id'     => 'required|array',
+            'unit_id.*'   => 'required',
+
+            'quantity'    => 'required|array',
+            'quantity.*'  => 'required|numeric|min:0',
+
+            // Price: decimals allowed, 0.0 allowed, can be left empty
+            'price'       => 'nullable|array',
+            'price.*'     => 'nullable|numeric|min:0',
+
+            'rider_id'    => 'required',
         ]);
 
+        /** @var \App\Models\FlowerPickupDetails $pickup */
         $pickup = FlowerPickupDetails::findOrFail($id);
 
-        // Update pickup details
+        // Update header fields
         $pickup->update([
-            'vendor_id' => $request->vendor_id,
+            'vendor_id'   => $request->vendor_id,
             'pickup_date' => $request->pickup_date,
-            'rider_id' => $request->rider_id,
+            'rider_id'    => $request->rider_id,
         ]);
 
-        $totalPrice = 0;
+        $totalPrice         = 0;
+        $flowerIdsInRequest = [];
 
-        // Update flower items
+        // Sync flower items
         foreach ($request->flower_id as $index => $flowerId) {
-            $quantity = $request->quantity[$index];
-            $price = $request->price[$index];
-            $totalPrice +=  $price;
+            $flowerIdsInRequest[] = $flowerId;
+
+            $quantity = $request->quantity[$index] ?? 0;
+            $price    = $request->price[$index] ?? 0;
+
+            // Sum only the price column (row amount)
+            $totalPrice += (float) $price;
 
             FlowerPickupItems::updateOrCreate(
-                ['pick_up_id' => $pickup->pick_up_id, 'flower_id' => $flowerId],
                 [
-                    'unit_id' => $request->unit_id[$index],
+                    'pick_up_id' => $pickup->pick_up_id,
+                    'flower_id'  => $flowerId,
+                ],
+                [
+                    'unit_id'  => $request->unit_id[$index] ?? null,
                     'quantity' => $quantity,
-                    'price' => $price,
+                    'price'    => $price,
                 ]
             );
         }
 
-        // Update total price in the details table
-        $pickup->update(['total_price' => $totalPrice]);
+        // Optionally delete removed items (if you want to keep DB in sync)
+        FlowerPickupItems::where('pick_up_id', $pickup->pick_up_id)
+            ->whereNotIn('flower_id', $flowerIdsInRequest)
+            ->delete();
 
-        return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Flower Pickup updated successfully.');
+        // Update total price in the main table
+        $pickup->update([
+            'total_price' => $totalPrice,
+        ]);
+
+        return redirect()
+            ->route('admin.manageflowerpickupdetails')
+            ->with('success', 'Flower Pickup updated successfully.');
     }
+
 
     public function updatePayment(Request $request, $pickup_id)
     {
