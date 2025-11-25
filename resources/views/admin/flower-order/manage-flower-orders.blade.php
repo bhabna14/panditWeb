@@ -264,6 +264,13 @@
 @endsection
 
 @section('content')
+    {{-- 🔹 NEW: Filter-wise header --}}
+    <div class="mt-3 mb-2">
+        <h4 class="fw-bold">
+            {{ $filterHeader ?? 'All Subscriptions' }}
+        </h4>
+    </div>
+
     <div class="row g-3 mb-4 mt-3">
         @php
             $cards = [
