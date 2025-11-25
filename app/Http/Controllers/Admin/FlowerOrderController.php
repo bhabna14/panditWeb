@@ -135,6 +135,12 @@ class FlowerOrderController extends Controller
                 ->whereDate('start_date', $tomorrow);
         }
 
+        if ($filter === 'tomorrow') {
+            $tomorrow = Carbon::tomorrow($tz)->toDateString();
+            $query->where('status', 'active')
+                ->whereDate('pause_start_date', $tomorrowDate);
+        }
+
         if ($filter === 'todayrequest') {
             $query->whereIn('subscription_id', function ($sub) use ($todayStart, $todayEnd) {
                 $sub->select('subscription_id')
