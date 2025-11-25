@@ -1,3 +1,4 @@
+{{-- resources/views/admin/reports/flower-package.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -78,13 +79,9 @@
         .preset-chips .btn.btn-outline-secondary:active {
             font-weight: 700;
             color: #fff !important;
-            /* make text visible */
             background-color: #6c757d;
-            /* optional: match outline-secondary active bg */
             border-color: #6c757d;
-            /* optional */
         }
-
 
         /* View segmented control */
         .segmented {
@@ -193,13 +190,13 @@
 @section('content')
     <div class="bg-light">
         <div class="container py-4">
-              @php
+            @php
+                // Tomorrow summary for bottom disclosure
                 $tProducts = $tomorrowEstimate['products'] ?? [];
                 $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
                 $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
 
-                // Build Tomorrow summary (from product items)
-                $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
+                $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0];
                 $distinctItems = [];
                 foreach ($tProducts as $row) {
                     foreach ($row['items'] ?? [] as $it) {
@@ -210,7 +207,6 @@
                 }
                 $tomorrowDistinctItemCount = count($distinctItems);
 
-                // Unit formatters for category totals
                 $fmtCat = function (float $qtyBase, string $cat): array {
                     if ($cat === 'weight') {
                         return $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'kg'] : [round($qtyBase, 3), 'g'];
@@ -225,8 +221,9 @@
                 [$cQty, $cUnit] = $fmtCat($catBase['count'], 'count');
             @endphp
 
+            {{-- ============== FILTER TOOLBAR ================== --}}
             <div class="filter-toolbar sticky">
-                <form class="card shadow-sm" method="get" action="{{ route('admin.flowerEstimate') }}">
+                <form class="card shadow-sm" method="get" action="{{ route('admin.flowerPackage') }}">
                     <input type="hidden" name="mode" value="{{ $mode }}" />
                     <div class="card-body">
                         <div class="row row-tight align-items-end">
@@ -251,11 +248,11 @@
                                     <div class="col-12 col-md-4">
                                         <label class="form-label mb-1">View</label>
                                         <div class="segmented w-100">
-                                            <a href="{{ route('admin.flowerEstimate', array_merge(request()->query(), ['mode' => 'day'])) }}"
+                                            <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'day'])) }}"
                                                 class="{{ $mode === 'day' ? 'active' : '' }}">
                                                 <i class="bi bi-calendar-day"></i> Day
                                             </a>
-                                            <a href="{{ route('admin.flowerEstimate', array_merge(request()->query(), ['mode' => 'month'])) }}"
+                                            <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'month'])) }}"
                                                 class="{{ $mode === 'month' ? 'active' : '' }}">
                                                 <i class="bi bi-calendar3"></i> Month
                                             </a>
@@ -269,7 +266,7 @@
                                     <button type="submit" class="btn btn-success">
                                         <i class="bi bi-funnel"></i> Apply
                                     </button>
-                                    <a href="{{ route('admin.flowerEstimate') }}"
+                                    <a href="{{ route('admin.flowerPackage') }}"
                                         class="btn btn-outline-secondary">Reset</a>
                                 </div>
                             </div>
@@ -297,11 +294,13 @@
                     </div>
                 </form>
             </div>
+
             @php
                 $hasDaily = !empty($dailyEstimates) && count($dailyEstimates) > 0;
                 $hasMonthly = !empty($monthlyEstimates) && count($monthlyEstimates) > 0;
             @endphp
 
+            {{-- ============== DAY / MONTH ACCORDION ================= --}}
             @if ($mode === 'day')
                 @if (!$hasDaily)
                     <div class="alert alert-info mt-4">No data for the selected range.</div>
@@ -328,8 +327,8 @@
                                                     products)</span>
                                             </div>
                                             <span class="badge bg-success fs-6">
-                                                Total Cost of Flower Per Day: <span
-                                                    class="money">₹{{ number_format($grand, 2) }}</span>
+                                                Total Cost of Flower Per Day:
+                                                <span class="money">₹{{ number_format($grand, 2) }}</span>
                                             </span>
                                         </div>
                                     </button>
@@ -358,21 +357,29 @@
                                                                     class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                                                                     <div>
                                                                         <h5 class="mb-1">
-                                                                            <span class="badge bg-warning text-uppercase me-2">Package Name</span>
+                                                                            <span class="badge bg-warning text-uppercase me-2">
+                                                                                Package Name
+                                                                            </span>
                                                                             {{ $product?->name ?? 'Product #' . $pid }}
                                                                         </h5>
                                                                         <div class="text-muted">
-                                                                            <span class="badge bg-warning text-uppercase me-2">Subscription</span>
+                                                                            <span class="badge bg-warning text-uppercase me-2">
+                                                                                Subscription
+                                                                            </span>
                                                                             <strong>{{ $subsCount }}</strong>
                                                                             subscription{{ $subsCount == 1 ? '' : 's' }}
                                                                         </div>
                                                                     </div>
                                                                     <div>
                                                                         <span class="badge bg-primary fs-6">
-                                                                            <span class="ms-2">Flower Cost:
-                                                                                ₹{{ number_format($bundlePerSub, 2) }}</span><br>
-                                                                            Total Flower Cost: <span
-                                                                                class="money">₹{{ number_format($productTotal, 2) }}</span>
+                                                                            <span class="ms-2">
+                                                                                Flower Cost:
+                                                                                ₹{{ number_format($bundlePerSub, 2) }}
+                                                                            </span><br>
+                                                                            Total Flower Cost:
+                                                                            <span class="money">
+                                                                                ₹{{ number_format($productTotal, 2) }}
+                                                                            </span>
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -413,7 +420,8 @@
                                                                                 <tr>
                                                                                     <td colspan="6" class="text-muted">
                                                                                         No package items configured for this
-                                                                                        product.</td>
+                                                                                        product.
+                                                                                    </td>
                                                                                 </tr>
                                                                             @endforelse
                                                                         </tbody>
@@ -426,7 +434,9 @@
                                             </div>
 
                                             <div class="card border-0 shadow-sm mt-3">
-                                                <div class="card-header bg-white"><strong>Total Types and Quantity of Flower Needed for Tomorrow Delivery</strong></div>
+                                                <div class="card-header bg-white">
+                                                    <strong>Total Types and Quantity of Flower Needed for Tomorrow Delivery</strong>
+                                                </div>
                                                 <div class="card-body">
                                                     <div class="table-responsive">
                                                         <table class="table table-sm align-middle">
@@ -447,8 +457,7 @@
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
-                                                                        <td colspan="2" class="text-muted">No items.
-                                                                        </td>
+                                                                        <td colspan="2" class="text-muted">No items.</td>
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
@@ -488,7 +497,8 @@
                                                     products)</span>
                                             </div>
                                             <span class="badge bg-success fs-6">
-                                                Grand Total: <span class="money">₹{{ number_format($grand, 2) }}</span>
+                                                Grand Total:
+                                                <span class="money">₹{{ number_format($grand, 2) }}</span>
                                             </span>
                                         </div>
                                     </button>
@@ -524,8 +534,10 @@
                                                                     </div>
                                                                     <div>
                                                                         <span class="badge bg-primary fs-6">
-                                                                            Product Total: <span
-                                                                                class="money">₹{{ number_format($productTotal, 2) }}</span>
+                                                                            Product Total:
+                                                                            <span class="money">
+                                                                                ₹{{ number_format($productTotal, 2) }}
+                                                                            </span>
                                                                         </span>
                                                                     </div>
                                                                 </div>
@@ -554,7 +566,8 @@
                                                                             @empty
                                                                                 <tr>
                                                                                     <td colspan="3" class="text-muted">
-                                                                                        No items aggregated.</td>
+                                                                                        No items aggregated.
+                                                                                    </td>
                                                                                 </tr>
                                                                             @endforelse
                                                                         </tbody>
@@ -567,8 +580,9 @@
                                             </div>
 
                                             <div class="card border-0 shadow-sm mt-3">
-                                                <div class="card-header bg-white"><strong>Totals by Item (All Products in
-                                                        Month)</strong></div>
+                                                <div class="card-header bg-white">
+                                                    <strong>Totals by Item (All Products in Month)</strong>
+                                                </div>
                                                 <div class="card-body">
                                                     <div class="table-responsive">
                                                         <table class="table table-sm align-middle">
@@ -589,8 +603,7 @@
                                                                     </tr>
                                                                 @empty
                                                                     <tr>
-                                                                        <td colspan="2" class="text-muted">No items.
-                                                                        </td>
+                                                                        <td colspan="2" class="text-muted">No items.</td>
                                                                     </tr>
                                                                 @endforelse
                                                             </tbody>
@@ -607,7 +620,8 @@
                 @endif
             @endif
 
-            <div class="row g-3">
+            {{-- ============== TOMORROW DISCLOSURE (bottom) ================= --}}
+            <div class="row g-3 mt-4">
                 @foreach ($tProducts as $pid => $row)
                     @php
                         $product = $row['product'];
@@ -615,7 +629,7 @@
                         $items = $row['items'] ?? [];
                         $productTotal = $row['product_total'] ?? 0;
                         $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
-                        $openFirst = $loop->first; // open only the first by default
+                        $openFirst = $loop->first;
                         $isRequests = ($product?->name ?? '') === 'On-demand Requests';
                     @endphp
 
@@ -635,7 +649,8 @@
                                 </div>
                                 <div class="summary-right">
                                     <span class="badge bg-primary">
-                                        Product Total: <span class="money">₹{{ number_format($productTotal, 2) }}</span>
+                                        Product Total:
+                                        <span class="money">₹{{ number_format($productTotal, 2) }}</span>
                                     </span>
                                     <i class="bi bi-chevron-down chev"></i>
                                 </div>
@@ -673,8 +688,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" class="text-muted">No package items
-                                                        configured.</td>
+                                                    <td colspan="6" class="text-muted">No package items configured.</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>
@@ -693,7 +707,7 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Keep accordion trigger state in sync (for day/month accordions only)
+        // Keep accordion trigger state in sync (for day/month accordions)
         document.addEventListener('shown.bs.collapse', function(e) {
             const btn = document.querySelector('[data-bs-target="#' + e.target.id + '"]');
             if (btn) {
