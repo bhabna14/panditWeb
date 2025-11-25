@@ -105,11 +105,11 @@
         <div class="container py-4">
 
             @php
-                $tProducts       = $tomorrowEstimate['products'] ?? [];
-                $tGrand          = $tomorrowEstimate['grand_total_amount'] ?? 0;
-                $tTotals         = $tomorrowEstimate['totals_by_item'] ?? [];
+                $tProducts = $tomorrowEstimate['products'] ?? [];
+                $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
+                $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
                 $tTotalsDetailed = $tomorrowEstimate['totals_by_item_detailed'] ?? [];
-                $garlandTotals   = $garlandTotals ?? [];
+                $garlandTotals = $garlandTotals ?? [];
 
                 // Build Tomorrow summary (from product items)
                 $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0]; // g, ml, pcs base
@@ -149,7 +149,7 @@
                             {{ \Carbon\Carbon::parse($tomorrowDate)->toFormattedDateString() }}</h5>
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('admin.assignPickupForm', ['date' => $tomorrowDate]) }}"
-                               class="btn btn-warning">
+                                class="btn btn-warning">
                                 <i class="bi bi-truck"></i> Assign Vendor
                             </a>
                             <span class="badge bg-success fs-6">
@@ -239,30 +239,40 @@
                                         <tbody>
                                             @forelse($tTotalsDetailed as $it)
                                                 @php
-                                                    $unit  = $it['unit_disp'] ?? '';
-                                                    $subs  = (float) ($it['subs_qty_disp'] ?? 0);
-                                                    $req   = (float) ($it['req_qty_disp'] ?? 0);
+                                                    // Original values
+                                                    $unit = $it['unit_disp'] ?? '';
+                                                    $subs = (float) ($it['subs_qty_disp'] ?? 0);
+                                                    $req = (float) ($it['req_qty_disp'] ?? 0);
                                                     $total = (float) ($it['total_qty_disp'] ?? 0);
+
+                                                    // Detect garland rows and override unit label
+                                                    $nameLower = strtolower($it['item_name'] ?? '');
+                                                    $displayUnit = $unit;
+
+                                                    // If unit is pcs and item name looks like a garland, show "Garlands"
+                                                    if ($unit === 'pcs' && str_contains($nameLower, 'garland')) {
+                                                        $displayUnit = 'Garlands';
+                                                    }
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $it['item_name'] }}</td>
                                                     <td class="text-end text-nowrap">
                                                         @if ($subs > 0)
-                                                            {{ $fmtNum($subs) }} {{ $unit }}
+                                                            {{ $fmtNum($subs) }} {{ $displayUnit }}
                                                         @else
                                                             <span class="text-muted">—</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-end text-nowrap">
                                                         @if ($req > 0)
-                                                            {{ $fmtNum($req) }} {{ $unit }}
+                                                            {{ $fmtNum($req) }} {{ $displayUnit }}
                                                         @else
                                                             <span class="text-muted">—</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-end text-nowrap fw-semibold">
                                                         @if ($total > 0)
-                                                            {{ $fmtNum($total) }} {{ $unit }}
+                                                            {{ $fmtNum($total) }} {{ $displayUnit }}
                                                         @else
                                                             <span class="text-muted">—</span>
                                                         @endif
@@ -278,6 +288,7 @@
                                 </div>
                             </div>
                         </div>
+
 
                         {{-- Customize Garlands Totals --}}
                         <div class="card border-0 shadow-sm mt-3">
