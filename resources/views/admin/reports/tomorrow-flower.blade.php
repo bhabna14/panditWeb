@@ -207,7 +207,7 @@
                                 </div>
                                 <span class="tag-pill">
                                     <span class="dot"></span>
-                                    <span>Values auto-scale (kg/g, L/ml, pcs)</span>
+                                    <span>Values auto-scale (kg/g, L/ml, pcs, Garlands)</span>
                                 </span>
                             </div>
                             <div class="card-body">
@@ -239,40 +239,30 @@
                                         <tbody>
                                             @forelse($tTotalsDetailed as $it)
                                                 @php
-                                                    // Original values
                                                     $unit = $it['unit_disp'] ?? '';
                                                     $subs = (float) ($it['subs_qty_disp'] ?? 0);
                                                     $req = (float) ($it['req_qty_disp'] ?? 0);
                                                     $total = (float) ($it['total_qty_disp'] ?? 0);
-
-                                                    // Detect garland rows and override unit label
-                                                    $nameLower = strtolower($it['item_name'] ?? '');
-                                                    $displayUnit = $unit;
-
-                                                    // If unit is pcs and item name looks like a garland, show "Garlands"
-                                                    if ($unit === 'pcs' && str_contains($nameLower, 'garland')) {
-                                                        $displayUnit = 'Garlands';
-                                                    }
                                                 @endphp
                                                 <tr>
                                                     <td>{{ $it['item_name'] }}</td>
                                                     <td class="text-end text-nowrap">
                                                         @if ($subs > 0)
-                                                            {{ $fmtNum($subs) }} {{ $displayUnit }}
+                                                            {{ $fmtNum($subs) }} {{ $unit }}
                                                         @else
                                                             <span class="text-muted">—</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-end text-nowrap">
                                                         @if ($req > 0)
-                                                            {{ $fmtNum($req) }} {{ $displayUnit }}
+                                                            {{ $fmtNum($req) }} {{ $unit }}
                                                         @else
                                                             <span class="text-muted">—</span>
                                                         @endif
                                                     </td>
                                                     <td class="text-end text-nowrap fw-semibold">
                                                         @if ($total > 0)
-                                                            {{ $fmtNum($total) }} {{ $displayUnit }}
+                                                            {{ $fmtNum($total) }} {{ $unit }}
                                                         @else
                                                             <span class="text-muted">—</span>
                                                         @endif
@@ -288,6 +278,7 @@
                                 </div>
                             </div>
                         </div>
+
 
 
                         {{-- Customize Garlands Totals --}}

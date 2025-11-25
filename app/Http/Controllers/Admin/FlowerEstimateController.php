@@ -358,8 +358,7 @@ class FlowerEstimateController extends Controller
             'tomorrowEstimate' => $tomorrowEstimate,
         ]);
     }
-
-    public function tomorrowFlower(Request $request)
+public function tomorrowFlower(Request $request)
     {
         // ---- FlowerDetails live price index (name → {unit, price}) ----------
         $fdIndex = FlowerDetails::query()
@@ -373,9 +372,13 @@ class FlowerEstimateController extends Controller
         // ---- Tomorrow (with effective end & pause handling + FLOWER REQUESTS) ----
         $tomorrow = Carbon::tomorrow()->startOfDay();
 
-        // subscriptions estimate (using your canonical logic)
-        $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
-        $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow, $fdIndex);
+        // subscriptions estimate
+        $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);       // you already have this
+        $tomorrowEstimate = $this->buildEstimateForSubsOnDate(                  // you already have this
+            $tomorrowSubs,
+            $tomorrow,
+            $fdIndex
+        );
 
         // merge ad-hoc Flower Requests scheduled for tomorrow
         [$requestsProductBlock, $requestsGrand] = $this->buildRequestsProductBlock($tomorrow, $fdIndex);
@@ -395,121 +398,159 @@ class FlowerEstimateController extends Controller
                 $this->recomputeTotalsByItemFromProducts($tomorrowEstimate['products']);
         }
 
-        // detailed per-item breakdown (subs vs customize requests)
+        // 👉 NEW: detailed per-item breakdown (subs vs customize requests)
         $products = $tomorrowEstimate['products'] ?? [];
         $tomorrowEstimate['totals_by_item_detailed'] = $this->buildDetailedTotalsByItem($products);
-
-        // garland totals from customize orders only
-        $requestsForTomorrow = $this->fetchRequestsForDate($tomorrow);
-        $garlandTotals       = $this->buildGarlandTotalsFromRequests($requestsForTomorrow);
 
         return view('admin.reports.tomorrow-flower', [
             'tomorrowDate'     => $tomorrow->toDateString(),
             'tomorrowEstimate' => $tomorrowEstimate,
-            'garlandTotals'    => $garlandTotals,
         ]);
     }
 
-private function fetchRequestsForDate(Carbon $date): Collection
-{
-    return FlowerRequest::with('flowerRequestItems')
-        ->whereDate('date', $date->toDateString())
-        ->whereNotIn('status', ['cancelled', 'rejected'])
-        ->get();
-}
+    /**
+     * If you already had this, keep as-is.
+     * Shown here only for completeness.
+     */
+    private function fetchRequestsForDate(Carbon $date): Collection
+    {
+        return FlowerRequest::with('flowerRequestItems')
+            ->whereDate('date', $date->toDateString())
+            ->whereNotIn('status', ['cancelled', 'rejected'])
+            ->get();
+    }
 
-private function buildDetailedTotalsByItem(array $products): array
-{
-    $map = [];
+    /**
+     * Build per-item detailed totals:
+     *  - subscription quantity
+     *  - customize request quantity
+     *  - total
+     *
+     * IMPORTANT: here we mark GARLAND rows (category 'garland')
+     * so that unit becomes "Garlands" instead of "pcs".
+     */
+    private function buildDetailedTotalsByItem(array $products): array
+    {
+        $map = [];
 
-    foreach ($products as $key => $product) {
-        $isRequests = ($key === '__requests__'); // synthetic block for FlowerRequest totals
+        foreach ($products as $key => $product) {
+            $isRequests = ($key === '__requests__'); // synthetic block for FlowerRequest totals
 
-        foreach ($product['items'] ?? [] as $it) {
-            $name = trim((string) ($it['item_name'] ?? ''));
-            if ($name === '') {
-                continue;
-            }
+            foreach ($product['items'] ?? [] as $it) {
+                $name = trim((string) ($it['item_name'] ?? ''));
+                if ($name === '') {
+                    continue;
+                }
 
-            $category = $it['category'] ?? 'count';
-            $base     = (float) ($it['total_qty_base'] ?? 0);
-            if ($base <= 0) {
-                continue;
-            }
+                // Base category from product item
+                $category = $it['category'] ?? 'count';
 
-            $mapKey = strtolower($name) . '|' . $category;
+                // Heuristic: if this is a request block AND looks like garland,
+                // treat it as GARLAND category so unit shows "Garlands"
+                $nameLower = strtolower($name);
+                if ($isRequests && $category === 'count') {
+                    if (
+                        str_contains($nameLower, 'garland') ||
+                        str_contains($nameLower, 'mala') ||        // just in case you use Mala etc.
+                        str_contains($nameLower, 'maalai')
+                    ) {
+                        $category = 'garland';
+                    }
+                }
 
-            if (!isset($map[$mapKey])) {
-                $map[$mapKey] = [
-                    'item_name' => $name,
-                    'category'  => $category,
-                    'subs_base' => 0.0,
-                    'req_base'  => 0.0,
-                ];
-            }
+                $base = (float) ($it['total_qty_base'] ?? 0);
+                if ($base <= 0) {
+                    continue;
+                }
 
-            if ($isRequests) {
-                $map[$mapKey]['req_base'] += $base;
-            } else {
-                $map[$mapKey]['subs_base'] += $base;
+                $mapKey = strtolower($name) . '|' . $category;
+
+                if (!isset($map[$mapKey])) {
+                    $map[$mapKey] = [
+                        'item_name' => $name,
+                        'category'  => $category,
+                        'subs_base' => 0.0,
+                        'req_base'  => 0.0,
+                    ];
+                }
+
+                if ($isRequests) {
+                    $map[$mapKey]['req_base'] += $base;
+                } else {
+                    $map[$mapKey]['subs_base'] += $base;
+                }
             }
         }
+
+        if (empty($map)) {
+            return [];
+        }
+
+        $rows = [];
+        foreach ($map as $row) {
+            $category  = $row['category'];
+            $subsBase  = $row['subs_base'];
+            $reqBase   = $row['req_base'];
+            $totalBase = $subsBase + $reqBase;
+
+            // Convert from base to display units (kg/g, L/ml, pcs, Garlands…)
+            [$subsDisp, $unitDisp]   = $this->formatQtyByCategoryFromBase($subsBase, $category);
+            [$reqDisp, ]             = $this->formatQtyByCategoryFromBase($reqBase, $category);
+            [$totalDisp, ]           = $this->formatQtyByCategoryFromBase($totalBase, $category);
+
+            $rows[] = [
+                'item_name'       => $row['item_name'],
+                'category'        => $category,
+                'subs_qty_disp'   => $subsDisp,
+                'req_qty_disp'    => $reqDisp,
+                'total_qty_disp'  => $totalDisp,
+                'unit_disp'       => $unitDisp,
+            ];
+        }
+
+        usort($rows, fn ($a, $b) => strcasecmp($a['item_name'], $b['item_name']));
+
+        return $rows;
     }
 
-    if (empty($map)) {
-        return [];
+    /**
+     * Convert base quantity into user-facing unit:
+     *  - weight: base in grams → kg/g
+     *  - volume: base in ml   → L/ml
+     *  - count : pcs
+     *  - garland: Garlands
+     */
+    private function formatQtyByCategoryFromBase(float $base, string $category): array
+    {
+        // Always keep unit consistent even for 0
+        if ($base <= 0) {
+            if ($category === 'weight')   return [0, 'g'];
+            if ($category === 'volume')   return [0, 'ml'];
+            if ($category === 'garland')  return [0, 'Garlands'];
+            return [0, 'pcs'];
+        }
+
+        if ($category === 'weight') {
+            return $base >= 1000
+                ? [round($base / 1000, 3), 'kg']
+                : [round($base, 3), 'g'];
+        }
+
+        if ($category === 'volume') {
+            return $base >= 1000
+                ? [round($base / 1000, 3), 'L']
+                : [round($base, 3), 'ml'];
+        }
+
+        if ($category === 'garland') {
+            // Base is simply "number of garlands"
+            return [round($base, 3), 'Garlands'];
+        }
+
+        // count
+        return [round($base, 3), 'pcs'];
     }
-
-    $rows = [];
-    foreach ($map as $row) {
-        $category  = $row['category'];
-        $subsBase  = $row['subs_base'];
-        $reqBase   = $row['req_base'];
-        $totalBase = $subsBase + $reqBase;
-
-        [$subsDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($subsBase, $category);
-        [$reqDisp, ]           = $this->formatQtyByCategoryFromBase($reqBase, $category);
-        [$totalDisp, ]         = $this->formatQtyByCategoryFromBase($totalBase, $category);
-
-        $rows[] = [
-            'item_name'       => $row['item_name'],
-            'category'        => $category,
-            'subs_qty_disp'   => $subsDisp,
-            'req_qty_disp'    => $reqDisp,
-            'total_qty_disp'  => $totalDisp,
-            'unit_disp'       => $unitDisp,
-        ];
-    }
-
-    usort($rows, fn ($a, $b) => strcasecmp($a['item_name'], $b['item_name']));
-
-    return $rows;
-}
-
-private function formatQtyByCategoryFromBase(float $base, string $category): array
-{
-    if ($base <= 0) {
-        if ($category === 'weight') return [0, 'g'];
-        if ($category === 'volume') return [0, 'ml'];
-        return [0, 'pcs'];
-    }
-
-    if ($category === 'weight') {
-        return $base >= 1000
-            ? [round($base / 1000, 3), 'kg']
-            : [round($base, 3), 'g'];
-    }
-
-    if ($category === 'volume') {
-        return $base >= 1000
-            ? [round($base / 1000, 3), 'L']
-            : [round($base, 3), 'ml'];
-    }
-
-    // count
-    return [round($base, 3), 'pcs'];
-}
-
+    
 private function buildGarlandTotalsFromRequests(Collection $requests): array
 {
     $acc = [];
