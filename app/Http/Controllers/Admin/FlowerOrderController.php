@@ -64,6 +64,9 @@ class FlowerOrderController extends Controller
             case 'tomorrowOrder':
                 $filterHeader = 'Subscriptions Starting Tomorrow';
                 break;
+            case 'tomorrow':
+                $filterHeader = 'Next Day Pause Subscriptions';
+                break;
             case 'todayrequest':
                 $filterHeader = 'Pause Requests Created Today';
                 break;
