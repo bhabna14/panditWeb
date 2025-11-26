@@ -358,7 +358,8 @@ class FlowerEstimateController extends Controller
             'tomorrowEstimate' => $tomorrowEstimate,
         ]);
     }
-  public function tomorrowFlower(Request $request)
+
+    public function tomorrowFlower(Request $request)
     {
         // ---- FlowerDetails live price index (name → {unit, price}) ----------
         $fdIndex = FlowerDetails::query()
