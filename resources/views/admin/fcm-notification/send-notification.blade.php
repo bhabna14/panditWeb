@@ -281,7 +281,7 @@
 
     <div class="container-fluid">
         {{-- Header --}}
-        <div class="nu-hero p-4 mb-4">
+        <div class="nu-hero p-4 mb-4 mt-4">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div>
                     <h3 class="nu-title mb-1">Send Notification</h3>
