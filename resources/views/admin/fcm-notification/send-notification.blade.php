@@ -16,6 +16,9 @@
             --nu-danger: #ef4444;
             --nu-slate: #334155;
             --nu-muted: #64748b;
+            --nu-purple: #7c3aed;
+            --nu-pink: #ec4899;
+            --nu-amber: #fbbf24;
         }
 
         /* Card & hero */
@@ -27,7 +30,7 @@
         }
 
         .nu-hero {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0f7ff 100%);
+            background: radial-gradient(circle at top left, #eef2ff 0%, #e0f7ff 40%, #fdf2ff 100%);
             border: 1px solid #e8ecf5;
             border-radius: 16px
         }
@@ -137,6 +140,136 @@
             border-bottom: 3px solid var(--nu-primary);
             color: #1e293b !important
         }
+
+        /* ---------- Templates section ---------- */
+        .template-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .template-section-header h5 {
+            margin-bottom: 0;
+        }
+
+        .template-section-chip {
+            font-size: .75rem;
+            border-radius: 999px;
+            padding: 2px 10px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px dashed #cbd5e1;
+        }
+
+        .template-card {
+            border-radius: 18px;
+            padding: 14px 14px 12px;
+            border: none;
+            background: linear-gradient(135deg, #eef2ff, #e0f2fe);
+            cursor: pointer;
+            transition: transform .12s ease, box-shadow .12s ease, background .18s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(15, 23, 42, .12);
+        }
+
+        .template-card:focus-visible {
+            outline: 2px solid var(--nu-primary);
+            outline-offset: 2px;
+        }
+
+        .template-tag {
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 3px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,.9);
+        }
+
+        .template-tag span.dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+        }
+
+        .template-tag-renew .dot {
+            background: var(--nu-success);
+        }
+
+        .template-tag-pending .dot {
+            background: var(--nu-warning);
+        }
+
+        .template-tag-custom .dot {
+            background: var(--nu-purple);
+        }
+
+        .template-tag-general .dot {
+            background: var(--nu-pink);
+        }
+
+        .template-title {
+            font-size: .9rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 8px;
+            margin-bottom: 4px;
+        }
+
+        .template-body {
+            font-size: .78rem;
+            color: #475569;
+        }
+
+        .template-hint {
+            font-size: .75rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        .template-accent-pill {
+            position: absolute;
+            right: -35px;
+            bottom: -35px;
+            width: 90px;
+            height: 90px;
+            border-radius: 999px;
+            opacity: .12;
+        }
+
+        .template-accent-renew {
+            background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
+        }
+
+        .template-accent-pending {
+            background: radial-gradient(circle at 30% 30%, #f97316, #ea580c);
+        }
+
+        .template-accent-custom {
+            background: radial-gradient(circle at 30% 30%, #8b5cf6, #6d28d9);
+        }
+
+        .template-accent-general {
+            background: radial-gradient(circle at 30% 30%, #ec4899, #db2777);
+        }
+
+        .template-badge-pill {
+            font-size: .7rem;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, .03);
+            color: #334155;
+        }
     </style>
 @endsection
 
@@ -153,14 +286,9 @@
                 <div>
                     <h3 class="nu-title mb-1">Send Notification</h3>
                     <div class="text-muted">
-                        Push a rich app notification to your users. Choose audience, attach an image, and preview.
+                        Push a rich app notification to your users. Use quick templates or write a custom message.
                     </div>
                 </div>
-                {{-- <div class="d-flex gap-2">
-                    <a class="btn btn-outline-primary" href="{{ route('whatsapp-notification.create') }}">
-                        <i class="fe fe-message-square me-1"></i> WhatsApp Notification
-                    </a>
-                </div> --}}
             </div>
         </div>
 
@@ -181,6 +309,112 @@
             <div class="alert alert-danger" id="Message">{{ session()->get('error') }}</div>
         @endif
 
+        {{-- Quick Templates --}}
+        <div class="row mb-4">
+            <div class="col-lg-12">
+                <div class="nu-card p-4">
+                    <div class="template-section-header mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-1">Quick Templates</h5>
+                            <div class="text-muted small">
+                                Tap a card to auto-fill notification title & description. You can still edit everything before sending.
+                            </div>
+                        </div>
+                        <div class="template-section-chip d-none d-md-inline-flex">
+                            Tip: Use placeholders like <strong>{NAME}</strong>, <strong>{DATE}</strong>, <strong>{ORDER_ID}</strong>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        {{-- Template: Renew Subscription --}}
+                        <div class="col-md-6 col-xl-3">
+                            <button type="button"
+                                    class="template-card w-100 text-start"
+                                    data-title="Subscription Renewal Reminder"
+                                    data-desc="Hi {NAME}, your flower subscription is due for renewal on {DATE}. Renew now to continue receiving your daily fresh flowers without interruption.">
+                                <div class="template-tag template-tag-renew">
+                                    <span class="dot"></span>
+                                    <span>Renewal</span>
+                                </div>
+                                <div class="template-title">Renew subscription</div>
+                                <div class="template-body">
+                                    Perfect for reminding users that their flower subscription is about to expire.
+                                </div>
+                                <div class="template-hint">
+                                    Uses: {NAME}, {DATE}
+                                </div>
+                                <div class="template-accent-pill template-accent-renew"></div>
+                            </button>
+                        </div>
+
+                        {{-- Template: Payment Pending --}}
+                        <div class="col-md-6 col-xl-3">
+                            <button type="button"
+                                    class="template-card w-100 text-start"
+                                    data-title="Payment Pending Reminder"
+                                    data-desc="Hi {NAME}, your payment for order {ORDER_ID} is still pending. Please complete the payment to avoid delays or cancellation of your flower delivery.">
+                                <div class="template-tag template-tag-pending">
+                                    <span class="dot"></span>
+                                    <span>Payment</span>
+                                </div>
+                                <div class="template-title">Payment pending</div>
+                                <div class="template-body">
+                                    Nudge users who started a purchase or renewal but payment is still not completed.
+                                </div>
+                                <div class="template-hint">
+                                    Uses: {NAME}, {ORDER_ID}
+                                </div>
+                                <div class="template-accent-pill template-accent-pending"></div>
+                            </button>
+                        </div>
+
+                        {{-- Template: Custom Order Payment Due --}}
+                        <div class="col-md-6 col-xl-3">
+                            <button type="button"
+                                    class="template-card w-100 text-start"
+                                    data-title="Custom Order Payment Due"
+                                    data-desc="Hi {NAME}, payment for your custom flower order {ORDER_ID} of amount {AMOUNT} is due. Please complete the payment to confirm your booking.">
+                                <div class="template-tag template-tag-custom">
+                                    <span class="dot"></span>
+                                    <span>Custom Order</span>
+                                </div>
+                                <div class="template-title">Custom order payment due</div>
+                                <div class="template-body">
+                                    Use when a custom or bulk flower order needs to be confirmed with a payment.
+                                </div>
+                                <div class="template-hint">
+                                    Uses: {NAME}, {ORDER_ID}, {AMOUNT}
+                                </div>
+                                <div class="template-accent-pill template-accent-custom"></div>
+                            </button>
+                        </div>
+
+                        {{-- Template: General Reminder --}}
+                        <div class="col-md-6 col-xl-3">
+                            <button type="button"
+                                    class="template-card w-100 text-start"
+                                    data-title="Friendly Reminder"
+                                    data-desc="Hi {NAME}, this is a gentle reminder about your flower service with us. If you have any questions or need help with your orders, reply in the app and we are happy to assist.">
+                                <div class="template-tag template-tag-general">
+                                    <span class="dot"></span>
+                                    <span>Reminder</span>
+                                </div>
+                                <div class="template-title">Friendly general reminder</div>
+                                <div class="template-body">
+                                    A soft-touch template for general reminders and nudges.
+                                </div>
+                                <div class="template-hint">
+                                    Uses: {NAME}
+                                </div>
+                                <div class="template-accent-pill template-accent-general"></div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Main content row --}}
         <div class="row">
             {{-- Left: Form --}}
             <div class="col-lg-12 mb-4">
@@ -261,7 +495,10 @@
                             <label for="title" class="form-label fw-semibold">Title</label>
                             <input type="text" name="title" id="title" class="form-control" maxlength="255"
                                    required>
-                            <div class="form-hint"><span id="titleCount">0</span>/255</div>
+                            <div class="form-hint d-flex justify-content-between">
+                                <span>Short, clear headline for the push notification.</span>
+                                <span><span id="titleCount">0</span>/255</span>
+                            </div>
                             @error('title')
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
@@ -271,7 +508,10 @@
                         <div class="mb-3">
                             <label for="description" class="form-label fw-semibold">Description</label>
                             <textarea name="description" id="description" rows="4" class="form-control" maxlength="1000" required></textarea>
-                            <div class="form-hint"><span id="descCount">0</span>/1000</div>
+                            <div class="form-hint d-flex justify-content-between">
+                                <span>Body text shown inside the push. You can use placeholders like {NAME}, {DATE}, {ORDER_ID}, {AMOUNT}.</span>
+                                <span><span id="descCount">0</span>/1000</span>
+                            </div>
                             @error('description')
                                 <div class="text-danger small">{{ $message }}</div>
                             @enderror
@@ -519,6 +759,25 @@
             const descCount = document.getElementById('descCount');
             title.addEventListener('input', () => titleCount.textContent = title.value.length);
             desc.addEventListener('input', () => descCount.textContent = desc.value.length);
+
+            // ---------- Template apply ----------
+            const templateCards = document.querySelectorAll('.template-card');
+            templateCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const t = card.getAttribute('data-title') || '';
+                    const d = card.getAttribute('data-desc') || '';
+
+                    title.value = t;
+                    desc.value = d;
+                    titleCount.textContent = t.length;
+                    descCount.textContent = d.length;
+
+                    // Smooth scroll to title field for better UX
+                    title.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                    toast('success', 'Template applied. You can edit and send.');
+                });
+            });
 
             // ---------- Image preview ----------
             const image = document.getElementById('image');
