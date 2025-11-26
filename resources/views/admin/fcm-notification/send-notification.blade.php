@@ -186,29 +186,28 @@
             <div class="col-lg-12 mb-4">
                 <div class="nu-card p-4 mb-4">
                     <form action="{{ route('admin.notification.send') }}" method="POST" enctype="multipart/form-data"
-                        id="fcmForm">
+                          id="fcmForm">
                         @csrf
-
-                        {{-- Audience --}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Audience</label>
                             <div class="d-flex gap-4 flex-wrap">
 
+                                {{-- DEFAULT: Selected Users checked --}}
                                 <label class="form-check d-flex align-items-center gap-2">
                                     <input class="form-check-input" type="radio" name="audience" id="audUsers"
-                                        value="users">
+                                           value="users" checked>
                                     <span>Selected Users</span>
                                 </label>
 
                                 <label class="form-check d-flex align-items-center gap-2">
                                     <input class="form-check-input" type="radio" name="audience" id="audAll"
-                                        value="all" checked>
+                                           value="all">
                                     <span>All Users</span>
                                 </label>
 
                                 <label class="form-check d-flex align-items-center gap-2">
                                     <input class="form-check-input" type="radio" name="audience" id="audPlatform"
-                                        value="platform">
+                                           value="platform">
                                     <span>Platforms</span>
                                 </label>
 
@@ -220,10 +219,10 @@
                         </div>
 
                         {{-- Selected Users --}}
-                        <div class="mb-3 d-none" id="usersWrap">
+                        <div class="mb-3" id="usersWrap">
                             <label class="form-label fw-semibold">Choose Users</label>
                             <select class="form-control" name="users[]" id="users" multiple
-                                data-placeholder="Search users…">
+                                    data-placeholder="Search users…">
                                 @foreach ($users as $u)
                                     <option value="{{ $u->userid }}">
                                         {{ $u->name }} — {{ $u->email ?? $u->mobile_number }}
@@ -243,7 +242,7 @@
                         <div class="mb-3 d-none" id="platformWrap">
                             <label class="form-label fw-semibold">Platform</label>
                             <select class="form-select" name="platform[]" id="platform" multiple
-                                data-placeholder="Choose platform(s)">
+                                    data-placeholder="Choose platform(s)">
                                 @foreach ($platforms as $p)
                                     <option value="{{ $p }}">{{ ucfirst($p) }}</option>
                                 @endforeach
@@ -261,7 +260,7 @@
                         <div class="mb-3">
                             <label for="title" class="form-label fw-semibold">Title</label>
                             <input type="text" name="title" id="title" class="form-control" maxlength="255"
-                                required>
+                                   required>
                             <div class="form-hint"><span id="titleCount">0</span>/255</div>
                             @error('title')
                                 <div class="text-danger small">{{ $message }}</div>
@@ -289,7 +288,8 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                            {{-- IMPORTANT: type="button" so we can intercept for All Users confirmation --}}
+                            <button type="button" class="btn btn-primary" id="sendBtn">
                                 <i class="fe fe-send me-1"></i> Send Notification
                             </button>
                             <button type="button" class="btn btn-outline-primary" id="previewBtn">
@@ -392,7 +392,7 @@
                                         <td>
                                             @if ($notification->image)
                                                 <img src="{{ asset('storage/' . $notification->image) }}" width="40"
-                                                    class="rounded border">
+                                                     class="rounded border">
                                             @else
                                                 —
                                             @endif
@@ -401,7 +401,7 @@
                                         <td class="text-nowrap">
                                             {{-- DELETE --}}
                                             <form action="{{ route('admin.notifications.delete', $notification->id) }}"
-                                                method="POST" class="d-inline" onsubmit="return confirmDelete(event)">
+                                                  method="POST" class="d-inline" onsubmit="return confirmDelete(event)">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">
@@ -411,12 +411,12 @@
 
                                             {{-- RESEND --}}
                                             <form id="resend-form-{{ $notification->id }}"
-                                                action="{{ route('admin.notifications.resend', $notification->id) }}"
-                                                method="POST" class="d-none">
+                                                  action="{{ route('admin.notifications.resend', $notification->id) }}"
+                                                  method="POST" class="d-none">
                                                 @csrf
                                             </form>
                                             <button type="button" class="btn btn-sm btn-outline-primary"
-                                                onclick="resendNotification({{ $notification->id }})">
+                                                    onclick="resendNotification({{ $notification->id }})">
                                                 Resend
                                             </button>
                                         </td>
@@ -549,9 +549,9 @@
                     audienceDetail = 'Platforms → ' + (sel.length ? sel.join(', ') : '(none selected)');
                 }
 
-                const imgEl = imgPreview && !imgPreview.classList.contains('d-none') ?
-                    `<img src="${imgPreview.src}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb;margin-top:10px"/>` :
-                    '';
+                const imgEl = imgPreview && !imgPreview.classList.contains('d-none')
+                    ? `<img src="${imgPreview.src}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb;margin-top:10px"/>`
+                    : '';
 
                 Swal.fire({
                     title: 'Preview',
@@ -597,6 +597,36 @@
                     const text = tr.innerText.toLowerCase();
                     tr.style.display = text.includes(q) ? '' : 'none';
                 });
+            });
+
+            // ---------- All Users submit confirmation ----------
+            const sendBtn = document.getElementById('sendBtn');
+            const form = document.getElementById('fcmForm');
+
+            sendBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const aud = document.querySelector('input[name="audience"]:checked')?.value;
+
+                if (aud === 'all') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Send to ALL users?',
+                        text: 'This will send a push notification to every authorized device.',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, send to all',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#2563eb'
+                    }).then(res => {
+                        if (res.isConfirmed) {
+                            toast('success', 'Submitting notification to all users...');
+                            form.submit();
+                        } else {
+                            toast('info', 'Send to all users cancelled');
+                        }
+                    });
+                } else {
+                    form.submit();
+                }
             });
 
             // ---------- Convert flash messages to toasts ----------
