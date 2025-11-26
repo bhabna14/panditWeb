@@ -193,21 +193,25 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Audience</label>
                             <div class="d-flex gap-4 flex-wrap">
-                                <label class="form-check d-flex align-items-center gap-2">
-                                    <input class="form-check-input" type="radio" name="audience" id="audAll"
-                                        value="all" checked>
-                                    <span>All Users</span>
-                                </label>
+
                                 <label class="form-check d-flex align-items-center gap-2">
                                     <input class="form-check-input" type="radio" name="audience" id="audUsers"
                                         value="users">
                                     <span>Selected Users</span>
                                 </label>
+
+                                <label class="form-check d-flex align-items-center gap-2">
+                                    <input class="form-check-input" type="radio" name="audience" id="audAll"
+                                        value="all" checked>
+                                    <span>All Users</span>
+                                </label>
+
                                 <label class="form-check d-flex align-items-center gap-2">
                                     <input class="form-check-input" type="radio" name="audience" id="audPlatform"
                                         value="platform">
                                     <span>Platforms</span>
                                 </label>
+
                             </div>
                             <div class="form-hint mt-1">Target everyone, specific users, or specific platforms.</div>
                             @error('audience')
