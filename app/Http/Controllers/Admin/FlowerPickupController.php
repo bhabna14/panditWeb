@@ -420,7 +420,6 @@ class FlowerPickupController extends Controller
             ->with('success', 'Flower Pickup updated successfully.');
     }
 
-
     public function updatePayment(Request $request, $pickup_id)
     {
         // Find the pickup detail by ID

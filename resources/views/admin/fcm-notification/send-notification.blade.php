@@ -156,11 +156,11 @@
                         Push a rich app notification to your users. Choose audience, attach an image, and preview.
                     </div>
                 </div>
-                <div class="d-flex gap-2">
+                {{-- <div class="d-flex gap-2">
                     <a class="btn btn-outline-primary" href="{{ route('whatsapp-notification.create') }}">
                         <i class="fe fe-message-square me-1"></i> WhatsApp Notification
                     </a>
-                </div>
+                </div> --}}
             </div>
         </div>
 
@@ -395,19 +395,23 @@
                                         </td>
                                         <td>{{ $notification->created_at?->format('d M Y, h:i A') }}</td>
                                         <td class="text-nowrap">
+                                            {{-- DELETE --}}
                                             <form action="{{ route('admin.notifications.delete', $notification->id) }}"
                                                 method="POST" class="d-inline" onsubmit="return confirmDelete(event)">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    Delete
+                                                </button>
                                             </form>
 
+                                            {{-- RESEND --}}
                                             <form id="resend-form-{{ $notification->id }}"
                                                 action="{{ route('admin.notifications.resend', $notification->id) }}"
                                                 method="POST" class="d-none">
                                                 @csrf
                                             </form>
-                                            <button class="btn btn-sm btn-outline-primary"
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
                                                 onclick="resendNotification({{ $notification->id }})">
                                                 Resend
                                             </button>
@@ -420,6 +424,7 @@
 
                 </div>
             </div>
+
         </div>
     </div>
 @endsection
@@ -540,9 +545,9 @@
                     audienceDetail = 'Platforms → ' + (sel.length ? sel.join(', ') : '(none selected)');
                 }
 
-                const imgEl = imgPreview && !imgPreview.classList.contains('d-none')
-                    ? `<img src="${imgPreview.src}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb;margin-top:10px"/>`
-                    : '';
+                const imgEl = imgPreview && !imgPreview.classList.contains('d-none') ?
+                    `<img src="${imgPreview.src}" style="max-width:100%;border-radius:10px;border:1px solid #e5e7eb;margin-top:10px"/>` :
+                    '';
 
                 Swal.fire({
                     title: 'Preview',

@@ -165,43 +165,34 @@ class AdminNotificationController extends Controller
             $notification = FCMNotification::findOrFail($id);
 
             $audience  = $notification->audience ?? 'all';
-            $userIds   = $notification->user_ids ?? null;      // cast to array in model
-            $platforms = $notification->platforms ?? null;     // cast to array in model
+            $userIds   = $notification->user_ids ?? null;   // cast to array in model
+            $platforms = $notification->platforms ?? null;  // cast to array in model
 
-            // build tokens query based on ORIGINAL audience snapshot
-            $tokensQuery = UserDevice::authorized()
-                ->whereNotNull('device_id');
+            // If audience === 'all' we ignore user_ids completely (in case it has ["ALL"])
+            if ($audience === 'users' && (empty($userIds) || !is_array($userIds))) {
+                Log::warning('Resend attempted with users audience, but no user_ids snapshot.', [
+                    'notification_id' => $id,
+                ]);
 
-            if ($audience === 'users') {
-                if (empty($userIds) || !is_array($userIds)) {
-                    Log::warning('Resend attempted with users audience, but no user_ids snapshot.', [
-                        'notification_id' => $id,
-                    ]);
-
-                    return back()->with(
-                        'error',
-                        'Original selected users are missing, cannot resend user-wise.'
-                    );
-                }
-
-                $tokensQuery->whereIn('user_id', $userIds);
-            } elseif ($audience === 'platform') {
-                if (empty($platforms) || !is_array($platforms)) {
-                    Log::warning('Resend attempted with platform audience, but no platforms snapshot.', [
-                        'notification_id' => $id,
-                    ]);
-
-                    return back()->with(
-                        'error',
-                        'Original platforms are missing, cannot resend platform-wise.'
-                    );
-                }
-
-                $tokensQuery->whereIn('platform', $platforms);
+                return back()->with(
+                    'error',
+                    'Original selected users are missing, cannot resend user-wise.'
+                );
             }
-            // audience === 'all' → no extra filter (send to all authorized devices)
 
-            $deviceTokens = $tokensQuery->distinct()->pluck('device_id')->toArray();
+            if ($audience === 'platform' && (empty($platforms) || !is_array($platforms))) {
+                Log::warning('Resend attempted with platform audience, but no platforms snapshot.', [
+                    'notification_id' => $id,
+                ]);
+
+                return back()->with(
+                    'error',
+                    'Original platforms are missing, cannot resend platform-wise.'
+                );
+            }
+
+            // Build device tokens again from ORIGINAL snapshot:
+            $deviceTokens = $this->buildDeviceTokensForAudience($audience, $userIds, $platforms);
 
             if (empty($deviceTokens)) {
                 Log::warning('No valid device tokens found for resending.', [
@@ -213,6 +204,7 @@ class AdminNotificationController extends Controller
             }
 
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+
             $resp = $notificationService->sendBulkNotifications(
                 $deviceTokens,
                 $notification->title,
@@ -242,6 +234,45 @@ class AdminNotificationController extends Controller
 
             return back()->with('error', 'Failed to resend notification. Please try again later.');
         }
+    }
+
+    protected function buildDeviceTokensForAudience(string $audience, ?array $userIds, ?array $platforms): array
+    {
+        // Start base query
+        $tokensQuery = UserDevice::query()
+            ->authorized()
+            ->whereNotNull('device_id');
+
+        if ($audience === 'users') {
+            // filter out any weird/empty values
+            $cleanUserIds = collect($userIds ?? [])
+                ->map(fn($v) => is_string($v) ? trim($v) : (string) $v)
+                ->filter(fn($v) => $v !== '' && strtoupper($v) !== 'ALL')
+                ->values()
+                ->all();
+
+            if (!empty($cleanUserIds)) {
+                $tokensQuery->whereIn('user_id', $cleanUserIds);
+            } else {
+                // nothing valid → will return empty
+                return [];
+            }
+        } elseif ($audience === 'platform') {
+            $cleanPlatforms = collect($platforms ?? [])
+                ->map(fn($v) => strtolower(trim($v)))
+                ->filter(fn($v) => in_array($v, ['android', 'ios', 'web'], true))
+                ->values()
+                ->all();
+
+            if (!empty($cleanPlatforms)) {
+                $tokensQuery->whereIn('platform', $cleanPlatforms);
+            } else {
+                return [];
+            }
+        }
+        // audience === 'all' → no extra filter
+
+        return $tokensQuery->distinct()->pluck('device_id')->toArray();
     }
 
     public function delete($id)
