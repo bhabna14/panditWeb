@@ -332,11 +332,11 @@
                 {{-- Simple table view: date wise total + subtotal --}}
                 <div class="card shadow-sm mt-3">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Daily Flower Cost (Filtered Date Range)</h6>
-                        <span class="badge bg-light text-muted">
+                        <h6 class="mb-0">Daily Flower Cost</h6>
+                        {{-- <span class="badge bg-light text-muted">
                             Subtotal:
                             <span class="money">₹{{ number_format($rangeTotal, 2) }}</span>
-                        </span>
+                        </span> --}}
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
