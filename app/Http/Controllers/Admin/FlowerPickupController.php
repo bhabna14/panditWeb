@@ -69,7 +69,7 @@ class FlowerPickupController extends Controller
             ->sum('total_price');
 
         // current admin
-        $admin = Auth::guard('admin')->user();
+        $admin = Auth::guard('admins')->user();
         $isSuperAdmin = $admin && $admin->role === 'super_admin';
 
         return view(
