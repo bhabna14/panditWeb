@@ -146,7 +146,7 @@
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle text-nowrap mb-0">
                                     <thead>
-                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid By</th><th>Rcv By</th><th>Description</th></tr>
+                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid</th><th>Rcv</th><th>Description</th></tr>
                                     </thead>
                                     <tbody>
                                         ${ (group.received||[]).map(r => `
@@ -174,13 +174,13 @@
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle text-nowrap mb-0">
                                     <thead>
-                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid By</th><th>Description</th></tr>
+                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid</th><th>Description</th></tr>
                                     </thead>
                                     <tbody>
                                         ${ (group.paid||[]).map(r => `
                                             <tr>
                                                 <td>${r.date ?? ''}</td>
-                                                <td class="text-end mono">${fmtINR(r.amount)}</td>
+                                                <td class="text-cap mono">${fmtINR(r.amount)}</td>
                                                 <td class="text-cap">${r.mode||''}</td>
                                                 <td class="text-cap">${r.paid_by||''}</td>
                                                 <td>${r.description||''}</td>
