@@ -20,18 +20,32 @@
 @endsection
 
 @section('content')
+    @php
+        // Logged-in admin (admin guard)
+        $admin = auth('admin')->user();
+        $adminRole = $admin->role ?? null; // 'super_admin' / 'admin' / null
+    @endphp
+
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE Flower Pickup Details</span>
-            <div class="text-muted mt-1">Today’s total: <strong>₹{{ number_format((float) $totalExpensesday, 2) }}</strong>
+            <div class="text-muted mt-1">
+                Today’s total:
+                <strong>₹{{ number_format((float) $totalExpensesday, 2) }}</strong>
             </div>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}"
-                        class="btn btn-danger text-white">Add Flower Pickup Request</a></li>
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}"
-                        class="btn btn-info text-white">Add Flower Pickup Details</a></li>
+                <li class="breadcrumb-item tx-15">
+                    <a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-danger text-white">
+                        Add Flower Pickup Request
+                    </a>
+                </li>
+                <li class="breadcrumb-item tx-15">
+                    <a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">
+                        Add Flower Pickup Details
+                    </a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Details</li>
             </ol>
         </div>
@@ -91,7 +105,8 @@
                     <h5 class="modal-title" id="flowerDetailsModalLabel">
                         <i class="fas fa-seedling"></i> Flower Pickup Details
                     </h5>
-                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="list-group" id="flowerItemsList">
@@ -171,6 +186,9 @@
     {{-- <script src="{{ asset('assets/js/table-data.js') }}"></script> --}}
 
     <script>
+        // Expose role from PHP → JS
+        const ADMIN_ROLE = @json($adminRole); // 'super_admin' | 'admin' | null
+
         (function() {
             const tableSel = '#file-datatable';
             const filterEl = $('#filter');
@@ -182,7 +200,7 @@
                 }
             });
 
-            // Avoid TN/3: destroy if already initialized (e.g. after PJAX or partial reload)
+            // Destroy if already initialized
             if ($.fn.DataTable.isDataTable(tableSel)) {
                 $(tableSel).DataTable().clear().destroy();
                 $(tableSel).empty(); // optional, clears cloned headers
@@ -248,7 +266,42 @@
                     {
                         data: 10,
                         orderable: false,
-                        searchable: false
+                        searchable: false,
+
+                        // ⬇⬇ ROLE-BASED ACTION BUTTONS (hide edit for non-super-admin) ⬇⬇
+                        render: function(data, type, row) {
+                            // For super_admin, show whatever server sends
+                            if (ADMIN_ROLE === 'super_admin') {
+                                return data;
+                            }
+
+                            // For admin / others: strip any edit button/icon out of the HTML
+                            if (type === 'display' || type === 'filter') {
+                                if (!data) return '';
+
+                                try {
+                                    const wrapper = document.createElement('div');
+                                    wrapper.innerHTML = data;
+
+                                    // Remove elements that contain typical edit icons
+                                    const editIcons = wrapper.querySelectorAll(
+                                        'i.fa-edit, i.fas.fa-edit, i.fa-pen, i.fa-pen-to-square'
+                                    );
+
+                                    editIcons.forEach(icon => {
+                                        const btn = icon.closest('a, button');
+                                        if (btn) btn.remove();
+                                    });
+
+                                    return wrapper.innerHTML;
+                                } catch (e) {
+                                    console.error('Edit strip error:', e);
+                                    return data;
+                                }
+                            }
+
+                            return data;
+                        }
                     },
                 ],
                 dom: 'Bfrtip',
@@ -333,7 +386,7 @@
                         },
                         body: formData
                     })
-                    .then(async (res) => {
+                    .then(async(res) => {
                         if (!res.ok) {
                             const txt = await res.text();
                             throw new Error(txt || 'Failed');
