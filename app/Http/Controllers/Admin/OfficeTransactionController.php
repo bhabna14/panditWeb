@@ -19,7 +19,7 @@ class OfficeTransactionController extends Controller
         return view('admin.office-transaction-details'); // your blade file
     }
 
-      public function manageOfficeTransaction()
+    public function manageOfficeTransaction()
     {
         $tz = config('app.timezone', 'Asia/Kolkata');
 

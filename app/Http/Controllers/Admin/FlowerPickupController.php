@@ -11,6 +11,8 @@ use App\Models\RiderDetails;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\FlowerPickupRequest;
+use App\Models\OfficeTransaction;
+use App\Models\OfficeLedger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;  
 
@@ -422,27 +424,92 @@ class FlowerPickupController extends Controller
 
     public function updatePayment(Request $request, $pickup_id)
     {
-        // Find the pickup detail by ID
-        $pickupDetail = FlowerPickupDetails::findOrFail($pickup_id);
-
-        // Update the payment details
-        $pickupDetail->payment_status = 'Paid';
-        $pickupDetail->Status = 'Completed';
-
-        $pickupDetail->payment_method = $request->input('payment_method');
-        $pickupDetail->payment_id = $request->input('payment_id');
-        $pickupDetail->paid_by = $request->input('paid_by', 'N/A');
-        $pickupDetail->save();
-
-        // Log the payment update
-        Log::info('Payment updated', [
-            'pickup_id' => $pickup_id,
-            'payment_method' => $request->input('payment_method'),
-            'payment_id' => $request->input('payment_id'),
-            'paid_by' => $request->input('paid_by', 'N/A')
+        // Basic validation (optional but recommended)
+        $request->validate([
+            'payment_method' => 'required|string',
+            'paid_by'        => 'required|string',
+            'payment_id'     => 'nullable|string',
         ]);
 
-        return redirect()->back()->with('success', 'Payment details updated successfully');
+        $tz = config('app.timezone', 'Asia/Kolkata');
+
+        try {
+            DB::transaction(function () use ($request, $pickup_id, $tz) {
+                // 1) Lock + update pickup payment
+                /** @var \App\Models\FlowerPickupDetails $pickupDetail */
+                $pickupDetail = FlowerPickupDetails::lockForUpdate()->findOrFail($pickup_id);
+
+                // Fix: column is `status`, NOT `Status`
+                $pickupDetail->payment_status = 'Paid';
+                $pickupDetail->status         = 'Completed';
+
+                $pickupDetail->payment_method = $request->input('payment_method');
+                $pickupDetail->payment_id     = $request->input('payment_id');
+                $pickupDetail->paid_by        = $request->input('paid_by', 'N/A');
+                $pickupDetail->save();
+
+                // 2) Create OfficeTransaction row (expense: vendor_payment)
+                $vendorName = optional($pickupDetail->vendor)->vendor_name
+                    ?? optional($pickupDetail->vendor)->name
+                    ?? 'Vendor';
+
+                $description = sprintf(
+                    'Vendor payment for pickup %s (%s)',
+                    $pickupDetail->pick_up_id,
+                    $vendorName
+                );
+
+                $officeTransaction = OfficeTransaction::create([
+                    'date'           => Carbon::today($tz)->format('Y-m-d'),
+                    'paid_by'        => $pickupDetail->paid_by,
+                    'amount'         => $pickupDetail->total_price,   // outgoing amount
+                    'mode_of_payment'=> strtolower($pickupDetail->payment_method), // e.g. cash/upi/online
+                    'categories'     => 'vendor_payment',             // matches your blade filter option
+                    'description'    => $description,
+                    'status'         => 'active',
+                ]);
+
+                // 3) Mirror it into OfficeLedger as an OUT entry
+                OfficeLedger::create([
+                    'entry_date'     => $officeTransaction->date,
+                    'category'       => $officeTransaction->categories,
+                    'direction'      => 'out',                       // money going out
+                    'source_type'    => 'transaction',
+                    'source_id'      => $officeTransaction->id,
+                    'amount'         => $officeTransaction->amount,
+                    'mode_of_payment'=> $officeTransaction->mode_of_payment,
+                    'paid_by'        => $officeTransaction->paid_by,
+                    'received_by'    => $vendorName,
+                    'description'    => $officeTransaction->description,
+                    'status'         => 'active',
+                ]);
+
+                // 4) Log everything for debugging
+                Log::info('Vendor payment updated & pushed to ledger', [
+                    'pickup_id'          => $pickupDetail->id,
+                    'pick_up_code'       => $pickupDetail->pick_up_id,
+                    'vendor_id'          => $pickupDetail->vendor_id,
+                    'vendor_name'        => $vendorName,
+                    'payment_method'     => $pickupDetail->payment_method,
+                    'payment_id'         => $pickupDetail->payment_id,
+                    'paid_by'            => $pickupDetail->paid_by,
+                    'office_transaction' => $officeTransaction->id,
+                ]);
+            });
+
+            return redirect()
+                ->back()
+                ->with('success', 'Payment details updated & vendor payment saved to ledger.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to update vendor payment / ledger', [
+                'pickup_id' => $pickup_id,
+                'error'     => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Unable to update payment. Please try again.');
+        }
     }
 
     public function storeFlowerPickup(Request $request)

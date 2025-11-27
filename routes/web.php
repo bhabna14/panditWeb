@@ -369,13 +369,10 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::get('/add-flower-pickup-details', 'addflowerpickupdetails')->name('admin.addflowerpickupdetails');
         Route::get('/add-flower-pickup-request', 'addflowerpickuprequest')->name('admin.addflowerpickuprequest');
         Route::post('/flower-pickup-request/approve/{id}',  'approveRequest')->name('flower-pickup-request.approve');
-
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
-
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
         Route::put('/flower-pickup/update/{id}', 'update')->name('flower-pickup.update');
-
     });
 
     Route::controller(RiderController::class)->group(function() {
@@ -978,7 +975,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/new-user-order/save', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 });
 
-// Admin Users management (Super Admin & Admin with limits)
+// Admn Users management (Super Admin & Admin with limits)
 Route::get('/manage-admin', [AdminUserController::class, 'index'])->name('users.index');
 Route::get('/create-admin', [AdminUserController::class, 'create'])->name('users.create');
 Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
