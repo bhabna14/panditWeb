@@ -63,12 +63,13 @@ class FlowerPickupController extends Controller
 
         return redirect()->back()->with('error', 'Pickup request not found.');
     }
-   public function manageflowerpickupdetails(Request $request)
+
+    public function manageflowerpickupdetails(Request $request)
     {
         $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
             ->sum('total_price');
 
-        // current admin
+        // current admin from "admins" guard
         $admin = Auth::guard('admins')->user();
         $isSuperAdmin = $admin && $admin->role === 'super_admin';
 
@@ -78,10 +79,10 @@ class FlowerPickupController extends Controller
         );
     }
 
-    // DATATABLES JSON
     public function flowerPickupDetailsData(Request $request)
     {
-        $admin        = Auth::guard('admin')->user();
+        // ✅ FIXED: use 'admins' guard (matches config/auth.php)
+        $admin        = Auth::guard('admins')->user();
         $isSuperAdmin = $admin && $admin->role === 'super_admin';
 
         $query = FlowerPickupDetails::with(['vendor', 'rider']); // adjust relations if different
@@ -158,7 +159,7 @@ class FlowerPickupController extends Controller
 
                 return '<span class="' . $class . '">' . e($row->payment_status) . '</span>';
             })
-            ->editColumn('Status', function ($row) {             // column 9 (note: your DB may use status / Status)
+            ->editColumn('Status', function ($row) {             // column 9
                 $status = $row->Status ?? $row->status ?? 'N/A';
                 $class  = $status === 'Completed'
                     ? 'badge bg-success'
@@ -171,7 +172,7 @@ class FlowerPickupController extends Controller
             ->addColumn('actions', function ($row) use ($isSuperAdmin) {  // column 10
                 $buttons = '';
 
-                // everyone (if you want): payment button
+                // everyone: payment button (if not paid)
                 if ($row->payment_status !== 'Paid') {
                     $buttons .= '<button type="button"
                                         class="btn btn-sm btn-success me-1 btn-open-payment"
@@ -196,19 +197,6 @@ class FlowerPickupController extends Controller
                 'payment_status',
                 'Status',
                 'actions',
-            ])
-            ->setRowData([
-                0  => 'DT_RowIndex',
-                1  => 'pickup_id_col',
-                2  => 'vendor_col',
-                3  => 'rider_col',
-                4  => 'flower_details_col',
-                5  => 'pickup_date',
-                6  => 'delivery_date',
-                7  => 'total_price',
-                8  => 'payment_status',
-                9  => 'Status',
-                10 => 'actions',
             ])
             ->make(true);
     }

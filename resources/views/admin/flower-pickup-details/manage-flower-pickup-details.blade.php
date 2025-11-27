@@ -21,9 +21,9 @@
 
 @section('content')
     @php
-        // Logged-in admin (admin guard)
-        $admin = auth('admin')->user();
-        $adminRole = $admin->role ?? null; // 'super_admin' / 'admin' / null
+        // Logged-in admin via "admins" guard (matches config/auth.php)
+        $admin = auth('admins')->user();          // ✅ FIXED
+        $adminRole = $admin->role ?? null;        // 'super_admin' / 'admin' / null
     @endphp
 
     <div class="breadcrumb-header justify-content-between">
@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    {{-- Flower Details Modal (one shared) --}}
+    {{-- Flower Details Modal --}}
     <div class="modal fade" id="flowerDetailsModal" tabindex="-1" aria-labelledby="flowerDetailsModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -122,7 +122,7 @@
         </div>
     </div>
 
-    {{-- Payment Modal (one shared) --}}
+    {{-- Payment Modal --}}
     <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -169,7 +169,7 @@
 @endsection
 
 @section('scripts')
-    <!-- DataTables (one set only) -->
+    <!-- DataTables -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -182,28 +182,20 @@
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
 
-    {{-- IMPORTANT: remove generic initializers that may re-init the same table --}}
-    {{-- <script src="{{ asset('assets/js/table-data.js') }}"></script> --}}
-
     <script>
-        // Expose role from PHP → JS
-        const ADMIN_ROLE = @json($adminRole); // 'super_admin' | 'admin' | null
-
         (function() {
             const tableSel = '#file-datatable';
             const filterEl = $('#filter');
 
-            // mark XHR globally (prevents auth redirects -> HTML)
             $.ajaxSetup({
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
-            // Destroy if already initialized
             if ($.fn.DataTable.isDataTable(tableSel)) {
                 $(tableSel).DataTable().clear().destroy();
-                $(tableSel).empty(); // optional, clears cloned headers
+                $(tableSel).empty();
             }
 
             const dt = $(tableSel).DataTable({
@@ -211,7 +203,7 @@
                 processing: true,
                 responsive: true,
                 deferRender: true,
-                retrieve: true, // return existing instance if called again
+                retrieve: true,
                 pageLength: 25,
                 lengthMenu: [10, 25, 50, 100],
                 order: [
@@ -266,42 +258,7 @@
                     {
                         data: 10,
                         orderable: false,
-                        searchable: false,
-
-                        // ⬇⬇ ROLE-BASED ACTION BUTTONS (hide edit for non-super-admin) ⬇⬇
-                        render: function(data, type, row) {
-                            // For super_admin, show whatever server sends
-                            if (ADMIN_ROLE === 'super_admin') {
-                                return data;
-                            }
-
-                            // For admin / others: strip any edit button/icon out of the HTML
-                            if (type === 'display' || type === 'filter') {
-                                if (!data) return '';
-
-                                try {
-                                    const wrapper = document.createElement('div');
-                                    wrapper.innerHTML = data;
-
-                                    // Remove elements that contain typical edit icons
-                                    const editIcons = wrapper.querySelectorAll(
-                                        'i.fa-edit, i.fas.fa-edit, i.fa-pen, i.fa-pen-to-square'
-                                    );
-
-                                    editIcons.forEach(icon => {
-                                        const btn = icon.closest('a, button');
-                                        if (btn) btn.remove();
-                                    });
-
-                                    return wrapper.innerHTML;
-                                } catch (e) {
-                                    console.error('Edit strip error:', e);
-                                    return data;
-                                }
-                            }
-
-                            return data;
-                        }
+                        searchable: false
                     },
                 ],
                 dom: 'Bfrtip',
@@ -359,7 +316,7 @@
                         '<li class="list-group-item text-danger">Failed to load items.</li>'));
             });
 
-            // Open payment modal, set action + hidden id
+            // Open payment modal
             $(tableSel).on('click', '.btn-open-payment', function() {
                 const id = $(this).data('id');
                 const action = $(this).data('action');
@@ -368,7 +325,7 @@
                 $('#paymentFeedback').removeClass('text-success text-danger').text('');
             });
 
-            // Submit payment via AJAX (with CSRF)
+            // Submit payment via AJAX
             $('#paymentForm').on('submit', function(e) {
                 e.preventDefault();
                 const $form = $(this);
@@ -395,7 +352,7 @@
                     })
                     .then(() => {
                         $('#paymentFeedback').addClass('text-success').text('Saved.');
-                        dt.ajax.reload(null, false); // refresh current page
+                        dt.ajax.reload(null, false);
                         setTimeout(() => $('#paymentModal').modal('hide'), 500);
                     })
                     .catch(() => {
@@ -405,4 +362,3 @@
         })();
     </script>
 @endsection
-
