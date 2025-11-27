@@ -473,7 +473,6 @@ class FlowerPickupAssignController extends Controller
             ->with('success', 'Flower pickups saved vendor-wise (vendor & rider stored on header only).');
     }
 
-
     public function store(Request $request)
     {
         $request->validate([
