@@ -289,6 +289,12 @@
                         Push a rich app notification to your users. Use quick templates or write a custom message.
                     </div>
                 </div>
+
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-primary" href="{{ route('whatsapp-notification.create') }}">
+                        <i class="fe fe-message-square me-1"></i> WhatsApp Notification
+                    </a>
+                </div>
             </div>
         </div>
 
