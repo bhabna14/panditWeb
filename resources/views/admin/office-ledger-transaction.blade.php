@@ -34,6 +34,28 @@
             <a href="{{ url()->previous() }}" class="btn btn-light">Back</a>
         </div>
 
+          {{-- Global metrics --}}
+        <div class="row g-3 mb-3">
+            <div class="col-md-4">
+                <div class="metric d-flex align-items-center justify-content-between">
+                    <div><div class="label">Total Fund Received</div><div class="value h4 mb-0 mono" id="ledgerIn">₹0.00</div></div>
+                    <span class="badge-soft">All Categories</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric d-flex align-items-center justify-content-between">
+                    <div><div class="label">Total Amount Paid</div><div class="value h4 mb-0 mono" id="ledgerOut">₹0.00</div></div>
+                    <span class="badge-soft">All Categories</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="metric d-flex align-items-center justify-content-between">
+                    <div><div class="label">Available Balance</div><div class="value h4 mb-0 mono" id="ledgerNet">₹0.00</div></div>
+                    <span class="badge-soft">All Categories</span>
+                </div>
+            </div>
+        </div>
+
         {{-- Filters --}}
         <div class="card custom-card mb-3">
             <div class="card-body">
@@ -67,27 +89,6 @@
             </div>
         </div>
 
-        {{-- Global metrics --}}
-        <div class="row g-3 mb-3">
-            <div class="col-md-4">
-                <div class="metric d-flex align-items-center justify-content-between">
-                    <div><div class="label">Total Fund Received</div><div class="value h4 mb-0 mono" id="ledgerIn">₹0.00</div></div>
-                    <span class="badge-soft">All Categories</span>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="metric d-flex align-items-center justify-content-between">
-                    <div><div class="label">Total Amount Paid</div><div class="value h4 mb-0 mono" id="ledgerOut">₹0.00</div></div>
-                    <span class="badge-soft">All Categories</span>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="metric d-flex align-items-center justify-content-between">
-                    <div><div class="label">Available Balance</div><div class="value h4 mb-0 mono" id="ledgerNet">₹0.00</div></div>
-                    <span class="badge-soft">All Categories</span>
-                </div>
-            </div>
-        </div>
 
         {{-- Category sections --}}
         <div id="categoryContainer" class="d-flex flex-column gap-3">
