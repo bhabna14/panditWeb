@@ -270,6 +270,22 @@ class FlowerEstimateController extends Controller
             ];
         }
 
+        // ---- Range summary (for filtered date range) --------------------------
+        $rangeTotal        = 0.0;   // overall total for filter range
+        $rangeDaysWithData = 0;     // how many days have > 0 cost
+
+        foreach ($dailyEstimates as $dateStr => $payload) {
+            $amount = (float) ($payload['grand_total_amount'] ?? 0);
+            $rangeTotal += $amount;
+            if ($amount > 0) {
+                $rangeDaysWithData++;
+            }
+        }
+
+        $rangeAvgPerDay = $rangeDaysWithData > 0
+            ? round($rangeTotal / $rangeDaysWithData, 2)
+            : 0.0;
+
         // ---- Month-wise rollup ----------------------------------------------
         $monthlyEstimates = [];
         if ($mode === 'month') {
@@ -348,14 +364,18 @@ class FlowerEstimateController extends Controller
         }
 
         return view('admin.reports.flower-package', [
-            'start'            => $start->toDateString(),
-            'end'              => $end->toDateString(),
-            'mode'             => $mode,
-            'preset'           => $preset,
-            'dailyEstimates'   => $dailyEstimates,
-            'monthlyEstimates' => $monthlyEstimates,
-            'tomorrowDate'     => $tomorrow->toDateString(),
-            'tomorrowEstimate' => $tomorrowEstimate,
+            'start'              => $start->toDateString(),
+            'end'                => $end->toDateString(),
+            'mode'               => $mode,
+            'preset'             => $preset,
+            'dailyEstimates'     => $dailyEstimates,
+            'monthlyEstimates'   => $monthlyEstimates,
+            'tomorrowDate'       => $tomorrow->toDateString(),
+            'tomorrowEstimate'   => $tomorrowEstimate,
+            // NEW: range-wise summary fields for UI
+            'rangeTotal'         => round($rangeTotal, 2),
+            'rangeDaysWithData'  => $rangeDaysWithData,
+            'rangeAvgPerDay'     => $rangeAvgPerDay,
         ]);
     }
 
