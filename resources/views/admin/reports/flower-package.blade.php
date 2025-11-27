@@ -555,7 +555,7 @@
                                                 @endforeach
                                             </div>
 
-                                            <div class="card border-0 shadow-sm mt-3">
+                                            {{-- <div class="card border-0 shadow-sm mt-3">
                                                 <div class="card-header bg-white">
                                                     <strong>Total Types and Quantity of Flower Needed for Tomorrow
                                                         Delivery</strong>
@@ -588,7 +588,7 @@
                                                         </table>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> --}}
                                         @endif
                                     </div>
                                 </div>
