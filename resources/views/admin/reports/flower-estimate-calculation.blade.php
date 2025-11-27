@@ -3,8 +3,10 @@
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Poppins font --}}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    {{-- Poppins (page) + Nunito Sans (table) --}}
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Nunito+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
     {{-- SheetJS --}}
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -300,6 +302,9 @@
             border: 1px solid var(--table-border);
             border-radius: 14px;
             overflow: hidden;
+
+            /* TABLE FONT: Nunito Sans */
+            font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
         }
 
         .excel thead th {
@@ -404,26 +409,31 @@
             margin-right: .18rem;
         }
 
-        /* Pills for units */
-        .pill {
+        /* Qty + unit inside same cell */
+        .qty-with-unit {
             display: inline-flex;
             align-items: center;
-            padding: .12rem .55rem;
-            border-radius: 999px;
-            font-size: .78rem;
+            justify-content: flex-end;
+            gap: .35rem;
+        }
+
+        .qty-with-unit .qty {
             font-weight: 500;
-            background: var(--neutral-soft);
-            color: #374151;
-            border: 1px solid #e5e7eb;
         }
 
-        .pill.unit-pill {
+        .qty-with-unit .unit-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: .1rem .55rem;
+            border-radius: 999px;
+            font-size: .76rem;
+            font-weight: 500;
             background: var(--accent-soft);
-            border-color: var(--accent-border);
             color: #1d4ed8;
+            border: 1px solid var(--accent-border);
         }
 
-        .pill.unit-pill::before {
+        .qty-with-unit .unit-pill::before {
             content: '◦';
             font-size: .7rem;
             margin-right: .15rem;
@@ -603,10 +613,8 @@
                             <th class="col-vendor">Vendor</th>
                             <th class="col-date">Pickup Date</th>
                             <th class="col-text">Item</th>
-                            <th class="col-num">Est. Qty</th>
-                            <th>Est. Unit</th>
-                            <th class="col-num">Act. Qty</th>
-                            <th>Act. Unit</th>
+                            <th class="col-num">Est. Qty / Unit</th>
+                            <th class="col-num">Act. Qty / Unit</th>
                             <th class="col-money">Unit Price</th>
                             <th class="col-money">Line Total</th>
                             <th class="col-diff">Qty Diff</th>
@@ -663,25 +671,31 @@
                                         <td class="col-date">{{ $pkDate }}</td>
                                         <td class="col-text">{{ optional($it->flower)->name ?? '—' }}</td>
 
+                                        {{-- Est Qty + Unit --}}
                                         <td class="col-num">
-                                            {{ $eqty ? number_format($eqty, 2) : '—' }}
-                                        </td>
-                                        <td>
-                                            @if ($ename && $ename !== '—')
-                                                <span class="pill unit-pill">{{ $ename }}</span>
+                                            @if ($eqty)
+                                                <span class="qty-with-unit">
+                                                    <span class="qty">{{ number_format($eqty, 2) }}</span>
+                                                    @if ($ename && $ename !== '—')
+                                                        <span class="unit-pill">{{ $ename }}</span>
+                                                    @endif
+                                                </span>
                                             @else
-                                                <span class="pill">—</span>
+                                                —
                                             @endif
                                         </td>
 
+                                        {{-- Act Qty + Unit --}}
                                         <td class="col-num">
-                                            {{ $aqty ? number_format($aqty, 2) : '—' }}
-                                        </td>
-                                        <td>
-                                            @if ($aname && $aname !== '—')
-                                                <span class="pill unit-pill">{{ $aname }}</span>
+                                            @if ($aqty)
+                                                <span class="qty-with-unit">
+                                                    <span class="qty">{{ number_format($aqty, 2) }}</span>
+                                                    @if ($aname && $aname !== '—')
+                                                        <span class="unit-pill">{{ $aname }}</span>
+                                                    @endif
+                                                </span>
                                             @else
-                                                <span class="pill">—</span>
+                                                —
                                             @endif
                                         </td>
 
@@ -710,14 +724,12 @@
                                 @endforeach
                             @endforeach
 
+                            {{-- Subtotal row per vendor --}}
                             <tr class="group-row">
-                                <td colspan="5">
+                                <td colspan="6">
                                     <span class="group-caption">Subtotal — {{ $vendorName }}</span>
                                 </td>
                                 <td></td>
-                                <td colspan="3" style="text-align:right;">
-                                    Actual (sum)
-                                </td>
                                 <td class="col-money">
                                     <span class="currency">₹</span>{{ number_format($vendorActSum, 2) }}
                                 </td>
