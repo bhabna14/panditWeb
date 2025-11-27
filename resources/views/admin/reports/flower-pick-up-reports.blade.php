@@ -361,11 +361,11 @@
                 <tr>
                     <th>Pickup Date</th>
                     <th>Vendor Name</th>
-                    <th>Rider Name</th>
-                    <th>Paid By</th>
                     <th>Flower Details</th>
-                    <th>Status</th>
                     <th class="text-end">Total Price</th>
+                    <th>Status</th>
+                    <th>Paid By</th>
+                    <th>Rider Name</th>
                 </tr>
             </thead>
             <tbody id="reportTableBody">
@@ -384,8 +384,6 @@
                                 —
                             @endif
                         </td>
-                        <td>{{ $item->rider->rider_name ?? '—' }}</td>
-                        <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
                         <td>
                             @forelse ($item->flowerPickupItems as $f)
                                 {{ $f->flower?->name ?? '—' }} —
@@ -397,52 +395,55 @@
                                 —
                             @endforelse
                         </td>
-                        <td>
-    @php
-        $s = strtolower($item->status ?? '');
-        $map = [
-            // success-ish
-            'success'   => 'status-badge--success',
-            'completed' => 'status-badge--success',
-            'complete'  => 'status-badge--success',
-            'active'    => 'status-badge--success',
-            'ok'        => 'status-badge--success',
-            'paid'      => 'status-badge--success',
-            'delivered' => 'status-badge--success',
-            'resume'    => 'status-badge--success',
-
-            // warning-ish
-            'pending'     => 'status-badge--warning',
-            'processing'  => 'status-badge--warning',
-            'in-progress' => 'status-badge--warning',
-            'on hold'     => 'status-badge--warning',
-            'hold'        => 'status-badge--warning',
-            'awaiting'    => 'status-badge--warning',
-
-            // danger-ish
-            'cancel'   => 'status-badge--danger',
-            'cancelled'=> 'status-badge--danger',
-            'failed'   => 'status-badge--danger',
-            'rejected' => 'status-badge--danger',
-            'expired'  => 'status-badge--danger',
-            'unpaid'   => 'status-badge--danger',
-        ];
-
-        if (isset($map[$s])) {
-            $badgeClass = $map[$s];
-        } elseif (in_array($s, ['new', 'created', 'open'])) {
-            $badgeClass = 'status-badge--neutral';
-        } else {
-            $badgeClass = 'status-badge--info';
-        }
-    @endphp
-
-    <span class="status-badge {{ $badgeClass }}">
-        {{ $item->status ? ucfirst($item->status) : '—' }}
-    </span>
-</td>
-
                         <td class="text-end">₹{{ number_format((float) $item->total_price, 2) }}</td>
+                        <td>
+                            @php
+                                $s = strtolower($item->status ?? '');
+                                $map = [
+                                    // success-ish
+                                    'success' => 'status-badge--success',
+                                    'completed' => 'status-badge--success',
+                                    'complete' => 'status-badge--success',
+                                    'active' => 'status-badge--success',
+                                    'ok' => 'status-badge--success',
+                                    'paid' => 'status-badge--success',
+                                    'delivered' => 'status-badge--success',
+                                    'resume' => 'status-badge--success',
+
+                                    // warning-ish
+                                    'pending' => 'status-badge--warning',
+                                    'processing' => 'status-badge--warning',
+                                    'in-progress' => 'status-badge--warning',
+                                    'on hold' => 'status-badge--warning',
+                                    'hold' => 'status-badge--warning',
+                                    'awaiting' => 'status-badge--warning',
+
+                                    // danger-ish
+                                    'cancel' => 'status-badge--danger',
+                                    'cancelled' => 'status-badge--danger',
+                                    'failed' => 'status-badge--danger',
+                                    'rejected' => 'status-badge--danger',
+                                    'expired' => 'status-badge--danger',
+                                    'unpaid' => 'status-badge--danger',
+                                ];
+
+                                if (isset($map[$s])) {
+                                    $badgeClass = $map[$s];
+                                } elseif (in_array($s, ['new', 'created', 'open'])) {
+                                    $badgeClass = 'status-badge--neutral';
+                                } else {
+                                    $badgeClass = 'status-badge--info';
+                                }
+                            @endphp
+
+                            <span class="status-badge {{ $badgeClass }}">
+                                {{ $item->status ? ucfirst($item->status) : '—' }}
+                            </span>
+                        </td>
+                        <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
+
+                        <td>{{ $item->rider->rider_name ?? '—' }}</td>
+
                     </tr>
                 @endforeach
             </tbody>
@@ -558,7 +559,7 @@
                 if (!vendorSummaries || vendorSummaries.length === 0) {
                     $wrap.append(
                         `<div class="col-12"><div class="vendor-card text-center"><span class="vendor-sub">No data available for current filters.</span></div></div>`
-                        );
+                    );
                     return;
                 }
                 vendorSummaries.forEach(v => {
@@ -674,7 +675,7 @@
                             }).join('<br>');
 
                             const t = (item.status || '').toString().trim()
-                            .toLowerCase();
+                                .toLowerCase();
                             let cls = 'status-badge--info';
                             if (['success', 'completed', 'complete', 'active', 'ok',
                                     'paid', 'delivered', 'resume'
