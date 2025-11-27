@@ -77,13 +77,13 @@
             </div>
             <div class="col-md-4">
                 <div class="metric d-flex align-items-center justify-content-between">
-                    <div><div class="label">Total Transaction</div><div class="value h4 mb-0 mono" id="ledgerOut">₹0.00</div></div>
+                    <div><div class="label">Total Amount Paid</div><div class="value h4 mb-0 mono" id="ledgerOut">₹0.00</div></div>
                     <span class="badge-soft">All Categories</span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="metric d-flex align-items-center justify-content-between">
-                    <div><div class="label">Available</div><div class="value h4 mb-0 mono" id="ledgerNet">₹0.00</div></div>
+                    <div><div class="label">Available Balance</div><div class="value h4 mb-0 mono" id="ledgerNet">₹0.00</div></div>
                     <span class="badge-soft">All Categories</span>
                 </div>
             </div>
