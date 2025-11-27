@@ -317,7 +317,7 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <div class="fw-semibold text-muted small">Total cost</div>
+                            <div class="fw-semibold text-muted small">Total Estimate</div>
                             <div class="fs-4 money text-success">
                                 ₹{{ number_format($rangeTotal, 2) }}
                             </div>
