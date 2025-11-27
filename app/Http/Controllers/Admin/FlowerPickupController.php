@@ -277,6 +277,14 @@ class FlowerPickupController extends Controller
 
     public function edit($id)
     {
+            $admin = Auth::guard('admins')->user();
+
+        if (!$admin || $admin->role !== 'super_admin') {
+            // if NOT super_admin, send back to manage page
+            return redirect()
+                ->route('admin.manageflowerpickupdetails')
+                ->with('error', 'You are not authorized to edit flower pickup details.');
+        }
         $detail = FlowerPickupDetails::with(['flowerPickupItems', 'vendor', 'rider'])->findOrFail($id);
        
         $flowers = FlowerProduct::where('status', 'active')
