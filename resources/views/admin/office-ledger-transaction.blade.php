@@ -174,7 +174,7 @@
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle text-nowrap mb-0">
                                     <thead>
-                                        <tr><th>Date</th><th class="text-end">Amount</th><th>Mode</th><th>Paid</th><th>Description</th></tr>
+                                        <tr><th>Date</th><th>Amount</th><th>Mode</th><th>Paid</th><th>Description</th></tr>
                                     </thead>
                                     <tbody>
                                         ${ (group.paid||[]).map(r => `
