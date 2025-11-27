@@ -3,8 +3,8 @@
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Inter font --}}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    {{-- Poppins font --}}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     {{-- SheetJS --}}
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -52,7 +52,7 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
             font-weight: 400;
         }
 
