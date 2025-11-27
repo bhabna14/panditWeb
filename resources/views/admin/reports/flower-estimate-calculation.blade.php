@@ -3,332 +3,551 @@
 @section('styles')
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Poppins font (similar to screenshot) --}}
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-
-    {{-- SheetJS for export --}}
+    {{-- Inter font --}}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    {{-- SheetJS --}}
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
         :root {
-            --pink: #ff5c8d;
-            --pink-soft: #ffe4ed;
-            --text-main: #222222;
-            --text-muted: #6b7280;
-            --border-soft: #f1f1f1;
-            --bg-page: #fafbff;
-            --bg-card: #ffffff;
+            /* Core palette */
+            --brand-blue: #e9f2ff;
+            --brand-blue-edge: #cfe0ff;
+            --header-text: #0b2a5b;
+
+            --chip-green: #e9f9ef;
+            --chip-green-text: #0b7a33;
+            --chip-orange: #fff3e5;
+            --chip-orange-text: #a24b05;
+            --chip-blue: #e0f2fe;
+            --chip-blue-text: #0b2a5b;
+
+            /* Table */
+            --table-head-bg: #0f172a;
+            --table-head-bg-soft: #1f2937;
+            --table-head-text: #e5e7eb;
+            --table-border: #e5e7eb;
+            --table-zebra: #f9fafb;
+            --table-hover: #fefce8;
+
+            --text: #0f172a;
+            --muted: #64748b;
+            --bg: #f7f8fc;
+            --card: #ffffff;
+            --ring: #e5e7eb;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            --radius: 16px;
+
+            --accent: #2563eb;
+            --accent-soft: #eff6ff;
+            --accent-border: #bfdbfe;
+            --danger: #b42318;
+            --danger-soft: #fef2f2;
+            --success: #047857;
+            --success-soft: #ecfdf3;
+            --neutral-soft: #f3f4f6;
         }
 
-        html, body {
-            background: var(--bg-page);
-            font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            color: var(--text-main);
-            font-size: 14px;
+        html,
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+            font-weight: 400;
         }
 
-        .pickup-page {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px 10px 40px;
+        .container-page {
+            max-width: 1320px;
         }
 
-        /* FILTER BAR
-        ------------------------------------------------------------------ */
-        .pickup-filter-form {
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 14px 16px;
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
+        /* Toolbar */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: var(--radius);
+            padding: .85rem 1rem;
+            display: grid;
+            gap: .75rem;
+            grid-template-columns: minmax(0, 1.2fr) auto;
+            align-items: center;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.1rem;
+        }
+
+        .date-range {
             display: flex;
+            gap: .6rem;
             flex-wrap: wrap;
             align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 18px;
+            color: var(--muted);
+            font-size: .85rem;
         }
 
-        .pickup-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .filter-pill {
-            border-radius: 999px;
-            border: 2px solid var(--pink);
-            padding: 8px 24px;
-            font-size: 13px;
+        .date-range span {
             font-weight: 500;
-            color: var(--pink);
+        }
+
+        .date-range input {
+            border: 1px solid var(--ring);
+            border-radius: 999px;
+            padding: .45rem .85rem;
             background: #fff;
+            font-weight: 500;
+            font-size: .88rem;
+            min-width: 170px;
+        }
+
+        .date-range input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .22);
+        }
+
+        .btn-chip {
+            border: 1px solid #d0d5dd;
+            background: #fff;
+            color: #0f172a;
+            padding: .42rem .9rem;
+            border-radius: 999px;
+            font-weight: 500;
             cursor: pointer;
-            outline: none;
-            box-shadow: 0 4px 10px rgba(255, 92, 141, 0.18);
-            transition: background .15s, color .15s, box-shadow .15s, transform .1s;
-        }
-
-        .filter-pill:hover {
-            background: var(--pink-soft);
-            box-shadow: 0 6px 14px rgba(255, 92, 141, 0.22);
-            transform: translateY(-1px);
-        }
-
-        .filter-pill.active {
-            background: var(--pink);
-            color: #fff;
-        }
-
-        .pickup-date-range {
-            display: flex;
+            font-size: .82rem;
+            transition: all .15s ease;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: .35rem;
         }
 
-        .pickup-date-range label {
-            font-size: 12px;
-            color: var(--text-muted);
+        .btn-chip::before {
+            content: '⦿';
+            font-size: .7rem;
+            opacity: .5;
         }
 
-        .pickup-date-range input[type="date"] {
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 6px 10px;
-            font-size: 12px;
-            min-width: 120px;
-        }
-
-        .pickup-date-range input[type="date"]:focus {
-            outline: none;
-            border-color: var(--pink);
-            box-shadow: 0 0 0 2px rgba(255, 92, 141, .16);
+        .btn-chip:hover {
+            background: #f3f4f6;
+            border-color: #cbd5e1;
         }
 
         .btn-apply {
-            border-radius: 999px;
-            border: none;
-            padding: 7px 16px;
-            font-size: 12px;
-            font-weight: 500;
-            background: linear-gradient(135deg, #ff5c8d, #ff7fa6);
+            background: linear-gradient(135deg, #0f172a, #1e293b);
             color: #fff;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(255, 92, 141, 0.4);
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+            border: none;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
         }
 
-        .btn-apply:hover {
-            filter: brightness(1.02);
+        .btn-apply::before {
+            content: '↻';
+            font-size: .75rem;
+            opacity: .75;
         }
 
-        /* HEADER ABOVE TABLE
-        ------------------------------------------------------------------ */
-        .pickup-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 10px;
-            padding: 0 4px;
-        }
-
-        .pickup-header-left {
+        /* Header band */
+        .band {
+            background: linear-gradient(135deg, #e0f2fe, #eef2ff);
+            border: 1px solid var(--brand-blue-edge);
+            border-radius: 18px;
+            padding: .9rem 1.2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: .9rem;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: .45rem;
         }
 
-        .pickup-title {
-            font-size: 16px;
+        .band h3 {
+            margin: 0;
+            font-size: 1rem;
             font-weight: 600;
+            color: var(--header-text);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
         }
 
-        .pickup-subtitle {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .pickup-summary {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        .btn-export {
+        .band h3 span.label {
+            font-size: .78rem;
+            padding: .12rem .55rem;
             border-radius: 999px;
-            border: 1px solid #e5e7eb;
-            padding: 7px 14px;
-            background: #fff;
-            font-size: 12px;
-            cursor: pointer;
+            background: rgba(15, 23, 42, 0.07);
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .chips {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+            gap: .45rem;
+            padding: .35rem .7rem;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
         }
 
-        .btn-export:hover {
-            background: #f9fafb;
+        .chip span.icon {
+            font-size: .9rem;
         }
 
-        /* TABLE
-        ------------------------------------------------------------------ */
-        .table-card {
-            background: var(--bg-card);
+        .chip.green {
+            background: var(--chip-green);
+            color: var(--chip-green-text);
+            border-color: #c9f0d6;
+        }
+
+        .chip.orange {
+            background: var(--chip-orange);
+            color: var(--chip-orange-text);
+            border-color: #ffd9b3;
+        }
+
+        .chip.blue {
+            background: var(--chip-blue);
+            color: var(--chip-blue-text);
+            border-color: #bae6fd;
+        }
+
+        /* Workbook */
+        .workbook {
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .workbook-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .9rem 1.2rem;
+            background: radial-gradient(circle at top left, #eff6ff, #e5e7eb);
+            border-bottom: 1px solid var(--brand-blue-edge);
+        }
+
+        .workbook-title {
+            font-weight: 600;
+            color: #111827;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .workbook-title::before {
+            content: '📊';
+            font-size: 1.1rem;
+        }
+
+        .workbook-sub {
+            color: #4b5563;
+            font-size: .84rem;
+        }
+
+        .workbook-tools {
+            display: flex;
+            gap: .5rem;
+        }
+
+        .export-btn {
+            border: 1px solid var(--accent-border);
+            border-radius: 999px;
+            padding: .45rem .9rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: var(--accent-soft);
+            color: #1d4ed8;
+            font-size: .84rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            transition: all .15s ease;
+        }
+
+        .export-btn::before {
+            content: '⬇';
+            font-size: .8rem;
+        }
+
+        .export-btn:hover {
+            background: #dbeafe;
+            border-color: #93c5fd;
+        }
+
+        /* Table wrapper */
+        .excel-wrap {
+            padding: 1rem 1.1rem 1.1rem;
+            overflow: auto;
+        }
+
+        .excel {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            font-size: .9rem;
+            border: 1px solid var(--table-border);
             border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
             overflow: hidden;
         }
 
-        .table-scroll-wrap {
-            overflow-x: auto;
-        }
-
-        .pickup-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 900px;
-        }
-
-        .pickup-table thead th {
-            font-size: 11px;
-            font-weight: 600;
+        .excel thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: linear-gradient(135deg, var(--table-head-bg), var(--table-head-bg-soft));
+            color: var(--table-head-text);
             text-transform: uppercase;
-            letter-spacing: .06em;
-            color: var(--text-muted);
-            background: #fafafa;
-            border-bottom: 1px solid var(--border-soft);
-            padding: 8px 10px;
+            font-size: .72rem;
+            letter-spacing: .08em;
+            padding: .6rem .7rem;
             text-align: left;
-        }
-
-        .pickup-table tbody td {
-            border-bottom: 1px solid var(--border-soft);
-            padding: 10px 10px;
-            font-size: 13px;
-            vertical-align: middle;
-            color: var(--text-main);
-            background: #fff;
-        }
-
-        .pickup-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .pickup-table tbody tr:hover td {
-            background: #fcfcff;
-        }
-
-        .pickup-table td:nth-child(1) {
-            width: 40px;
-        }
-
-        .pickup-table td:nth-child(2) {
-            min-width: 160px;
-        }
-
-        .pickup-table td,
-        .pickup-table th {
+            font-weight: 600;
+            border-bottom: 0;
+            border-right: 1px solid rgba(55, 65, 81, 0.7);
             white-space: nowrap;
         }
 
-        .pickup-table td:nth-child(4) {
-            white-space: normal;
+        .excel thead th:first-child {
+            border-top-left-radius: 14px;
+        }
+
+        .excel thead th:last-child {
+            border-top-right-radius: 14px;
+            border-right: none;
+        }
+
+        .excel tbody td {
+            border-top: 1px solid var(--table-border);
+            border-right: 1px solid var(--table-border);
+            padding: .55rem .7rem;
+            vertical-align: middle;
+            color: var(--text);
+            font-weight: 400;
+            background: #fff;
+        }
+
+        .excel tbody tr:nth-child(even) td:not(.group-row td) {
+            background: var(--table-zebra);
+        }
+
+        .excel tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 14px;
+        }
+
+        .excel tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 14px;
+        }
+
+        .excel tbody tr:hover td {
+            background: var(--table-hover);
+        }
+
+        .excel th,
+        .excel td {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .excel tr td:first-child,
+        .excel thead th:first-child {
+            border-left: none;
+        }
+
+        .excel tbody tr td:last-child {
+            border-right: none;
+        }
+
+        /* Column helpers */
+        .col-index {
+            width: 56px;
+            text-align: right;
+            color: #6b7280;
+            font-size: .8rem;
+        }
+
+        .col-vendor {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .col-date {
+            white-space: nowrap;
+            font-size: .86rem;
+            color: #4b5563;
+        }
+
+        .col-text {
+            font-weight: 500;
+        }
+
+        .col-num,
+        .col-money,
+        .col-diff {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .col-money span.currency {
+            color: #6b7280;
+            font-size: .8rem;
+            margin-right: .18rem;
+        }
+
+        /* Pills for units */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: .12rem .55rem;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 500;
+            background: var(--neutral-soft);
+            color: #374151;
+            border: 1px solid #e5e7eb;
+        }
+
+        .pill.unit-pill {
+            background: var(--accent-soft);
+            border-color: var(--accent-border);
+            color: #1d4ed8;
+        }
+
+        .pill.unit-pill::before {
+            content: '◦';
+            font-size: .7rem;
+            margin-right: .15rem;
         }
 
         /* Vendor subtotal row */
         .group-row td {
+            background: #eef2ff !important;
+            border-top: 2px solid var(--table-border);
             font-weight: 600;
-            background: #fdf2f7;
-            border-top: 1px solid #f9d7e5;
-            border-bottom: 1px solid #f9d7e5;
+            color: #1d283a;
+            font-size: .88rem;
         }
 
-        .group-row .group-caption {
-            color: #b42360;
+        .group-caption {
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
         }
 
-        /* Qty diff colouring */
+        .group-caption::before {
+            content: '⏺';
+            font-size: .7rem;
+            color: #4f46e5;
+        }
+
+        /* Diff styles */
         .diff-up {
-            color: #b42318;
+            color: var(--danger);
             font-weight: 600;
         }
 
         .diff-down {
-            color: #027a48;
+            color: var(--success);
             font-weight: 600;
         }
 
-        /* Pagination container tweak */
-        .pickup-pagination {
-            padding: 10px 16px 14px;
+        .diff-zero {
+            color: #6b7280;
+            font-weight: 500;
         }
 
-        @media (max-width: 768px) {
-            .pickup-filter-form {
-                align-items: flex-start;
+        .diff-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: .25rem;
+            padding: .16rem .55rem;
+            border-radius: 999px;
+            font-size: .78rem;
+            min-width: 90px;
+        }
+
+        .diff-pill.up {
+            background: var(--danger-soft);
+        }
+
+        .diff-pill.down {
+            background: var(--success-soft);
+        }
+
+        .diff-pill.zero {
+            background: var(--neutral-soft);
+        }
+
+        .diff-pill span.unit {
+            opacity: .8;
+            font-size: .76rem;
+        }
+
+        /* Pagination alignment override (if needed) */
+        .pagination {
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 992px) {
+            .toolbar {
+                grid-template-columns: 1fr;
             }
 
-            .pickup-date-range {
+            .workbook-head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: .4rem;
+            }
+
+            .workbook-tools {
+                width: 100%;
                 justify-content: flex-start;
             }
 
-            .pickup-header {
-                align-items: flex-start;
+            .export-btn {
+                width: auto;
             }
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="pickup-page">
+    <div class="container container-page py-4">
 
-        {{-- FILTER BAR --}}
-        <form method="GET" action="{{ route('admin.pickups.manage') }}" id="filterForm" class="pickup-filter-form">
-            <div class="pickup-pills">
-                <button class="filter-pill {{ $preset === 'today' ? 'active' : '' }}" data-preset="today" type="button">
-                    Today
-                </button>
-                <button class="filter-pill {{ $preset === 'yesterday' ? 'active' : '' }}" data-preset="yesterday"
-                        type="button">
-                    Yesterday
-                </button>
-                <button class="filter-pill {{ $preset === 'tomorrow' ? 'active' : '' }}" data-preset="tomorrow"
-                        type="button">
-                    Tomorrow
-                </button>
-                <button class="filter-pill {{ $preset === 'this_week' ? 'active' : '' }}" data-preset="this_week"
-                        type="button">
-                    This Week
-                </button>
-                <button class="filter-pill {{ $preset === 'this_month' ? 'active' : '' }}" data-preset="this_month"
-                        type="button">
-                    This Month
-                </button>
+        {{-- Filters --}}
+        <form method="GET" action="{{ route('admin.pickups.manage') }}" id="filterForm" class="toolbar">
+            <div class="date-range">
+                <span>From</span>
+                <input type="date" name="start" value="{{ $start }}" />
+                <span>To</span>
+                <input type="date" name="end" value="{{ $end }}" />
             </div>
-
-            <div class="pickup-date-range">
-                <label>
-                    From
-                    <input type="date" name="start" value="{{ $start }}">
-                </label>
-                <label>
-                    To
-                    <input type="date" name="end" value="{{ $end }}">
-                </label>
-                <button class="btn-apply" type="submit">
-                    Apply
-                </button>
+            <div style="display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end">
+                <button class="btn-chip" data-preset="today" type="button">Today</button>
+                <button class="btn-chip" data-preset="yesterday" type="button">Yesterday</button>
+                <button class="btn-chip" data-preset="tomorrow" type="button">Tomorrow</button>
+                <button class="btn-chip" data-preset="this_week" type="button">This Week</button>
+                <button class="btn-chip" data-preset="this_month" type="button">This Month</button>
+                <button class="btn-chip btn-apply" type="submit">Apply</button>
             </div>
-
             <input type="hidden" name="preset" id="presetInput" value="{{ $preset }}">
         </form>
 
-        {{-- SMALL HEADER ABOVE TABLE --}}
+        {{-- Summary band --}}
         @php
+            // Page totals for chips
             $pageActual = $pickups->getCollection()->flatMap->flowerPickupItems->reduce(function ($carry, $it) {
                 $aprc = (float) ($it->price ?? 0);
                 $aqty = (float) ($it->quantity ?? 0);
@@ -338,136 +557,190 @@
             $pageItems = $pickups->getCollection()->flatMap->flowerPickupItems->count();
             $pageVendors = $pickups->getCollection()->pluck('vendor.vendor_id')->filter()->unique()->count();
         @endphp
-
-        <div class="pickup-header">
-            <div class="pickup-header-left">
-                <div class="pickup-title">Vendor Flower Pickups</div>
-                <div class="pickup-subtitle">
-                    Range:
-                    {{ \Carbon\Carbon::parse($start)->format('d M Y') }}
-                    –
-                    {{ \Carbon\Carbon::parse($end)->format('d M Y') }}
-                </div>
-            </div>
-            <div class="pickup-summary">
-                Income: ₹{{ number_format($pageActual, 2) }} ·
-                Items: {{ number_format($pageItems) }} ·
-                Vendors: {{ number_format($pageVendors) }}
-            </div>
-            <div>
-                <button class="btn-export" id="exportAllBtn" type="button">
-                    Export (XLSX)
-                </button>
+        <div class="band">
+            <h3>
+                {{ \Carbon\Carbon::parse($start)->format('M d') }} – {{ \Carbon\Carbon::parse($end)->format('M d, Y') }}
+                <span class="label">Pickup Summary</span>
+            </h3>
+            <div class="chips">
+                <span class="chip green">
+                    <span class="icon">💰</span>
+                    <span>Income</span> ₹{{ number_format($pageActual, 2) }}
+                </span>
+                <span class="chip orange">
+                    <span class="icon">📦</span>
+                    <span>Items</span> {{ number_format($pageItems) }}
+                </span>
+                <span class="chip blue">
+                    <span class="icon">🏪</span>
+                    <span>Vendors</span> {{ number_format($pageVendors) }}
+                </span>
             </div>
         </div>
 
-        {{-- TABLE CARD --}}
-        <div class="table-card">
-            <div class="table-scroll-wrap">
-                <table class="pickup-table" id="masterExcelTable">
+        {{-- Workbook --}}
+        <div class="workbook">
+            <div class="workbook-head">
+                <div>
+                    <div class="workbook-title">Pickup Items — Detailed</div>
+                    <div class="workbook-sub">
+                        Range: {{ \Carbon\Carbon::parse($start)->format('d M Y') }} —
+                        {{ \Carbon\Carbon::parse($end)->format('d M Y') }}
+                    </div>
+                </div>
+                <div class="workbook-tools">
+                    <button class="export-btn" id="exportAllBtn" type="button">
+                        Export (XLSX)
+                    </button>
+                </div>
+            </div>
+
+            <div class="excel-wrap">
+                <table class="excel" id="masterExcelTable">
                     <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Vendor</th>
-                        <th>Pickup Date</th>
-                        <th>Item</th>
-                        <th>Est. Qty</th>
-                        <th>Est. Unit</th>
-                        <th>Act. Qty</th>
-                        <th>Act. Unit</th>
-                        <th>Unit Price</th>
-                        <th>Line Total</th>
-                        <th>Qty Diff</th>
-                    </tr>
+                        <tr>
+                            <th class="col-index">#</th>
+                            <th class="col-vendor">Vendor</th>
+                            <th class="col-date">Pickup Date</th>
+                            <th class="col-text">Item</th>
+                            <th class="col-num">Est. Qty</th>
+                            <th>Est. Unit</th>
+                            <th class="col-num">Act. Qty</th>
+                            <th>Act. Unit</th>
+                            <th class="col-money">Unit Price</th>
+                            <th class="col-money">Line Total</th>
+                            <th class="col-diff">Qty Diff</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    @php
-                        $rowNo = 0;
-                        $byVendor = $pickups->getCollection()
-                            ->groupBy(fn($p) => optional($p->vendor)->vendor_name ?? 'Unknown Vendor');
-                    @endphp
-
-                    @foreach ($byVendor as $vendorName => $vendorPickups)
                         @php
-                            $vendorActSum = 0.0;
-                            $vendorQtyDiffSum = 0.0;
+                            $rowNo = 0;
+                            $byVendor = $pickups
+                                ->getCollection()
+                                ->groupBy(fn($p) => optional($p->vendor)->vendor_name ?? 'Unknown Vendor');
                         @endphp
 
-                        @foreach ($vendorPickups as $pickup)
+                        @foreach ($byVendor as $vendorName => $vendorPickups)
                             @php
-                                $pkDate = $pickup->pickup_date
-                                    ? \Carbon\Carbon::parse($pickup->pickup_date)->format('d M Y')
-                                    : '—';
+                                $vendorActSum = 0.0;
+                                $vendorQtyDiffSum = 0.0;
                             @endphp
 
-                            @foreach ($pickup->flowerPickupItems as $it)
+                            @foreach ($vendorPickups as $pickup)
                                 @php
-                                    $rowNo++;
-                                    $ename = optional($it->estUnit)->unit_name ?? ($unitMap[$it->est_unit_id] ?? '—');
-                                    $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
-
-                                    $eqty = (float) ($it->est_quantity ?? 0);
-                                    $aqty = (float) ($it->quantity ?? 0);
-                                    $aprc = (float) ($it->price ?? 0);
-                                    $ltotal = $it->item_total_price !== null
-                                        ? (float) $it->item_total_price
-                                        : $aprc * $aqty;
-
-                                    $diffUnit = $aname ?: $ename ?: '';
-                                    $qdiff = round($aqty - $eqty, 2);
-
-                                    $vendorActSum += $ltotal;
-                                    $vendorQtyDiffSum += $qdiff;
+                                    $pkDate = $pickup->pickup_date
+                                        ? \Carbon\Carbon::parse($pickup->pickup_date)->format('d M Y')
+                                        : '—';
                                 @endphp
-                                <tr>
-                                    <td>{{ $rowNo }}</td>
-                                    <td>{{ $vendorName }}</td>
-                                    <td>{{ $pkDate }}</td>
-                                    <td>{{ optional($it->flower)->name ?? '—' }}</td>
 
-                                    <td>{{ $eqty ? number_format($eqty, 2) : '—' }}</td>
-                                    <td>{{ $ename }}</td>
+                                @foreach ($pickup->flowerPickupItems as $it)
+                                    @php
+                                        $rowNo++;
+                                        $ename = optional($it->estUnit)->unit_name ?? ($unitMap[$it->est_unit_id] ?? '—');
+                                        $aname = optional($it->unit)->unit_name ?? ($unitMap[$it->unit_id] ?? '—');
 
-                                    <td>{{ $aqty ? number_format($aqty, 2) : '—' }}</td>
-                                    <td>{{ $aname }}</td>
+                                        $eqty = (float) ($it->est_quantity ?? 0);
+                                        $aqty = (float) ($it->quantity ?? 0);
+                                        $aprc = (float) ($it->price ?? 0);
+                                        $ltotal =
+                                            $it->item_total_price !== null
+                                                ? (float) $it->item_total_price
+                                                : $aprc * $aqty;
 
-                                    <td>₹ {{ number_format($aprc, 2) }}</td>
-                                    <td>₹ {{ number_format($ltotal, 2) }}</td>
+                                        // Prefer actual unit for diff; fallback to estimate unit
+                                        $diffUnit = $aname ?: $ename ?: '';
+                                        $qdiff = round($aqty - $eqty, 2);
 
-                                    <td class="{{ $qdiff > 0 ? 'diff-up' : ($qdiff < 0 ? 'diff-down' : '') }}">
-                                        {{ $qdiff > 0 ? '+' : '' }}{{ number_format($qdiff, 2) }}
-                                        @if ($diffUnit)
-                                            <span style="opacity:.8"> {{ $diffUnit }}</span>
-                                        @endif
-                                    </td>
-                                </tr>
+                                        $vendorActSum += $ltotal;
+                                        $vendorQtyDiffSum += $qdiff;
+
+                                        $diffClass = $qdiff > 0 ? 'up' : ($qdiff < 0 ? 'down' : 'zero');
+                                        $diffTextClass = $qdiff > 0 ? 'diff-up' : ($qdiff < 0 ? 'diff-down' : 'diff-zero');
+                                    @endphp
+                                    <tr>
+                                        <td class="col-index">{{ $rowNo }}</td>
+                                        <td class="col-vendor">{{ $vendorName }}</td>
+                                        <td class="col-date">{{ $pkDate }}</td>
+                                        <td class="col-text">{{ optional($it->flower)->name ?? '—' }}</td>
+
+                                        <td class="col-num">
+                                            {{ $eqty ? number_format($eqty, 2) : '—' }}
+                                        </td>
+                                        <td>
+                                            @if ($ename && $ename !== '—')
+                                                <span class="pill unit-pill">{{ $ename }}</span>
+                                            @else
+                                                <span class="pill">—</span>
+                                            @endif
+                                        </td>
+
+                                        <td class="col-num">
+                                            {{ $aqty ? number_format($aqty, 2) : '—' }}
+                                        </td>
+                                        <td>
+                                            @if ($aname && $aname !== '—')
+                                                <span class="pill unit-pill">{{ $aname }}</span>
+                                            @else
+                                                <span class="pill">—</span>
+                                            @endif
+                                        </td>
+
+                                        <td class="col-money">
+                                            <span class="currency">₹</span>{{ number_format($aprc, 2) }}
+                                        </td>
+                                        <td class="col-money">
+                                            <span class="currency">₹</span>{{ number_format($ltotal, 2) }}
+                                        </td>
+
+                                        <td class="col-diff {{ $diffTextClass }}">
+                                            <span class="diff-pill {{ $diffClass }}">
+                                                @if ($qdiff > 0)
+                                                    <span>+{{ number_format($qdiff, 2) }}</span>
+                                                @elseif ($qdiff < 0)
+                                                    <span>{{ number_format($qdiff, 2) }}</span>
+                                                @else
+                                                    <span>0.00</span>
+                                                @endif
+                                                @if ($diffUnit)
+                                                    <span class="unit">{{ $diffUnit }}</span>
+                                                @endif
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
                             @endforeach
-                        @endforeach
 
-                        {{-- vendor subtotal --}}
-                        <tr class="group-row">
-                            <td colspan="4">
-                                <span class="group-caption">Subtotal — {{ $vendorName }}</span>
-                            </td>
-                            <td colspan="5"></td>
-                            <td>₹ {{ number_format($vendorActSum, 2) }}</td>
-                            <td>{{ $vendorQtyDiffSum > 0 ? '+' : '' }}{{ number_format($vendorQtyDiffSum, 2) }}</td>
-                        </tr>
-                    @endforeach
+                            <tr class="group-row">
+                                <td colspan="5">
+                                    <span class="group-caption">Subtotal — {{ $vendorName }}</span>
+                                </td>
+                                <td></td>
+                                <td colspan="3" style="text-align:right;">
+                                    Actual (sum)
+                                </td>
+                                <td class="col-money">
+                                    <span class="currency">₹</span>{{ number_format($vendorActSum, 2) }}
+                                </td>
+                                <td class="col-diff">
+                                    {{ $vendorQtyDiffSum > 0 ? '+' : '' }}{{ number_format($vendorQtyDiffSum, 2) }}
+                                </td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            <div class="pickup-pagination d-flex justify-content-center">
-                {{ $pickups->withQueryString()->links() }}
-            </div>
+        {{-- Pagination --}}
+        <div class="d-flex justify-content-center">
+            {{ $pickups->withQueryString()->links() }}
         </div>
     </div>
 @endsection
 
 @section('scripts')
     <script>
-        // Preset pills click
+        // Presets
         document.querySelectorAll('[data-preset]').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.getElementById('presetInput').value = btn.getAttribute('data-preset');
@@ -476,25 +749,21 @@
         });
 
         // Clear preset when manual dates change
-        ['start', 'end'].forEach(name => {
-            const el = document.querySelector(`input[name="${name}"]`);
-            if (!el) return;
-            el.addEventListener('change', () => {
-                document.getElementById('presetInput').value = '';
-                // also remove active state from pills visually
-                document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
-            });
+        ['start', 'end'].forEach(n => {
+            const el = document.querySelector(`input[name="${n}"]`);
+            if (el) el.addEventListener('change', () => document.getElementById('presetInput').value = '');
         });
 
-        // Export whole table to XLSX
+        // Export whole table
         const exportBtn = document.getElementById('exportAllBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
                 const table = document.getElementById('masterExcelTable');
                 if (!table) return;
-
                 const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.table_to_sheet(table, { raw: true });
+                const ws = XLSX.utils.table_to_sheet(table, {
+                    raw: true
+                });
                 XLSX.utils.book_append_sheet(wb, ws, 'Pickups');
                 XLSX.writeFile(wb, 'Pickups_All.xlsx');
             });
