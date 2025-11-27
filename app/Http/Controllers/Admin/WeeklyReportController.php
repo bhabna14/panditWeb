@@ -16,6 +16,7 @@ use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\SubscriptionPauseResumeLog;
 use App\Models\FlowerRequest; // for customize orders
+use App\Models\OfficeFund;    // NEW: vendor fund received
 
 class WeeklyReportController extends Controller
 {
@@ -46,10 +47,16 @@ class WeeklyReportController extends Controller
                 'date'     => $d->toDateString(),
                 'dow'      => $d->format('l'),
                 'finance'  => [
-                    'income'      => 0,  // from FlowerPayment
-                    'expenditure' => 0,  // Purch from FlowerPickupDetails.total_price
+                    'income'       => 0,  // from FlowerPayment
+                    'expenditure'  => 0,  // Purch from FlowerPickupDetails.total_price
+                    'vendor_fund'  => 0,  // NEW: from OfficeFund
                 ],
-                'customer' => ['renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0],
+                'customer' => [
+                    'renew'     => 0,
+                    'new'       => 0,
+                    'pause'     => 0,
+                    'customize' => 0
+                ],
                 'vendors'  => [],   // vendor name => total paid to vendor that day
                 'riders'   => [],   // rider name  => delivered count that day
                 'total_delivery' => 0,
@@ -96,6 +103,26 @@ class WeeklyReportController extends Controller
         foreach ($expend as $row) {
             if (isset($days[$row->d])) {
                 $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
+            }
+        }
+
+        // NEW: Vendor Fund (OfficeFund) per day
+        // If you want to filter by category, you can add ->where('categories', 'Vendor Fund') here.
+        $vendorFund = OfficeFund::query()
+            ->select([
+                DB::raw("DATE(date) as d"),
+                DB::raw("SUM(amount) as amt"),
+            ])
+            ->whereBetween('date', [
+                $monthStart->toDateString(),
+                $monthEnd->toDateString(),
+            ])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($vendorFund as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['vendor_fund'] = (float)$row->amt;
             }
         }
 
@@ -230,7 +257,6 @@ class WeeklyReportController extends Controller
         sort($vendorColumns);
 
         /* ================= Deliveries per rider (counts, by created_at date) ================= */
-        // created_at is full DATETIME (2025-11-20 07:42:04), so we use that for the date.
         $deliv = DeliveryHistory::query()
             ->select([
                 DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
@@ -274,8 +300,17 @@ class WeeklyReportController extends Controller
                 $weekDays[$key] = $days[$key] ?? [
                     'date'     => $key,
                     'dow'      => $d->format('l'),
-                    'finance'  => ['income' => 0, 'expenditure' => 0],
-                    'customer' => ['renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0],
+                    'finance'  => [
+                        'income'      => 0,
+                        'expenditure' => 0,
+                        'vendor_fund' => 0,
+                    ],
+                    'customer' => [
+                        'renew'     => 0,
+                        'new'       => 0,
+                        'pause'     => 0,
+                        'customize' => 0
+                    ],
                     'vendors'  => [],
                     'riders'   => [],
                     'total_delivery' => 0,
@@ -284,20 +319,27 @@ class WeeklyReportController extends Controller
 
             // Week totals
             $weekTotals = [
-                'income' => 0, 'expenditure' => 0,
-                'renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0,
-                'vendors' => array_fill_keys($vendorColumns, 0.0),
-                'riders'  => array_fill_keys($deliveryCols, 0),
+                'income'       => 0,
+                'expenditure'  => 0,
+                'vendor_fund'  => 0,  // NEW
+                'renew'        => 0,
+                'new'          => 0,
+                'pause'        => 0,
+                'customize'    => 0,
+                'vendors'      => array_fill_keys($vendorColumns, 0.0),
+                'riders'       => array_fill_keys($deliveryCols, 0),
                 'total_delivery' => 0,
             ];
 
             foreach ($weekDays as $row) {
-                $weekTotals['income']      += $row['finance']['income'];
-                $weekTotals['expenditure'] += $row['finance']['expenditure'];
-                $weekTotals['renew']       += $row['customer']['renew'];
-                $weekTotals['new']         += $row['customer']['new'];
-                $weekTotals['pause']       += $row['customer']['pause'];
-                $weekTotals['customize']   += $row['customer']['customize'];
+                $weekTotals['income']       += $row['finance']['income'];
+                $weekTotals['expenditure']  += $row['finance']['expenditure'];
+                $weekTotals['vendor_fund']  += $row['finance']['vendor_fund'] ?? 0;
+
+                $weekTotals['renew']        += $row['customer']['renew'];
+                $weekTotals['new']          += $row['customer']['new'];
+                $weekTotals['pause']        += $row['customer']['pause'];
+                $weekTotals['customize']    += $row['customer']['customize'];
 
                 foreach ($vendorColumns as $v) {
                     $weekTotals['vendors'][$v] += $row['vendors'][$v] ?? 0;
@@ -321,20 +363,27 @@ class WeeklyReportController extends Controller
 
         // ---- Month totals
         $monthTotals = [
-            'income'      => 0, 'expenditure' => 0,
-            'renew'       => 0, 'new' => 0, 'pause' => 0, 'customize' => 0,
-            'vendors'     => array_fill_keys($vendorColumns, 0.0),
-            'riders'      => array_fill_keys($deliveryCols, 0),
+            'income'         => 0,
+            'expenditure'    => 0,
+            'vendor_fund'    => 0,  // NEW
+            'renew'          => 0,
+            'new'            => 0,
+            'pause'          => 0,
+            'customize'      => 0,
+            'vendors'        => array_fill_keys($vendorColumns, 0.0),
+            'riders'         => array_fill_keys($deliveryCols, 0),
             'total_delivery' => 0,
         ];
 
         foreach ($days as $row) {
-            $monthTotals['income']      += $row['finance']['income'];
-            $monthTotals['expenditure'] += $row['finance']['expenditure'];
-            $monthTotals['renew']       += $row['customer']['renew'];
-            $monthTotals['new']         += $row['customer']['new'];
-            $monthTotals['pause']       += $row['customer']['pause'];
-            $monthTotals['customize']   += $row['customer']['customize'];
+            $monthTotals['income']         += $row['finance']['income'];
+            $monthTotals['expenditure']    += $row['finance']['expenditure'];
+            $monthTotals['vendor_fund']    += $row['finance']['vendor_fund'] ?? 0;
+
+            $monthTotals['renew']          += $row['customer']['renew'];
+            $monthTotals['new']            += $row['customer']['new'];
+            $monthTotals['pause']          += $row['customer']['pause'];
+            $monthTotals['customize']      += $row['customer']['customize'];
 
             foreach ($vendorColumns as $v) {
                 $monthTotals['vendors'][$v] += $row['vendors'][$v] ?? 0;

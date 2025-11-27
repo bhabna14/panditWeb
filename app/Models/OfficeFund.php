@@ -19,7 +19,6 @@ class OfficeFund extends Model
         'paid_by',
         'received_by',
         'description',
-        // 'status', // uncomment only if your table has this column
     ];
 
     protected $casts = [

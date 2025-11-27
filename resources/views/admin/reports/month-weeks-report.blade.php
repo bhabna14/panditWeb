@@ -328,10 +328,17 @@
                                                 ₹{{ number_format($w['totals']['income']) }}</span>
                                             <span class="chip exp">Expense
                                                 ₹{{ number_format($w['totals']['expenditure']) }}</span>
+
+                                            {{-- NEW: Weekly Vendor Fund Received --}}
+                                            <span class="chip income">
+                                                Vendor Fund ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}
+                                            </span>
+
                                             <span class="chip deliv">Deliveries {{ $w['totals']['total_delivery'] }}</span>
                                         </div>
                                     </button>
                                 </h2>
+
                                 <div id="collapse-{{ $weekId }}" class="accordion-collapse collapse"
                                     aria-labelledby="heading-{{ $weekId }}" data-bs-parent="#weeksAccordion">
                                     <div class="accordion-body p-0">
