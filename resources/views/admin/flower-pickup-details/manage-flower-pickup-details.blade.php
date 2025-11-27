@@ -20,32 +20,18 @@
 @endsection
 
 @section('content')
-    @php
-        // Logged-in admin via "admins" guard (matches config/auth.php)
-        $admin = auth('admins')->user();          // ✅ FIXED
-        $adminRole = $admin->role ?? null;        // 'super_admin' / 'admin' / null
-    @endphp
-
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE Flower Pickup Details</span>
-            <div class="text-muted mt-1">
-                Today’s total:
-                <strong>₹{{ number_format((float) $totalExpensesday, 2) }}</strong>
+            <div class="text-muted mt-1">Today’s total: <strong>₹{{ number_format((float) $totalExpensesday, 2) }}</strong>
             </div>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15">
-                    <a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-danger text-white">
-                        Add Flower Pickup Request
-                    </a>
-                </li>
-                <li class="breadcrumb-item tx-15">
-                    <a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">
-                        Add Flower Pickup Details
-                    </a>
-                </li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}"
+                        class="btn btn-danger text-white">Add Flower Pickup Request</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}"
+                        class="btn btn-info text-white">Add Flower Pickup Details</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Details</li>
             </ol>
         </div>
@@ -96,7 +82,7 @@
         </div>
     </div>
 
-    {{-- Flower Details Modal --}}
+    {{-- Flower Details Modal (one shared) --}}
     <div class="modal fade" id="flowerDetailsModal" tabindex="-1" aria-labelledby="flowerDetailsModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -105,8 +91,7 @@
                     <h5 class="modal-title" id="flowerDetailsModalLabel">
                         <i class="fas fa-seedling"></i> Flower Pickup Details
                     </h5>
-                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="list-group" id="flowerItemsList">
@@ -122,7 +107,7 @@
         </div>
     </div>
 
-    {{-- Payment Modal --}}
+    {{-- Payment Modal (one shared) --}}
     <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -169,7 +154,7 @@
 @endsection
 
 @section('scripts')
-    <!-- DataTables -->
+    <!-- DataTables (one set only) -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -182,20 +167,25 @@
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
 
+    {{-- IMPORTANT: remove generic initializers that may re-init the same table --}}
+    {{-- <script src="{{ asset('assets/js/table-data.js') }}"></script> --}}
+
     <script>
         (function() {
             const tableSel = '#file-datatable';
             const filterEl = $('#filter');
 
+            // mark XHR globally (prevents auth redirects -> HTML)
             $.ajaxSetup({
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             });
 
+            // Avoid TN/3: destroy if already initialized (e.g. after PJAX or partial reload)
             if ($.fn.DataTable.isDataTable(tableSel)) {
                 $(tableSel).DataTable().clear().destroy();
-                $(tableSel).empty();
+                $(tableSel).empty(); // optional, clears cloned headers
             }
 
             const dt = $(tableSel).DataTable({
@@ -203,7 +193,7 @@
                 processing: true,
                 responsive: true,
                 deferRender: true,
-                retrieve: true,
+                retrieve: true, // return existing instance if called again
                 pageLength: 25,
                 lengthMenu: [10, 25, 50, 100],
                 order: [
@@ -316,7 +306,7 @@
                         '<li class="list-group-item text-danger">Failed to load items.</li>'));
             });
 
-            // Open payment modal
+            // Open payment modal, set action + hidden id
             $(tableSel).on('click', '.btn-open-payment', function() {
                 const id = $(this).data('id');
                 const action = $(this).data('action');
@@ -325,7 +315,7 @@
                 $('#paymentFeedback').removeClass('text-success text-danger').text('');
             });
 
-            // Submit payment via AJAX
+            // Submit payment via AJAX (with CSRF)
             $('#paymentForm').on('submit', function(e) {
                 e.preventDefault();
                 const $form = $(this);
@@ -343,7 +333,7 @@
                         },
                         body: formData
                     })
-                    .then(async(res) => {
+                    .then(async (res) => {
                         if (!res.ok) {
                             const txt = await res.text();
                             throw new Error(txt || 'Failed');
@@ -352,7 +342,7 @@
                     })
                     .then(() => {
                         $('#paymentFeedback').addClass('text-success').text('Saved.');
-                        dt.ajax.reload(null, false);
+                        dt.ajax.reload(null, false); // refresh current page
                         setTimeout(() => $('#paymentModal').modal('hide'), 500);
                     })
                     .catch(() => {

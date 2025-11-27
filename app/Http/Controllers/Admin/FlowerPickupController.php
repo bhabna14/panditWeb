@@ -15,8 +15,6 @@ use App\Models\OfficeTransaction;
 use App\Models\OfficeLedger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;  
-use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\Facades\DataTables;
 
 use Illuminate\Support\Facades\Log;
 
@@ -63,142 +61,14 @@ class FlowerPickupController extends Controller
 
         return redirect()->back()->with('error', 'Pickup request not found.');
     }
-
+    
     public function manageflowerpickupdetails(Request $request)
     {
+        // Use your real table name via the model (double underscore is fine)
         $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
             ->sum('total_price');
 
-        // current admin from "admins" guard
-        $admin = Auth::guard('admins')->user();
-        $isSuperAdmin = $admin && $admin->role === 'super_admin';
-
-        return view(
-            'admin.flower-pickup-details.manage-flower-pickup-details',
-            compact('totalExpensesday', 'isSuperAdmin')
-        );
-    }
-
-    public function flowerPickupDetailsData(Request $request)
-    {
-        // ✅ FIXED: use 'admins' guard (matches config/auth.php)
-        $admin        = Auth::guard('admins')->user();
-        $isSuperAdmin = $admin && $admin->role === 'super_admin';
-
-        $query = FlowerPickupDetails::with(['vendor', 'rider']); // adjust relations if different
-
-        // simple filter example (match your existing logic)
-        $filter = $request->get('filter', 'all');
-        $today  = Carbon::today();
-
-        switch ($filter) {
-            case 'todayexpenses':
-                $query->whereDate('pickup_date', $today);
-                break;
-            case 'todaypaidpickup':
-                $query->whereDate('pickup_date', $today)
-                    ->where('payment_status', 'Paid');
-                break;
-            case 'todaypendingpickup':
-                $query->whereDate('pickup_date', $today)
-                    ->where('payment_status', '!=', 'Paid');
-                break;
-            case 'monthlyexpenses':
-                $query->whereMonth('pickup_date', $today->month)
-                    ->whereYear('pickup_date', $today->year);
-                break;
-            case 'monthlypaidpickup':
-                $query->whereMonth('pickup_date', $today->month)
-                    ->whereYear('pickup_date', $today->year)
-                    ->where('payment_status', 'Paid');
-                break;
-            case 'monthlypendingpickup':
-                $query->whereMonth('pickup_date', $today->month)
-                    ->whereYear('pickup_date', $today->year)
-                    ->where('payment_status', '!=', 'Paid');
-                break;
-            default:
-                // "all" – no extra filter
-                break;
-        }
-
-        return DataTables::of($query)
-            ->addIndexColumn() // column 0
-            ->addColumn('pickup_id_col', function ($row) {      // column 1
-                return $row->pickup_id ?? $row->id;
-            })
-            ->addColumn('vendor_col', function ($row) {          // column 2
-                return optional($row->vendor)->vendor_name ?? 'N/A';
-            })
-            ->addColumn('rider_col', function ($row) {           // column 3
-                return optional($row->rider)->rider_name ?? 'N/A';
-            })
-            ->addColumn('flower_details_col', function ($row) {  // column 4
-                return '<button type="button" class="btn btn-sm btn-outline-info btn-view-items"
-                            data-id="' . $row->id . '">
-                            <i class="fas fa-leaf"></i> View
-                        </button>';
-            })
-            ->editColumn('pickup_date', function ($row) {        // column 5
-                return $row->pickup_date
-                    ? Carbon::parse($row->pickup_date)->format('d-m-Y')
-                    : 'N/A';
-            })
-            ->editColumn('delivery_date', function ($row) {      // column 6
-                return $row->delivery_date
-                    ? Carbon::parse($row->delivery_date)->format('d-m-Y')
-                    : 'N/A';
-            })
-            ->editColumn('total_price', function ($row) {        // column 7
-                return '₹' . number_format((float) $row->total_price, 2);
-            })
-            ->editColumn('payment_status', function ($row) {     // column 8
-                $class = $row->payment_status === 'Paid'
-                    ? 'badge bg-success'
-                    : 'badge bg-warning text-dark';
-
-                return '<span class="' . $class . '">' . e($row->payment_status) . '</span>';
-            })
-            ->editColumn('Status', function ($row) {             // column 9
-                $status = $row->Status ?? $row->status ?? 'N/A';
-                $class  = $status === 'Completed'
-                    ? 'badge bg-success'
-                    : 'badge bg-secondary';
-
-                return '<span class="' . $class . '">' . e($status) . '</span>';
-            })
-
-            // ====== ACTIONS COLUMN (ROLE CHECK HERE) ======
-            ->addColumn('actions', function ($row) use ($isSuperAdmin) {  // column 10
-                $buttons = '';
-
-                // everyone: payment button (if not paid)
-                if ($row->payment_status !== 'Paid') {
-                    $buttons .= '<button type="button"
-                                        class="btn btn-sm btn-success me-1 btn-open-payment"
-                                        data-id="' . $row->id . '"
-                                        data-action="' . route('admin.flowerpickupdetails.updatePayment', $row->id) . '">
-                                        <i class="fas fa-indian-rupee-sign"></i>
-                                    </button>';
-                }
-
-                // ONLY super_admin: edit button
-                if ($isSuperAdmin) {
-                    $buttons .= '<a href="' . route('admin.editflowerpickupdetails', $row->id) . '"
-                                    class="btn btn-sm btn-primary">
-                                    <i class="fas fa-edit"></i>
-                                 </a>';
-                }
-
-                return $buttons ?: '-';
-            })
-            ->rawColumns([
-                'flower_details_col',
-                'payment_status',
-                'Status',
-                'actions',
-            ])
-            ->make(true);
+        return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
     }
 
     public function ajaxFlowerPickupDetails(Request $request)
