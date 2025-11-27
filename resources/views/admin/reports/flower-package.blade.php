@@ -313,16 +313,16 @@
                                 {{ \Carbon\Carbon::parse($end)->format('d M Y') }}
                             </h5>
                             <div class="text-muted small">
-                                Days with flower cost: <strong>{{ $rangeDaysWithData }}</strong>
+                            No Of Days: <strong>{{ $rangeDaysWithData }}</strong>
                             </div>
                         </div>
                         <div class="text-end">
-                            <div class="fw-semibold text-muted small">Total cost (filtered range)</div>
+                            <div class="fw-semibold text-muted small">Total cost</div>
                             <div class="fs-4 money text-success">
                                 ₹{{ number_format($rangeTotal, 2) }}
                             </div>
                             <div class="small text-muted">
-                                Avg per active day:
+                                Avg per day:
                                 <span class="money">₹{{ number_format($rangeAvgPerDay, 2) }}</span>
                             </div>
                         </div>
@@ -555,40 +555,6 @@
                                                 @endforeach
                                             </div>
 
-                                            {{-- <div class="card border-0 shadow-sm mt-3">
-                                                <div class="card-header bg-white">
-                                                    <strong>Total Types and Quantity of Flower Needed for Tomorrow
-                                                        Delivery</strong>
-                                                </div>
-                                                <div class="card-body">
-                                                    <div class="table-responsive">
-                                                        <table class="table table-sm align-middle">
-                                                            <thead class="table-light">
-                                                                <tr>
-                                                                    <th>Item</th>
-                                                                    <th class="text-end">Total Qty</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @forelse($dayTotals as $it)
-                                                                    <tr>
-                                                                        <td>{{ $it['item_name'] }}</td>
-                                                                        <td class="text-end">
-                                                                            {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                                            {{ $it['total_unit_disp'] }}
-                                                                        </td>
-                                                                    </tr>
-                                                                @empty
-                                                                    <tr>
-                                                                        <td colspan="2" class="text-muted">No items.
-                                                                        </td>
-                                                                    </tr>
-                                                                @endforelse
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
-                                                </div>
-                                            </div> --}}
                                         @endif
                                     </div>
                                 </div>
