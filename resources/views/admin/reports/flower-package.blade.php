@@ -274,7 +274,7 @@
 
                         <div class="row row-tight mt-3">
                             <div class="col-12">
-                                <label class="form-label mb-1">Quick presets</label>
+                                {{-- <label class="form-label mb-1">Quick presets</label> --}}
                                 <div class="preset-chips">
                                     <button type="submit" name="preset" value="today"
                                         class="btn btn-outline-secondary {{ $preset === 'today' ? 'active' : '' }}">Today</button>
@@ -307,7 +307,7 @@
                     <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
                         <div>
                             <h5 class="mb-1">
-                                Summary for
+                                Estimate for
                                 {{ \Carbon\Carbon::parse($start)->format('d M Y') }}
                                 –
                                 {{ \Carbon\Carbon::parse($end)->format('d M Y') }}
@@ -332,7 +332,7 @@
                 {{-- Simple table view: date wise total + subtotal --}}
                 <div class="card shadow-sm mt-3">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">Daily Flower Cost</h6>
+                        <h6 class="mb-0">Estimate of flower cost</h6>
                         {{-- <span class="badge bg-light text-muted">
                             Subtotal:
                             <span class="money">₹{{ number_format($rangeTotal, 2) }}</span>
@@ -344,7 +344,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th style="width:45%">Date</th>
-                                        <th class="text-end">Total Cost (₹)</th>
+                                        <th class="text-end">Total Estimate (₹)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
