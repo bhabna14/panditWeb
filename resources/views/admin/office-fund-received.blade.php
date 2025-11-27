@@ -208,7 +208,6 @@
                                 <option value="cash" @selected(old('mode_of_payment')==='cash')>Cash</option>
                                 <option value="upi"  @selected(old('mode_of_payment')==='upi')>UPI</option>
                                 <option value="icici"  @selected(old('mode_of_payment')==='icici')>ICICI</option>
-
                             </select>
                             @error('mode_of_payment') <div class="invalid-feedback">{{ $message }}</div> @enderror
                         </div>

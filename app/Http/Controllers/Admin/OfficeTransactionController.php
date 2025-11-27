@@ -231,8 +231,8 @@ class OfficeTransactionController extends Controller
             'date'            => 'required|date',
             'categories'      => 'required|string|max:255',
             'amount'          => 'required|numeric|min:0',
-            'mode_of_payment' => 'required|string|in:cash,upi',
-            'paid_by'         => 'required|string|in:pankaj,subrat,basudha',
+            'mode_of_payment' => 'required|string',
+            'paid_by'         => 'required|string',
             'received_by'     => 'nullable|string|max:255', // keep nullable to match your form
             'description'     => 'nullable|string|max:500',
         ]);
