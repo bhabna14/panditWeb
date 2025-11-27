@@ -86,7 +86,7 @@
 
         <div class="card-body">
             {{-- Live Preview --}}
-            <div class="preview mb-3">
+            {{-- <div class="preview mb-3">
                 <div class="chip">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                          stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -131,7 +131,7 @@
                     </svg>
                     <span id="pv-mode">—</span>
                 </div>
-            </div>
+            </div> --}}
 
             <form action="{{ route('saveOfficeFund') }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
