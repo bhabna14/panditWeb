@@ -19,19 +19,36 @@
     </style>
 @endsection
 
+@php
+    // Detect current admin role; fallback to session value
+    $adminRole = optional(auth('admins')->user())->role ?? session('admin_role');
+    $canEdit   = $adminRole === 'super_admin'; // ✅ only super_admin can see Edit icon
+@endphp
+
 @section('content')
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE Flower Pickup Details</span>
-            <div class="text-muted mt-1">Today’s total: <strong>₹{{ number_format((float) $totalExpensesday, 2) }}</strong>
+            <div class="text-muted mt-1">
+                Today’s total:
+                <strong>₹{{ number_format((float) $totalExpensesday, 2) }}</strong>
             </div>
+
+            {{-- Optional: show current role for debugging (remove in production) --}}
+            {{-- <div class="text-muted mt-1">Role: {{ $adminRole ?? 'N/A' }}</div> --}}
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}"
-                        class="btn btn-danger text-white">Add Flower Pickup Request</a></li>
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}"
-                        class="btn btn-info text-white">Add Flower Pickup Details</a></li>
+                <li class="breadcrumb-item tx-15">
+                    <a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-danger text-white">
+                        Add Flower Pickup Request
+                    </a>
+                </li>
+                <li class="breadcrumb-item tx-15">
+                    <a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">
+                        Add Flower Pickup Details
+                    </a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Details</li>
             </ol>
         </div>
@@ -71,7 +88,7 @@
                                     <th>Total Price</th>
                                     <th>Payment Status</th>
                                     <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>Actions</th> {{-- Edit icon is inside this via DataTables --}}
                                 </tr>
                             </thead>
                             <tbody><!-- filled by DataTables --></tbody>
@@ -91,7 +108,8 @@
                     <h5 class="modal-title" id="flowerDetailsModalLabel">
                         <i class="fas fa-seedling"></i> Flower Pickup Details
                     </h5>
-                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="list-group" id="flowerItemsList">
@@ -174,6 +192,9 @@
         (function() {
             const tableSel = '#file-datatable';
             const filterEl = $('#filter');
+
+            // ✅ role-based flag from backend
+            const CAN_EDIT = @json($canEdit); // true only for super_admin
 
             // mark XHR globally (prevents auth redirects -> HTML)
             $.ajaxSetup({
@@ -265,6 +286,14 @@
                         title: 'Flower Pickup Details'
                     }
                 ],
+            });
+
+            // ✅ On each draw, hide Edit icon for non-super_admin
+            dt.on('draw.dt', function() {
+                if (!CAN_EDIT) {
+                    // Ensure your edit button in actions column has class "btn-edit"
+                    $(tableSel).find('.btn-edit').remove();
+                }
             });
 
             // Re-load on filter change

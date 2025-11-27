@@ -16,6 +16,9 @@ use App\Models\OfficeLedger;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;  
 
+use Illuminate\Support\Facades\Auth;
+use Yajra\DataTables\Facades\DataTables;
+
 use Illuminate\Support\Facades\Log;
 
 use Carbon\Carbon;
@@ -61,15 +64,82 @@ class FlowerPickupController extends Controller
 
         return redirect()->back()->with('error', 'Pickup request not found.');
     }
-    
     public function manageflowerpickupdetails(Request $request)
-    {
-        // Use your real table name via the model (double underscore is fine)
-        $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
-            ->sum('total_price');
+{
+    $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
+        ->sum('total_price');
 
-        return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
-    }
+    $adminRole = session('admin_role'); // or Auth::guard('admins')->user()->role ?? null;
+
+    return view(
+        'admin.flower-pickup-details.manage-flower-pickup-details',
+        compact('totalExpensesday', 'adminRole')
+    );
+}
+
+
+public function flowerPickupDetailsData(Request $request)
+{
+    // Base query (adjust relations/columns as you already have)
+    $query = FlowerPickupDetails::with(['vendor', 'rider']) // example relations
+        ->orderByDesc('pickup_date');
+
+    // --- Check current admin role ------------------------------------------
+    $admin   = Auth::guard('admins')->user();
+    $role    = $admin->role ?? session('admin_role');
+    $canEdit = ($role === 'super_admin');      // ✅ only super_admin can edit
+
+    return DataTables::of($query)
+        ->addIndexColumn() // for # column if you use it
+        ->editColumn('pickup_date', function ($row) {
+            return optional($row->pickup_date)->format('d-m-Y');
+        })
+        ->editColumn('delivery_date', function ($row) {
+            return optional($row->delivery_date)->format('d-m-Y');
+        })
+        ->editColumn('total_price', function ($row) {
+            return number_format((float) $row->total_price, 2);
+        })
+        // ---------------------------------------------------------------------
+        //  Actions column: build buttons and add Edit ONLY if $canEdit is true
+        // ---------------------------------------------------------------------
+        ->addColumn('actions', function ($row) use ($canEdit) {
+
+            // View items button (used by .btn-view-items in your JS)
+            $buttons = '
+                <button type="button"
+                        class="btn btn-sm btn-outline-info btn-view-items"
+                        data-id="' . $row->id . '">
+                    <i class="fas fa-eye"></i>
+                </button>
+            ';
+
+            // Payment button (used by .btn-open-payment in your JS)
+            $buttons .= '
+                <button type="button"
+                        class="btn btn-sm btn-outline-success btn-open-payment"
+                        data-id="' . $row->id . '"
+                        data-action="' . route('admin.flower-pickup-details.update-payment', $row->id) . '">
+                    <i class="fas fa-indian-rupee-sign"></i>
+                </button>
+            ';
+
+            // ✅ EDIT button: only for super_admin
+            if ($canEdit) {
+                $buttons .= '
+                    <a href="' . route('admin.editflowerpickupdetails', $row->id) . '"
+                       class="btn btn-sm btn-outline-primary btn-edit">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                ';
+            }
+
+            return $buttons;
+        })
+        ->rawColumns(['actions']) // important so HTML is not escaped
+        ->make(true);
+}
+
 
     public function ajaxFlowerPickupDetails(Request $request)
     {
