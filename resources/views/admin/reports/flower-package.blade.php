@@ -375,6 +375,13 @@
                 </div>
             @endif
 
+            <div class="card shadow-sm mt-3">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                    <h3 class="mb-0">Detailed Flower Estimate</h3>
+                    
+                </div>
+            </div>
+
             {{-- ============== DAY / MONTH ACCORDION ================= --}}
             @if ($mode === 'day')
                 @if (!$hasDaily)
