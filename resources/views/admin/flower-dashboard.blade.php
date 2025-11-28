@@ -108,11 +108,13 @@
         /* Section wrapper card (white base like screenshot) */
         .dashboard-section {
             border-radius: var(--card-radius);
-            background: #ffffff;
+            background-color: #ffffff !important;
             box-shadow: var(--card-shadow);
             border: 1px solid rgba(226, 232, 240, 0.9);
             padding-top: 18px;
             padding-bottom: 18px;
+            margin-left: 0;
+            margin-right: 0;
         }
 
         /* Metric tiles inside each section */
@@ -121,7 +123,6 @@
             position: relative;
             border-radius: var(--card-radius);
             border: 1px solid var(--card-border);
-            /* IMPORTANT: only base color, NOT gradient, so theme gradients show */
             background-color: #f9fafb;
             box-shadow: var(--card-shadow);
             transition:
@@ -162,10 +163,10 @@
             border-color: rgba(129, 140, 248, 0.85);
         }
 
-        /* --------- COLORFUL THEMES (project-wise palette) ---------- */
+        /* --------- COLORFUL THEMES (with !important) ---------- */
 
         .card-theme-sky {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 40%, #e0f2fe 100%);
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 40%, #e0f2fe 100%) !important;
         }
 
         .card-theme-sky::before {
@@ -175,7 +176,7 @@
         }
 
         .card-theme-indigo {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #c7d2fe 100%);
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #c7d2fe 100%) !important;
         }
 
         .card-theme-indigo::before {
@@ -185,7 +186,7 @@
         }
 
         .card-theme-violet {
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 40%, #fee2ff 100%);
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 40%, #fee2ff 100%) !important;
         }
 
         .card-theme-violet::before {
@@ -195,7 +196,7 @@
         }
 
         .card-theme-rose {
-            background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 40%, #fce7f3 100%);
+            background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 40%, #fce7f3 100%) !important;
         }
 
         .card-theme-rose::before {
@@ -205,7 +206,7 @@
         }
 
         .card-theme-amber {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 40%, #fef3c7 100%);
+            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 40%, #fef3c7 100%) !important;
         }
 
         .card-theme-amber::before {
@@ -215,7 +216,7 @@
         }
 
         .card-theme-emerald {
-            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 40%, #bbf7d0 100%);
+            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 40%, #bbf7d0 100%) !important;
         }
 
         .card-theme-emerald::before {
@@ -225,7 +226,7 @@
         }
 
         .card-theme-cyan {
-            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #cffafe 100%);
+            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #cffafe 100%) !important;
         }
 
         .card-theme-cyan::before {
@@ -235,7 +236,7 @@
         }
 
         .card-theme-lime {
-            background: linear-gradient(135deg, #f7fee7 0%, #ecfccb 40%, #d9f99d 100%);
+            background: linear-gradient(135deg, #f7fee7 0%, #ecfccb 40%, #d9f99d 100%) !important;
         }
 
         .card-theme-lime::before {
@@ -245,7 +246,7 @@
         }
 
         .card-theme-slate {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 40%, #e5e7eb 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 40%, #e5e7eb 100%) !important;
         }
 
         .card-theme-slate::before {
@@ -254,21 +255,21 @@
                     rgba(30, 64, 175, 0));
         }
 
-        /* Watch cards extra gradients */
+        /* Watch cards extra gradients (also !important) */
         .watch-card[data-color="amber"] {
-            background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fef9c3 100%);
+            background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fef9c3 100%) !important;
         }
 
         .watch-card[data-color="fuchsia"] {
-            background: linear-gradient(135deg, #fdf2ff 0%, #fce7f3 45%, #e0f2fe 100%);
+            background: linear-gradient(135deg, #fdf2ff 0%, #fce7f3 45%, #e0f2fe 100%) !important;
         }
 
         .watch-card[data-color="cyan"] {
-            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #eef2ff 100%);
+            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #eef2ff 100%) !important;
         }
 
         .watch-card[data-color="emerald"] {
-            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 45%, #e0f2fe 100%);
+            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 45%, #e0f2fe 100%) !important;
         }
 
         /* Typography to match Quick Template look */
@@ -333,20 +334,21 @@
 @endsection
 
 @section('content')
-    {{-- Each outer row now also has .dashboard-section for the white “panel” look --}}
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+    {{-- TODAY'S ORDER --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
                 <!-- New Subscription (WATCH) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
                         <div class="card sales-card watch-card card-theme-amber" data-color="amber">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">New Subscription</h6>
-                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}"
+                                        <h4 id="newUserSubscriptionCount"
+                                            data-initial="{{ $newUserSubscription }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $newUserSubscription }}
                                         </h4>
@@ -358,14 +360,15 @@
                 </div>
 
                 <!-- Renewed Subscription (WATCH) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
                         <div class="card sales-card watch-card card-theme-violet" data-color="fuchsia">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Renewed Subscription</h6>
-                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}"
+                                        <h4 id="renewSubscriptionCount"
+                                            data-initial="{{ $renewSubscription }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $renewSubscription }}
                                         </h4>
@@ -377,11 +380,11 @@
                 </div>
 
                 <!-- Customize Order (WATCH, main one) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card watch-card card-theme-cyan" data-color="cyan">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order</h6>
                                         <h4 id="ordersRequestedTodayCount"
@@ -397,7 +400,7 @@
                 </div>
 
                 <!-- Customize Order (Upcoming 3 Days) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
                         <div class="card sales-card card-theme-indigo">
                             <div class="row">
@@ -417,15 +420,16 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+    {{-- SUBSCRIPTION STATUS --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Subscription Status</h4>
             <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
                         <div class="card sales-card card-theme-rose">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Ends Today</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
@@ -438,7 +442,7 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
                         <div class="card sales-card card-theme-sky">
                             <div class="row">
@@ -455,7 +459,7 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
                         <div class="card sales-card card-theme-amber">
                             <div class="row">
@@ -472,13 +476,13 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
                         <div class="card sales-card card-theme-violet">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12"> New Order Assign Rider</h6>
+                                        <h6 class="mb-2 tx-12">New Order Assign Rider</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
                                             {{ $nonAssignedRidersCount }}
                                         </h4>
@@ -492,15 +496,16 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+    {{-- PAUSED SUBSCRIPTION --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
             <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
                         <div class="card sales-card card-theme-lime">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Paused Request</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">
@@ -513,11 +518,11 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
                         <div class="card sales-card card-theme-emerald">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Paused Subscription</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">
@@ -530,11 +535,11 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
                         <div class="card sales-card card-theme-sky">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Next-Day Pause</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">
@@ -547,11 +552,11 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
                         <div class="card sales-card card-theme-indigo">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Next-Day Resumed</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">
@@ -567,11 +572,12 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+    {{-- TODAY'S TRANSACTION --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card card-theme-emerald">
                             <div class="row">
@@ -589,11 +595,11 @@
                 </div>
 
                 <!-- Today Total Income -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.payments.index') }}" target="_blank">
                         <div class="card sales-card card-theme-violet">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Total Income</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
@@ -607,11 +613,11 @@
                 </div>
 
                 <!-- Today Total Expenditure -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
                         <div class="card sales-card position-relative card-theme-rose">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
@@ -626,7 +632,7 @@
                 </div>
 
                 <!-- Tomorrow Active Order -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
                         <div class="card sales-card card-theme-cyan">
                             <div class="row">
@@ -646,17 +652,18 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    {{-- TODAY'S RIDER DETAILS --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12">
             <h4 class="card-title-custom mb-4" style="font-size: 14px">Todays Rider Details</h4>
             <div class="row">
                 @foreach ($ridersData as $data)
-                    <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
+                    <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}"
-                            target="_blank" class="text-decoration-none">
+                           target="_blank" class="text-decoration-none">
                             <div class="sales-card card-theme-slate">
                                 <div class="row">
-                                    <div class="col-8">
+                                    <div class="col-12">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
                                             <h6 class="mb-2 text-dark tx-12">
                                                 {{ $data['rider']->rider_name }}
@@ -680,16 +687,17 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom" style="font-size: 14px"> Rider Details</h4>
+    {{-- RIDER DETAILS SUMMARY --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12">
+            <h4 class="card-title-custom" style="font-size: 14px">Rider Details</h4>
             <div class="row">
                 <!-- Total Riders -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
                         <div class="card sales-card card-theme-indigo">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Riders</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
@@ -703,11 +711,11 @@
                 </div>
 
                 <!-- Total Delivery Today (WATCH) -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card watch-card card-theme-emerald" data-color="emerald">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Delivery Today</h6>
                                         <h4 id="totalDeliveriesTodayCount"
@@ -723,12 +731,12 @@
                 </div>
 
                 <!-- Total Delivery in Month -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
-                        target="_blank">
+                       target="_blank">
                         <div class="card sales-card card-theme-amber">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Delivery in Month</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
@@ -742,11 +750,11 @@
                 </div>
 
                 <!-- Total Delivery -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
                         <div class="card sales-card card-theme-sky">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Delivery</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
@@ -762,11 +770,12 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+    {{-- MARKETING --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
             <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.visitPlace', ['filter' => 'todayVisitPlace']) }}" target="_blank">
                         <div class="card sales-card card-theme-rose">
                             <div class="row">
@@ -786,13 +795,14 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2 dashboard-section">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+    {{-- REFERRAL DETAILS --}}
+    <div class="row mt-2 dashboard-section">
+        <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
-                        target="_blank">
+                       target="_blank">
                         <div class="card sales-card card-theme-sky">
                             <div class="row">
                                 <div class="col-12">
@@ -808,9 +818,9 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
-                        target="_blank">
+                       target="_blank">
                         <div class="card sales-card card-theme-emerald">
                             <div class="row">
                                 <div class="col-12">
@@ -826,7 +836,7 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
                         <div class="card sales-card card-theme-amber">
                             <div class="row">
@@ -843,7 +853,7 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
                         <div class="card sales-card card-theme-violet">
                             <div class="row">
@@ -885,67 +895,24 @@
             const el = document.getElementById('welcomeSections');
             if (el) el.style.display = 'none';
         }, 5000);
-
-        // Single DateTime updater
-        function updateDateTime() {
-            const now = new Date();
-            const date1 = document.getElementById('todayDate');
-            const time1 = document.getElementById('liveTime');
-            const date2 = document.getElementById('current-date');
-            const time2 = document.getElementById('current-time');
-
-            if (date1) date1.textContent = now.toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            if (time1) time1.textContent = now.toLocaleTimeString();
-            if (date2) date2.textContent = now.toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            if (time2) time2.textContent = now.toLocaleTimeString();
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
     </script>
 
     <!-- Live metrics poll + colorful glow + initial fire + robust sound unlock -->
     <script>
         (function() {
-            // map watched metrics to DOM ids + color
-            const watchers = [{
-                    key: 'ordersRequestedToday',
-                    elId: 'ordersRequestedTodayCount',
-                    color: 'cyan'
-                }, // main - coming orders
-                {
-                    key: 'newUserSubscription',
-                    elId: 'newUserSubscriptionCount',
-                    color: 'amber'
-                },
-                {
-                    key: 'renewSubscription',
-                    elId: 'renewSubscriptionCount',
-                    color: 'fuchsia'
-                },
-                {
-                    key: 'totalDeliveriesToday',
-                    elId: 'totalDeliveriesTodayCount',
-                    color: 'emerald'
-                },
+            const watchers = [
+                { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount', color: 'cyan' },
+                { key: 'newUserSubscription', elId: 'newUserSubscriptionCount', color: 'amber' },
+                { key: 'renewSubscription', elId: 'renewSubscriptionCount', color: 'fuchsia' },
+                { key: 'totalDeliveriesToday', elId: 'totalDeliveriesTodayCount', color: 'emerald' },
             ];
 
-            const els = {},
-                prev = {};
+            const els = {}, prev = {};
             watchers.forEach(w => {
                 els[w.key] = document.getElementById(w.elId);
                 if (els[w.key]) {
                     const initAttr = parseInt(els[w.key].getAttribute('data-initial'), 10);
-                    const parsed = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent,
-                        10) || 0);
+                    const parsed = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent, 10) || 0);
                     prev[w.key] = parsed;
                 }
             });
@@ -954,7 +921,6 @@
                 return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
             }
 
-            // --- persistence helpers for "blink all day" ---
             const DAY_MS = 24 * 60 * 60 * 1000;
 
             function keyFor(wkey) {
@@ -962,30 +928,21 @@
             }
 
             function setBlinkUntil(wkey, ts) {
-                try {
-                    localStorage.setItem(keyFor(wkey), String(ts));
-                } catch (e) {}
+                try { localStorage.setItem(keyFor(wkey), String(ts)); } catch (e) {}
             }
 
             function getBlinkUntil(wkey) {
                 try {
                     const v = localStorage.getItem(keyFor(wkey));
                     return v ? parseInt(v, 10) : 0;
-                } catch (e) {
-                    return 0;
-                }
+                } catch (e) { return 0; }
             }
 
             function clearBlinkUntil(wkey) {
-                try {
-                    localStorage.removeItem(keyFor(wkey));
-                } catch (e) {}
+                try { localStorage.removeItem(keyFor(wkey)); } catch (e) {}
             }
 
-            // apply BOTH: border glow + background tint (via ::after)
-            function glow(el, color, {
-                persistMs = 0
-            } = {}) {
+            function glow(el, color, { persistMs = 0 } = {}) {
                 const card = findCard(el);
                 if (!card) return;
                 const borderCls = `pulse-glow--${color}`;
@@ -994,21 +951,18 @@
                 card.classList.add(borderCls, bgCls);
 
                 if (persistMs > 0) {
-                    // run forever (CSS .pulse-day forces infinite iteration)
                     card.classList.add('pulse-day');
                     setTimeout(() => {
-                        stopGlow(card, borderCls, bgCls, /*removePulseDay=*/ true);
+                        stopGlow(card, borderCls, bgCls, true);
                     }, persistMs);
                 } else {
-                    // quick cue ~6s; DO NOT remove pulse-day if present
                     setTimeout(() => {
-                        stopGlow(card, borderCls, bgCls, /*removePulseDay=*/ false);
+                        stopGlow(card, borderCls, bgCls, false);
                     }, 6000);
                 }
             }
 
             function stopGlow(card, borderCls, bgCls, removePulseDay) {
-                // If we’re in day-mode, keep classes; otherwise allow quick cleanup
                 if (!card.classList.contains('pulse-day')) {
                     card.classList.remove(borderCls, bgCls);
                 }
@@ -1018,8 +972,7 @@
             }
 
             // ---- audio (unlock + queue + throttle) ----
-            let audioEnabled = false,
-                audioCtx = null;
+            let audioEnabled = false, audioCtx = null;
             const beepQueue = [];
             let lastBeepAt = 0;
             const BEEP_COOLDOWN_MS = 3500;
@@ -1051,8 +1004,7 @@
                     const now = Date.now();
                     if (now - lastBeepAt < BEEP_COOLDOWN_MS) return;
                     lastBeepAt = now;
-                    const osc = audioCtx.createOscillator(),
-                        gain = audioCtx.createGain();
+                    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
                     osc.type = 'sine';
                     osc.frequency.value = freq;
                     gain.gain.value = 0.0001;
@@ -1061,9 +1013,7 @@
                     gain.gain.exponentialRampToValueAtTime(0.07, audioCtx.currentTime + 0.02);
                     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
                     setTimeout(() => {
-                        try {
-                            osc.stop();
-                        } catch (e) {}
+                        try { osc.stop(); } catch (e) {}
                     }, ms + 60);
                 } catch (e) {}
             }
@@ -1079,10 +1029,7 @@
             function setupUnlockUI() {
                 const pill = document.getElementById('sound-unlock');
                 const hide = () => pill && pill.classList.add('hidden');
-                if (audioEnabled) {
-                    hide();
-                    return;
-                }
+                if (audioEnabled) { hide(); return; }
                 if (pill) pill.classList.remove('hidden');
                 const unlock = () => {
                     ensureAudio();
@@ -1096,7 +1043,6 @@
                 pill && pill.addEventListener('click', unlock, true);
             }
 
-            // initial: re-apply 24h blink if active; only do quick cue if NOT in day-mode
             function initialKick() {
                 watchers.forEach(w => {
                     const el = els[w.key];
@@ -1107,13 +1053,11 @@
                     const dayActive = until && Date.now() < until;
 
                     if (dayActive) {
-                        glow(el, w.color, {
-                            persistMs: until - Date.now()
-                        });
+                        glow(el, w.color, { persistMs: until - Date.now() });
                     }
 
                     if (!dayActive && val > 0) {
-                        glow(el, w.color); // quick cue only if not in day-mode
+                        glow(el, w.color);
                         if (w.key === 'ordersRequestedToday') {
                             beep(260, 1200);
                             setTimeout(() => beep(220, 900), 160);
@@ -1130,9 +1074,7 @@
                 try {
                     const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
                     const res = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json'
-                        },
+                        headers: { 'Accept': 'application/json' },
                         cache: 'no-store'
                     });
                     if (!res.ok) throw new Error('Bad response');
@@ -1153,13 +1095,11 @@
                                 if (w.key === 'ordersRequestedToday') {
                                     const untilTs = Date.now() + DAY_MS;
                                     setBlinkUntil(w.key, untilTs);
-                                    glow(el, w.color, {
-                                        persistMs: DAY_MS
-                                    }); // 24h continuous blink
+                                    glow(el, w.color, { persistMs: DAY_MS });
                                     beep(300, 1250);
                                     setTimeout(() => beep(240, 920), 170);
                                 } else {
-                                    glow(el, w.color); // quick cue for others
+                                    glow(el, w.color);
                                     beep(200, 880);
                                 }
                             }
@@ -1167,30 +1107,8 @@
                         }
                     });
                 } catch (e) {
-                    /* optional console.warn(e) */
+                    // silent
                 }
-            }
-
-            // keep your datetime updater if you use it elsewhere
-            function updateDateTimeInner() {
-                const now = new Date();
-                const date1 = document.getElementById('todayDate');
-                const time1 = document.getElementById('liveTime');
-                const date2 = document.getElementById('current-date');
-                const time2 = document.getElementById('current-time');
-                if (date1) date1.textContent = now.toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                if (time1) time1.textContent = now.toLocaleTimeString();
-                if (date2) date2.textContent = now.toLocaleDateString(undefined, {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                if (time2) time2.textContent = now.toLocaleTimeString();
             }
 
             document.addEventListener('visibilitychange', () => {
@@ -1198,10 +1116,8 @@
             });
             document.addEventListener('DOMContentLoaded', () => {
                 setupUnlockUI();
-                updateDateTimeInner();
-                setInterval(updateDateTimeInner, 1000);
-                initialKick(); // re-apply day-long blink if active
-                poll(); // initial sync
+                initialKick();
+                poll();
                 setInterval(poll, 5000);
             });
         })();
