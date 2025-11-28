@@ -34,12 +34,17 @@
             --nu-shell-radius: 20px;
         }
 
-        /* ====== SECTION SHELL (outer row card) – like big white tile ====== */
+        /* Soft page bg (like notification page) */
+        body {
+            background-color: #f8fafc;
+        }
+
+        /* ---------- Outer white shell around each section ---------- */
         .dashboard-shell-card {
             border-radius: var(--nu-shell-radius);
             border: 1px solid #e2e8f0;
             background: #ffffff;
-            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
             padding: 1.25rem 1.5rem 1.4rem;
             margin-top: 1rem;
         }
@@ -50,18 +55,13 @@
             letter-spacing: 0.02em;
         }
 
-        /* Slightly soften the page background if not already */
-        body {
-            background-color: #f8fafc;
-        }
-
-        /* ====== METRIC CARD – matches notification template look ====== */
+        /* ---------- Metric cards (same spirit as Quick Templates) ---------- */
         .dash-metric-card {
             position: relative;
             border-radius: var(--nu-card-radius);
             border: 1px solid rgba(148, 163, 184, 0.45);
             background: linear-gradient(135deg, #eef2ff, #e0f2fe);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); /* soft shadow below card */
             overflow: hidden;
             transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
         }
@@ -69,11 +69,11 @@
         .dash-metric-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 22px 48px rgba(15, 23, 42, 0.14);
-            border-color: rgba(129, 140, 248, 0.8);
+            border-color: rgba(129, 140, 248, 0.9);
         }
 
-        /* Colored corner blob like notification templates */
-        .dash-metric-card::after {
+        /* Corner blob – use ::before so ::after is free for pulse-bg */
+        .dash-metric-card::before {
             content: "";
             position: absolute;
             right: -40px;
@@ -81,14 +81,14 @@
             width: 120px;
             height: 120px;
             border-radius: 999px;
-            opacity: .22;
+            opacity: 0.24;
             background: radial-gradient(circle at 30% 30%, #4f46e5, #0ea5e9);
+            z-index: 0;
         }
 
-        /* Text hierarchy inside cards */
         .dash-metric-card h6,
         .dash-metric-card h5 {
-            font-size: .8rem;
+            font-size: .78rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: .08em;
@@ -109,12 +109,12 @@
             font-weight: 500;
         }
 
-        /* ====== COLOR VARIANTS (match the pastel chips feel) ====== */
+        /* ---------- Color variants (pastel gradient like templates) ---------- */
         .dash-metric-card--amber {
             background: linear-gradient(135deg, var(--nu-amber-soft), #fffbeb);
         }
 
-        .dash-metric-card--amber::after {
+        .dash-metric-card--amber::before {
             background: radial-gradient(circle at 30% 30%, #fbbf24, #f97316);
         }
 
@@ -122,7 +122,7 @@
             background: linear-gradient(135deg, var(--nu-fuchsia-soft), #fdf4ff);
         }
 
-        .dash-metric-card--fuchsia::after {
+        .dash-metric-card--fuchsia::before {
             background: radial-gradient(circle at 30% 30%, #e879f9, #c026d3);
         }
 
@@ -130,7 +130,7 @@
             background: linear-gradient(135deg, var(--nu-cyan-soft), #f0f9ff);
         }
 
-        .dash-metric-card--cyan::after {
+        .dash-metric-card--cyan::before {
             background: radial-gradient(circle at 30% 30%, #22d3ee, #0ea5e9);
         }
 
@@ -138,7 +138,7 @@
             background: linear-gradient(135deg, var(--nu-indigo-soft), #eef2ff);
         }
 
-        .dash-metric-card--indigo::after {
+        .dash-metric-card--indigo::before {
             background: radial-gradient(circle at 30% 30%, #6366f1, #4f46e5);
         }
 
@@ -146,7 +146,7 @@
             background: linear-gradient(135deg, var(--nu-emerald-soft), #f0fdf4);
         }
 
-        .dash-metric-card--emerald::after {
+        .dash-metric-card--emerald::before {
             background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
         }
 
@@ -154,7 +154,7 @@
             background: linear-gradient(135deg, var(--nu-pink-soft), #fff1f2);
         }
 
-        .dash-metric-card--pink::after {
+        .dash-metric-card--pink::before {
             background: radial-gradient(circle at 30% 30%, #ec4899, #db2777);
         }
 
@@ -162,17 +162,26 @@
             background: linear-gradient(135deg, var(--nu-slate-soft), #e5e7eb);
         }
 
-        .dash-metric-card--slate::after {
+        .dash-metric-card--slate::before {
             background: radial-gradient(circle at 30% 30%, #64748b, #475569);
         }
 
-        /* Make all inner cards use our metric style */
+        /* Base sales-card – keep pulse behaviour & allow bg layers */
         .sales-card,
         .card.sales-card {
             position: relative;
             border-radius: var(--nu-card-radius);
+            transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease, border-color .35s ease;
+            will-change: background-color, transform, box-shadow, border-color;
             background-clip: padding-box;
             overflow: hidden;
+        }
+
+        /* elevate direct children above pseudo-layers */
+        .sales-card>*,
+        .card.sales-card>* {
+            position: relative;
+            z-index: 1;
         }
 
         /* ========= Colorful pulse glows (border halo) ========= */
@@ -252,7 +261,7 @@
             }
         }
 
-        /* ========= Background blink via ::after (works with gradients) ========= */
+        /* ========= NEW: background blink using a pseudo-element (after) ========= */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
@@ -273,6 +282,7 @@
             animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
+        /* pseudo-element layer under content (but above ::before blob) */
         .pulse-bg--cyan::after,
         .pulse-bg--emerald::after,
         .pulse-bg--fuchsia::after,
@@ -282,7 +292,7 @@
             inset: 0;
             border-radius: inherit;
             pointer-events: none;
-            z-index: 0;
+            z-index: 1;
             background: transparent;
         }
 
@@ -296,13 +306,6 @@
             50% {
                 background: var(--tint);
             }
-        }
-
-        /* children above ::after layer */
-        .sales-card>*,
-        .card.sales-card>* {
-            position: relative;
-            z-index: 1;
         }
 
         /* --- Sound unlock pill --- */
@@ -364,8 +367,7 @@
                 <!-- Renewed Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--fuchsia watch-card"
-                            data-color="fuchsia">
+                        <div class="card sales-card dash-metric-card dash-metric-card--fuchsia watch-card" data-color="fuchsia">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -381,7 +383,7 @@
                     </a>
                 </div>
 
-                <!-- Customize Order (WATCH, main one) -->
+                <!-- Customize Order (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card dash-metric-card dash-metric-card--cyan watch-card" data-color="cyan">
@@ -400,7 +402,7 @@
                     </a>
                 </div>
 
-                <!-- Customize Order (Upcoming 3 Days) -->
+                <!-- Customize Order (Next 3 Days) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
                         <div class="card sales-card dash-metric-card dash-metric-card--indigo">
@@ -588,7 +590,7 @@
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h5 class="mb-2 tx-12">Active Subscription / Total Delivery</h5>
+                                        <h5 class="mb-2 tx-12">Active Subscription/Total Delivery</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
                                             {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}
                                         </h4>
@@ -718,8 +720,7 @@
                 <!-- Total Delivery Today (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--emerald watch-card"
-                            data-color="emerald">
+                        <div class="card sales-card dash-metric-card dash-metric-card--emerald watch-card" data-color="emerald">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -737,8 +738,7 @@
 
                 <!-- Delivery in Month -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
-                        target="_blank">
+                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}" target="_blank">
                         <div class="card sales-card dash-metric-card dash-metric-card--cyan">
                             <div class="row">
                                 <div class="col-8">
@@ -802,7 +802,7 @@
     </div>
 
     {{-- Referal Details --}}
-    <div class="row card sales-card dashboard-shell-card mb-3">
+    <div class="row card sales-card dashboard-shell-card">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
@@ -929,14 +929,15 @@
         setInterval(updateDateTime, 1000);
     </script>
 
-    <!-- Live metrics poll + colorful glow + sound unlock (unchanged) -->
+    <!-- Live metrics poll + colorful glow + initial fire + robust sound unlock -->
     <script>
         (function() {
+            // map watched metrics to DOM ids + color
             const watchers = [{
                     key: 'ordersRequestedToday',
                     elId: 'ordersRequestedTodayCount',
                     color: 'cyan'
-                },
+                }, // main - coming orders
                 {
                     key: 'newUserSubscription',
                     elId: 'newUserSubscriptionCount',
@@ -970,6 +971,7 @@
                 return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
             }
 
+            // --- persistence helpers for "blink all day" ---
             const DAY_MS = 24 * 60 * 60 * 1000;
 
             function keyFor(wkey) {
@@ -997,6 +999,7 @@
                 } catch (e) {}
             }
 
+            // apply BOTH: border glow + background tint (via ::after)
             function glow(el, color, {
                 persistMs = 0
             } = {}) {
@@ -1008,18 +1011,21 @@
                 card.classList.add(borderCls, bgCls);
 
                 if (persistMs > 0) {
+                    // run forever (CSS .pulse-day forces infinite iteration)
                     card.classList.add('pulse-day');
                     setTimeout(() => {
-                        stopGlow(card, borderCls, bgCls, true);
+                        stopGlow(card, borderCls, bgCls, /*removePulseDay=*/ true);
                     }, persistMs);
                 } else {
+                    // quick cue ~6s; DO NOT remove pulse-day if present
                     setTimeout(() => {
-                        stopGlow(card, borderCls, bgCls, false);
+                        stopGlow(card, borderCls, bgCls, /*removePulseDay=*/ false);
                     }, 6000);
                 }
             }
 
             function stopGlow(card, borderCls, bgCls, removePulseDay) {
+                // If we’re in day-mode, keep classes; otherwise allow quick cleanup
                 if (!card.classList.contains('pulse-day')) {
                     card.classList.remove(borderCls, bgCls);
                 }
@@ -1028,6 +1034,7 @@
                 }
             }
 
+            // ---- audio (unlock + queue + throttle) ----
             let audioEnabled = false,
                 audioCtx = null;
             const beepQueue = [];
@@ -1061,20 +1068,15 @@
                     const now = Date.now();
                     if (now - lastBeepAt < BEEP_COOLDOWN_MS) return;
                     lastBeepAt = now;
-
                     const osc = audioCtx.createOscillator(),
                         gain = audioCtx.createGain();
-
                     osc.type = 'sine';
                     osc.frequency.value = freq;
                     gain.gain.value = 0.0001;
-
                     osc.connect(gain).connect(audioCtx.destination);
                     osc.start();
-
                     gain.gain.exponentialRampToValueAtTime(0.07, audioCtx.currentTime + 0.02);
                     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
-
                     setTimeout(() => {
                         try {
                             osc.stop();
@@ -1094,14 +1096,11 @@
             function setupUnlockUI() {
                 const pill = document.getElementById('sound-unlock');
                 const hide = () => pill && pill.classList.add('hidden');
-
                 if (audioEnabled) {
                     hide();
                     return;
                 }
-
                 if (pill) pill.classList.remove('hidden');
-
                 const unlock = () => {
                     ensureAudio();
                     hide();
@@ -1109,12 +1108,12 @@
                     window.removeEventListener('keydown', unlock, true);
                     pill && pill.removeEventListener('click', unlock, true);
                 };
-
                 window.addEventListener('click', unlock, true);
                 window.addEventListener('keydown', unlock, true);
                 pill && pill.addEventListener('click', unlock, true);
             }
 
+            // initial: re-apply 24h blink if active; only do quick cue if NOT in day-mode
             function initialKick() {
                 watchers.forEach(w => {
                     const el = els[w.key];
@@ -1131,7 +1130,7 @@
                     }
 
                     if (!dayActive && val > 0) {
-                        glow(el, w.color);
+                        glow(el, w.color); // quick cue only if not in day-mode
                         if (w.key === 'ordersRequestedToday') {
                             beep(260, 1200);
                             setTimeout(() => beep(220, 900), 160);
@@ -1173,52 +1172,31 @@
                                     setBlinkUntil(w.key, untilTs);
                                     glow(el, w.color, {
                                         persistMs: DAY_MS
-                                    });
+                                    }); // 24h continuous blink
                                     beep(300, 1250);
                                     setTimeout(() => beep(240, 920), 170);
                                 } else {
-                                    glow(el, w.color);
+                                    glow(el, w.color); // quick cue for others
                                     beep(200, 880);
                                 }
                             }
                             prev[w.key] = newVal;
                         }
                     });
-                } catch (e) {}
-            }
-
-            function updateDateTime() {
-                const now = new Date();
-                const date1 = document.getElementById('todayDate');
-                const time1 = document.getElementById('liveTime');
-                const date2 = document.getElementById('current-date');
-                const time2 = document.getElementById('current-time');
-
-                if (date1) date1.textContent = now.toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                if (time1) time1.textContent = now.toLocaleTimeString();
-                if (date2) date2.textContent = now.toLocaleDateString(undefined, {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                if (time2) time2.textContent = now.toLocaleTimeString();
+                } catch (e) {
+                    /* optional console.warn(e) */
+                }
             }
 
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') poll();
             });
-
             document.addEventListener('DOMContentLoaded', () => {
                 setupUnlockUI();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
-                initialKick();
-                poll();
+                initialKick(); // re-apply day-long blink if active
+                poll(); // initial sync
                 setInterval(poll, 5000);
             });
         })();
