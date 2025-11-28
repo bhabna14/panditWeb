@@ -16,7 +16,13 @@
             --tab2: #06b6d4;
             --tab3: #22c55e;
             --tab4: #f59e0b;
-            --chip: #eff6ff
+            --chip: #eff6ff;
+
+            /* Column text colors */
+            --col-date: #1d4ed8;     /* blue */
+            --col-finance: #047857;  /* green */
+            --col-vendor: #7c3aed;   /* purple */
+            --col-rider: #ea580c;    /* orange */
         }
 
         body,
@@ -232,6 +238,45 @@
             color: #1e40af;
             border-color: #e1e9ff
         }
+
+        .chip.vendor-fund {
+            background: #ecfeff;
+            color: #0369a1;
+            border-color: #bae6fd;
+        }
+
+        .chip.balance {
+            background: #eef2ff;
+            color: #4338ca;
+            border-color: #c7d2fe;
+        }
+
+        /* Column color coding (text-only for readability) */
+        th.col-date,
+        td.col-date,
+        th.col-dow,
+        td.col-dow {
+            color: var(--col-date);
+            font-weight: 600;
+        }
+
+        th.col-finance,
+        td.col-finance {
+            color: var(--col-finance);
+            font-weight: 600;
+        }
+
+        th.col-vendor,
+        td.col-vendor {
+            color: var(--col-vendor);
+            font-weight: 600;
+        }
+
+        th.col-rider,
+        td.col-rider {
+            color: var(--col-rider);
+            font-weight: 600;
+        }
     </style>
 @endsection
 
@@ -278,8 +323,14 @@
                     <div class="h4 value">₹{{ number_format($monthTotals['expenditure']) }}</div>
                 </div>
                 <div class="kpi">
-                    <div class="label">Total Deliveries (Month)</div>
-                    <div class="h4 value">{{ $monthTotals['total_delivery'] }}</div>
+                    <div class="label">Available Balance (Month)</div>
+                    <div class="h4 value">
+                        ₹{{ number_format($monthTotals['available_balance'] ?? 0) }}
+                    </div>
+                    <div class="small text-muted mt-1">
+                        Vendor Fund ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}
+                        − Expense ₹{{ number_format($monthTotals['expenditure']) }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -322,19 +373,31 @@
                                         data-bs-toggle="collapse" data-bs-target="#collapse-{{ $weekId }}"
                                         aria-expanded="false" aria-controls="collapse-{{ $weekId }}">
                                         <div class="d-flex flex-wrap align-items-center gap-2">
-                                            <span class="me-1">Week {{ $i + 1 }} <small
-                                                    class="text-muted">({{ $title }})</small></span>
-                                            <span class="chip income">Income
-                                                ₹{{ number_format($w['totals']['income']) }}</span>
-                                            <span class="chip exp">Expense
-                                                ₹{{ number_format($w['totals']['expenditure']) }}</span>
+                                            <span class="me-1">Week {{ $i + 1 }}
+                                                <small class="text-muted">({{ $title }})</small>
+                                            </span>
 
-                                            {{-- NEW: Weekly Vendor Fund Received --}}
                                             <span class="chip income">
+                                                Income ₹{{ number_format($w['totals']['income']) }}
+                                            </span>
+
+                                            <span class="chip exp">
+                                                Expense ₹{{ number_format($w['totals']['expenditure']) }}
+                                            </span>
+
+                                            {{-- Weekly Vendor Fund --}}
+                                            <span class="chip vendor-fund">
                                                 Vendor Fund ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}
                                             </span>
 
-                                            <span class="chip deliv">Deliveries {{ $w['totals']['total_delivery'] }}</span>
+                                            {{-- Weekly Available Balance = Vendor Fund - Expense --}}
+                                            <span class="chip balance">
+                                                Avail Bal ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}
+                                            </span>
+
+                                            <span class="chip deliv">
+                                                Deliveries {{ $w['totals']['total_delivery'] }}
+                                            </span>
                                         </div>
                                     </button>
                                 </h2>
@@ -346,18 +409,20 @@
                                             <table class="table table-sm table-striped table-hover align-middle mb-2">
                                                 <thead>
                                                     <tr>
-                                                        <th rowspan="2">Date</th>
-                                                        <th rowspan="2">Day</th>
-                                                        <th colspan="2">Finance</th>
+                                                        <th rowspan="2" class="col-date">Date</th>
+                                                        <th rowspan="2" class="col-dow">Day</th>
+                                                        <th colspan="2" class="col-finance">Finance</th>
                                                         <th colspan="4">Customer</th>
-                                                        <th colspan="{{ max(count($vendorColumns), 1) }}">Vendor Report
+                                                        <th colspan="{{ max(count($vendorColumns), 1) }}"
+                                                            class="col-vendor">Vendor Report
                                                         </th>
-                                                        <th colspan="{{ 1 + max(count($deliveryCols), 1) }}">Rider
+                                                        <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
+                                                            class="col-rider">Rider
                                                             Deliveries</th>
                                                     </tr>
                                                     <tr>
-                                                        <th>Incm</th>
-                                                        <th>Purch</th>
+                                                        <th class="col-finance">Incm</th>
+                                                        <th class="col-finance">Purch</th>
 
                                                         <th>Renew</th>
                                                         <th>New</th>
@@ -365,15 +430,15 @@
                                                         <th>Customize</th>
 
                                                         @forelse($vendorColumns as $v)
-                                                            <th>{{ $v }}</th>
+                                                            <th class="col-vendor">{{ $v }}</th>
                                                         @empty
                                                             <th>—</th>
                                                         @endforelse
 
-                                                        <th>Dlvy</th>
+                                                        <th class="col-rider">Dlvy</th>
                                                         @forelse($deliveryCols as $r)
                                                             {{-- SHOW ONLY FIRST 4 LETTERS OF RIDER NAME --}}
-                                                            <th title="{{ $r }}">
+                                                            <th title="{{ $r }}" class="col-rider">
                                                                 {{ \Illuminate\Support\Str::substr($r, 0, 4) }}</th>
                                                         @empty
                                                             <th>—</th>
@@ -383,13 +448,14 @@
                                                 <tbody>
                                                     @foreach ($w['days'] as $d)
                                                         <tr>
-                                                            <td>{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}
+                                                            <td class="col-date">
+                                                                {{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}
                                                             </td>
-                                                            <td class="text-muted">{{ $d['dow'] }}</td>
+                                                            <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
-                                                            <td class="money">
+                                                            <td class="money col-finance">
                                                                 ₹{{ number_format($d['finance']['income']) }}</td>
-                                                            <td class="money">
+                                                            <td class="money col-finance">
                                                                 ₹{{ number_format($d['finance']['expenditure']) }}</td>
 
                                                             <td><span
@@ -406,22 +472,24 @@
                                                             </td>
 
                                                             @foreach ($vendorColumns as $v)
-                                                                <td class="money">
+                                                                <td class="money col-vendor">
                                                                     ₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
                                                             @endforeach
 
-                                                            <td class="fw-semibold">{{ $d['total_delivery'] }}</td>
+                                                            <td class="fw-semibold col-rider">
+                                                                {{ $d['total_delivery'] }}</td>
                                                             @foreach ($deliveryCols as $r)
-                                                                <td>{{ $d['riders'][$r] ?? 0 }}</td>
+                                                                <td class="col-rider">{{ $d['riders'][$r] ?? 0 }}</td>
                                                             @endforeach
                                                         </tr>
                                                     @endforeach
 
                                                     <tr class="totals-row">
-                                                        <td colspan="2">Week Total</td>
-                                                        <td class="money">₹{{ number_format($w['totals']['income']) }}
+                                                        <td colspan="2" class="col-date">Week Total</td>
+                                                        <td class="money col-finance">
+                                                            ₹{{ number_format($w['totals']['income']) }}
                                                         </td>
-                                                        <td class="money">
+                                                        <td class="money col-finance">
                                                             ₹{{ number_format($w['totals']['expenditure']) }}</td>
 
                                                         <td>{{ $w['totals']['renew'] }}</td>
@@ -430,13 +498,14 @@
                                                         <td>{{ $w['totals']['customize'] }}</td>
 
                                                         @foreach ($vendorColumns as $v)
-                                                            <td class="money">
+                                                            <td class="money col-vendor">
                                                                 ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
                                                         @endforeach
 
-                                                        <td class="fw-semibold">{{ $w['totals']['total_delivery'] }}</td>
+                                                        <td class="fw-semibold col-rider">
+                                                            {{ $w['totals']['total_delivery'] }}</td>
                                                         @foreach ($deliveryCols as $r)
-                                                            <td>{{ $w['totals']['riders'][$r] ?? 0 }}</td>
+                                                            <td class="col-rider">{{ $w['totals']['riders'][$r] ?? 0 }}</td>
                                                         @endforeach
                                                     </tr>
                                                 </tbody>
@@ -464,6 +533,10 @@
                                             ₹{{ number_format($monthTotals['income']) }}</span>
                                         <span class="chip exp">Expense
                                             ₹{{ number_format($monthTotals['expenditure']) }}</span>
+                                        <span class="chip vendor-fund">
+                                            Vendor Fund ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</span>
+                                        <span class="chip balance">
+                                            Avail Bal ₹{{ number_format($monthTotals['available_balance'] ?? 0) }}</span>
                                         <span class="chip deliv">Deliveries {{ $monthTotals['total_delivery'] }}</span>
                                     </div>
                                 </button>
@@ -475,32 +548,34 @@
                                         <table class="table table-sm table-striped table-hover align-middle mb-0">
                                             <thead>
                                                 <tr>
-                                                    <th rowspan="2">Date</th>
-                                                    <th rowspan="2">Day</th>
-                                                    <th colspan="2">Finance</th>
+                                                    <th rowspan="2" class="col-date">Date</th>
+                                                    <th rowspan="2" class="col-dow">Day</th>
+                                                    <th colspan="2" class="col-finance">Finance</th>
                                                     <th colspan="4">Customer</th>
-                                                    <th colspan="{{ max(count($vendorColumns), 1) }}">Vendor Report</th>
-                                                    <th colspan="{{ 1 + max(count($deliveryCols), 1) }}">Rider Deliveries
+                                                    <th colspan="{{ max(count($vendorColumns), 1) }}"
+                                                        class="col-vendor">Vendor Report</th>
+                                                    <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
+                                                        class="col-rider">Rider Deliveries
                                                     </th>
                                                 </tr>
                                                 <tr>
-                                                    <th>Incm</th>
-                                                    <th>Purch</th>
+                                                    <th class="col-finance">Incm</th>
+                                                    <th class="col-finance">Purch</th>
                                                     <th>Renew</th>
                                                     <th>New</th>
                                                     <th>Pause</th>
                                                     <th>Customize</th>
 
                                                     @forelse($vendorColumns as $v)
-                                                        <th>{{ $v }}</th>
+                                                        <th class="col-vendor">{{ $v }}</th>
                                                     @empty
                                                         <th>—</th>
                                                     @endforelse
 
-                                                    <th>Dlvy</th>
+                                                    <th class="col-rider">Dlvy</th>
                                                     @forelse($deliveryCols as $r)
                                                         {{-- SHOW ONLY FIRST 4 LETTERS OF RIDER NAME --}}
-                                                        <th title="{{ $r }}">
+                                                        <th title="{{ $r }}" class="col-rider">
                                                             {{ \Illuminate\Support\Str::substr($r, 0, 4) }}</th>
                                                     @empty
                                                         <th>—</th>
@@ -510,12 +585,14 @@
                                             <tbody>
                                                 @foreach ($monthDays as $d)
                                                     <tr>
-                                                        <td>{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
-                                                        <td class="text-muted">{{ $d['dow'] }}</td>
+                                                        <td class="col-date">
+                                                            {{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
+                                                        <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
-                                                        <td class="money">₹{{ number_format($d['finance']['income']) }}
+                                                        <td class="money col-finance">
+                                                            ₹{{ number_format($d['finance']['income']) }}
                                                         </td>
-                                                        <td class="money">
+                                                        <td class="money col-finance">
                                                             ₹{{ number_format($d['finance']['expenditure']) }}</td>
 
                                                         <td><span
@@ -532,21 +609,24 @@
                                                         </td>
 
                                                         @foreach ($vendorColumns as $v)
-                                                            <td class="money">
+                                                            <td class="money col-vendor">
                                                                 ₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
                                                         @endforeach
 
-                                                        <td class="fw-semibold">{{ $d['total_delivery'] }}</td>
+                                                        <td class="fw-semibold col-rider">
+                                                            {{ $d['total_delivery'] }}</td>
                                                         @foreach ($deliveryCols as $r)
-                                                            <td>{{ $d['riders'][$r] ?? 0 }}</td>
+                                                            <td class="col-rider">{{ $d['riders'][$r] ?? 0 }}</td>
                                                         @endforeach
                                                     </tr>
                                                 @endforeach
 
                                                 <tr class="totals-row">
-                                                    <td colspan="2">Month Total</td>
-                                                    <td class="money">₹{{ number_format($monthTotals['income']) }}</td>
-                                                    <td class="money">₹{{ number_format($monthTotals['expenditure']) }}
+                                                    <td colspan="2" class="col-date">Month Total</td>
+                                                    <td class="money col-finance">
+                                                        ₹{{ number_format($monthTotals['income']) }}</td>
+                                                    <td class="money col-finance">
+                                                        ₹{{ number_format($monthTotals['expenditure']) }}
                                                     </td>
 
                                                     <td>{{ $monthTotals['renew'] }}</td>
@@ -555,13 +635,14 @@
                                                     <td>{{ $monthTotals['customize'] }}</td>
 
                                                     @foreach ($vendorColumns as $v)
-                                                        <td class="money">
+                                                        <td class="money col-vendor">
                                                             ₹{{ number_format($monthTotals['vendors'][$v] ?? 0) }}</td>
                                                     @endforeach
 
-                                                    <td class="fw-semibold">{{ $monthTotals['total_delivery'] }}</td>
+                                                    <td class="fw-semibold col-rider">
+                                                        {{ $monthTotals['total_delivery'] }}</td>
                                                     @foreach ($deliveryCols as $r)
-                                                        <td>{{ $monthTotals['riders'][$r] ?? 0 }}</td>
+                                                        <td class="col-rider">{{ $monthTotals['riders'][$r] ?? 0 }}</td>
                                                     @endforeach
                                                 </tr>
                                             </tbody>
