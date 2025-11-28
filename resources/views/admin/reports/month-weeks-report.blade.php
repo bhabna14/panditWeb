@@ -19,10 +19,10 @@
             --chip: #eff6ff;
 
             /* Column text colors */
-            --col-date: #1d4ed8;     /* blue */
-            --col-finance: #047857;  /* green */
-            --col-vendor: #7c3aed;   /* purple */
-            --col-rider: #ea580c;    /* orange */
+            --col-date: #1d4ed8;
+            --col-finance: #047857;
+            --col-vendor: #7c3aed;
+            --col-rider: #ea580c;
 
             /* Colorful table palette */
             --tbl-head-from: #0ea5e9;
@@ -153,14 +153,14 @@
 
         .accordion-button {
             font-weight: 600;
-            padding: 16px 20px;
-            margin-bottom: 10px
+            padding: 14px 20px;
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border);
         }
 
         .accordion-button:not(.collapsed) {
             background: linear-gradient(180deg, #f6faff, #f2f6ff);
             color: var(--ink);
-            border-bottom: 1px solid var(--border)
         }
 
         .week-header {
@@ -176,30 +176,6 @@
             overflow: clip
         }
 
-        .table thead th {
-            white-space: nowrap;
-            font-weight: 600;
-            color: var(--muted);
-            border-bottom: 1px solid var(--border) !important
-        }
-
-        .table thead tr:first-child th {
-            background: #f9fbff
-        }
-
-        .table thead tr:nth-child(2) th {
-            background: #f3f6fb;
-            font-size: .9rem
-        }
-
-        .table.table-hover tbody tr:hover {
-            background: #fbfdff
-        }
-
-        .table-striped>tbody>tr:nth-of-type(odd) {
-            --bs-table-accent-bg: #fcfdff
-        }
-
         .table th,
         .table td {
             text-align: center !important;
@@ -212,8 +188,8 @@
 
         .totals-row {
             font-weight: 700;
-            background: #fffdf5;
-            border-top: 2px solid #f5e6b3
+            background: linear-gradient(90deg, #fee2e2, #fffbeb);
+            border-top: 2px solid #fecaca;
         }
 
         .chip {
@@ -259,7 +235,7 @@
             border-color: #c7d2fe;
         }
 
-        /* Column color coding (text-only for readability) */
+        /* Column color coding (headers) */
         th.col-date,
         td.col-date,
         th.col-dow,
@@ -286,7 +262,7 @@
             font-weight: 600;
         }
 
-        /* =================== COLORFUL WEEKLY TABLE ===================== */
+        /* =================== COLORFUL TABLE BASE ===================== */
 
         .colorful-metrics-table {
             border-collapse: separate !important;
@@ -296,10 +272,10 @@
             overflow: hidden;
             border: 1px solid var(--tbl-border);
             box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
-        /* Header */
+        /* Header band */
         .colorful-metrics-table thead th {
             background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
             color: var(--tbl-head-text) !important;
@@ -309,11 +285,10 @@
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 600;
-            padding-top: 10px;
-            padding-bottom: 10px;
+            padding-top: 9px;
+            padding-bottom: 9px;
         }
 
-        /* round the header corners */
         .colorful-metrics-table thead:first-child tr:first-child th:first-child {
             border-top-left-radius: 18px;
         }
@@ -322,17 +297,12 @@
             border-top-right-radius: 18px;
         }
 
-        /* kill ALL default stripe colors (Bootstrap + DataTables) */
+        /* kill default stripes */
         .colorful-metrics-table.table-striped>tbody>tr:nth-of-type(odd)>*,
-        .colorful-metrics-table.table-striped>tbody>tr:nth-of-type(even)>*,
-        .colorful-metrics-table.dataTable.stripe>tbody>tr:nth-of-type(odd)>*,
-        .colorful-metrics-table.dataTable.stripe>tbody>tr:nth-of-type(even)>*,
-        .colorful-metrics-table.dataTable.display tbody tr.odd>*,
-        .colorful-metrics-table.dataTable.display tbody tr.even>* {
+        .colorful-metrics-table.table-striped>tbody>tr:nth-of-type(even)>* {
             background-color: var(--tbl-row-bg) !important;
         }
 
-        /* base row look + hover */
         .colorful-metrics-table tbody tr {
             background: var(--tbl-row-bg) !important;
             transition: background .18s ease, transform .1s ease, box-shadow .1s ease;
@@ -344,7 +314,6 @@
             box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);
         }
 
-        /* body cell borders / text */
         .colorful-metrics-table tbody td {
             border-top: 1px solid rgba(148, 163, 184, 0.30) !important;
             font-size: 13px;
@@ -353,6 +322,7 @@
         }
 
         /* ======= Column-wise color rules (using nth-child) ======= */
+
         /* 1: Date */
         .colorful-metrics-table tbody td:nth-child(1) {
             font-weight: 600;
@@ -371,13 +341,13 @@
             color: #16a34a;
         }
 
-        /* 4: Purch – blue / teal */
+        /* 4: Purch – teal/blue */
         .colorful-metrics-table tbody td:nth-child(4) {
             font-weight: 700;
             color: #0284c7;
         }
 
-        /* 5–8: Renew / New / Pause / Customize – pill backgrounds */
+        /* 5–8: Renew / New / Pause / Customize – soft pills */
         .colorful-metrics-table tbody td:nth-child(5),
         .colorful-metrics-table tbody td:nth-child(6),
         .colorful-metrics-table tbody td:nth-child(7),
@@ -386,60 +356,34 @@
             font-weight: 600;
         }
 
-        /* 5: Renew – soft green pill */
         .colorful-metrics-table tbody td:nth-child(5) {
             background: rgba(34, 197, 94, 0.16) !important;
             color: #15803d;
             border-radius: 999px;
         }
 
-        /* 6: New – soft sky pill */
         .colorful-metrics-table tbody td:nth-child(6) {
             background: rgba(56, 189, 248, 0.16) !important;
             color: #0369a1;
             border-radius: 999px;
         }
 
-        /* 7: Pause – soft amber pill */
         .colorful-metrics-table tbody td:nth-child(7) {
             background: rgba(245, 158, 11, 0.18) !important;
             color: #b45309;
             border-radius: 999px;
         }
 
-        /* 8: Customize – soft pink pill */
         .colorful-metrics-table tbody td:nth-child(8) {
             background: rgba(244, 114, 182, 0.18) !important;
             color: #be185d;
             border-radius: 999px;
         }
 
-        /* 9–13: vendor columns – purple text */
-        .colorful-metrics-table tbody td:nth-child(9),
-        .colorful-metrics-table tbody td:nth-child(10),
-        .colorful-metrics-table tbody td:nth-child(11),
-        .colorful-metrics-table tbody td:nth-child(12),
-        .colorful-metrics-table tbody td:nth-child(13) {
+        /* vendors (after col 8) – purple text */
+        .colorful-metrics-table tbody td:nth-child(n+9) {
             font-weight: 600;
             color: #6d28d9;
-        }
-
-        /* DataTables info / pager styling (if ever used) */
-        .dataTables_wrapper .dataTables_info,
-        .dataTables_wrapper .dataTables_paginate {
-            font-size: 12px;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
-            background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
-            color: #f9fafb !important;
-            border-radius: 999px !important;
-            border: none !important;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button {
-            border-radius: 999px !important;
         }
     </style>
 @endsection
@@ -530,6 +474,8 @@
                             @php
                                 $weekId = 'wk' . $i;
                                 $title = $w['start']->format('d M') . ' - ' . $w['end']->format('d M');
+                                $weekVendorColumns = $w['vendorColumns'] ?? $vendorColumns; // fall back if needed
+                                $weekVendorCount = max(count($weekVendorColumns), 1);
                             @endphp
                             <div class="accordion-item mb-3">
                                 <h2 class="accordion-header week-header" id="heading-{{ $weekId }}">
@@ -554,7 +500,7 @@
                                                 Vendor Fund ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}
                                             </span>
 
-                                            {{-- Weekly Available Balance = Vendor Fund - Expense --}}
+                                            {{-- Weekly Available Balance --}}
                                             <span class="chip balance">
                                                 Avail Bal ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}
                                             </span>
@@ -578,7 +524,7 @@
                                                         <th rowspan="2" class="col-dow">Day</th>
                                                         <th colspan="2" class="col-finance">Finance</th>
                                                         <th colspan="4">Customer</th>
-                                                        <th colspan="{{ max(count($vendorColumns), 1) }}"
+                                                        <th colspan="{{ $weekVendorCount }}"
                                                             class="col-vendor">Vendor Report
                                                         </th>
                                                         <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
@@ -594,7 +540,7 @@
                                                         <th>Pause</th>
                                                         <th>Customize</th>
 
-                                                        @forelse($vendorColumns as $v)
+                                                        @forelse($weekVendorColumns as $v)
                                                             <th class="col-vendor">{{ $v }}</th>
                                                         @empty
                                                             <th>—</th>
@@ -636,10 +582,14 @@
                                                                     class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span>
                                                             </td>
 
-                                                            @foreach ($vendorColumns as $v)
-                                                                <td class="money col-vendor">
-                                                                    ₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
-                                                            @endforeach
+                                                            @if (count($weekVendorColumns))
+                                                                @foreach ($weekVendorColumns as $v)
+                                                                    <td class="money col-vendor">
+                                                                        ₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
+                                                                @endforeach
+                                                            @else
+                                                                <td class="text-muted">—</td>
+                                                            @endif
 
                                                             <td class="fw-semibold col-rider">
                                                                 {{ $d['total_delivery'] }}</td>
@@ -662,10 +612,14 @@
                                                         <td>{{ $w['totals']['pause'] }}</td>
                                                         <td>{{ $w['totals']['customize'] }}</td>
 
-                                                        @foreach ($vendorColumns as $v)
-                                                            <td class="money col-vendor">
-                                                                ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
-                                                        @endforeach
+                                                        @if (count($weekVendorColumns))
+                                                            @foreach ($weekVendorColumns as $v)
+                                                                <td class="money col-vendor">
+                                                                    ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
+                                                            @endforeach
+                                                        @else
+                                                            <td class="text-muted">—</td>
+                                                        @endif
 
                                                         <td class="fw-semibold col-rider">
                                                             {{ $w['totals']['total_delivery'] }}</td>
