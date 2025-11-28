@@ -113,7 +113,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
+        
     public function startDelivery(Request $request)
     {
         try {
@@ -129,7 +129,9 @@ class OrderController extends Controller
             $today = Carbon::today(); // app timezone
 
             // Fetch today's active subscription orders assigned to this rider
+            // AND only those where request_id IS NULL
             $orders = Order::where('rider_id', $rider->rider_id)
+                ->whereNull('request_id')   // <<=== ⬅️ only subscription orders (no request orders)
                 ->whereHas('subscription', function ($q) use ($today) {
                     $q->where('status', 'active')
                     ->where(function ($q) use ($today) {
@@ -155,6 +157,11 @@ class OrderController extends Controller
                 $now = now();
 
                 foreach ($orders as $order) {
+                    // Extra safety: skip if somehow request_id is not null
+                    if (!is_null($order->request_id)) {
+                        continue;
+                    }
+
                     // Is there already a delivery_history row for this order+rider today?
                     $exists = DeliveryHistory::where('order_id', $order->order_id)
                         ->where('rider_id', $rider->rider_id)
@@ -174,7 +181,6 @@ class OrderController extends Controller
                         'latitude'        => $request->latitude,
                     ]);
                 }
-
             });
 
             return response()->json([
