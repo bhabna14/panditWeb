@@ -291,6 +291,7 @@
 
         .colorful-metrics-table thead:first-child tr:first-child th:first-child {
             border-top-left-radius: 18px;
+                padding-top: 65px;
         }
 
         .colorful-metrics-table thead:first-child tr:first-child th:last-child {
@@ -317,8 +318,8 @@
         .colorful-metrics-table tbody td {
             border-top: 1px solid rgba(148, 163, 184, 0.30) !important;
             font-size: 13px;
-            padding-top: 6px;
             padding-bottom: 6px;
+            padding-top: 6px;
         }
 
         /* column-wise rules */
