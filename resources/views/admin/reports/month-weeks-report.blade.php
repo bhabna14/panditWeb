@@ -380,7 +380,7 @@
         /* vendors text (after col 8) */
         .colorful-metrics-table tbody td:nth-child(n+9) {
             font-weight: 600;
-            color: #6d28d9;
+            color: #56041a;
         }
 
         /* ===== pair-wise vendor colors (header + body) ===== */
