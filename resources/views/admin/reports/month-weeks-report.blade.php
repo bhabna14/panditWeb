@@ -187,7 +187,8 @@
         }
 
         .totals-row {
-            font-weight: 700;
+            font-weight: 800;              /* BOLDER + bigger for Week/Month Total */
+            font-size: 14px;
             background: linear-gradient(90deg, #fee2e2, #fffbeb);
             border-top: 2px solid #fecaca;
         }
@@ -275,7 +276,7 @@
             margin-bottom: 0.75rem;
         }
 
-        /* Header band */
+        /* Header band (default) */
         .colorful-metrics-table thead th {
             background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
             color: var(--tbl-head-text) !important;
@@ -291,11 +292,44 @@
 
         .colorful-metrics-table thead:first-child tr:first-child th:first-child {
             border-top-left-radius: 18px;
-                padding-top: 65px;
+            padding-top: 65px;
         }
 
         .colorful-metrics-table thead:first-child tr:first-child th:last-child {
             border-top-right-radius: 18px;
+        }
+
+        /* === CUSTOM HEADER COLORS (YOUR REQUIREMENT) ================= */
+
+        /* Date header cell */
+        .colorful-metrics-table thead th.col-date {
+            background: rgba(56, 189, 248, 0.9) !important;
+            color: #0f172a !important;
+        }
+
+        /* Day header cell */
+        .colorful-metrics-table thead th.col-dow {
+            background: rgba(56, 189, 248, 0.5) !important;
+            color: #0f172a !important;
+        }
+
+        /* Income header cell */
+        .colorful-metrics-table thead th.income-head {
+            background: #16a34a !important;
+            color: #f9fafb !important;
+        }
+
+        /* Vendor name headers (2nd header row) */
+        .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-odd,
+        .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-even {
+            background: linear-gradient(90deg, rgba(236, 72, 153, 0.95), rgba(244, 114, 182, 0.95)) !important;
+            color: #f9fafb !important;
+        }
+
+        /* Rider name headers */
+        .colorful-metrics-table thead tr:nth-child(2) th.col-rider {
+            background: rgba(129, 140, 248, 0.95) !important;
+            color: #f9fafb !important;
         }
 
         /* kill default stripes */
@@ -383,18 +417,8 @@
             color: #045e06;
         }
 
-        /* ===== pair-wise vendor colors (header + body) ===== */
+        /* ===== pair-wise vendor colors (BODY ONLY) ===== */
 
-        /* second header row vendor columns */
-        .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-odd {
-            background: linear-gradient(90deg, rgba(129, 140, 248, 0.95), rgba(56, 189, 248, 0.95)) !important;
-        }
-
-        .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-even {
-            background: linear-gradient(90deg, rgba(236, 72, 153, 0.95), rgba(244, 114, 182, 0.95)) !important;
-        }
-
-        /* body cells for each vendor column */
         .colorful-metrics-table tbody td.col-vendor.vendor-odd {
             background: rgba(129, 140, 248, 0.10) !important;
         }
@@ -542,6 +566,7 @@
                                                         <th colspan="2" class="col-finance">Finance</th>
                                                         <th colspan="4">Customer</th>
                                                         <th colspan="{{ $weekVendorCount }}"
+
                                                             class="col-vendor">Vendor Report
                                                         </th>
                                                         <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
@@ -549,7 +574,7 @@
                                                             Deliveries</th>
                                                     </tr>
                                                     <tr>
-                                                        <th class="col-finance">Incm</th>
+                                                        <th class="col-finance income-head">Incm</th>
                                                         <th class="col-finance">Purch</th>
 
                                                         <th>Renew</th>
@@ -706,7 +731,7 @@
                                                     </th>
                                                 </tr>
                                                 <tr>
-                                                    <th class="col-finance">Incm</th>
+                                                    <th class="col-finance income-head">Incm</th>
                                                     <th class="col-finance">Purch</th>
                                                     <th>Renew</th>
                                                     <th>New</th>
