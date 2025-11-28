@@ -120,7 +120,8 @@ class OfficeTransactionController extends Controller
             ], 500);
         }
     }
-  public function manageOfficeFund()
+
+    public function manageOfficeFund()
     {
         $transactions = OfficeFund::query()
             ->active()
@@ -204,7 +205,6 @@ class OfficeTransactionController extends Controller
             'transactions' => $rows,
         ]);
     }
-
 
     public function saveOfficeTransaction(Request $request)
     {
@@ -346,7 +346,7 @@ class OfficeTransactionController extends Controller
             'ledger'     => $data,
         ]);
     }
-
+    
     public function update(Request $request, $id)
     {
         $transaction = OfficeTransaction::findOrFail($id);
@@ -355,8 +355,10 @@ class OfficeTransactionController extends Controller
             'date'            => 'required|date',
             'categories'      => 'required|string|max:255',
             'amount'          => 'required|numeric|min:0',
-            'mode_of_payment' => 'required|string|in:cash,upi',
-            'paid_by'         => 'required|string|in:pankaj,subrat,basudha',
+            // ⬇️ allow cash, upi, icici
+            'mode_of_payment' => 'required|string|in:cash,upi,icici',
+            // ⬇️ allow new people
+            'paid_by'         => 'required|string|in:pankaj,subrat,basudha,biswa,pooja',
             'description'     => 'nullable|string|max:500',
         ]);
 
@@ -377,8 +379,10 @@ class OfficeTransactionController extends Controller
             'date'            => 'required|date',
             'categories'      => 'required|string|max:255',
             'amount'          => 'required|numeric|min:0',
-            'mode_of_payment' => 'required|string|in:cash,upi',
-            'paid_by'         => 'required|string|in:pankaj,subrat,basudha',
+            // ⬇️ allow cash, upi, icici
+            'mode_of_payment' => 'required|string|in:cash,upi,icici',
+            // ⬇️ allow new people
+            'paid_by'         => 'required|string|in:pankaj,subrat,basudha,biswa,pooja',
             'received_by'     => 'nullable|string|max:255',
             'description'     => 'nullable|string|max:500',
         ]);

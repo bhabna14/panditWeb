@@ -1,3 +1,4 @@
+{{-- resources/views/admin/office-fund/index.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -179,7 +180,10 @@
             position: absolute;
             inset: 0;
             transform: translateX(-100%);
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .65) 50%, rgba(255, 255, 255, 0) 100%);
+            background: linear-gradient(90deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, .65) 50%,
+                    rgba(255, 255, 255, 0) 100%);
             animation: shimmer 1.2s infinite;
         }
 
@@ -187,6 +191,11 @@
             100% {
                 transform: translateX(100%);
             }
+        }
+
+        /* Select2 inside modal alignment fix */
+        .modal .select2-container {
+            width: 100% !important;
         }
     </style>
 @endsection
@@ -316,8 +325,10 @@
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ \Carbon\Carbon::parse($t->date)->format('Y-m-d') }}</td>
-                                        <td><span
-                                                class="badge-soft text-capitalize">{{ str_replace('_', ' ', $t->categories) }}</span>
+                                        <td>
+                                            <span class="badge-soft text-capitalize">
+                                                {{ str_replace('_', ' ', $t->categories) }}
+                                            </span>
                                         </td>
                                         <td class="text-end">₹{{ number_format($t->amount, 2) }}</td>
                                         <td class="text-capitalize">{{ $t->mode_of_payment }}</td>
@@ -368,25 +379,33 @@
 
     {{-- Edit Modal --}}
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <form id="editForm" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title" id="editModalLabel">Edit Office Fund</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="modal-header border-0 pb-0">
+                        <div>
+                            <h5 class="modal-title fw-semibold" id="editModalLabel">Edit Office Fund</h5>
+                            <p class="text-muted mb-0 small">
+                                Update date, category, payment details and description.
+                            </p>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="edit_date" class="form-label">Date</label>
+
+                        {{-- Row 1: Date + Category --}}
+                        <div class="row g-3 mb-2">
+                            <div class="col-md-4">
+                                <label for="edit_date" class="form-label fw-semibold">Date</label>
                                 <input type="date" class="form-control" id="edit_date" name="date" required>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="edit_categories" class="form-label">Categories</label>
+                            <div class="col-md-8">
+                                <label for="edit_categories" class="form-label fw-semibold">Category</label>
                                 <select class="form-select select2" id="edit_categories" name="categories" required>
                                     <option value="">Select Type</option>
                                     <option value="rent">Rent</option>
@@ -398,9 +417,14 @@
                                     <option value="miscellaneous">Miscellaneous</option>
                                 </select>
                             </div>
+                        </div>
 
+                        <hr class="my-3">
+
+                        {{-- Row 2: Amount + Mode --}}
+                        <div class="row g-3 mb-2">
                             <div class="col-md-6">
-                                <label for="edit_amount" class="form-label">Amount</label>
+                                <label for="edit_amount" class="form-label fw-semibold">Amount</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
                                     <input type="number" class="form-control" id="edit_amount" name="amount"
@@ -409,42 +433,53 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="edit_mode_of_payment" class="form-label">Mode of Payment</label>
+                                <label for="edit_mode_of_payment" class="form-label fw-semibold">Mode of Payment</label>
                                 <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment"
                                     required>
                                     <option value="">Select Mode</option>
                                     <option value="cash">Cash</option>
                                     <option value="upi">UPI</option>
+                                    <option value="icici">ICICI</option>
                                 </select>
                             </div>
+                        </div>
 
+                        {{-- Row 3: Paid by + Received by --}}
+                        <div class="row g-3 mb-2">
                             <div class="col-md-6">
-                                <label for="edit_paid_by" class="form-label">Paid By</label>
+                                <label for="edit_paid_by" class="form-label fw-semibold">Paid By</label>
                                 <select class="form-select select2" id="edit_paid_by" name="paid_by" required>
                                     <option value="">Select Person</option>
                                     <option value="pankaj">Pankaj</option>
                                     <option value="subrat">Subrat</option>
                                     <option value="basudha">Basudha</option>
+                                    <option value="biswa">Biswa Sir</option>
+                                    <option value="pooja">Pooja Mam</option>
                                 </select>
                             </div>
 
                             <div class="col-md-6">
-                                <label for="edit_received_by" class="form-label">Received By Name</label>
+                                <label for="edit_received_by" class="form-label fw-semibold">Received By Name</label>
                                 <input type="text" class="form-control" id="edit_received_by" name="received_by"
                                     placeholder="Enter name" required>
                             </div>
+                        </div>
 
-                            <div class="col-md-12">
-                                <label for="edit_description" class="form-label">Description</label>
+                        {{-- Row 4: Description --}}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label for="edit_description" class="form-label fw-semibold">Description</label>
                                 <textarea class="form-control" id="edit_description" name="description" rows="3"
-                                    placeholder="Enter description"></textarea>
+                                    placeholder="Enter description (optional)"></textarea>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modal-footer border-0">
+                    <div class="modal-footer border-0 pt-0">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-brand">Update</button>
+                        <button type="submit" class="btn btn-brand">
+                            Update
+                        </button>
                     </div>
                 </div>
             </form>
@@ -452,7 +487,8 @@
     </div>
 
     {{-- Delete Confirm Modal --}}
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog">
             <form id="deleteForm" method="POST">
                 @csrf
@@ -460,7 +496,8 @@
                 <div class="modal-content">
                     <div class="modal-header border-0">
                         <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
 
                     <div class="modal-body">
@@ -476,6 +513,7 @@
         </div>
     </div>
 @endsection
+
 @section('scripts')
     <!-- DataTables & deps -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
@@ -503,6 +541,7 @@
                 currency: 'INR',
                 maximumFractionDigits: 2
             }).format(Number(n || 0));
+
             const toLocalYMD = (d) => {
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -560,8 +599,10 @@
                     doSearch();
                 }
             }
+
             document.querySelectorAll('.quick-chip').forEach(c => c.addEventListener('click', () => setRange(c.dataset
                 .range)));
+
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = '';
                 toEl.value = '';
@@ -668,14 +709,15 @@
                     const description = editBtn.getAttribute('data-description') || '';
 
                     const editForm = document.getElementById('editForm');
-                    editForm.action = "{{ route('officeFund.update', ['id' => '__ID__']) }}".replace('__ID__',
-                        id);
+                    editForm.action = "{{ route('officeFund.update', ['id' => '__ID__']) }}".replace('__ID__', id);
 
                     document.getElementById('edit_date').value = date;
                     $('#edit_categories').val(categories).trigger('change');
                     document.getElementById('edit_amount').value = amount;
+
                     $('#edit_mode_of_payment').val((mode || '').toLowerCase()).trigger('change');
                     $('#edit_paid_by').val((paidBy || '').toLowerCase()).trigger('change');
+
                     document.getElementById('edit_received_by').value = receivedBy;
                     document.getElementById('edit_description').value = description;
                 }
@@ -726,35 +768,37 @@
                 const amountPretty = fmtINR(row.amount);
                 const catPretty = (row.categories || '').replace(/_/g, ' ');
                 return `
-            <tr>
-                <td>${sl}</td>
-                <td>${row.date}</td>
-                <td><span class="badge-soft text-capitalize">${catPretty}</span></td>
-                <td class="text-end">${amountPretty}</td>
-                <td class="text-capitalize">${row.mode_of_payment || ''}</td>
-                <td class="text-capitalize">${row.paid_by || ''}</td>
-                <td class="text-capitalize">${row.received_by || ''}</td>
-                <td>${row.description ? row.description : ''}</td>
-                <td>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
-                            data-bs-toggle="modal" data-bs-target="#editModal"
-                            data-id="${row.id}"
-                            data-date="${row.date}"
-                            data-categories="${row.categories || ''}"
-                            data-amount="${row.amount}"
-                            data-mode_of_payment="${(row.mode_of_payment||'')}"
-                            data-paid_by="${(row.paid_by||'')}"
-                            data-received_by="${row.received_by ? String(row.received_by).replace(/"/g,'&quot;') : ''}"
-                            data-description="${row.description ? String(row.description).replace(/"/g,'&quot;') : ''}">
-                            Edit
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger btn-delete"
-                            data-bs-toggle="modal" data-bs-target="#deleteModal"
-                            data-id="${row.id}">Delete</button>
-                    </div>
-                </td>
-            </tr>`;
+                    <tr>
+                        <td>${sl}</td>
+                        <td>${row.date}</td>
+                        <td><span class="badge-soft text-capitalize">${catPretty}</span></td>
+                        <td class="text-end">${amountPretty}</td>
+                        <td class="text-capitalize">${row.mode_of_payment || ''}</td>
+                        <td class="text-capitalize">${row.paid_by || ''}</td>
+                        <td class="text-capitalize">${row.received_by || ''}</td>
+                        <td>${row.description ? row.description : ''}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
+                                    data-bs-toggle="modal" data-bs-target="#editModal"
+                                    data-id="${row.id}"
+                                    data-date="${row.date}"
+                                    data-categories="${row.categories || ''}"
+                                    data-amount="${row.amount}"
+                                    data-mode_of_payment="${(row.mode_of_payment||'')}"
+                                    data-paid_by="${(row.paid_by||'')}"
+                                    data-received_by="${row.received_by ? String(row.received_by).replace(/"/g,'&quot;') : ''}"
+                                    data-description="${row.description ? String(row.description).replace(/"/g,'&quot;') : ''}">
+                                    Edit
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                    data-id="${row.id}">
+                                    Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
             }
 
             async function doSearch() {
@@ -796,8 +840,8 @@
                     }
 
                     const list = Array.isArray(data.transactions) ? data.transactions : [];
-                    const html = list.length ? list.map((row, i) => rowHTML(row, i + 1)).join('') : emptyRow(
-                        'No records');
+                    const html = list.length ? list.map((row, i) => rowHTML(row, i + 1)).join('') :
+                        emptyRow('No records');
 
                     body.innerHTML = html;
                     initDT();
@@ -809,7 +853,6 @@
                     todayCard.textContent = fmtINR(0);
                     rangeCard.textContent = fmtINR(0);
                     if (rangeLabel) rangeLabel.textContent = 'All-time total';
-                    // Also show toast
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops',
