@@ -19,10 +19,10 @@
             --chip: #eff6ff;
 
             /* Column text colors */
-            --col-date: #1d4ed8;
+            --col-date: #92400e;   /* brown for Date / Day */
             --col-finance: #047857;
             --col-vendor: #7c3aed;
-            --col-rider: #ea580c;
+            --col-rider: #0f766e;  /* teal for rider columns */
 
             /* Colorful table palette */
             --tbl-head-from: #0ea5e9;
@@ -235,7 +235,7 @@
             border-color: #c7d2fe;
         }
 
-        /* Column color coding (headers) */
+        /* Column color coding */
         th.col-date,
         td.col-date,
         th.col-dow,
@@ -321,18 +321,18 @@
             padding-bottom: 6px;
         }
 
-        /* ======= Column-wise color rules (using nth-child) ======= */
+        /* column-wise rules */
 
         /* 1: Date */
         .colorful-metrics-table tbody td:nth-child(1) {
             font-weight: 600;
-            color: #0f172a;
+            color: var(--col-date);
         }
 
         /* 2: Day */
         .colorful-metrics-table tbody td:nth-child(2) {
             font-weight: 500;
-            color: #4b5563;
+            color: var(--col-date);
         }
 
         /* 3: Incm – green */
@@ -380,10 +380,30 @@
             border-radius: 999px;
         }
 
-        /* vendors (after col 8) – purple text */
+        /* vendors text (after col 8) */
         .colorful-metrics-table tbody td:nth-child(n+9) {
             font-weight: 600;
             color: #6d28d9;
+        }
+
+        /* ===== pair-wise vendor colors (header + body) ===== */
+
+        /* second header row vendor columns */
+        .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-odd {
+            background: linear-gradient(90deg, rgba(129, 140, 248, 0.95), rgba(56, 189, 248, 0.95)) !important;
+        }
+
+        .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-even {
+            background: linear-gradient(90deg, rgba(236, 72, 153, 0.95), rgba(244, 114, 182, 0.95)) !important;
+        }
+
+        /* body cells for each vendor column */
+        .colorful-metrics-table tbody td.col-vendor.vendor-odd {
+            background: rgba(129, 140, 248, 0.10) !important;
+        }
+
+        .colorful-metrics-table tbody td.col-vendor.vendor-even {
+            background: rgba(244, 114, 182, 0.10) !important;
         }
     </style>
 @endsection
@@ -474,7 +494,7 @@
                             @php
                                 $weekId = 'wk' . $i;
                                 $title = $w['start']->format('d M') . ' - ' . $w['end']->format('d M');
-                                $weekVendorColumns = $w['vendorColumns'] ?? $vendorColumns; // fall back if needed
+                                $weekVendorColumns = $w['vendorColumns'] ?? $vendorColumns; // fallback
                                 $weekVendorCount = max(count($weekVendorColumns), 1);
                             @endphp
                             <div class="accordion-item mb-3">
@@ -541,7 +561,11 @@
                                                         <th>Customize</th>
 
                                                         @forelse($weekVendorColumns as $v)
-                                                            <th class="col-vendor">{{ $v }}</th>
+                                                            @php
+                                                                $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
+                                                            @endphp
+                                                            <th class="col-vendor {{ $vendorColClass }}" title="{{ $v }}">
+                                                                {{ \Illuminate\Support\Str::substr($v, 0, 5) }}</th>
                                                         @empty
                                                             <th>—</th>
                                                         @endforelse
@@ -584,7 +608,10 @@
 
                                                             @if (count($weekVendorColumns))
                                                                 @foreach ($weekVendorColumns as $v)
-                                                                    <td class="money col-vendor">
+                                                                    @php
+                                                                        $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
+                                                                    @endphp
+                                                                    <td class="money col-vendor {{ $vendorColClass }}">
                                                                         ₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
                                                                 @endforeach
                                                             @else
@@ -614,7 +641,10 @@
 
                                                         @if (count($weekVendorColumns))
                                                             @foreach ($weekVendorColumns as $v)
-                                                                <td class="money col-vendor">
+                                                                @php
+                                                                    $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
+                                                                @endphp
+                                                                <td class="money col-vendor {{ $vendorColClass }}">
                                                                     ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
                                                             @endforeach
                                                         @else
@@ -687,7 +717,11 @@
                                                     <th>Customize</th>
 
                                                     @forelse($vendorColumns as $v)
-                                                        <th class="col-vendor">{{ $v }}</th>
+                                                        @php
+                                                            $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
+                                                        @endphp
+                                                        <th class="col-vendor {{ $vendorColClass }}" title="{{ $v }}">
+                                                            {{ \Illuminate\Support\Str::substr($v, 0, 5) }}</th>
                                                     @empty
                                                         <th>—</th>
                                                     @endforelse
@@ -729,7 +763,10 @@
                                                         </td>
 
                                                         @foreach ($vendorColumns as $v)
-                                                            <td class="money col-vendor">
+                                                            @php
+                                                                $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
+                                                            @endphp
+                                                            <td class="money col-vendor {{ $vendorColClass }}">
                                                                 ₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
                                                         @endforeach
 
@@ -755,7 +792,10 @@
                                                     <td>{{ $monthTotals['customize'] }}</td>
 
                                                     @foreach ($vendorColumns as $v)
-                                                        <td class="money col-vendor">
+                                                        @php
+                                                            $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
+                                                        @endphp
+                                                        <td class="money col-vendor {{ $vendorColClass }}">
                                                             ₹{{ number_format($monthTotals['vendors'][$v] ?? 0) }}</td>
                                                     @endforeach
 
