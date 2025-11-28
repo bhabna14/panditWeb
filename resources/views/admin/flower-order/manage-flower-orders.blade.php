@@ -264,7 +264,7 @@
 @endsection
 
 @section('content')
-    {{-- 🔹 NEW: Filter-wise header --}}
+    {{-- 🔹 Filter-wise header --}}
     <div class="mt-3 mb-2">
         <h4 class="fw-bold">
             {{ $filterHeader ?? 'All Subscriptions' }}
@@ -275,7 +275,7 @@
         @php
             $cards = [
                 [
-                    'title'  => 'Subscriptions Placed Today',
+                    'title'  => 'Renew Customers',
                     'value'  => $ordersRequestedToday,
                     'filter' => 'today',
                     'icon'   => 'fa-calendar-plus',
@@ -303,6 +303,12 @@
                     'value'  => $expiredSubscriptions,
                     'filter' => 'expired',
                     'icon'   => 'fa-user-slash',
+                ],
+                [
+                    'title'  => 'Pending Subscriptions',
+                    'value'  => $pendingSubscriptions,
+                    'filter' => 'pending',
+                    'icon'   => 'fa-hourglass-half',
                 ],
             ];
         @endphp
@@ -631,13 +637,11 @@
                                 ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
                             `.replace(/"/g, '&quot;');
 
-                            // View subscription button with delivery icon
                             const viewSubscriptionBtn =
                                 `<a href="/admin/flower-orders/${r.id}" class="btn btn-outline-primary btn-sm" title="View subscription">
                                     <i class="fas fa-truck"></i>
                                 </a>`;
 
-                            // Notify button
                             const notifyBtn = userId
                                 ? `<a href="{{ route('admin.notification.create') }}?user=${userId}"
                                        class="btn btn-outline-primary btn-sm"
@@ -708,7 +712,7 @@
                         }
                     },
 
-                    // 2) Address (second column)
+                    // 2) Address
                     {
                         data: null,
                         orderable: false,
@@ -837,7 +841,6 @@
                         }
                     }
                 ],
-                // Sort by First Purchase Date column (index 2)
                 order: [[2, 'desc']]
             });
 

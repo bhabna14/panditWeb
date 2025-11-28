@@ -28,8 +28,7 @@ use App\Models\UserDevice; // ✅ add this
 
 class FlowerOrderController extends Controller
 {
-        
- public function showOrders(Request $request)
+public function showOrders(Request $request)
 {
     // TZ-safe "today"
     $tz         = config('app.timezone');
@@ -96,6 +95,9 @@ class FlowerOrderController extends Controller
             break;
         case 'nextdayresumed':
             $filterHeader = 'Subscriptions Resuming Tomorrow';
+            break;
+        case 'pending':
+            $filterHeader = 'Pending Subscriptions';
             break;
     }
 
@@ -246,6 +248,11 @@ class FlowerOrderController extends Controller
         $query->where('status', 'paused');
     }
 
+    // 🔹 NEW: filter pending
+    if ($filter === 'pending') {
+        $query->where('status', 'pending');
+    }
+
     $tomorrowStart = (clone $todayStart)->addDay();
     $tomorrowEnd   = (clone $tomorrowStart)->endOfDay();
 
@@ -285,9 +292,10 @@ class FlowerOrderController extends Controller
     }
 
     // ---- Card counts ----
-    $activeSubscriptions  = Subscription::where('status', 'active')->count();
-    $pausedSubscriptions  = Subscription::where('status', 'paused')->count();
-    $ordersRequestedToday = Subscription::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+    $activeSubscriptions   = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions   = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday  = Subscription::whereBetween('created_at', [$todayStart, $todayEnd])->count();
+    $pendingSubscriptions  = Subscription::where('status', 'pending')->count(); // 🔹 NEW
 
     // New subscriptions (first subscription per user created today)
     $firstRowsSubCard = DB::table('subscriptions as s1')
@@ -348,12 +356,13 @@ class FlowerOrderController extends Controller
         'activeSubscriptions',
         'pausedSubscriptions',
         'ordersRequestedToday',
+        'pendingSubscriptions',
         'newSubscriptions',
         'expiredSubscriptions',
         'users',
         'apartmentNames',
         'apartmentNumbers',
-        'filterHeader'   // 🔹 PASS TO VIEW
+        'filterHeader'
     ));
 }
 
