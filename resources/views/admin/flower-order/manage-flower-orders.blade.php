@@ -292,6 +292,18 @@
                     'filter' => 'paused',
                     'icon'   => 'fa-pause-circle',
                 ],
+                [
+                    'title'  => 'New Customers (First Subscription Today)',
+                    'value'  => $newSubscriptions,
+                    'filter' => 'new',
+                    'icon'   => 'fa-user-plus',
+                ],
+                [
+                    'title'  => 'Expired Subscriptions (This Month)',
+                    'value'  => $expiredSubscriptions,
+                    'filter' => 'expired',
+                    'icon'   => 'fa-user-slash',
+                ],
             ];
         @endphp
 
