@@ -24,10 +24,6 @@
             --card-border: rgba(148, 163, 184, 0.45);
             --card-shadow: 0 18px 32px rgba(15, 23, 42, 0.14);
             --card-shadow-hover: 0 26px 46px rgba(15, 23, 42, 0.20);
-            --card-bg-soft: linear-gradient(135deg,
-                    #eaf3ff 0%,
-                    #f7fbff 45%,
-                    #fff5fb 100%);
             --card-title: #0b1120;
             --card-subtitle: #64748b;
             --card-number: #020617;
@@ -60,83 +56,35 @@
         }
 
         @keyframes pulseGlowCyan {
-            0% {
-                box-shadow: 0 0 0 rgba(6, 182, 212, 0)
-            }
-
-            50% {
-                box-shadow: 0 0 34px rgba(6, 182, 212, .75)
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(6, 182, 212, 0)
-            }
+            0% { box-shadow: 0 0 0 rgba(6, 182, 212, 0) }
+            50% { box-shadow: 0 0 34px rgba(6, 182, 212, .75) }
+            100% { box-shadow: 0 0 0 rgba(6, 182, 212, 0) }
         }
 
         @keyframes pulseGlowEmerald {
-            0% {
-                box-shadow: 0 0 0 rgba(16, 185, 129, 0)
-            }
-
-            50% {
-                box-shadow: 0 0 34px rgba(16, 185, 129, .75)
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(16, 185, 129, 0)
-            }
+            0% { box-shadow: 0 0 0 rgba(16, 185, 129, 0) }
+            50% { box-shadow: 0 0 34px rgba(16, 185, 129, .75) }
+            100% { box-shadow: 0 0 0 rgba(16, 185, 129, 0) }
         }
 
         @keyframes pulseGlowFuchsia {
-            0% {
-                box-shadow: 0 0 0 rgba(217, 70, 239, 0)
-            }
-
-            50% {
-                box-shadow: 0 0 34px rgba(217, 70, 239, .75)
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(217, 70, 239, 0)
-            }
+            0% { box-shadow: 0 0 0 rgba(217, 70, 239, 0) }
+            50% { box-shadow: 0 0 34px rgba(217, 70, 239, .75) }
+            100% { box-shadow: 0 0 0 rgba(217, 70, 239, 0) }
         }
 
         @keyframes pulseGlowAmber {
-            0% {
-                box-shadow: 0 0 0 rgba(245, 158, 11, 0)
-            }
-
-            50% {
-                box-shadow: 0 0 34px rgba(245, 158, 11, .75)
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(245, 158, 11, 0)
-            }
+            0% { box-shadow: 0 0 0 rgba(245, 158, 11, 0) }
+            50% { box-shadow: 0 0 34px rgba(245, 158, 11, .75) }
+            100% { box-shadow: 0 0 0 rgba(245, 158, 11, 0) }
         }
 
         /* ========= NEW: background blink using a pseudo-element ========= */
-        .pulse-bg--cyan::after {
-            --tint: rgba(6, 182, 212, .16);
-            animation: pulseBg 1.2s ease-in-out 0s 6;
-        }
+        .pulse-bg--cyan::after { --tint: rgba(6, 182, 212, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
+        .pulse-bg--emerald::after { --tint: rgba(16, 185, 129, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
+        .pulse-bg--fuchsia::after { --tint: rgba(217, 70, 239, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
+        .pulse-bg--amber::after { --tint: rgba(245, 158, 11, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
 
-        .pulse-bg--emerald::after {
-            --tint: rgba(16, 185, 129, .16);
-            animation: pulseBg 1.2s ease-in-out 0s 6;
-        }
-
-        .pulse-bg--fuchsia::after {
-            --tint: rgba(217, 70, 239, .16);
-            animation: pulseBg 1.2s ease-in-out 0s 6;
-        }
-
-        .pulse-bg--amber::after {
-            --tint: rgba(245, 158, 11, .16);
-            animation: pulseBg 1.2s ease-in-out 0s 6;
-        }
-
-        /* pseudo-element layer under content (for pulse) */
         .pulse-bg--cyan::after,
         .pulse-bg--emerald::after,
         .pulse-bg--fuchsia::after,
@@ -151,15 +99,8 @@
         }
 
         @keyframes pulseBg {
-
-            0%,
-            100% {
-                background: transparent;
-            }
-
-            50% {
-                background: var(--tint);
-            }
+            0%, 100% { background: transparent; }
+            50% { background: var(--tint); }
         }
 
         /* =============== “Quick Templates” base cards ================== */
@@ -180,7 +121,8 @@
             position: relative;
             border-radius: var(--card-radius);
             border: 1px solid var(--card-border);
-            background: var(--card-bg-soft);
+            /* IMPORTANT: only base color, NOT gradient, so theme gradients show */
+            background-color: #f9fafb;
             box-shadow: var(--card-shadow);
             transition:
                 transform .18s ease,
@@ -207,7 +149,6 @@
             z-index: 0;
         }
 
-        /* keep the tinted pulse ::after and ::before underneath content */
         .sales-card>*,
         .card.sales-card>* {
             position: relative;
@@ -313,7 +254,7 @@
                     rgba(30, 64, 175, 0));
         }
 
-        /* Slight color variations for watcher cards using data-color (for pulses) */
+        /* Watch cards extra gradients */
         .watch-card[data-color="amber"] {
             background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fef9c3 100%);
         }
@@ -381,7 +322,6 @@
             display: none;
         }
 
-        /* run animations infinitely while active-for-a-day */
         .pulse-day {
             animation-iteration-count: infinite !important;
         }
