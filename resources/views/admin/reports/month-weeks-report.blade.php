@@ -360,25 +360,21 @@
         .colorful-metrics-table tbody td:nth-child(5) {
             background: rgba(34, 197, 94, 0.16) !important;
             color: #15803d;
-            border-radius: 999px;
         }
 
         .colorful-metrics-table tbody td:nth-child(6) {
             background: rgba(56, 189, 248, 0.16) !important;
             color: #0369a1;
-            border-radius: 999px;
         }
 
         .colorful-metrics-table tbody td:nth-child(7) {
             background: rgba(245, 158, 11, 0.18) !important;
             color: #b45309;
-            border-radius: 999px;
         }
 
         .colorful-metrics-table tbody td:nth-child(8) {
             background: rgba(244, 114, 182, 0.18) !important;
             color: #be185d;
-            border-radius: 999px;
         }
 
         /* vendors text (after col 8) */
