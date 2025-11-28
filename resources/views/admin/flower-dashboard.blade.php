@@ -24,14 +24,22 @@
             --card-border: rgba(148, 163, 184, 0.45);
             --card-shadow: 0 18px 32px rgba(15, 23, 42, 0.14);
             --card-shadow-hover: 0 26px 46px rgba(15, 23, 42, 0.20);
-            --card-title: #0b1120;
+            --card-title: #020617;
             --card-subtitle: #64748b;
-            --card-number: #020617;
+            --card-number: #0f172a;
+
+            /* New palette for tables */
+            --tbl-head-from: #0ea5e9;
+            --tbl-head-to: #6366f1;
+            --tbl-head-text: #f9fafb;
+            --tbl-row-bg: rgba(248, 250, 252, 0.96);
+            --tbl-row-hover: #eff6ff;
+            --tbl-border: rgba(148, 163, 184, 0.6);
         }
 
         body {
             font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: #eef2ff;
+            background: radial-gradient(circle at top, #e0f2fe, #eef2ff 32%, #f9fafb 100%);
         }
 
         /* ========= Colorful pulse glows (border halo) ========= */
@@ -79,7 +87,7 @@
             100% { box-shadow: 0 0 0 rgba(245, 158, 11, 0) }
         }
 
-        /* ========= NEW: background blink using a pseudo-element ========= */
+        /* ========= background blink using a pseudo-element ========= */
         .pulse-bg--cyan::after { --tint: rgba(6, 182, 212, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
         .pulse-bg--emerald::after { --tint: rgba(16, 185, 129, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
         .pulse-bg--fuchsia::after { --tint: rgba(217, 70, 239, .16); animation: pulseBg 1.2s ease-in-out 0s 6; }
@@ -103,14 +111,12 @@
             50% { background: var(--tint); }
         }
 
-        /* =============== “Quick Templates” base cards ================== */
-
-        /* Section wrapper card (white base like screenshot) */
+        /* =============== Section wrapper cards ================== */
         .dashboard-section {
             border-radius: var(--card-radius);
-            background-color: #ffffff !important;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(239, 246, 255, 0.98));
             box-shadow: var(--card-shadow);
-            border: 1px solid rgba(226, 232, 240, 0.9);
+            border: 1px solid rgba(203, 213, 225, 0.9);
             padding-top: 18px;
             padding-bottom: 18px;
             margin-left: 0;
@@ -134,7 +140,6 @@
             overflow: hidden;
         }
 
-        /* permanent soft “corner blob” shadow */
         .sales-card::before,
         .card.sales-card::before {
             content: "";
@@ -150,8 +155,8 @@
             z-index: 0;
         }
 
-        .sales-card>*,
-        .card.sales-card>* {
+        .sales-card > *,
+        .card.sales-card > * {
             position: relative;
             z-index: 1;
         }
@@ -160,119 +165,119 @@
         .card.sales-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--card-shadow-hover);
-            border-color: rgba(129, 140, 248, 0.85);
+            border-color: rgba(59, 130, 246, 0.95);
         }
 
-        /* --------- COLORFUL THEMES (with !important) ---------- */
+        /* --------- NEW COLORFUL CARD THEMES ---------- */
 
         .card-theme-sky {
-            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 40%, #e0f2fe 100%) !important;
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 40%, #a5f3fc 100%) !important;
         }
 
         .card-theme-sky::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(59, 130, 246, 0.28),
+                    rgba(59, 130, 246, 0.30),
                     rgba(59, 130, 246, 0));
         }
 
         .card-theme-indigo {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 40%, #c7d2fe 100%) !important;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 40%, #a5b4fc 100%) !important;
         }
 
         .card-theme-indigo::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(79, 70, 229, 0.32),
+                    rgba(79, 70, 229, 0.34),
                     rgba(79, 70, 229, 0));
         }
 
         .card-theme-violet {
-            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 40%, #fee2ff 100%) !important;
+            background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 40%, #f5d0fe 100%) !important;
         }
 
         .card-theme-violet::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(139, 92, 246, 0.30),
+                    rgba(139, 92, 246, 0.32),
                     rgba(139, 92, 246, 0));
         }
 
         .card-theme-rose {
-            background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 40%, #fce7f3 100%) !important;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #fbcfe8 100%) !important;
         }
 
         .card-theme-rose::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(244, 63, 94, 0.30),
+                    rgba(244, 63, 94, 0.32),
                     rgba(244, 63, 94, 0));
         }
 
         .card-theme-amber {
-            background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 40%, #fef3c7 100%) !important;
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 40%, #facc15 100%) !important;
         }
 
         .card-theme-amber::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(245, 158, 11, 0.32),
+                    rgba(245, 158, 11, 0.34),
                     rgba(245, 158, 11, 0));
         }
 
         .card-theme-emerald {
-            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 40%, #bbf7d0 100%) !important;
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #6ee7b7 100%) !important;
         }
 
         .card-theme-emerald::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(16, 185, 129, 0.30),
+                    rgba(16, 185, 129, 0.32),
                     rgba(16, 185, 129, 0));
         }
 
         .card-theme-cyan {
-            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #cffafe 100%) !important;
+            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #a5f3fc 100%) !important;
         }
 
         .card-theme-cyan::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(6, 182, 212, 0.30),
+                    rgba(6, 182, 212, 0.32),
                     rgba(6, 182, 212, 0));
         }
 
         .card-theme-lime {
-            background: linear-gradient(135deg, #f7fee7 0%, #ecfccb 40%, #d9f99d 100%) !important;
+            background: linear-gradient(135deg, #f7fee7 0%, #ecfccb 40%, #bef264 100%) !important;
         }
 
         .card-theme-lime::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(101, 163, 13, 0.26),
+                    rgba(101, 163, 13, 0.30),
                     rgba(101, 163, 13, 0));
         }
 
         .card-theme-slate {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 40%, #e5e7eb 100%) !important;
+            background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 40%, #e0f2fe 100%) !important;
         }
 
         .card-theme-slate::before {
             background: radial-gradient(circle at 30% 30%,
-                    rgba(30, 64, 175, 0.24),
+                    rgba(30, 64, 175, 0.26),
                     rgba(30, 64, 175, 0));
         }
 
-        /* Watch cards extra gradients (also !important) */
+        /* Watch cards extra gradients */
         .watch-card[data-color="amber"] {
-            background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fef9c3 100%) !important;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 40%, #fed7aa 100%) !important;
         }
 
         .watch-card[data-color="fuchsia"] {
-            background: linear-gradient(135deg, #fdf2ff 0%, #fce7f3 45%, #e0f2fe 100%) !important;
+            background: linear-gradient(135deg, #fdf2ff 0%, #fbcfe8 45%, #e0f2fe 100%) !important;
         }
 
         .watch-card[data-color="cyan"] {
-            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #eef2ff 100%) !important;
+            background: linear-gradient(135deg, #e0f2fe 0%, #a5f3fc 45%, #eef2ff 100%) !important;
         }
 
         .watch-card[data-color="emerald"] {
-            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 45%, #e0f2fe 100%) !important;
+            background: linear-gradient(135deg, #dcfce7 0%, #86efac 45%, #e0f2fe 100%) !important;
         }
 
-        /* Typography to match Quick Template look */
+        /* Typography */
         .card-title-custom {
             font-weight: 600;
             font-size: 15px;
@@ -309,7 +314,7 @@
             right: 16px;
             bottom: 16px;
             z-index: 9999;
-            background: #111827;
+            background: #020617;
             color: #fff;
             padding: 8px 12px;
             border-radius: 999px;
@@ -329,6 +334,92 @@
 
         .pulse-day::after {
             animation-iteration-count: infinite !important;
+        }
+
+        /* =================== COLORFUL TABLE STYLE ===================== */
+
+        /* Wrapper for rounded tables; catches DataTables as well */
+        .table,
+        table.dataTable {
+            border-collapse: separate !important;
+            border-spacing: 0;
+            background: var(--tbl-row-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--tbl-border);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+            margin-bottom: 1rem;
+        }
+
+        /* Round outer border */
+        .table thead:first-child tr:first-child th:first-child,
+        table.dataTable thead:first-child tr:first-child th:first-child {
+            border-top-left-radius: 18px;
+        }
+
+        .table thead:first-child tr:first-child th:last-child,
+        table.dataTable thead:first-child tr:first-child th:last-child {
+            border-top-right-radius: 18px;
+        }
+
+        /* Colorful header */
+        .table thead th,
+        table.dataTable thead th {
+            background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to));
+            color: var(--tbl-head-text);
+            border-bottom: none !important;
+            border-top: none !important;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+        }
+
+        /* Body cells */
+        .table tbody td,
+        table.dataTable tbody td {
+            border-top: 1px solid rgba(148, 163, 184, 0.3) !important;
+            background: var(--tbl-row-bg);
+            font-size: 13px;
+        }
+
+        /* Remove old striped “odd row only” background */
+        .table-striped > tbody > tr:nth-of-type(odd),
+        table.dataTable.stripe > tbody > tr:nth-of-type(odd) {
+            --bs-table-accent-bg: transparent;
+            background: var(--tbl-row-bg);
+        }
+
+        /* All rows same colorful base, hover brighter */
+        .table tbody tr,
+        table.dataTable tbody tr {
+            background: var(--tbl-row-bg);
+            transition: background .18s ease, transform .12s ease, box-shadow .12s ease;
+        }
+
+        .table tbody tr:hover,
+        table.dataTable tbody tr:hover {
+            background: var(--tbl-row-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
+        }
+
+        /* DataTables info/pager more subtle */
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 12px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
+            color: #f9fafb !important;
+            border-radius: 999px !important;
+            border: none !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 999px !important;
         }
     </style>
 @endsection
