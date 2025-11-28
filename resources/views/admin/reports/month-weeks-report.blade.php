@@ -23,6 +23,14 @@
             --col-finance: #047857;  /* green */
             --col-vendor: #7c3aed;   /* purple */
             --col-rider: #ea580c;    /* orange */
+
+            /* Colorful table palette */
+            --tbl-head-from: #0ea5e9;
+            --tbl-head-to: #6366f1;
+            --tbl-head-text: #f9fafb;
+            --tbl-row-bg: rgba(248, 250, 252, 0.96);
+            --tbl-row-hover: #eff6ff;
+            --tbl-border: rgba(148, 163, 184, 0.6);
         }
 
         body,
@@ -134,7 +142,7 @@
             padding: 16px
         }
 
-        /* Tables */
+        /* Tables / accordion shells */
         .accordion-item {
             border: 1px solid var(--border) !important;
             border-radius: 14px !important;
@@ -277,6 +285,162 @@
             color: var(--col-rider);
             font-weight: 600;
         }
+
+        /* =================== COLORFUL WEEKLY TABLE ===================== */
+
+        .colorful-metrics-table {
+            border-collapse: separate !important;
+            border-spacing: 0;
+            background: var(--tbl-row-bg);
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1px solid var(--tbl-border);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+            margin-bottom: 1rem;
+        }
+
+        /* Header */
+        .colorful-metrics-table thead th {
+            background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
+            color: var(--tbl-head-text) !important;
+            border-bottom: none !important;
+            border-top: none !important;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 600;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        /* round the header corners */
+        .colorful-metrics-table thead:first-child tr:first-child th:first-child {
+            border-top-left-radius: 18px;
+        }
+
+        .colorful-metrics-table thead:first-child tr:first-child th:last-child {
+            border-top-right-radius: 18px;
+        }
+
+        /* kill ALL default stripe colors (Bootstrap + DataTables) */
+        .colorful-metrics-table.table-striped>tbody>tr:nth-of-type(odd)>*,
+        .colorful-metrics-table.table-striped>tbody>tr:nth-of-type(even)>*,
+        .colorful-metrics-table.dataTable.stripe>tbody>tr:nth-of-type(odd)>*,
+        .colorful-metrics-table.dataTable.stripe>tbody>tr:nth-of-type(even)>*,
+        .colorful-metrics-table.dataTable.display tbody tr.odd>*,
+        .colorful-metrics-table.dataTable.display tbody tr.even>* {
+            background-color: var(--tbl-row-bg) !important;
+        }
+
+        /* base row look + hover */
+        .colorful-metrics-table tbody tr {
+            background: var(--tbl-row-bg) !important;
+            transition: background .18s ease, transform .1s ease, box-shadow .1s ease;
+        }
+
+        .colorful-metrics-table tbody tr:hover {
+            background: var(--tbl-row-hover) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);
+        }
+
+        /* body cell borders / text */
+        .colorful-metrics-table tbody td {
+            border-top: 1px solid rgba(148, 163, 184, 0.30) !important;
+            font-size: 13px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+
+        /* ======= Column-wise color rules (using nth-child) ======= */
+        /* 1: Date */
+        .colorful-metrics-table tbody td:nth-child(1) {
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        /* 2: Day */
+        .colorful-metrics-table tbody td:nth-child(2) {
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        /* 3: Incm – green */
+        .colorful-metrics-table tbody td:nth-child(3) {
+            font-weight: 700;
+            color: #16a34a;
+        }
+
+        /* 4: Purch – blue / teal */
+        .colorful-metrics-table tbody td:nth-child(4) {
+            font-weight: 700;
+            color: #0284c7;
+        }
+
+        /* 5–8: Renew / New / Pause / Customize – pill backgrounds */
+        .colorful-metrics-table tbody td:nth-child(5),
+        .colorful-metrics-table tbody td:nth-child(6),
+        .colorful-metrics-table tbody td:nth-child(7),
+        .colorful-metrics-table tbody td:nth-child(8) {
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* 5: Renew – soft green pill */
+        .colorful-metrics-table tbody td:nth-child(5) {
+            background: rgba(34, 197, 94, 0.16) !important;
+            color: #15803d;
+            border-radius: 999px;
+        }
+
+        /* 6: New – soft sky pill */
+        .colorful-metrics-table tbody td:nth-child(6) {
+            background: rgba(56, 189, 248, 0.16) !important;
+            color: #0369a1;
+            border-radius: 999px;
+        }
+
+        /* 7: Pause – soft amber pill */
+        .colorful-metrics-table tbody td:nth-child(7) {
+            background: rgba(245, 158, 11, 0.18) !important;
+            color: #b45309;
+            border-radius: 999px;
+        }
+
+        /* 8: Customize – soft pink pill */
+        .colorful-metrics-table tbody td:nth-child(8) {
+            background: rgba(244, 114, 182, 0.18) !important;
+            color: #be185d;
+            border-radius: 999px;
+        }
+
+        /* 9–13: vendor columns – purple text */
+        .colorful-metrics-table tbody td:nth-child(9),
+        .colorful-metrics-table tbody td:nth-child(10),
+        .colorful-metrics-table tbody td:nth-child(11),
+        .colorful-metrics-table tbody td:nth-child(12),
+        .colorful-metrics-table tbody td:nth-child(13) {
+            font-weight: 600;
+            color: #6d28d9;
+        }
+
+        /* DataTables info / pager styling (if ever used) */
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 12px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
+            color: #f9fafb !important;
+            border-radius: 999px !important;
+            border: none !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            border-radius: 999px !important;
+        }
     </style>
 @endsection
 
@@ -406,7 +570,8 @@
                                     aria-labelledby="heading-{{ $weekId }}" data-bs-parent="#weeksAccordion">
                                     <div class="accordion-body p-0">
                                         <div class="table-responsive table-card">
-                                            <table class="table table-sm table-striped table-hover align-middle mb-2">
+                                            <table
+                                                class="table table-sm table-striped table-hover align-middle mb-2 colorful-metrics-table">
                                                 <thead>
                                                     <tr>
                                                         <th rowspan="2" class="col-date">Date</th>
@@ -545,7 +710,8 @@
                                 aria-labelledby="heading-{{ $monthAllId }}" data-bs-parent="#monthAllAccordion">
                                 <div class="accordion-body p-0">
                                     <div class="table-responsive table-card">
-                                        <table class="table table-sm table-striped table-hover align-middle mb-0">
+                                        <table
+                                            class="table table-sm table-striped table-hover align-middle mb-0 colorful-metrics-table">
                                             <thead>
                                                 <tr>
                                                     <th rowspan="2" class="col-date">Date</th>
