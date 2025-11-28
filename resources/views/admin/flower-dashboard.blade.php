@@ -3,185 +3,39 @@
 @section('styles')
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+
     <!-- Feather Icons -->
     <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
+
     <!-- INTERNAL DataTable css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
+
     <!-- Dashboard custom css -->
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
 
+    <!-- Poppins font (for Quick Template look) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --nu-primary: #2563eb;
-            --nu-primary-soft: #eff6ff;
-            --nu-success: #10b981;
-            --nu-warning: #f59e0b;
-            --nu-danger: #ef4444;
-            --nu-slate: #0f172a;
-            --nu-muted: #64748b;
-
-            --nu-emerald-soft: #dcfce7;
-            --nu-cyan-soft: #e0f2fe;
-            --nu-amber-soft: #fef3c7;
-            --nu-fuchsia-soft: #fae8ff;
-            --nu-indigo-soft: #e0e7ff;
-            --nu-pink-soft: #ffe4f1;
-            --nu-slate-soft: #f1f5f9;
-
-            --nu-card-radius: 18px;
-            --nu-shell-radius: 20px;
+            --card-radius: 22px;
+            --card-border: rgba(148, 163, 184, 0.45);
+            --card-shadow: 0 18px 32px rgba(15, 23, 42, 0.14);
+            --card-shadow-hover: 0 26px 46px rgba(15, 23, 42, 0.20);
+            --card-bg-soft: linear-gradient(135deg,
+                    #eaf3ff 0%,
+                    #f7fbff 45%,
+                    #fff5fb 100%);
+            --card-title: #0b1120;
+            --card-subtitle: #64748b;
+            --card-number: #020617;
         }
 
-        /* Soft page bg (like notification page) */
         body {
-            background-color: #f8fafc;
-        }
-
-        /* ---------- Outer white shell around each section ---------- */
-        .dashboard-shell-card {
-            border-radius: var(--nu-shell-radius);
-            border: 1px solid #e2e8f0;
-            background: #ffffff;
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.04);
-            padding: 1.25rem 1.5rem 1.4rem;
-            margin-top: 1rem;
-        }
-
-        .dashboard-shell-card .card-title-custom {
-            font-weight: 800;
-            color: var(--nu-slate);
-            letter-spacing: 0.02em;
-        }
-
-        /* ---------- Metric cards (same spirit as Quick Templates) ---------- */
-        .dash-metric-card {
-            position: relative;
-            border-radius: var(--nu-card-radius);
-            border: 1px solid rgba(148, 163, 184, 0.45);
-            background: linear-gradient(135deg, #eef2ff, #e0f2fe);
-            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08); /* soft shadow below card */
-            overflow: hidden;
-            transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
-        }
-
-        .dash-metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 22px 48px rgba(15, 23, 42, 0.14);
-            border-color: rgba(129, 140, 248, 0.9);
-        }
-
-        /* Corner blob – use ::before so ::after is free for pulse-bg */
-        .dash-metric-card::before {
-            content: "";
-            position: absolute;
-            right: -40px;
-            bottom: -40px;
-            width: 120px;
-            height: 120px;
-            border-radius: 999px;
-            opacity: 0.24;
-            background: radial-gradient(circle at 30% 30%, #4f46e5, #0ea5e9);
-            z-index: 0;
-        }
-
-        .dash-metric-card h6,
-        .dash-metric-card h5 {
-            font-size: .78rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: #0f172a;
-            opacity: .9;
-        }
-
-        .dash-metric-card h4 {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #0f172a;
-        }
-
-        .dash-metric-card h5.card-subtitle,
-        .dash-metric-card h6.card-subtitle {
-            text-transform: none;
-            letter-spacing: 0;
-            font-weight: 500;
-        }
-
-        /* ---------- Color variants (pastel gradient like templates) ---------- */
-        .dash-metric-card--amber {
-            background: linear-gradient(135deg, var(--nu-amber-soft), #fffbeb);
-        }
-
-        .dash-metric-card--amber::before {
-            background: radial-gradient(circle at 30% 30%, #fbbf24, #f97316);
-        }
-
-        .dash-metric-card--fuchsia {
-            background: linear-gradient(135deg, var(--nu-fuchsia-soft), #fdf4ff);
-        }
-
-        .dash-metric-card--fuchsia::before {
-            background: radial-gradient(circle at 30% 30%, #e879f9, #c026d3);
-        }
-
-        .dash-metric-card--cyan {
-            background: linear-gradient(135deg, var(--nu-cyan-soft), #f0f9ff);
-        }
-
-        .dash-metric-card--cyan::before {
-            background: radial-gradient(circle at 30% 30%, #22d3ee, #0ea5e9);
-        }
-
-        .dash-metric-card--indigo {
-            background: linear-gradient(135deg, var(--nu-indigo-soft), #eef2ff);
-        }
-
-        .dash-metric-card--indigo::before {
-            background: radial-gradient(circle at 30% 30%, #6366f1, #4f46e5);
-        }
-
-        .dash-metric-card--emerald {
-            background: linear-gradient(135deg, var(--nu-emerald-soft), #f0fdf4);
-        }
-
-        .dash-metric-card--emerald::before {
-            background: radial-gradient(circle at 30% 30%, #22c55e, #16a34a);
-        }
-
-        .dash-metric-card--pink {
-            background: linear-gradient(135deg, var(--nu-pink-soft), #fff1f2);
-        }
-
-        .dash-metric-card--pink::before {
-            background: radial-gradient(circle at 30% 30%, #ec4899, #db2777);
-        }
-
-        .dash-metric-card--slate {
-            background: linear-gradient(135deg, var(--nu-slate-soft), #e5e7eb);
-        }
-
-        .dash-metric-card--slate::before {
-            background: radial-gradient(circle at 30% 30%, #64748b, #475569);
-        }
-
-        /* Base sales-card – keep pulse behaviour & allow bg layers */
-        .sales-card,
-        .card.sales-card {
-            position: relative;
-            border-radius: var(--nu-card-radius);
-            transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease, border-color .35s ease;
-            will-change: background-color, transform, box-shadow, border-color;
-            background-clip: padding-box;
-            overflow: hidden;
-        }
-
-        /* elevate direct children above pseudo-layers */
-        .sales-card>*,
-        .card.sales-card>* {
-            position: relative;
-            z-index: 1;
+            font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #eef2ff;
         }
 
         /* ========= Colorful pulse glows (border halo) ========= */
@@ -261,7 +115,7 @@
             }
         }
 
-        /* ========= NEW: background blink using a pseudo-element (after) ========= */
+        /* ========= NEW: background blink using a pseudo-element ========= */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
@@ -282,7 +136,7 @@
             animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
-        /* pseudo-element layer under content (but above ::before blob) */
+        /* pseudo-element layer under content (for pulse) */
         .pulse-bg--cyan::after,
         .pulse-bg--emerald::after,
         .pulse-bg--fuchsia::after,
@@ -292,7 +146,7 @@
             inset: 0;
             border-radius: inherit;
             pointer-events: none;
-            z-index: 1;
+            z-index: 0;
             background: transparent;
         }
 
@@ -306,6 +160,113 @@
             50% {
                 background: var(--tint);
             }
+        }
+
+        /* =============== “Quick Templates” style cards ================== */
+
+        /* Section wrapper card (white base like screenshot) */
+        .dashboard-section {
+            border-radius: var(--card-radius);
+            background: #ffffff;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            padding-top: 18px;
+            padding-bottom: 18px;
+        }
+
+        /* Metric tiles inside each section */
+        .sales-card,
+        .card.sales-card {
+            position: relative;
+            border-radius: var(--card-radius);
+            border: 1px solid var(--card-border);
+            background: var(--card-bg-soft);
+            box-shadow: var(--card-shadow);
+            transition:
+                transform .18s ease,
+                box-shadow .18s ease,
+                border-color .18s ease,
+                background .18s ease;
+            background-clip: padding-box;
+            overflow: hidden;
+        }
+
+        /* permanent soft “corner blob” shadow */
+        .sales-card::before,
+        .card.sales-card::before {
+            content: "";
+            position: absolute;
+            width: 185px;
+            height: 185px;
+            right: -70px;
+            bottom: -70px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%,
+                    rgba(148, 163, 184, 0.22),
+                    rgba(148, 163, 184, 0));
+            z-index: 0;
+        }
+
+        /* keep the tinted pulse ::after and ::before underneath content */
+        .sales-card>*,
+        .card.sales-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        .sales-card:hover,
+        .card.sales-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: rgba(129, 140, 248, 0.85);
+        }
+
+        /* Slight color variations for watcher cards using data-color */
+        .watch-card[data-color="amber"] {
+            background: linear-gradient(135deg, #fff7ed 0%, #fef3c7 40%, #fef9c3 100%);
+        }
+
+        .watch-card[data-color="fuchsia"] {
+            background: linear-gradient(135deg, #fdf2ff 0%, #fce7f3 45%, #e0f2fe 100%);
+        }
+
+        .watch-card[data-color="cyan"] {
+            background: linear-gradient(135deg, #ecfeff 0%, #e0f2fe 45%, #eef2ff 100%);
+        }
+
+        .watch-card[data-color="emerald"] {
+            background: linear-gradient(135deg, #ecfdf3 0%, #dcfce7 45%, #e0f2fe 100%);
+        }
+
+        /* Typography to match Quick Template look */
+        .card-title-custom {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--card-title);
+        }
+
+        .sales-card h6,
+        .sales-card .tx-12 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--card-subtitle);
+            margin-bottom: 4px;
+        }
+
+        .sales-card h4,
+        .sales-card .tx-20,
+        .sales-card .tx-22 {
+            font-weight: 700;
+            color: var(--card-number);
+            margin-bottom: 0;
+        }
+
+        .sales-card h5 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--card-subtitle);
         }
 
         /* --- Sound unlock pill --- */
@@ -340,15 +301,15 @@
 @endsection
 
 @section('content')
-    {{-- Todays Order --}}
-    <div class="row card sales-card dashboard-shell-card">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    {{-- Each outer row now also has .dashboard-section for the white “panel” look --}}
+    <div class="row card sales-card mt-2 dashboard-section">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
                 <!-- New Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--amber watch-card" data-color="amber">
+                        <div class="card sales-card watch-card" data-color="amber">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -367,7 +328,7 @@
                 <!-- Renewed Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--fuchsia watch-card" data-color="fuchsia">
+                        <div class="card sales-card watch-card" data-color="fuchsia">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -383,15 +344,16 @@
                     </a>
                 </div>
 
-                <!-- Customize Order (WATCH) -->
+                <!-- Customize Order (WATCH, main one) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--cyan watch-card" data-color="cyan">
+                        <div class="card sales-card watch-card" data-color="cyan">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}"
+                                        <h4 id="ordersRequestedTodayCount"
+                                            data-initial="{{ $ordersRequestedToday }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $ordersRequestedToday }}
                                         </h4>
@@ -402,10 +364,10 @@
                     </a>
                 </div>
 
-                <!-- Customize Order (Next 3 Days) -->
+                <!-- Customize Order (Upcoming 3 Days) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--indigo">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -419,19 +381,17 @@
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
 
-    {{-- Subscription Status --}}
-    <div class="row card sales-card dashboard-shell-card">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    <div class="row card sales-card mt-2 dashboard-section">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Subscription Status</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--pink">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -448,7 +408,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--indigo">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -465,7 +425,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--amber">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -482,11 +442,11 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--cyan">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">New Order Assign Rider</h6>
+                                        <h6 class="mb-2 tx-12"> New Order Assign Rider</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
                                             {{ $nonAssignedRidersCount }}
                                         </h4>
@@ -496,19 +456,17 @@
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
 
-    {{-- Paused Subscription --}}
-    <div class="row card sales-card dashboard-shell-card">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    <div class="row card sales-card mt-2 dashboard-section">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--amber">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -525,7 +483,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--slate">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -542,7 +500,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--indigo">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -559,7 +517,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--emerald">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -573,20 +531,17 @@
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
 
-    {{-- Todays Transaction --}}
-    <div class="row card sales-card dashboard-shell-card">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    <div class="row card sales-card mt-2 dashboard-section">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
-                <!-- Active Subscription / Total Delivery -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--cyan">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -604,7 +559,7 @@
                 <!-- Today Total Income -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.payments.index') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--emerald">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -622,7 +577,7 @@
                 <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
-                        <div class="card sales-card dash-metric-card dash-metric-card--pink position-relative">
+                        <div class="card sales-card position-relative">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -641,7 +596,7 @@
                 <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--indigo">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -655,13 +610,11 @@
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
 
-    {{-- Todays Rider Details --}}
-    <div class="row card sales-card dashboard-shell-card">
+    <div class="row card sales-card mt-2 dashboard-section">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <h4 class="card-title-custom mb-4" style="font-size: 14px">Todays Rider Details</h4>
             <div class="row">
@@ -669,16 +622,18 @@
                     <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}"
                             target="_blank" class="text-decoration-none">
-                            <div class="card sales-card dash-metric-card dash-metric-card--slate">
+                            <div class="sales-card">
                                 <div class="row">
                                     <div class="col-8">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
-                                            <h6 class="mb-2">{{ $data['rider']->rider_name }}</h6>
+                                            <h6 class="mb-2 text-dark tx-12">
+                                                {{ $data['rider']->rider_name }}
+                                            </h6>
                                             <div class="d-flex flex-column">
-                                                <h4 class="tx-12 font-weight-semibold mb-2">
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">
                                                     Delivery Assigned: {{ $data['totalAssignedOrders'] }}
                                                 </h4>
-                                                <h4 class="tx-12 font-weight-semibold mb-0">
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">
                                                     Delivered: {{ $data['totalDeliveredToday'] }}
                                                 </h4>
                                             </div>
@@ -689,20 +644,18 @@
                         </a>
                     </div>
                 @endforeach
-
             </div>
         </div>
     </div>
 
-    {{-- Rider Details --}}
-    <div class="row card sales-card dashboard-shell-card">
+    <div class="row card sales-card mt-2 dashboard-section">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom" style="font-size: 14px">Rider Details</h4>
+            <h4 class="card-title-custom" style="font-size: 14px"> Rider Details</h4>
             <div class="row">
                 <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--indigo">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -720,12 +673,13 @@
                 <!-- Total Delivery Today (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--emerald watch-card" data-color="emerald">
+                        <div class="card sales-card watch-card" data-color="emerald">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Delivery Today</h6>
-                                        <h4 id="totalDeliveriesTodayCount" data-initial="{{ $totalDeliveriesToday }}"
+                                        <h4 id="totalDeliveriesTodayCount"
+                                            data-initial="{{ $totalDeliveriesToday }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $totalDeliveriesToday }}
                                         </h4>
@@ -736,10 +690,11 @@
                     </a>
                 </div>
 
-                <!-- Delivery in Month -->
+                <!-- Total Delivery in Month -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--cyan">
+                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
+                        target="_blank">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -757,7 +712,7 @@
                 <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--slate">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -771,19 +726,17 @@
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
 
-    {{-- Marketing --}}
-    <div class="row card sales-card dashboard-shell-card">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    <div class="row card sales-card mt-2 dashboard-section">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.visitPlace', ['filter' => 'todayVisitPlace']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--pink">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -801,15 +754,14 @@
         </div>
     </div>
 
-    {{-- Referal Details --}}
-    <div class="row card sales-card dashboard-shell-card">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    <div class="row card sales-card mt-2 dashboard-section">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
                         target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--emerald">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -827,7 +779,7 @@
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
                         target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--cyan">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -844,7 +796,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--amber">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -861,7 +813,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
-                        <div class="card sales-card dash-metric-card dash-metric-card--slate">
+                        <div class="card sales-card">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -875,7 +827,6 @@
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
@@ -1186,6 +1137,28 @@
                 } catch (e) {
                     /* optional console.warn(e) */
                 }
+            }
+
+            // keep your datetime updater if you use it elsewhere
+            function updateDateTime() {
+                const now = new Date();
+                const date1 = document.getElementById('todayDate');
+                const time1 = document.getElementById('liveTime');
+                const date2 = document.getElementById('current-date');
+                const time2 = document.getElementById('current-time');
+                if (date1) date1.textContent = now.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                if (time1) time1.textContent = now.toLocaleTimeString();
+                if (date2) date2.textContent = now.toLocaleDateString(undefined, {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                if (time2) time2.textContent = now.toLocaleTimeString();
             }
 
             document.addEventListener('visibilitychange', () => {
