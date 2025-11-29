@@ -1001,7 +1001,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card ref-card-1"  style="background: linear-gradient(135deg, #6b0329 0%, #fa4b9d 40%, #f3afca 80%) !important;">
+                        <div class="card sales-card ref-card-1"  style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -1019,7 +1019,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card ref-card-2"  style="background: linear-gradient(135deg, #6b0329 0%, #fa4b9d 40%, #f3afca 60%) !important;">
+                        <div class="card sales-card ref-card-2"  style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -1036,7 +1036,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
-                        <div class="card sales-card ref-card-3"  style="background: linear-gradient(135deg, #6b0329 0%, #fa4b9d 40%, #f3afca 40%) !important;">
+                        <div class="card sales-card ref-card-3"  style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -1053,7 +1053,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
-                        <div class="card sales-card ref-card-4" style="background: linear-gradient(135deg, #6b0329 0%, #fa4b9d 40%, #f3afca 20%) !important;">
+                        <div class="card sales-card ref-card-4" style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
