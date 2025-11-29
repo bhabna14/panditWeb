@@ -123,6 +123,23 @@
             margin-right: 0;
         }
 
+        /* Section-specific gradient themes (applied conditionally) */
+        .dashboard-section--indigo {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 40%, #a5b4fc 100%) !important;
+        }
+
+        .dashboard-section--emerald {
+            background: linear-gradient(135deg, #dcfce7 0%, #86efac 45%, #e0f2fe 100%) !important;
+        }
+
+        .dashboard-section--lime {
+            background: linear-gradient(135deg, #f7fee7 0%, #ecfccb 40%, #bef264 100%) !important;
+        }
+
+        .dashboard-section--amber {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 40%, #facc15 100%) !important;
+        }
+
         /* Metric tiles inside each section */
         .sales-card,
         .card.sales-card {
@@ -426,7 +443,7 @@
 
 @section('content')
     {{-- TODAY'S ORDER --}}
-    <div class="row mt-2 dashboard-section">
+    <div class="row mt-2 dashboard-section {{ ((($newUserSubscription ?? 0) + ($renewSubscription ?? 0) + ($ordersRequestedToday ?? 0) + ($upcomingCustomizeOrders ?? 0)) > 0) ? 'dashboard-section--indigo' : '' }}">
         <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
@@ -588,7 +605,7 @@
     </div>
 
     {{-- PAUSED SUBSCRIPTION --}}
-    <div class="row mt-2 dashboard-section">
+    <div class="row mt-2 dashboard-section {{ ((($todayPausedRequest ?? 0) + ($pausedSubscriptions ?? 0) + ($nextDayPaused ?? 0) + ($nextDayResumed ?? 0)) > 0) ? 'dashboard-section--emerald' : '' }}">
         <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
             <div class="row">
@@ -664,7 +681,7 @@
     </div>
 
     {{-- TODAY'S TRANSACTION --}}
-    <div class="row mt-2 dashboard-section">
+    <div class="row mt-2 dashboard-section {{ ((($activeSubscriptions ?? 0) + ($totalDeliveriesTodayCount ?? 0) + ($totalIncomeToday ?? 0) + ($todayTotalExpenditure ?? 0) + ($activeTomorrowCount ?? 0)) > 0) ? 'dashboard-section--lime' : '' }}">
         <div class="col-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
@@ -887,7 +904,7 @@
     </div>
 
     {{-- REFERRAL DETAILS --}}
-    <div class="row mt-2 dashboard-section">
+    <div class="row mt-2 dashboard-section {{ ((($todayClaimed ?? 0) + ($todayApproved ?? 0) + ($todayRefer ?? 0) + ($totalRefer ?? 0)) > 0) ? 'dashboard-section--amber' : '' }}">
         <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
