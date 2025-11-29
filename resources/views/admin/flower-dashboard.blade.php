@@ -795,7 +795,7 @@
                 <!-- Today Total Income -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.payments.index') }}" target="_blank">
-                        <div class="card sales-card txn-card-2"  style="background: linear-gradient(135deg, #bd9deb 0%, #aa6edb 40%, #a67aba 100%) !important;">
+                        <div class="card sales-card txn-card-2"  style="background: linear-gradient(135deg, #dff7d1 0%, #e1ecbb 40%, #f1f7d6 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -813,7 +813,7 @@
                 <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
-                        <div class="card sales-card position-relative txn-card-3" style="background: linear-gradient(135deg, #bd9deb 0%, #aa6edb 40%, #a67aba 100%) !important;">
+                        <div class="card sales-card position-relative txn-card-3" style="background: linear-gradient(135deg, #dff7d1 0%, #e1ecbb 40%, #f1f7d6 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -832,7 +832,7 @@
                 <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
-                        <div class="card sales-card txn-card-4" style="background: linear-gradient(135deg, #bd9deb 0%, #aa6edb 40%, #a67aba 100%) !important;">
+                        <div class="card sales-card txn-card-4" style="background: linear-gradient(135deg, #dff7d1 0%, #e1ecbb 40%, #f1f7d6 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
