@@ -1001,7 +1001,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card ref-card-1"  style="background: linear-gradient(135deg, #f5dde5 0%, #807c7d 40%, #f3afca 80%) !important;">
+                        <div class="card sales-card ref-card-1"  style="background: linear-gradient(135deg, #f5dde5 0%, #807c7d 40%, #f3afca 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
