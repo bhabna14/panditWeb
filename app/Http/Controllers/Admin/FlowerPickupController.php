@@ -489,20 +489,20 @@ class FlowerPickupController extends Controller
                     'status'         => 'active',
                 ]);
 
-                // 3) Mirror it into OfficeLedger as an OUT entry
-                OfficeLedger::create([
-                    'entry_date'     => $officeTransaction->date,
-                    'category'       => $officeTransaction->categories,
-                    'direction'      => 'out',                       // money going out
-                    'source_type'    => 'transaction',
-                    'source_id'      => $officeTransaction->id,
-                    'amount'         => $officeTransaction->amount,
-                    'mode_of_payment'=> $officeTransaction->mode_of_payment,
-                    'paid_by'        => $officeTransaction->paid_by,
-                    'received_by'    => $vendorName,
-                    'description'    => $officeTransaction->description,
-                    'status'         => 'active',
-                ]);
+                // // 3) Mirror it into OfficeLedger as an OUT entry
+                // OfficeLedger::create([
+                //     'entry_date'     => $officeTransaction->date,
+                //     'category'       => $officeTransaction->categories,
+                //     'direction'      => 'out',                       // money going out
+                //     'source_type'    => 'transaction',
+                //     'source_id'      => $officeTransaction->id,
+                //     'amount'         => $officeTransaction->amount,
+                //     'mode_of_payment'=> $officeTransaction->mode_of_payment,
+                //     'paid_by'        => $officeTransaction->paid_by,
+                //     'received_by'    => $vendorName,
+                //     'description'    => $officeTransaction->description,
+                //     'status'         => 'active',
+                // ]);
 
                 // 4) Log everything for debugging
                 Log::info('Vendor payment updated & pushed to ledger', [

@@ -303,7 +303,6 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
-
 public function flowerPickUp(Request $request)
 {
     $fromDate = $request->input('from_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
@@ -332,10 +331,16 @@ public function flowerPickUp(Request $request)
 
     // Clone for filtered listing
     $filtered = (clone $base);
+
     if ($request->filled('vendor_id')) {
         $filtered->where('vendor_id', $request->vendor_id);
     }
 
+    // ORDER: latest pickup_date first, then latest id
+    $filtered->orderBy('pickup_date', 'desc')
+             ->orderBy('id', 'desc');
+
+    // Main data (DESC)
     $reportData = $filtered->get();
 
     $totalPrice = (float) $reportData->sum('total_price');
@@ -345,6 +350,7 @@ public function flowerPickUp(Request $request)
 
     // === Summaries ===
     // All vendors (ignore vendor filter, respect date+payment+category)
+    // (No need to order here for grouping; we still sort by total_amount desc)
     $vendorSummariesAll = (clone $base)->get()
         ->groupBy('vendor_id')
         ->map(function ($rows) {
@@ -392,14 +398,14 @@ public function flowerPickUp(Request $request)
     }
 
     return view('admin.reports.flower-pick-up-reports', [
-        'reportData'             => $reportData,
-        'total_price'            => $totalPrice,
-        'today_price'            => $todayPrice,
-        'fromDate'               => $fromDate,
-        'toDate'                 => $toDate,
-        'vendors'                => $vendors,
+        'reportData'         => $reportData,
+        'total_price'        => $totalPrice,
+        'today_price'        => $todayPrice,
+        'fromDate'           => $fromDate,
+        'toDate'             => $toDate,
+        'vendors'            => $vendors,
         // Render cards from ALL vendors on initial load too
-        'vendorSummariesAll'     => $vendorSummariesAll,
+        'vendorSummariesAll' => $vendorSummariesAll,
     ]);
 }
 
