@@ -15,7 +15,7 @@
     <!-- Dashboard custom css -->
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
 
-    <!-- Poppins font (for Quick Template look) -->
+    <!-- Poppins font -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
@@ -129,7 +129,8 @@
             position: relative;
             border-radius: var(--card-radius);
             border: 1px solid var(--card-border);
-            background-color: #f9fafb;
+            /* IMPORTANT: make base transparent so custom bg shows */
+            background: transparent !important;
             box-shadow: var(--card-shadow);
             transition:
                 transform .18s ease,
@@ -153,6 +154,30 @@
                     rgba(148, 163, 184, 0.22),
                     rgba(148, 163, 184, 0));
             z-index: 0;
+        }
+
+        /* remove grey arc on cards where we add strong colors */
+        .sub-status-card-ends-today::before,
+        .sub-status-card-five-days::before,
+        .sub-status-card-renew-pending::before,
+        .sub-status-card-assign-rider::before,
+        .paused-card-1::before,
+        .paused-card-2::before,
+        .paused-card-3::before,
+        .paused-card-4::before,
+        .txn-card-1::before,
+        .txn-card-2::before,
+        .txn-card-3::before,
+        .txn-card-4::before,
+        .rider-card-1::before,
+        .rider-card-2::before,
+        .rider-card-3::before,
+        .rider-card-4::before,
+        .ref-card-1::before,
+        .ref-card-2::before,
+        .ref-card-3::before,
+        .ref-card-4::before {
+            background: none;
         }
 
         .sales-card > *,
