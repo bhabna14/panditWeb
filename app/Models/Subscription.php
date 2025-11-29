@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;   // 👈 ADD THIS LINE
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -13,8 +13,8 @@ class Subscription extends Model
 {
     use HasFactory;
 
-    protected $table = 'subscriptions'; // Ensure this matches your actual table name
-    
+    protected $table = 'subscriptions';
+
     protected $fillable = [
         'subscription_id',
         'order_id',
@@ -26,7 +26,7 @@ class Subscription extends Model
         'pause_start_date',
         'pause_end_date',
         'new_date',
-        'status'
+        'status',
     ];
 
     public function users()
@@ -35,9 +35,9 @@ class Subscription extends Model
     }
 
     public function user()
-{
-    return $this->belongsTo(\App\Models\User::class, 'user_id');
-}
+    {
+        return $this->belongsTo(\App\Models\User::class, 'user_id');
+    }
 
     public function flowerPayments()
     {
@@ -47,16 +47,15 @@ class Subscription extends Model
     public static function expireIfEnded()
     {
         $today = Carbon::today();
-    
-        // Find active subscriptions where the end date has passed
+
         $subscriptions = self::whereIn('status', ['active', 'paused'])
             ->where('end_date', '<', $today)
             ->get();
-    
+
         foreach ($subscriptions as $subscription) {
             $subscription->status = 'expired';
             $subscription->save();
-    
+
             Log::info('Subscription expired', [
                 'order_id' => $subscription->order_id,
                 'user_id'  => $subscription->user_id,
@@ -97,8 +96,8 @@ class Subscription extends Model
     public function latestPaidPayment()
     {
         return $this->hasOne(FlowerPayment::class, 'order_id', 'order_id')
-                    ->where('payment_status', 'paid')
-                    ->latestOfMany();
+            ->where('payment_status', 'paid')
+            ->latestOfMany();
     }
 
     public function scopeActiveOn($query, $date)
@@ -113,10 +112,8 @@ class Subscription extends Model
             })
             ->whereDate('start_date', '<=', $d)
             ->where(function ($q) use ($d) {
-                // If new_date is present we compare with that; else with end_date; allow open-ended too.
                 $q->whereDate(DB::raw('COALESCE(new_date, end_date, start_date)'), '>=', $d);
             })
-            // Exclude rows where the target date falls inside the pause window (inclusive)
             ->where(function ($q) use ($d) {
                 $q->whereNull('pause_start_date')
                   ->orWhereNull('pause_end_date')
@@ -127,22 +124,21 @@ class Subscription extends Model
 
     /**
      * Scope: exclude subscriptions where the same user
-     * has another subscription with status 'active' or 'pending'.
+     * has another subscription with status 'active' or 'pending'
+     * that starts in the future (> today).
      */
- public function scopeWithoutOtherActiveOrPending($query)
-{
-    // Use app timezone if you want to stay consistent
-    $tz    = config('app.timezone');
-    $today = \Carbon\Carbon::today($tz)->toDateString();
+    public function scopeWithoutOtherActiveOrPending($query)
+    {
+        $tz    = config('app.timezone');
+        $today = \Carbon\Carbon::today($tz)->toDateString();
 
-    return $query->whereNotExists(function ($sub) use ($today) {
-        $sub->select(DB::raw(1))
-            ->from('subscriptions as s2')
-            ->whereColumn('s2.user_id', 'subscriptions.user_id') // same user
-            ->whereColumn('s2.id', '!=', 'subscriptions.id')      // different subscription
-            ->whereIn('s2.status', ['active', 'pending'])         // other sub is active/pending
-            ->whereDate('s2.start_date', '>', $today);            // and starts in the future (> today)
-    });
-}
-
+        return $query->whereNotExists(function ($sub) use ($today) {
+            $sub->select(DB::raw(1))
+                ->from('subscriptions as s2')
+                ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                ->whereColumn('s2.id', '!=', 'subscriptions.id')
+                ->whereIn('s2.status', ['active', 'pending'])
+                ->whereDate('s2.start_date', '>', $today);
+        });
+    }
 }
