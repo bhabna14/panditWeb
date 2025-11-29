@@ -625,7 +625,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card sub-status-card-ends-today"  style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #fecaca 100%)">
+                        <div class="card sales-card sub-status-card-ends-today"  style="background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #fecaca 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
