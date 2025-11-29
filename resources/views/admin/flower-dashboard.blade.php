@@ -701,7 +701,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card paused-card-1"  style="background: linear-gradient(135deg, #89eda9 0%, #225f01 40%, #91efdd 100%) !important;">
+                        <div class="card sales-card paused-card-1"  style="background: linear-gradient(135deg, #b5f4c9 0%, #adc99e 40%, #c7eee7 40%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -718,7 +718,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card paused-card-2"  style="background: linear-gradient(135deg, #89eda9 0%, #225f01 40%, #91efdd 80%) !important;">
+                        <div class="card sales-card paused-card-2"  style="background: linear-gradient(135deg, #b5f4c9 0%, #adc99e 40%, #c7eee7 40%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -735,7 +735,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
-                        <div class="card sales-card paused-card-3"  style="background: linear-gradient(135deg, #89eda9 0%, #225f01 40%, #91efdd 60%) !important;">
+                        <div class="card sales-card paused-card-3"  style="background: linear-gradient(135deg, #b5f4c9 0%, #adc99e 40%, #c7eee7 40%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -752,7 +752,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card paused-card-4"  style="background: linear-gradient(135deg, #89eda9 0%, #225f01 40%, #91efdd 40%) !important;">
+                        <div class="card sales-card paused-card-4"  style="background: linear-gradient(135deg, #b5f4c9 0%, #adc99e 40%, #c7eee7 40%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -795,7 +795,7 @@
                 <!-- Today Total Income -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.payments.index') }}" target="_blank">
-                        <div class="card sales-card txn-card-2"  style="background: linear-gradient(135deg, #2e026b 0%, #1c69e6 40%, #84b3f1 100%) !important;">
+                        <div class="card sales-card txn-card-2"  style="background: linear-gradient(135deg, #bd9deb 0%, #aa6edb 40%, #a67aba 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -813,7 +813,7 @@
                 <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
-                        <div class="card sales-card position-relative txn-card-3" style="background: linear-gradient(135deg, #2e026b 0%, #1c69e6 40%, #84b3f1 80%) !important;">
+                        <div class="card sales-card position-relative txn-card-3" style="background: linear-gradient(135deg, #bd9deb 0%, #aa6edb 40%, #a67aba 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -832,7 +832,7 @@
                 <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
-                        <div class="card sales-card txn-card-4" style="background: linear-gradient(135deg, #2e026b 0%, #1c69e6 40%, #84b3f1 60%) !important;">
+                        <div class="card sales-card txn-card-4" style="background: linear-gradient(135deg, #bd9deb 0%, #aa6edb 40%, #a67aba 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -892,8 +892,8 @@
             <div class="row">
                 <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card rider-card-1">
+                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" >
+                        <div class="card sales-card rider-card-1" style="background: linear-gradient(135deg, #e9f3c0 0%, #dff0c5 40%, #c8e4b3 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -932,7 +932,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
                        target="_blank">
-                        <div class="card sales-card rider-card-3">
+                        <div class="card sales-card rider-card-3" style="background: linear-gradient(135deg, #e9f3c0 0%, #dff0c5 40%, #c8e4b3 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -950,7 +950,7 @@
                 <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card rider-card-4">
+                        <div class="card sales-card rider-card-4"  style="background: linear-gradient(135deg, #e9f3c0 0%, #dff0c5 40%, #c8e4b3 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -975,7 +975,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.visitPlace', ['filter' => 'todayVisitPlace']) }}" target="_blank">
-                        <div class="card sales-card card-theme-rose"  style="background: linear-gradient(135deg, #6b0329 0%, #fa4b9d 40%, #f3afca 100%) !important;">
+                        <div class="card sales-card card-theme-rose" >
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -1019,7 +1019,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card ref-card-2"  style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
+                        <div class="card sales-card ref-card-2"  style="background: linear-gradient(135deg, #f5dde5 0%, #fbcad7 40%, #f3afca 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -1036,7 +1036,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
-                        <div class="card sales-card ref-card-3"  style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
+                        <div class="card sales-card ref-card-3"  style="background: linear-gradient(135deg, #f5dde5 0%, #fbcad7 40%, #f3afca 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -1053,7 +1053,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
-                        <div class="card sales-card ref-card-4" style="background: linear-gradient(135deg, #f54f8c 0%, #fa4b9d 40%, #f3afca 80%) !important;">
+                        <div class="card sales-card ref-card-4" style="background: linear-gradient(135deg, #f5dde5 0%, #fbcad7 40%, #f3afca 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
