@@ -431,13 +431,13 @@
                                     $rows = $item->flowerPickupItems;
                                 @endphp
                                 <table class="flower-detail-table">
-                                    {{-- <thead>
+                                    <thead>
                                         <tr>
                                             <th>Item</th>
                                             <th class="text-end">Qty</th>
                                             <th class="text-end">Price</th>
                                         </tr>
-                                    </thead> --}}
+                                    </thead>
                                     <tbody>
                                         @foreach ($rows as $f)
                                             @php
