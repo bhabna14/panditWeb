@@ -625,7 +625,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card sub-status-card-ends-today"  style="background: linear-gradient(135deg, #f2e35e 0%, #efeaa5 40%, #f3f9d4 100%) !important;">
+                        <div class="card sales-card sub-status-card-ends-today"  style="background: linear-gradient(135deg, #ff7878 0%, #fd9db0 40%, #f9e3e9 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -642,7 +642,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card sub-status-card-five-days"  style="background: linear-gradient(135deg, #f2e35e 0%, #efeaa5 40%, #f3f9d4 100%) !important;">
+                        <div class="card sales-card sub-status-card-five-days"  style="background: linear-gradient(135deg, #ff7878 0%, #fd9db0 40%, #f9e3e9 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -659,7 +659,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card sub-status-card-renew-pending" style="background: linear-gradient(135deg, #f2e35e 0%, #efeaa5 40%, #f3f9d4 100%) !important;">
+                        <div class="card sales-card sub-status-card-renew-pending" style="background: linear-gradient(135deg, #ff7878 0%, #fd9db0 40%, #f9e3e9 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -676,7 +676,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card sub-status-card-assign-rider" style="background: linear-gradient(135deg, #f2e35e 0%, #efeaa5 40%, #f3f9d4 100%) !important;">
+                        <div class="card sales-card sub-status-card-assign-rider" style="background: linear-gradient(135deg, #ff7878 0%, #fd9db0 40%, #f9e3e9 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
