@@ -600,7 +600,7 @@
                 <!-- Customize Order (Upcoming 3 Days) -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
-                        <div class="card sales-card card-theme-indigo"  style="background: linear-gradient(135deg, #9793f2 0%, #cfbfb0 40%, #c7c4f2 100%) !important;">
+                        <div class="card sales-card card-theme-indigo"  style="background: linear-gradient(135deg, #9793f2 0%, #cfbfb0 40%, #eeb8d1 100%) !important;">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">

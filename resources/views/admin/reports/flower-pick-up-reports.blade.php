@@ -29,7 +29,10 @@
         body {
             font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif !important;
             color: var(--text);
-            background: radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%), radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%), var(--bg-subtle)
+            background:
+                radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%),
+                radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%),
+                var(--bg-subtle);
         }
 
         .stats-card {
@@ -245,6 +248,40 @@
         .link-vendor:hover {
             text-decoration: underline
         }
+
+        /* ===== Flower detail pills (one-line, user-friendly) ===== */
+        .flower-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 3px 8px;
+            margin: 2px 4px 2px 0;
+            border-radius: 999px;
+            background: #EEF2FF;
+            border: 1px dashed #CBD5F5;
+            font-size: .78rem;
+            white-space: nowrap;
+        }
+
+        .flower-pill__name {
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .flower-pill__meta {
+            color: #4B5563;
+        }
+
+        .flower-pill__price {
+            font-weight: 700;
+            color: #0E7490;
+        }
+
+        @media (max-width: 767.98px) {
+            .flower-pill {
+                white-space: normal;
+            }
+        }
     </style>
 @endsection
 
@@ -320,7 +357,7 @@
         </div>
     </div>
 
-    {{-- Vendor Cards (ALWAYS show ALL vendors for the current date/payment filter) --}}
+    {{-- Vendor Cards --}}
     <div class="mb-3">
         <h6 class="mb-2" style="font-weight:800;">Vendors</h6>
         <div class="row g-3" id="vendorCards">
@@ -336,8 +373,9 @@
                             <div class="text-end">
                                 <span class="vendor-chip">{{ $v['pickups_count'] }} pickups</span>
                                 @if (!empty($v['last_pickup']))
-                                    <div class="vendor-sub mt-1">Last:
-                                        {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}</div>
+                                    <div class="vendor-sub mt-1">
+                                        Last: {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}
+                                    </div>
                                 @endif
                             </div>
                         </div>
@@ -378,24 +416,34 @@
                                 $vName = $item->vendor->vendor_name ?? '—';
                             @endphp
                             @if ($vId && $vName !== '—')
-                                <a href="#" class="link-vendor"
-                                    data-vendor-id="{{ $vId }}">{{ $vName }}</a>
+                                <a href="#" class="link-vendor" data-vendor-id="{{ $vId }}">
+                                    {{ $vName }}
+                                </a>
                             @else
                                 —
                             @endif
                         </td>
+                        {{-- FLOWER DETAILS – ONE-LINE PILL DESIGN --}}
                         <td>
                             @forelse ($item->flowerPickupItems as $f)
-                                {{ $f->flower?->name ?? '—' }} —
-                                ₹{{ rtrim(rtrim(number_format((float) ($f->price ?? 0), 2), '0'), '.') }}
-                                ({{ rtrim(rtrim(number_format((float) $f->quantity, 2), '0'), '.') }}
-                                {{ $f->unit?->unit_name ?? '—' }})
-                                <br>
+                                @php
+                                    $qty = $f->quantity ?? 0;
+                                    $qtyFormatted = rtrim(rtrim(number_format((float) $qty, 2, '.', ''), '0'), '.');
+                                    $price = $f->price ?? 0;
+                                    $priceFormatted = rtrim(rtrim(number_format((float) $price, 2, '.', ''), '0'), '.');
+                                @endphp
+                                <span class="flower-pill">
+                                    <span class="flower-pill__name">{{ $f->flower?->name ?? '—' }}</span>
+                                    <span class="flower-pill__meta">{{ $qtyFormatted }} {{ $f->unit?->unit_name ?? '' }}</span>
+                                    <span class="flower-pill__price">₹{{ $priceFormatted }}</span>
+                                </span>
                             @empty
                                 —
                             @endforelse
                         </td>
-                        <td class="text-end">₹{{ number_format((float) $item->total_price, 2) }}</td>
+                        <td class="text-end">
+                            ₹{{ number_format((float) $item->total_price, 2) }}
+                        </td>
                         <td>
                             @php
                                 $s = strtolower($item->status ?? '');
@@ -441,9 +489,7 @@
                             </span>
                         </td>
                         <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
-
                         <td>{{ $item->rider->rider_name ?? '—' }}</td>
-
                     </tr>
                 @endforeach
             </tbody>
@@ -496,6 +542,7 @@
                 const today = moment().startOf('day');
                 let start = today.clone(),
                     end = today.clone();
+
                 switch (key) {
                     case 'today':
                         break;
@@ -598,38 +645,23 @@
                 searching: true,
                 paging: true,
                 info: true,
-                dom: "<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" + "<'row'<'col-12'tr>>" +
+                dom: "<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" +
+                    "<'row'<'col-12'tr>>" +
                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                buttons: [{
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        className: 'btn btn-outline-secondary btn-sm'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        className: 'btn btn-outline-secondary btn-sm'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        className: 'btn btn-outline-secondary btn-sm'
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        className: 'btn btn-outline-secondary btn-sm'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        className: 'btn btn-outline-secondary btn-sm'
-                    }
+                buttons: [
+                    { extend: 'copyHtml5', text: 'Copy', className: 'btn btn-outline-secondary btn-sm' },
+                    { extend: 'csvHtml5', text: 'CSV', className: 'btn btn-outline-secondary btn-sm' },
+                    { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-outline-secondary btn-sm' },
+                    { extend: 'pdfHtml5', text: 'PDF', className: 'btn btn-outline-secondary btn-sm' },
+                    { extend: 'print', text: 'Print', className: 'btn btn-outline-secondary btn-sm' }
                 ],
-                columnDefs: [{
-                    targets: 6,
-                    className: 'text-end'
-                }]
+                columnDefs: [
+                    {
+                        // Total Price column right aligned (index 3)
+                        targets: 3,
+                        className: 'text-end'
+                    }
+                ]
             });
 
             // Click-to-filter on vendor name inside the table
@@ -664,50 +696,49 @@
                         table.clear();
 
                         (response.data || []).forEach(item => {
+                            // Build flower details pills (one-line)
                             const items = (item.flower_pickup_items || []).map(i => {
-                                const name = (i.flower && i.flower.name) ? i
-                                    .flower.name : '—';
-                                const unit = (i.unit && i.unit.unit_name) ? i
-                                    .unit.unit_name : '';
+                                const name = (i.flower && i.flower.name) ? i.flower.name : '—';
+                                const unit = (i.unit && i.unit.unit_name) ? i.unit.unit_name : '';
                                 const qty = trim2(i.quantity);
                                 const price = trim2(i.price || 0);
-                                return `${name} — ₹${price} (${qty} ${unit})`;
-                            }).join('<br>');
+                                return `
+                                    <span class="flower-pill">
+                                        <span class="flower-pill__name">${name}</span>
+                                        <span class="flower-pill__meta">${qty} ${unit}</span>
+                                        <span class="flower-pill__price">₹${price}</span>
+                                    </span>
+                                `;
+                            }).join(' ');
 
-                            const t = (item.status || '').toString().trim()
-                                .toLowerCase();
+                            const t = (item.status || '').toString().trim().toLowerCase();
                             let cls = 'status-badge--info';
-                            if (['success', 'completed', 'complete', 'active', 'ok',
-                                    'paid', 'delivered', 'resume'
-                                ].includes(t)) cls = 'status-badge--success';
-                            else if (['pending', 'processing', 'in-progress', 'on hold',
-                                    'hold', 'awaiting'
-                                ].includes(t)) cls = 'status-badge--warning';
-                            else if (['cancel', 'cancelled', 'failed', 'rejected',
-                                    'expired', 'unpaid'
-                                ].includes(t)) cls = 'status-badge--danger';
-                            else if (['new', 'created', 'open'].includes(t)) cls =
-                                'status-badge--neutral';
+                            if (['success', 'completed', 'complete', 'active', 'ok', 'paid', 'delivered', 'resume'].includes(t)) {
+                                cls = 'status-badge--success';
+                            } else if (['pending', 'processing', 'in-progress', 'on hold', 'hold', 'awaiting'].includes(t)) {
+                                cls = 'status-badge--warning';
+                            } else if (['cancel', 'cancelled', 'failed', 'rejected', 'expired', 'unpaid'].includes(t)) {
+                                cls = 'status-badge--danger';
+                            } else if (['new', 'created', 'open'].includes(t)) {
+                                cls = 'status-badge--neutral';
+                            }
 
-                            const vId = (item.vendor && item.vendor.vendor_id) ? item
-                                .vendor.vendor_id : item.vendor_id;
-                            const vName = (item.vendor && item.vendor.vendor_name) ?
-                                item.vendor.vendor_name : null;
-                            const vendorCell = (vId && vName) ?
-                                `<a href="#" class="link-vendor" data-vendor-id="${vId}">${vName}</a>` :
-                                '—';
+                            const vId = (item.vendor && item.vendor.vendor_id) ? item.vendor.vendor_id : item.vendor_id;
+                            const vName = (item.vendor && item.vendor.vendor_name) ? item.vendor.vendor_name : null;
+                            const vendorCell = (vId && vName)
+                                ? `<a href="#" class="link-vendor" data-vendor-id="${vId}">${vName}</a>`
+                                : '—';
 
                             table.row.add([
-                                moment(item.pickup_date).isValid() ? moment(item
-                                    .pickup_date).format('DD MMM YYYY') : (item
-                                    .pickup_date || '—'),
+                                moment(item.pickup_date).isValid()
+                                    ? moment(item.pickup_date).format('DD MMM YYYY')
+                                    : (item.pickup_date || '—'),
                                 vendorCell,
-                                (item.rider && item.rider.rider_name) ? item
-                                .rider.rider_name : '—',
-                                capFirst(item.paid_by),
-                                items || '—',
+                                items || '—', // Flower Details column
+                                money(item.total_price), // Total Price column
                                 `<span class="status-badge ${cls}">${capFirst(item.status || '—')}</span>`,
-                                money(item.total_price)
+                                capFirst(item.paid_by),
+                                (item.rider && item.rider.rider_name) ? item.rider.rider_name : '—'
                             ]);
                         });
 
