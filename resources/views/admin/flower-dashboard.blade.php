@@ -123,19 +123,6 @@
             margin-right: 0;
         }
 
-        /* EXTRA: section-level gradients (applied conditionally from Blade) */
-        .dashboard-section--paused {
-            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 40%, #a5b4fc 100%) !important;
-        }
-
-        .dashboard-section--transaction {
-            background: linear-gradient(135deg, #dcfce7 0%, #86efac 45%, #e0f2fe 100%) !important;
-        }
-
-        .dashboard-section--referral {
-            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 40%, #facc15 100%) !important;
-        }
-
         /* Metric tiles inside each section */
         .sales-card,
         .card.sales-card {
@@ -181,7 +168,7 @@
             border-color: rgba(59, 130, 246, 0.95);
         }
 
-        /* --------- NEW COLORFUL CARD THEMES ---------- */
+        /* --------- EXISTING COLORFUL CARD THEMES ---------- */
 
         .card-theme-sky {
             background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 40%, #a5f3fc 100%) !important;
@@ -214,7 +201,7 @@
         }
 
         .card-theme-rose {
-            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #fbcfe8 100%) !important;
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #ffe4e6 100%) !important;
         }
 
         .card-theme-rose::before {
@@ -224,7 +211,7 @@
         }
 
         .card-theme-amber {
-            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 40%, #facc15 100%) !important;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 40%, #fed7aa 100%) !important;
         }
 
         .card-theme-amber::before {
@@ -351,7 +338,6 @@
 
         /* =================== COLORFUL TABLE STYLE ===================== */
 
-        /* Wrapper for rounded tables; catches DataTables as well */
         .table,
         table.dataTable {
             border-collapse: separate !important;
@@ -364,7 +350,6 @@
             margin-bottom: 1rem;
         }
 
-        /* Round outer border */
         .table thead:first-child tr:first-child th:first-child,
         table.dataTable thead:first-child tr:first-child th:first-child {
             border-top-left-radius: 18px;
@@ -375,7 +360,6 @@
             border-top-right-radius: 18px;
         }
 
-        /* Colorful header */
         .table thead th,
         table.dataTable thead th {
             background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to));
@@ -388,7 +372,6 @@
             font-weight: 600;
         }
 
-        /* Body cells */
         .table tbody td,
         table.dataTable tbody td {
             border-top: 1px solid rgba(148, 163, 184, 0.3) !important;
@@ -396,14 +379,12 @@
             font-size: 13px;
         }
 
-        /* Remove old striped “odd row only” background */
         .table-striped > tbody > tr:nth-of-type(odd),
         table.dataTable.stripe > tbody > tr:nth-of-type(odd) {
             --bs-table-accent-bg: transparent;
             background: var(--tbl-row-bg);
         }
 
-        /* All rows same colorful base, hover brighter */
         .table tbody tr,
         table.dataTable tbody tr {
             background: var(--tbl-row-bg);
@@ -417,7 +398,6 @@
             box-shadow: 0 6px 14px rgba(15, 23, 42, 0.10);
         }
 
-        /* DataTables info/pager more subtle */
         .dataTables_wrapper .dataTables_info,
         .dataTables_wrapper .dataTables_paginate {
             font-size: 12px;
@@ -433,6 +413,95 @@
 
         .dataTables_wrapper .dataTables_paginate .paginate_button {
             border-radius: 999px !important;
+        }
+
+        /* ===================================================== */
+        /* CUSTOM COLORS REQUESTED FOR SPECIFIC CARD GROUPS      */
+        /* ===================================================== */
+
+        /* Subscription Status – each card different gradient */
+        .sub-status-card-ends-today {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #fecaca 100%) !important;
+        }
+
+        .sub-status-card-five-days {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 40%, #fed7aa 100%) !important;
+        }
+
+        .sub-status-card-renew-pending {
+            background: linear-gradient(135deg, #ecfccb 0%, #bbf7d0 40%, #6ee7b7 100%) !important;
+        }
+
+        .sub-status-card-assign-rider {
+            background: linear-gradient(135deg, #e0f2fe 0%, #c7d2fe 40%, #a5b4fc 100%) !important;
+        }
+
+        /* Paused Subscription – same rgb, different opacity per card */
+        .paused-card-1 {
+            background: rgba(10, 20, 20, 0.12) !important;
+        }
+
+        .paused-card-2 {
+            background: rgba(10, 20, 20, 0.18) !important;
+        }
+
+        .paused-card-3 {
+            background: rgba(10, 20, 20, 0.24) !important;
+        }
+
+        .paused-card-4 {
+            background: rgba(10, 20, 20, 0.30) !important;
+        }
+
+        /* Today's Transaction – same hue, opacity increasing per card */
+        .txn-card-1 {
+            background: rgba(56, 189, 248, 0.18) !important;
+        }
+
+        .txn-card-2 {
+            background: rgba(56, 189, 248, 0.24) !important;
+        }
+
+        .txn-card-3 {
+            background: rgba(56, 189, 248, 0.30) !important;
+        }
+
+        .txn-card-4 {
+            background: rgba(56, 189, 248, 0.36) !important;
+        }
+
+        /* Rider Details (summary) – four soft gradients */
+        .rider-card-1 {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 40%, #bae6fd 100%) !important;
+        }
+
+        .rider-card-2 {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #a7f3d0 100%) !important;
+        }
+
+        .rider-card-3 {
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 40%, #fdba74 100%) !important;
+        }
+
+        .rider-card-4 {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 40%, #fbcfe8 100%) !important;
+        }
+
+        /* Referral Details – same hue, opacity decreasing */
+        .ref-card-1 {
+            background: rgba(129, 140, 248, 0.36) !important;
+        }
+
+        .ref-card-2 {
+            background: rgba(129, 140, 248, 0.30) !important;
+        }
+
+        .ref-card-3 {
+            background: rgba(129, 140, 248, 0.24) !important;
+        }
+
+        .ref-card-4 {
+            background: rgba(129, 140, 248, 0.18) !important;
         }
     </style>
 @endsection
@@ -531,7 +600,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card card-theme-rose">
+                        <div class="card sales-card sub-status-card-ends-today">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -548,7 +617,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card card-theme-sky">
+                        <div class="card sales-card sub-status-card-five-days">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -565,7 +634,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card card-theme-amber">
+                        <div class="card sales-card sub-status-card-renew-pending">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -582,7 +651,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card card-theme-violet">
+                        <div class="card sales-card sub-status-card-assign-rider">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -601,13 +670,13 @@
     </div>
 
     {{-- PAUSED SUBSCRIPTION --}}
-    <div class="row mt-2 dashboard-section {{ ($todayPausedRequest > 0 || $pausedSubscriptions > 0 || $nextDayPaused > 0 || $nextDayResumed > 0) ? 'dashboard-section--paused' : '' }}">
+    <div class="row mt-2 dashboard-section">
         <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card card-theme-lime">
+                        <div class="card sales-card paused-card-1">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -624,7 +693,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card card-theme-emerald">
+                        <div class="card sales-card paused-card-2">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -641,7 +710,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
-                        <div class="card sales-card card-theme-sky">
+                        <div class="card sales-card paused-card-3">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -658,7 +727,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card card-theme-indigo">
+                        <div class="card sales-card paused-card-4">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -677,13 +746,13 @@
     </div>
 
     {{-- TODAY'S TRANSACTION --}}
-    <div class="row mt-2 dashboard-section {{ ($activeSubscriptions > 0 || $totalDeliveriesTodayCount > 0 || $totalIncomeToday > 0 || $todayTotalExpenditure > 0 || $activeTomorrowCount > 0) ? 'dashboard-section--transaction' : '' }}">
+    <div class="row mt-2 dashboard-section">
         <div class="col-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card card-theme-emerald">
+                        <div class="card sales-card txn-card-1">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -701,7 +770,7 @@
                 <!-- Today Total Income -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.payments.index') }}" target="_blank">
-                        <div class="card sales-card card-theme-violet">
+                        <div class="card sales-card txn-card-2">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -719,7 +788,7 @@
                 <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
-                        <div class="card sales-card position-relative card-theme-rose">
+                        <div class="card sales-card position-relative txn-card-3">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -738,7 +807,7 @@
                 <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
-                        <div class="card sales-card card-theme-cyan">
+                        <div class="card sales-card txn-card-4">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -799,7 +868,7 @@
                 <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card card-theme-indigo">
+                        <div class="card sales-card rider-card-1">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -817,7 +886,7 @@
                 <!-- Total Delivery Today (WATCH) -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card watch-card card-theme-emerald" data-color="emerald">
+                        <div class="card sales-card watch-card rider-card-2" data-color="emerald">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -838,7 +907,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
                        target="_blank">
-                        <div class="card sales-card card-theme-amber">
+                        <div class="card sales-card rider-card-3">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -856,7 +925,7 @@
                 <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card card-theme-sky">
+                        <div class="card sales-card rider-card-4">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -900,14 +969,14 @@
     </div>
 
     {{-- REFERRAL DETAILS --}}
-    <div class="row mt-2 dashboard-section {{ ((($todayClaimed ?? 0) > 0) || (($todayApproved ?? 0) > 0) || (($todayRefer ?? 0) > 0) || (($totalRefer ?? 0) > 0)) ? 'dashboard-section--referral' : '' }}">
+    <div class="row mt-2 dashboard-section">
         <div class="col-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card card-theme-sky">
+                        <div class="card sales-card ref-card-1">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -925,7 +994,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card card-theme-emerald">
+                        <div class="card sales-card ref-card-2">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -942,7 +1011,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
-                        <div class="card sales-card card-theme-amber">
+                        <div class="card sales-card ref-card-3">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -959,7 +1028,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
-                        <div class="card sales-card card-theme-violet">
+                        <div class="card sales-card ref-card-4">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
