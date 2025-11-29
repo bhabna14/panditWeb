@@ -319,109 +319,73 @@
             font-weight: 800;
         }
 
-        .nav-creative {
-            --tab-radius: 12px;
-            --ink-height: 3px;
-            position: relative;
-            padding-bottom: calc(var(--ink-height) + 4px);
+        /* ===== New tabs row design (single row, scrollable) ===== */
+        .tabs-strip {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: .5rem;
+            padding-bottom: .25rem;
         }
 
-        .nav-creative .ink-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: var(--ink-height);
-            width: 0;
-            background: linear-gradient(90deg, #6366f1, #22d3ee);
+        .tabs-strip::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .tabs-strip::-webkit-scrollbar-thumb {
+            background: #cbd5f5;
             border-radius: 999px;
-            transition: transform .28s ease, width .28s ease, background .28s ease;
-            will-change: transform, width;
         }
 
-        .nav-creative .nav-link {
+        .tabs-strip .nav-item {
+            flex: 0 0 auto;
+        }
+
+        .tab-pill {
             display: inline-flex;
             align-items: center;
-            gap: .5rem;
-            border-radius: var(--tab-radius);
+            gap: .4rem;
+            border-radius: 999px;
             border: 1px solid #e5e7eb;
             background: #ffffff;
             color: #0f172a;
             font-weight: 600;
-            padding: .5rem .8rem;
-            transition: border-color .2s ease, box-shadow .2s ease, transform .08s ease;
+            font-size: .85rem;
+            padding: .45rem .85rem;
+            transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .06s ease;
+            white-space: nowrap;
         }
 
-        .nav-creative .nav-link:hover {
+        .tab-pill i {
+            font-size: 1rem;
+            opacity: .9;
+        }
+
+        .tab-pill .tab-count {
+            border-radius: 999px;
+            padding: .1rem .5rem;
+            font-size: .75rem;
+            font-weight: 700;
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .tab-pill:hover {
             border-color: #d1d5db;
-            box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+            box-shadow: 0 6px 16px rgba(15, 23, 42, .06);
             transform: translateY(-1px);
         }
 
-        .nav-creative .nav-link:focus-visible {
-            outline: 3px solid rgba(59, 130, 246, .35);
-            outline-offset: 2px;
-        }
-
-        .nav-creative .nav-link.active {
-            color: #fff;
+        .tab-pill.active {
+            background: linear-gradient(135deg, #0ea5e9, #6366f1);
+            color: #ffffff;
             border-color: transparent;
-            box-shadow: 0 8px 22px rgba(0, 0, 0, .10);
+            box-shadow: 0 8px 22px rgba(15, 23, 42, .18);
         }
 
-        .nav-creative .pill-count {
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: .78rem;
-            padding: .15rem .45rem;
-            line-height: 1;
-            border: 1px solid rgba(255, 255, 255, .35);
-            background: rgba(255, 255, 255, .22);
-            color: #fff;
-        }
-
-        .nav-creative .nav-link i {
-            font-size: 1.05rem;
-            opacity: .92;
-        }
-
-        .btn-tab-active.active {
-            background: linear-gradient(135deg, #22d3ee, #0ea5e9);
-        }
-
-        .btn-tab-pause.active {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-        }
-
-        .btn-tab-custom.active {
-            background: linear-gradient(135deg, #a78bfa, #6366f1);
-        }
-
-        .btn-tab-resume.active {
-            background: linear-gradient(135deg, #34d399, #10b981);
-        }
-
-        .btn-tab-expired.active {
-            background: linear-gradient(135deg, #fb7185, #ef4444);
-        }
-
-        .btn-tab-active:hover:not(.active) {
-            background: linear-gradient(0deg, rgba(34, 211, 238, .06), rgba(34, 211, 238, .06)), #fff;
-        }
-
-        .btn-tab-pause:hover:not(.active) {
-            background: linear-gradient(0deg, rgba(245, 158, 11, .08), rgba(245, 158, 11, .08)), #fff;
-        }
-
-        .btn-tab-custom:hover:not(.active) {
-            background: linear-gradient(0deg, rgba(99, 102, 241, .08), rgba(99, 102, 241, .08)), #fff;
-        }
-
-        .btn-tab-resume:hover:not(.active) {
-            background: linear-gradient(0deg, rgba(16, 185, 129, .08), rgba(16, 185, 129, .08)), #fff;
-        }
-
-        .btn-tab-expired:hover:not(.active) {
-            background: linear-gradient(0deg, rgba(239, 68, 68, .08), rgba(239, 68, 68, .08)), #fff;
+        .tab-pill.active .tab-count {
+            background: rgba(15, 23, 42, .2);
+            color: #e5e7eb;
         }
     </style>
 @endsection
@@ -724,10 +688,7 @@
             <div class="card shadow-sm mb-3 mt-3">
                 <div class="card-body">
                     <div class="tabs-wrap">
-                        <ul class="nav nav-pills nav-creative flex-wrap position-relative" id="sectionsTabs"
-                            role="tablist">
-                            <span class="ink-bar" id="inkBar"></span>
-
+                        <ul class="nav nav-pills tabs-strip" id="sectionsTabs" role="tablist">
                             @php
                                 $sections = [
                                     [
@@ -735,49 +696,53 @@
                                         'title' => 'Tomorrow Delivery',
                                         'count' => count($activeTomorrow),
                                         'icon'  => 'bi-truck',
-                                        'btn'   => 'btn-tab-active',
+                                    ],
+                                    [
+                                        'key'   => 'start-new',
+                                        'title' => 'Starting Tomorrow (New Users)',
+                                        'count' => count($startingTomorrowNew),
+                                        'icon'  => 'bi-person-plus',
                                     ],
                                     [
                                         'key'   => 'pause',
                                         'title' => 'Pausing from Tomorrow',
                                         'count' => count($pausingTomorrow),
                                         'icon'  => 'bi-pause-circle',
-                                        'btn'   => 'btn-tab-pause',
                                     ],
                                     [
                                         'key'   => 'custom',
                                         'title' => 'Tomorrow Customize Orders',
                                         'count' => count($customizeTomorrow),
                                         'icon'  => 'bi-sliders2',
-                                        'btn'   => 'btn-tab-custom',
                                     ],
                                     [
                                         'key'   => 'resume',
                                         'title' => 'Pause → Active (Tomorrow)',
                                         'count' => count($resumingTomorrow),
                                         'icon'  => 'bi-play-circle',
-                                        'btn'   => 'btn-tab-resume',
                                     ],
                                     [
                                         'key'   => 'expired-today',
                                         'title' => 'Expired Today Users',
                                         'count' => count($expiredTodayUsers),
                                         'icon'  => 'bi-calendar-x',
-                                        'btn'   => 'btn-tab-expired',
                                     ],
                                 ];
                             @endphp
 
                             @foreach ($sections as $i => $s)
-                                <li class="nav-item me-2 mb-2" role="presentation">
-                                    <button class="nav-link {{ $s['btn'] }} {{ $i === 0 ? 'active' : '' }}"
-                                        id="tab-{{ $s['key'] }}" data-bs-toggle="tab"
-                                        data-bs-target="#pane-{{ $s['key'] }}" type="button" role="tab"
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link tab-pill {{ $i === 0 ? 'active' : '' }}"
+                                        id="tab-{{ $s['key'] }}"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#pane-{{ $s['key'] }}"
+                                        type="button"
+                                        role="tab"
                                         aria-controls="pane-{{ $s['key'] }}"
                                         aria-selected="{{ $i === 0 ? 'true' : 'false' }}">
                                         <i class="bi {{ $s['icon'] }}"></i>
                                         <span>{{ $s['title'] }}</span>
-                                        <span class="pill-count ms-1">{{ $s['count'] }}</span>
+                                        <span class="tab-count">{{ $s['count'] }}</span>
                                     </button>
                                 </li>
                             @endforeach
@@ -1054,47 +1019,5 @@
                     .replace(/'/g, '&#039;');
             }
         })();
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tabs = document.getElementById('sectionsTabs');
-            const inkBar = document.getElementById('inkBar');
-            if (!tabs || !inkBar) return;
-
-            const setInkTo = (btn) => {
-                const btnRect = btn.getBoundingClientRect();
-                const parentRect = tabs.getBoundingClientRect();
-                const left = btnRect.left - parentRect.left + tabs.scrollLeft;
-                const width = btnRect.width;
-
-                if (btn.classList.contains('btn-tab-active')) inkBar.style.background =
-                    'linear-gradient(90deg,#22d3ee,#0ea5e9)';
-                if (btn.classList.contains('btn-tab-pause')) inkBar.style.background =
-                    'linear-gradient(90deg,#f59e0b,#ef4444)';
-                if (btn.classList.contains('btn-tab-custom')) inkBar.style.background =
-                    'linear-gradient(90deg,#a78bfa,#6366f1)';
-                if (btn.classList.contains('btn-tab-resume')) inkBar.style.background =
-                    'linear-gradient(90deg,#34d399,#10b981)';
-                if (btn.classList.contains('btn-tab-expired')) inkBar.style.background =
-                    'linear-gradient(90deg,#fb7185,#ef4444)';
-
-                inkBar.style.width = `${width}px`;
-                inkBar.style.transform = `translateX(${left}px)`;
-            };
-
-            const initActive = tabs.querySelector('.nav-link.active');
-            if (initActive) setInkTo(initActive);
-
-            tabs.addEventListener('shown.bs.tab', function(e) {
-                const btn = e.target;
-                setInkTo(btn);
-            });
-
-            window.addEventListener('resize', () => {
-                const active = tabs.querySelector('.nav-link.active');
-                if (active) setInkTo(active);
-            });
-        });
     </script>
 @endsection
