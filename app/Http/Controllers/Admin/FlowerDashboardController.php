@@ -207,21 +207,36 @@ class FlowerDashboardController extends Controller
 
         // TODAY END SUBSCRIPTIONS
         $todayDate = Carbon::today($tz)->toDateString();
-        $todayEndSubscription = Subscription::where(function ($q) use ($todayDate) {
-
-            $q->where(function ($subQuery) use ($todayDate) {
-                    $subQuery->whereNotNull('new_date')
-                            ->whereDate('new_date', $todayDate);
-                })
-            ->orWhere(function ($subQuery) use ($todayDate) {
-                    $subQuery->whereNull('new_date')
-                            ->whereDate('end_date', $todayDate);
-                });
-
+     $todayEndSubscription = Subscription::where(function ($q) use ($todayDate) {
+        // Ends today: either new_date == today OR (no new_date && end_date == today)
+        $q->where(function ($subQuery) use ($todayDate) {
+                $subQuery->whereNotNull('new_date')
+                         ->whereDate('new_date', $todayDate);
             })
-            ->where('status', 'active')
-            ->withoutOtherActiveOrPending()
-            ->count();
+          ->orWhere(function ($subQuery) use ($todayDate) {
+                $subQuery->whereNull('new_date')
+                         ->whereDate('end_date', $todayDate);
+            });
+    })
+    ->where('status', 'active')
+    // skip users who have another future sub with paid payment
+    ->whereNotExists(function ($sq) use ($todayDate) {
+        $sq->select(DB::raw(1))
+            ->from('subscriptions as s2')
+            ->whereColumn('s2.user_id', 'subscriptions.user_id')   // same user
+            ->whereColumn('s2.id', '!=', 'subscriptions.id')       // different subscription
+            // future window: COALESCE(new_date, end_date) > today
+            ->whereDate(DB::raw('COALESCE(s2.new_date, s2.end_date)'), '>', $todayDate)
+            // that future sub has at least one PAID flower payment
+            ->whereExists(function ($qp) {
+                $qp->select(DB::raw(1))
+                   ->from('flower_payments as fp')
+                   ->whereColumn('fp.order_id', 's2.order_id')
+                   ->where('fp.payment_status', 'paid');
+            });
+    })
+    ->withoutOtherActiveOrPending() // keep your existing scope if you still need it
+    ->count();
 
         // FIVE DAY END SUBSCRIPTIONS
         $winStart = $today->copy()->addDay()->startOfDay();
