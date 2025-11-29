@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TomorrowSubscriptionsController extends Controller
 {
-        
     public function index(Request $request)
     {
         // --- Role & IST time gate ---
@@ -144,23 +143,35 @@ class TomorrowSubscriptionsController extends Controller
             ->values();
 
         // 6) **Expired Today — Users**
-        // Users whose subscription window ends today (COALESCE(new_date, end_date) = today),
-        // AND:
-        //  - do NOT have another future active/pending subscription (scopeWithoutOtherActiveOrPending)
-        //  - do NOT have another subscription ending AFTER today with a PAID FlowerPayment
+        //
+        // Condition for a user to be shown here:
+        //
+        //  - This subscription's window ends today:
+        //        COALESCE(new_date, end_date) = today
+        //  - AND user does NOT have another future subscription
+        //        with end/new_date > today AND with at least one
+        //        paid flower_payment on that other order.
+        //
+        // That new condition is what skips USER44072 because they have:
+        //   - sub 755 ending 2025-12-06
+        //   - and (assuming) paid flower_payment for that order.
+        //
         $expiredTodayUsers = Subscription::with($withSubs)
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '=', $todayStr)
-            ->withoutOtherActiveOrPending()
             ->whereNotExists(function ($sq) use ($todayStr) {
                 $sq->select(DB::raw(1))
                 ->from('subscriptions as s2')
-                ->join('flower_payments as fp', 'fp.order_id', '=', 's2.order_id')
                 ->whereColumn('s2.user_id', 'subscriptions.user_id')   // same user
                 ->whereColumn('s2.id', '!=', 'subscriptions.id')       // different subscription
-                // window for that other subscription ends AFTER today
+                // other subscription's window ends after today
                 ->whereDate(DB::raw('COALESCE(s2.new_date, s2.end_date)'), '>', $todayStr)
-                // there is at least one paid payment for that order
-                ->where('fp.payment_status', 'paid');
+                // AND it has a PAID payment
+                ->whereExists(function ($qp) {
+                    $qp->select(DB::raw(1))
+                        ->from('flower_payments as fp')
+                        ->whereColumn('fp.order_id', 's2.order_id')
+                        ->where('fp.payment_status', 'paid');
+                });
             })
             ->get()
             ->unique('user_id')
@@ -179,10 +190,18 @@ class TomorrowSubscriptionsController extends Controller
             if ($order) {
                 $parts = [];
                 foreach ([
-                    'shipping_name', 'shipping_address', 'shipping_street', 'shipping_area',
-                    'shipping_city', 'shipping_state', 'shipping_pincode', 'shipping_zip',
+                    'shipping_name',
+                    'shipping_address',
+                    'shipping_street',
+                    'shipping_area',
+                    'shipping_city',
+                    'shipping_state',
+                    'shipping_pincode',
+                    'shipping_zip',
                 ] as $f) {
-                    if (isset($order->$f) && filled($order->$f)) $parts[] = $order->$f;
+                    if (isset($order->$f) && filled($order->$f)) {
+                        $parts[] = $order->$f;
+                    }
                 }
                 $address = trim(implode(', ', array_unique(array_filter($parts))));
             }

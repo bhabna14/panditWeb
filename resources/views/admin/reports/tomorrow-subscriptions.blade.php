@@ -1,3 +1,4 @@
+{{-- resources/views/admin/reports/tomorrow-subscriptions.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -149,7 +150,7 @@
             min-width: 160px
         }
 
-        /* Totals grid */
+        /* Totals grid (currently commented out in markup) */
         .totals-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
@@ -325,7 +326,6 @@
             padding-bottom: calc(var(--ink-height) + 4px);
         }
 
-        /* Ink bar */
         .nav-creative .ink-bar {
             position: absolute;
             bottom: 0;
@@ -338,7 +338,6 @@
             will-change: transform, width;
         }
 
-        /* Pill buttons */
         .nav-creative .nav-link {
             display: inline-flex;
             align-items: center;
@@ -363,14 +362,12 @@
             outline-offset: 2px;
         }
 
-        /* Active tab – white text on gradient */
         .nav-creative .nav-link.active {
             color: #fff;
             border-color: transparent;
             box-shadow: 0 8px 22px rgba(0, 0, 0, .10);
         }
 
-        /* Soft count badge inside pills */
         .nav-creative .pill-count {
             border-radius: 999px;
             font-weight: 700;
@@ -382,13 +379,11 @@
             color: #fff;
         }
 
-        /* Icons inside pills */
         .nav-creative .nav-link i {
             font-size: 1.05rem;
             opacity: .92;
         }
 
-        /* ===== Color themes per tab ===== */
         .btn-tab-active.active {
             background: linear-gradient(135deg, #22d3ee, #0ea5e9);
         }
@@ -409,7 +404,6 @@
             background: linear-gradient(135deg, #fb7185, #ef4444);
         }
 
-        /* Hover hints for inactive pills (light tinted bg) */
         .btn-tab-active:hover:not(.active) {
             background: linear-gradient(0deg, rgba(34, 211, 238, .06), rgba(34, 211, 238, .06)), #fff;
         }
@@ -1053,8 +1047,10 @@
 
             function escapeHtml(str) {
                 return (str || '').toString()
-                    .replace(/&/g, '&amp;').replace(/</g, '&lt;/g')
-                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
                     .replace(/'/g, '&#039;');
             }
         })();
