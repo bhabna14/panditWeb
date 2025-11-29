@@ -249,37 +249,38 @@
             text-decoration: underline
         }
 
-        /* ===== Flower detail pills (one-line, user-friendly) ===== */
-        .flower-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 3px 8px;
-            margin: 2px 4px 2px 0;
-            border-radius: 999px;
-            background: #EEF2FF;
-            border: 1px dashed #CBD5F5;
+        /* ===== Flower details mini-table inside cell (column-wise) ===== */
+        .flower-detail-table {
+            width: 100%;
+            border-collapse: collapse;
             font-size: .78rem;
-            white-space: nowrap;
         }
 
-        .flower-pill__name {
+        .flower-detail-table thead th {
+            border-bottom: 1px solid #E5E7EB;
+            padding: 2px 4px;
             font-weight: 700;
-            color: #111827;
-        }
-
-        .flower-pill__meta {
             color: #4B5563;
+            background: #F9FAFB;
         }
 
-        .flower-pill__price {
-            font-weight: 700;
-            color: #0E7490;
+        .flower-detail-table tbody td {
+            padding: 2px 4px;
+            border-bottom: 1px dashed #E5E7EB;
+            vertical-align: middle;
+        }
+
+        .flower-detail-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .flower-detail-table .text-end {
+            text-align: right;
         }
 
         @media (max-width: 767.98px) {
-            .flower-pill {
-                white-space: normal;
+            .flower-detail-table {
+                font-size: .72rem;
             }
         }
     </style>
@@ -423,23 +424,39 @@
                                 —
                             @endif
                         </td>
-                        {{-- FLOWER DETAILS – ONE-LINE PILL DESIGN --}}
+                        {{-- FLOWER DETAILS – COLUMN-WISE MINI TABLE --}}
                         <td>
-                            @forelse ($item->flowerPickupItems as $f)
+                            @if ($item->flowerPickupItems->isNotEmpty())
                                 @php
-                                    $qty = $f->quantity ?? 0;
-                                    $qtyFormatted = rtrim(rtrim(number_format((float) $qty, 2, '.', ''), '0'), '.');
-                                    $price = $f->price ?? 0;
-                                    $priceFormatted = rtrim(rtrim(number_format((float) $price, 2, '.', ''), '0'), '.');
+                                    $rows = $item->flowerPickupItems;
                                 @endphp
-                                <span class="flower-pill">
-                                    <span class="flower-pill__name">{{ $f->flower?->name ?? '—' }}</span>
-                                    <span class="flower-pill__meta">{{ $qtyFormatted }} {{ $f->unit?->unit_name ?? '' }}</span>
-                                    <span class="flower-pill__price">₹{{ $priceFormatted }}</span>
-                                </span>
-                            @empty
+                                <table class="flower-detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th class="text-end">Qty</th>
+                                            <th class="text-end">Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($rows as $f)
+                                            @php
+                                                $qty = $f->quantity ?? 0;
+                                                $qtyFormatted = rtrim(rtrim(number_format((float) $qty, 2, '.', ''), '0'), '.');
+                                                $price = $f->price ?? 0;
+                                                $priceFormatted = rtrim(rtrim(number_format((float) $price, 2, '.', ''), '0'), '.');
+                                            @endphp
+                                            <tr>
+                                                <td>{{ $f->flower?->name ?? '—' }}</td>
+                                                <td class="text-end">{{ $qtyFormatted }} {{ $f->unit?->unit_name ?? '' }}</td>
+                                                <td class="text-end">₹{{ $priceFormatted }}</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            @else
                                 —
-                            @endforelse
+                            @endif
                         </td>
                         <td class="text-end">
                             ₹{{ number_format((float) $item->total_price, 2) }}
@@ -696,20 +713,37 @@
                         table.clear();
 
                         (response.data || []).forEach(item => {
-                            // Build flower details pills (one-line)
-                            const items = (item.flower_pickup_items || []).map(i => {
+                            // Build flower details mini-table rows
+                            const rowsHtml = (item.flower_pickup_items || []).map(i => {
                                 const name = (i.flower && i.flower.name) ? i.flower.name : '—';
                                 const unit = (i.unit && i.unit.unit_name) ? i.unit.unit_name : '';
                                 const qty = trim2(i.quantity);
                                 const price = trim2(i.price || 0);
                                 return `
-                                    <span class="flower-pill">
-                                        <span class="flower-pill__name">${name}</span>
-                                        <span class="flower-pill__meta">${qty} ${unit}</span>
-                                        <span class="flower-pill__price">₹${price}</span>
-                                    </span>
+                                    <tr>
+                                        <td>${name}</td>
+                                        <td class="text-end">${qty} ${unit}</td>
+                                        <td class="text-end">₹${price}</td>
+                                    </tr>
                                 `;
-                            }).join(' ');
+                            }).join('');
+
+                            const detailsTable = rowsHtml
+                                ? `
+                                    <table class="flower-detail-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Item</th>
+                                                <th class="text-end">Qty</th>
+                                                <th class="text-end">Price</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${rowsHtml}
+                                        </tbody>
+                                    </table>
+                                  `
+                                : '—';
 
                             const t = (item.status || '').toString().trim().toLowerCase();
                             let cls = 'status-badge--info';
@@ -734,7 +768,7 @@
                                     ? moment(item.pickup_date).format('DD MMM YYYY')
                                     : (item.pickup_date || '—'),
                                 vendorCell,
-                                items || '—', // Flower Details column
+                                detailsTable, // Flower Details column
                                 money(item.total_price), // Total Price column
                                 `<span class="status-badge ${cls}">${capFirst(item.status || '—')}</span>`,
                                 capFirst(item.paid_by),
