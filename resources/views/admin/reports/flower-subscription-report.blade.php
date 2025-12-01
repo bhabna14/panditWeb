@@ -520,11 +520,11 @@
         <div class="toolbar mb-3">
             <div class="toolbar-left">
                 <div class="date-range">
-                    <span class="label">From</span>
+                    <span class="label">F</span>
                     <input type="date" id="from_date" name="from_date" disabled>
                 </div>
                 <div class="date-range">
-                    <span class="label">To</span>
+                    <span class="label">T</span>
                     <input type="date" id="to_date" name="to_date" disabled>
                 </div>
             </div>
