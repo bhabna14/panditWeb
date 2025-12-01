@@ -10,79 +10,165 @@
     <!-- Select2 CSS -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
 
+    {{-- Poppins (page) + Nunito Sans (table) --}}
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Nunito+Sans:wght@400;500;600&display=swap"
+        rel="stylesheet">
+
     <style>
-        /* ===== Premium look & feel ===== */
         :root {
-            --brand: #4f46e5;
-            /* indigo */
-            --brand-2: #06b6d4;
-            /* cyan */
-            --ink: #0f172a;
-            /* slate-900 */
+            /* Core palette (report style) */
+            --brand-blue: #e9f2ff;
+            --brand-blue-edge: #cfe0ff;
+            --header-text: #0b2a5b;
+
+            --chip-green: #e9f9ef;
+            --chip-green-text: #0b7a33;
+            --chip-orange: #fff3e5;
+            --chip-orange-text: #a24b05;
+            --chip-blue: #e0f2fe;
+            --chip-blue-text: #0b2a5b;
+
+            /* Table */
+            --table-head-bg: #0f172a;
+            --table-head-bg-soft: #1f2937;
+            --table-head-text: #e5e7eb;
+            --table-border: #e5e7eb;
+            --table-zebra: #f9fafb;
+            --table-hover: #fefce8;
+
+            --text: #0f172a;
             --muted: #64748b;
-            /* slate-500 */
-            --line: #eef2f7;
-            --soft: #f8fafc;
+            --bg: #f7f8fc;
+            --card: #ffffff;
+            --ring: #e5e7eb;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+            --radius: 16px;
+
+            --accent: #2563eb;
+            --accent-soft: #eff6ff;
+            --accent-border: #bfdbfe;
+            --danger: #b42318;
+            --danger-soft: #fef2f2;
+            --success: #047857;
+            --success-soft: #ecfdf3;
+            --neutral-soft: #f3f4f6;
         }
 
-        .card.custom-card {
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, .04);
+        html,
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 400;
         }
 
-        .metric {
-            position: relative;
-            border-radius: 14px;
-            padding: 14px 16px;
-            background:
-                linear-gradient(0deg, #fff, #fff) padding-box,
-                linear-gradient(135deg, rgba(79, 70, 229, .35), rgba(6, 182, 212, .35)) border-box;
-            border: 1px solid transparent;
-            box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+        .container-page {
+            max-width: 1320px;
         }
 
-        .metric .label {
-            color: var(--muted);
-            font-weight: 600;
-            letter-spacing: .02em;
+        .money {
+            font-variant-numeric: tabular-nums;
         }
 
-        .metric .value {
-            color: var(--ink);
-            font-weight: 800;
-        }
-
-        .metric .icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, rgba(79, 70, 229, .1), rgba(6, 182, 212, .1));
-            display: flex;
+        /* ===== Toolbar ===== */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: var(--radius);
+            padding: .85rem 1rem;
+            display: grid;
+            gap: .75rem;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
             align-items: center;
-            justify-content: center;
-            margin-right: 10px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.1rem;
         }
 
-        .metric svg {
-            stroke: var(--brand);
+        .date-range {
+            display: flex;
+            gap: .6rem;
+            flex-wrap: wrap;
+            align-items: center;
+            color: var(--muted);
+            font-size: .85rem;
         }
 
-        /* Filters */
-        .filters {
-            background: #ffffff;
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 14px;
+        .date-range span {
+            font-weight: 500;
+        }
+
+        .date-range input {
+            border: 1px solid var(--ring);
+            border-radius: 999px;
+            padding: .45rem .85rem;
+            background: #fff;
+            font-weight: 500;
+            font-size: .88rem;
+            min-width: 170px;
+        }
+
+        .date-range input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .22);
+        }
+
+        .toolbar-right {
+            display: flex;
+            flex-direction: column;
+            gap: .4rem;
+            align-items: flex-end;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+            justify-content: flex-end;
+            width: 100%;
+        }
+
+        .btn-brand {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: none;
+            color: #fff;
+            box-shadow: 0 10px 20px rgba(15, 23, 42, .25);
+        }
+
+        .btn-brand:hover {
+            opacity: .95;
+            color: #fff;
+        }
+
+        .btn-outline-brand {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-outline-brand:hover {
+            background: #eff6ff;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .quick-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem;
+            justify-content: flex-end;
         }
 
         .quick-chip {
-            border: 1px dashed rgba(79, 70, 229, .35);
+            border: 1px dashed rgba(37, 99, 235, .45);
             border-radius: 999px;
-            padding: 6px 12px;
-            color: var(--brand);
-            background: #eef3ff;
+            padding: .32rem .8rem;
+            font-size: .8rem;
+            color: #1d4ed8;
+            background: #eff6ff;
             cursor: pointer;
             user-select: none;
             transition: .18s;
@@ -92,34 +178,256 @@
 
         .quick-chip:hover {
             transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(79, 70, 229, .08);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, .15);
         }
 
-        /* Table */
-        .table-premium {
-            border: 1px solid var(--line);
-            border-radius: 12px;
+        /* ===== Summary band ===== */
+        .band {
+            background: linear-gradient(135deg, #e0f2fe, #eef2ff);
+            border: 1px solid var(--brand-blue-edge);
+            border-radius: 18px;
+            padding: .9rem 1.2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: .9rem;
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+        }
+
+        .band h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--header-text);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .band h3 span.label {
+            font-size: .78rem;
+            padding: .12rem .55rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.07);
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .band-sub {
+            font-size: .84rem;
+            color: var(--muted);
+        }
+
+        .chips {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            padding: .35rem .7rem;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            border: 1px solid transparent;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+        }
+
+        .chip span.icon {
+            font-size: .9rem;
+        }
+
+        .chip.green {
+            background: var(--chip-green);
+            color: var(--chip-green-text);
+            border-color: #c9f0d6;
+        }
+
+        .chip.orange {
+            background: var(--chip-orange);
+            color: var(--chip-orange-text);
+            border-color: #ffd9b3;
+        }
+
+        .chip.blue {
+            background: var(--chip-blue);
+            color: var(--chip-blue-text);
+            border-color: #bae6fd;
+        }
+
+        .chip.purple {
+            background: #f5f3ff;
+            color: #4c1d95;
+            border-color: #ddd6fe;
+        }
+
+        /* ===== Workbook shell ===== */
+        .workbook {
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: var(--radius);
             overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-top: 1rem;
         }
 
-        .table-premium thead th {
+        .workbook-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: .9rem 1.2rem;
+            background: radial-gradient(circle at top left, #eff6ff, #e5e7eb);
+            border-bottom: 1px solid var(--brand-blue-edge);
+        }
+
+        .workbook-title {
+            font-weight: 600;
+            color: #111827;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .workbook-title::before {
+            content: '📑';
+            font-size: 1.1rem;
+        }
+
+        .workbook-sub {
+            color: #4b5563;
+            font-size: .84rem;
+        }
+
+        .workbook-tools {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .note-muted {
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        /* ===== Excel-style table ===== */
+        .excel-wrap {
+            padding: 1rem 1.1rem 1.1rem;
+            overflow: auto;
+        }
+
+        .excel {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: #fff;
+            font-size: .9rem;
+            border: 1px solid var(--table-border);
+            border-radius: 14px;
+            overflow: hidden;
+
+            /* TABLE FONT: Nunito Sans */
+            font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .excel thead th {
             position: sticky;
             top: 0;
             z-index: 2;
-            background: linear-gradient(180deg, #f9fbff, #f6f8fe);
-            color: #223;
-            font-weight: 700;
-            border-bottom: 1px solid var(--line) !important;
+            background: linear-gradient(135deg, var(--table-head-bg), var(--table-head-bg-soft));
+            color: var(--table-head-text);
+            text-transform: uppercase;
+            font-size: .72rem;
+            letter-spacing: .08em;
+            padding: .6rem .7rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 0;
+            border-right: 1px solid rgba(55, 65, 81, 0.7);
+            white-space: nowrap;
         }
 
-        .table-premium tbody td {
+        .excel thead th:first-child {
+            border-top-left-radius: 14px;
+        }
+
+        .excel thead th:last-child {
+            border-top-right-radius: 14px;
+            border-right: none;
+        }
+
+        .excel tbody td {
+            border-top: 1px solid var(--table-border);
+            border-right: 1px solid var(--table-border);
+            padding: .55rem .7rem;
             vertical-align: middle;
+            color: var(--text);
+            font-weight: 400;
+            background: #fff;
+        }
+
+        .excel tbody tr:nth-child(even) td {
+            background: var(--table-zebra);
+        }
+
+        .excel tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 14px;
+        }
+
+        .excel tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 14px;
+        }
+
+        .excel tbody tr:hover td {
+            background: var(--table-hover);
+        }
+
+        .excel th,
+        .excel td {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .excel tr td:first-child,
+        .excel thead th:first-child {
+            border-left: none;
+        }
+
+        .excel tbody tr td:last-child {
+            border-right: none;
+        }
+
+        .col-index {
+            width: 56px;
+            text-align: right;
+            color: #6b7280;
+            font-size: .8rem;
+        }
+
+        .col-date {
+            white-space: nowrap;
+            font-size: .86rem;
+            color: #4b5563;
+        }
+
+        .col-money {
+            text-align: right;
+        }
+
+        .col-money span.currency {
+            color: #6b7280;
+            font-size: .8rem;
+            margin-right: .18rem;
         }
 
         .badge-soft {
             background: #eef3ff;
-            color: var(--brand);
-            border: 1px solid rgba(79, 70, 229, .25);
+            color: #1d4ed8;
+            border: 1px solid rgba(37, 99, 235, .25);
             border-radius: 999px;
             padding: .25rem .5rem;
             font-weight: 600;
@@ -129,50 +437,29 @@
             text-transform: capitalize;
         }
 
-        /* Buttons */
-        .btn-brand {
-            background: linear-gradient(135deg, var(--brand), var(--brand-2));
-            border: none;
-            color: #fff;
-            box-shadow: 0 10px 20px rgba(79, 70, 229, .25);
-        }
-
-        .btn-brand:hover {
-            opacity: .95
-        }
-
-        .btn-outline-brand {
-            border-color: var(--brand);
-            color: var(--brand);
-        }
-
-        .btn-outline-brand:hover {
-            background: #eef3ff;
-            border-color: var(--brand);
-            color: var(--brand);
-        }
-
         /* DataTables tweaks */
         table.dataTable tbody tr:hover {
-            background: #fbfdff;
+            background: #fbfdf4;
         }
 
         .dataTables_wrapper .dataTables_filter input {
             border-radius: 999px;
             padding: .4rem .8rem;
-            border: 1px solid var(--line);
+            border: 1px solid var(--ring);
+            font-size: .85rem;
         }
 
         .dt-buttons .btn {
             border-radius: 999px !important;
+            font-size: .8rem;
         }
 
-        /* Skeleton while searching */
+        /* Skeleton shimmer (for summary values & loading rows) */
         .skeleton {
             position: relative;
             overflow: hidden;
-            background: #eef2f7;
             border-radius: 6px;
+            background: #eef2f7;
         }
 
         .skeleton::after {
@@ -182,7 +469,7 @@
             transform: translateX(-100%);
             background: linear-gradient(90deg,
                     rgba(255, 255, 255, 0) 0%,
-                    rgba(255, 255, 255, .65) 50%,
+                    rgba(255, 255, 255, .8) 50%,
                     rgba(255, 255, 255, 0) 100%);
             animation: shimmer 1.2s infinite;
         }
@@ -193,126 +480,142 @@
             }
         }
 
-        /* Select2 inside modal alignment fix */
+        /* Select2 inside modal */
         .modal .select2-container {
             width: 100% !important;
+        }
+
+        @media (max-width: 992px) {
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar-right {
+                align-items: flex-start;
+            }
+
+            .workbook-head {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: .4rem;
+            }
+
+            .workbook-tools {
+                width: 100%;
+                justify-content: flex-start;
+            }
         }
     </style>
 @endsection
 
 @section('content')
-    <div class="row row-sm">
-        <div class="col-lg-12">
-            <div class="card custom-card overflow-hidden">
-                <div class="card-body">
+    <div class="container container-page py-4">
 
-                    @if (session('success'))
-                        <div class="alert alert-success border-0 rounded-3 d-flex align-items-center gap-2">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 6L9 17l-5-5"></path>
-                            </svg>
-                            <div>{{ session('success') }}</div>
-                        </div>
-                    @endif
+        @if (session('success'))
+            <div class="alert alert-success border-0 rounded-3 d-flex align-items-center gap-2">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6L9 17l-5-5"></path>
+                </svg>
+                <div>{{ session('success') }}</div>
+            </div>
+        @endif
 
-                    {{-- Metrics --}}
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="metric d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <span class="icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                                            <line x1="3" y1="9" x2="21" y2="9"></line>
-                                            <line x1="7" y1="15" x2="12" y2="15"></line>
-                                        </svg>
-                                    </span>
-                                    <div>
-                                        <div class="label">Total Payment</div>
-                                        <div class="value h4 mb-0" id="totalPaymentByDateRange">
-                                            ₹{{ number_format($rangeTotal ?? 0, 2) }}
-                                        </div>
-                                        <div class="small text-muted mt-1" id="rangeLabel">All-time total</div>
-                                    </div>
-                                </div>
-                                <span class="badge-soft">All categories</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="metric d-flex align-items-center justify-content-between">
-                                <div class="d-flex align-items-center">
-                                    <span class="icon">
-                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                            stroke-linejoin="round">
-                                            <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                                            <line x1="8" y1="3" x2="8" y2="7"></line>
-                                            <line x1="16" y1="3" x2="16" y2="7"></line>
-                                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                                        </svg>
-                                    </span>
-                                    <div>
-                                        <div class="label">Today Payment</div>
-                                        <div class="value h4 mb-0" id="todayPayment">
-                                            ₹{{ number_format($todayTotal ?? 0, 2) }}
-                                        </div>
-                                        <div class="small text-muted mt-1">
-                                            {{ \Carbon\Carbon::today(config('app.timezone', 'Asia/Kolkata'))->format('Y-m-d') }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <span class="badge-soft">Live</span>
-                            </div>
-                        </div>
+        {{-- ========= FILTER TOOLBAR ========= --}}
+        <form id="filterForm" class="toolbar" onsubmit="return false;">
+            <div class="date-range">
+                <span>From</span>
+                <input type="date" id="from_date" name="from_date" />
+                <span>To</span>
+                <input type="date" id="to_date" name="to_date" />
+            </div>
+
+            <div class="toolbar-right">
+                <div class="toolbar-actions">
+                    <button type="button" id="searchBtn" class="btn btn-brand btn-sm">
+                        Search
+                    </button>
+                    <button type="button" id="resetBtn" class="btn btn-outline-brand btn-sm">
+                        Reset
+                    </button>
+                </div>
+
+                <div class="quick-row">
+                    <span class="quick-chip" data-range="today">Today</span>
+                    <span class="quick-chip" data-range="week">This Week</span>
+                    <span class="quick-chip" data-range="month">This Month</span>
+                    <span class="quick-chip" data-range="30">Last 30 Days</span>
+                    <span class="quick-chip" data-range="fy">FY (Apr–Mar)</span>
+                </div>
+            </div>
+        </form>
+
+        {{-- ========= SUMMARY BAND ========= --}}
+        @php
+            $initialTransactionsCount = $transactions->count();
+        @endphp
+        <div class="band">
+            <h3>
+                Office Fund
+                <span class="label">Summary</span>
+            </h3>
+            <div class="band-sub">
+                <span id="rangeLabel">All-time total</span> •
+                <strong>{{ $initialTransactionsCount }}</strong> record{{ $initialTransactionsCount == 1 ? '' : 's' }}
+                loaded
+            </div>
+            <div class="chips">
+                <span class="chip green">
+                    <span class="icon">💰</span>
+                    <span>Range Total</span>
+                    <span class="money" id="totalPaymentByDateRange">
+                        ₹{{ number_format($rangeTotal ?? 0, 2) }}
+                    </span>
+                </span>
+
+                <span class="chip orange">
+                    <span class="icon">📅</span>
+                    <span>Today</span>
+                    <span class="money" id="todayPayment">
+                        ₹{{ number_format($todayTotal ?? 0, 2) }}
+                    </span>
+                </span>
+
+                <span class="chip blue">
+                    <span class="icon">🧾</span>
+                    <span>Transactions</span>
+                    <span>{{ $initialTransactionsCount }}</span>
+                </span>
+            </div>
+        </div>
+
+        {{-- ========= WORKBOOK (TABLE) ========= --}}
+        <div class="workbook">
+            <div class="workbook-head">
+                <div>
+                    <div class="workbook-title">Office Fund — Detailed</div>
+                    <div class="workbook-sub">
+                        Filter by date range above. Search, export and pagination powered by DataTables.
                     </div>
+                </div>
+                <div class="workbook-tools">
+                    <span class="note-muted">Showing outgoing fund entries</span>
+                </div>
+            </div>
 
-                    {{-- Filters --}}
-                    <div class="filters mb-4">
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label for="from_date" class="form-label fw-semibold">From Date</label>
-                                <input type="date" id="from_date" name="from_date" class="form-control">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="to_date" class="form-label fw-semibold">To Date</label>
-                                <input type="date" id="to_date" name="to_date" class="form-control">
-                            </div>
-                            <div class="col-md-4 d-flex align-items-end gap-2">
-                                <button type="button" id="searchBtn" class="btn btn-brand w-100">
-                                    <svg width="18" height="18" class="me-1" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                    </svg>
-                                    Search
-                                </button>
-                                <button type="button" id="resetBtn" class="btn btn-outline-brand">
-                                    Reset
-                                </button>
-                            </div>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                            <span class="quick-chip" data-range="today">Today</span>
-                            <span class="quick-chip" data-range="week">This Week</span>
-                            <span class="quick-chip" data-range="month">This Month</span>
-                            <span class="quick-chip" data-range="30">Last 30 Days</span>
-                            <span class="quick-chip" data-range="fy">FY (Apr–Mar)</span>
-                        </div>
-                    </div>
+            <div class="excel-wrap">
+                <div class="position-relative">
+                    <!-- (we don’t need full overlay div here, skeleton rows are used inside table) -->
 
-                    {{-- Table --}}
-                    <div class="table-responsive table-premium">
-                        <table id="file-datatable" class="table table-hover align-middle text-nowrap mb-0">
+                    <div class="table-responsive">
+                        <table id="file-datatable"
+                            class="excel table table-hover align-middle text-nowrap mb-0">
                             <thead>
                                 <tr>
-                                    <th>Sl No.</th>
-                                    <th>Date</th>
+                                    <th class="col-index">Sl No.</th>
+                                    <th class="col-date">Date</th>
                                     <th>Categories</th>
-                                    <th class="text-end">Amount</th>
+                                    <th class="col-money">Amount</th>
                                     <th>Mode</th>
                                     <th>Paid By</th>
                                     <th>Received By</th>
@@ -323,14 +626,16 @@
                             <tbody id="transactionsBody">
                                 @foreach ($transactions as $t)
                                     <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($t->date)->format('Y-m-d') }}</td>
+                                        <td class="col-index">{{ $loop->iteration }}</td>
+                                        <td class="col-date">{{ \Carbon\Carbon::parse($t->date)->format('Y-m-d') }}</td>
                                         <td>
                                             <span class="badge-soft text-capitalize">
                                                 {{ str_replace('_', ' ', $t->categories) }}
                                             </span>
                                         </td>
-                                        <td class="text-end">₹{{ number_format($t->amount, 2) }}</td>
+                                        <td class="col-money">
+                                            <span class="currency">₹</span>{{ number_format($t->amount, 2) }}
+                                        </td>
                                         <td class="text-capitalize">{{ $t->mode_of_payment }}</td>
                                         <td class="text-capitalize">{{ $t->paid_by }}</td>
                                         <td class="text-capitalize">{{ $t->received_by }}</td>
@@ -360,10 +665,10 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-                            <tfoot class="table-light">
+                            <tfoot>
                                 <tr>
                                     <th colspan="3" class="text-end">Total (shown):</th>
-                                    <th class="text-end" id="tableShownTotal">—</th>
+                                    <th class="col-money" id="tableShownTotal">—</th>
                                     <th colspan="5"></th>
                                 </tr>
                             </tfoot>
@@ -375,141 +680,140 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Edit Modal --}}
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <form id="editForm" method="POST">
-                @csrf
-                @method('PUT')
-                <div class="modal-content">
-                    <div class="modal-header border-0 pb-0">
-                        <div>
-                            <h5 class="modal-title fw-semibold" id="editModalLabel">Edit Office Fund</h5>
-                            <p class="text-muted mb-0 small">
-                                Update date, category, payment details and description.
-                            </p>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body">
-
-                        {{-- Row 1: Date + Category --}}
-                        <div class="row g-3 mb-2">
-                            <div class="col-md-4">
-                                <label for="edit_date" class="form-label fw-semibold">Date</label>
-                                <input type="date" class="form-control" id="edit_date" name="date" required>
+        {{-- ========= Edit Modal ========= --}}
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <form id="editForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-content">
+                        <div class="modal-header border-0 pb-0">
+                            <div>
+                                <h5 class="modal-title fw-semibold" id="editModalLabel">Edit Office Fund</h5>
+                                <p class="text-muted mb-0 small">
+                                    Update date, category, payment details and description.
+                                </p>
                             </div>
-
-                            <div class="col-md-8">
-                                <label for="edit_categories" class="form-label fw-semibold">Category</label>
-                                <select class="form-select select2" id="edit_categories" name="categories" required>
-                                    <option value="">Select Type</option>
-                                    <option value="rent">Rent</option>
-                                    <option value="rider_salary">Rider Salary</option>
-                                    <option value="vendor_payment">Vendor Payment</option>
-                                    <option value="fuel">Fuel</option>
-                                    <option value="package">Package</option>
-                                    <option value="bus_fare">Bus Fare</option>
-                                    <option value="miscellaneous">Miscellaneous</option>
-                                </select>
-                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
                         </div>
 
-                        <hr class="my-3">
+                        <div class="modal-body">
+                            {{-- Row 1: Date + Category --}}
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-4">
+                                    <label for="edit_date" class="form-label fw-semibold">Date</label>
+                                    <input type="date" class="form-control" id="edit_date" name="date" required>
+                                </div>
 
-                        {{-- Row 2: Amount + Mode --}}
-                        <div class="row g-3 mb-2">
-                            <div class="col-md-6">
-                                <label for="edit_amount" class="form-label fw-semibold">Amount</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">₹</span>
-                                    <input type="number" class="form-control" id="edit_amount" name="amount"
-                                        step="0.01" min="0" required>
+                                <div class="col-md-8">
+                                    <label for="edit_categories" class="form-label fw-semibold">Category</label>
+                                    <select class="form-select select2" id="edit_categories" name="categories" required>
+                                        <option value="">Select Type</option>
+                                        <option value="rent">Rent</option>
+                                        <option value="rider_salary">Rider Salary</option>
+                                        <option value="vendor_payment">Vendor Payment</option>
+                                        <option value="fuel">Fuel</option>
+                                        <option value="package">Package</option>
+                                        <option value="bus_fare">Bus Fare</option>
+                                        <option value="miscellaneous">Miscellaneous</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
-                                <label for="edit_mode_of_payment" class="form-label fw-semibold">Mode of Payment</label>
-                                <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment"
-                                    required>
-                                    <option value="">Select Mode</option>
-                                    <option value="cash">Cash</option>
-                                    <option value="upi">UPI</option>
-                                    <option value="icici">ICICI</option>
-                                </select>
+                            <hr class="my-3">
+
+                            {{-- Row 2: Amount + Mode --}}
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-6">
+                                    <label for="edit_amount" class="form-label fw-semibold">Amount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="edit_amount" name="amount"
+                                            step="0.01" min="0" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="edit_mode_of_payment" class="form-label fw-semibold">Mode of Payment</label>
+                                    <select class="form-select select2" id="edit_mode_of_payment" name="mode_of_payment"
+                                        required>
+                                        <option value="">Select Mode</option>
+                                        <option value="cash">Cash</option>
+                                        <option value="upi">UPI</option>
+                                        <option value="icici">ICICI</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {{-- Row 3: Paid by + Received by --}}
+                            <div class="row g-3 mb-2">
+                                <div class="col-md-6">
+                                    <label for="edit_paid_by" class="form-label fw-semibold">Paid By</label>
+                                    <select class="form-select select2" id="edit_paid_by" name="paid_by" required>
+                                        <option value="">Select Person</option>
+                                        <option value="pankaj">Pankaj</option>
+                                        <option value="subrat">Subrat</option>
+                                        <option value="basudha">Basudha</option>
+                                        <option value="biswa">Biswa Sir</option>
+                                        <option value="pooja">Pooja Mam</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="edit_received_by" class="form-label fw-semibold">Received By Name</label>
+                                    <input type="text" class="form-control" id="edit_received_by" name="received_by"
+                                        placeholder="Enter name" required>
+                                </div>
+                            </div>
+
+                            {{-- Row 4: Description --}}
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="edit_description" class="form-label fw-semibold">Description</label>
+                                    <textarea class="form-control" id="edit_description" name="description" rows="3"
+                                        placeholder="Enter description (optional)"></textarea>
+                                </div>
                             </div>
                         </div>
 
-                        {{-- Row 3: Paid by + Received by --}}
-                        <div class="row g-3 mb-2">
-                            <div class="col-md-6">
-                                <label for="edit_paid_by" class="form-label fw-semibold">Paid By</label>
-                                <select class="form-select select2" id="edit_paid_by" name="paid_by" required>
-                                    <option value="">Select Person</option>
-                                    <option value="pankaj">Pankaj</option>
-                                    <option value="subrat">Subrat</option>
-                                    <option value="basudha">Basudha</option>
-                                    <option value="biswa">Biswa Sir</option>
-                                    <option value="pooja">Pooja Mam</option>
-                                </select>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="edit_received_by" class="form-label fw-semibold">Received By Name</label>
-                                <input type="text" class="form-control" id="edit_received_by" name="received_by"
-                                    placeholder="Enter name" required>
-                            </div>
-                        </div>
-
-                        {{-- Row 4: Description --}}
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label for="edit_description" class="form-label fw-semibold">Description</label>
-                                <textarea class="form-control" id="edit_description" name="description" rows="3"
-                                    placeholder="Enter description (optional)"></textarea>
-                            </div>
+                        <div class="modal-footer border-0 pt-0">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-brand">
+                                Update
+                            </button>
                         </div>
                     </div>
-
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-brand">
-                            Update
-                        </button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
 
-    {{-- Delete Confirm Modal --}}
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="deleteForm" method="POST">
-                @csrf
-                @method('DELETE')
-                <div class="modal-content">
-                    <div class="modal-header border-0">
-                        <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                            aria-label="Close"></button>
-                    </div>
+        {{-- ========= Delete Confirm Modal ========= --}}
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="deleteForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div class="modal-content">
+                        <div class="modal-header border-0">
+                            <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
 
-                    <div class="modal-body">
-                        <p class="mb-0">Are you sure you want to delete this record?</p>
-                    </div>
+                        <div class="modal-body">
+                            <p class="mb-0">Are you sure you want to delete this record?</p>
+                        </div>
 
-                    <div class="modal-footer border-0">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        <div class="modal-footer border-0">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 @endsection
@@ -600,8 +904,9 @@
                 }
             }
 
-            document.querySelectorAll('.quick-chip').forEach(c => c.addEventListener('click', () => setRange(c.dataset
-                .range)));
+            document.querySelectorAll('.quick-chip').forEach(c => c.addEventListener('click', () =>
+                setRange(c.dataset.range)
+            ));
 
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = '';
@@ -744,7 +1049,7 @@
 
             function setLoadingState(loading) {
                 if (loading) {
-                    // Destroy DT BEFORE changing tbody to avoid DataTables reading invalid rows
+                    // Destroy DT BEFORE changing tbody
                     if ($.fn.dataTable.isDataTable($table)) {
                         $table.DataTable().clear().destroy();
                         dt = null;
@@ -769,10 +1074,10 @@
                 const catPretty = (row.categories || '').replace(/_/g, ' ');
                 return `
                     <tr>
-                        <td>${sl}</td>
-                        <td>${row.date}</td>
+                        <td class="col-index">${sl}</td>
+                        <td class="col-date">${row.date}</td>
                         <td><span class="badge-soft text-capitalize">${catPretty}</span></td>
-                        <td class="text-end">${amountPretty}</td>
+                        <td class="col-money">${amountPretty}</td>
                         <td class="text-capitalize">${row.mode_of_payment || ''}</td>
                         <td class="text-capitalize">${row.paid_by || ''}</td>
                         <td class="text-capitalize">${row.received_by || ''}</td>
