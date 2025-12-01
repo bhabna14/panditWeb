@@ -225,24 +225,20 @@
                 <div class="card-body">
                     <div class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">From Date</label>
+                            <label class="form-label fw-semibold mb-1">From Date</label>
                             <input type="date" id="from_date" class="form-control">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">To Date</label>
+                            <label class="form-label fw-semibold mb-1">To Date</label>
                             <input type="date" id="to_date" class="form-control">
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Category (quick filter)</label>
+                            <label class="form-label fw-semibold mb-1">Category (quick filter)</label>
                             <select id="ledger_category" class="form-select">
                                 <option value="">All</option>
-                                <option value="rent">Rent</option>
-                                <option value="rider_salary">Rider Salary</option>
-                                <option value="vendor_payment">Vendor Payment</option>
-                                <option value="fuel">Fuel</option>
-                                <option value="package">Package</option>
-                                <option value="bus_fare">Bus Fare</option>
-                                <option value="miscellaneous">Miscellaneous</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat }}">{{ \Illuminate\Support\Str::headline($cat) }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-3 d-flex gap-2">
@@ -441,7 +437,7 @@
                                     <thead>
                                         <tr>
                                             <th>Date</th>
-                                            <th>Amount</th>
+                                            <th class="text-end">Amount</th>
                                             <th>Mode</th>
                                             <th>Paid</th>
                                             <th>Description</th>
@@ -451,7 +447,7 @@
                                         ${(group.paid || []).map(r => `
                                             <tr>
                                                 <td>${r.date ?? ''}</td>
-                                                <td class="text-cap mono">${fmtINR(r.amount)}</td>
+                                                <td class="text-end mono">${fmtINR(r.amount)}</td>
                                                 <td class="text-cap">${r.mode || ''}</td>
                                                 <td class="text-cap">${r.paid_by || ''}</td>
                                                 <td>${r.description || ''}</td>
@@ -499,6 +495,12 @@
 
                 const url = `{{ route('officeLedger.category.filter') }}` +
                     (qs.toString() ? `?${qs.toString()}` : '');
+
+                // keep URL in sync with current filters
+                const newUrl = qs.toString()
+                    ? `${location.pathname}?${qs.toString()}`
+                    : location.pathname;
+                history.replaceState(null, '', newUrl);
 
                 container.innerHTML = `<div class="muted">Loading…</div>`;
 
@@ -570,8 +572,13 @@
                 });
             });
 
-            // Initial load
-            load();
+            // Initial load:
+            // if no filters in URL, default to "This Month"
+            if (!fromEl.value && !toEl.value && !catEl.value) {
+                setRange('month');
+            } else {
+                load();
+            }
         })();
     </script>
 @endsection

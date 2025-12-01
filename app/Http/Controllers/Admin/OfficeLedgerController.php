@@ -10,10 +10,21 @@ use Illuminate\Http\Request;
 class OfficeLedgerController extends Controller
 {
     /** Render the category-first ledger view */
-    public function index()
+    public function index(Request $request)
     {
+        // Distinct categories for the dropdown
+        $categories = OfficeLedger::query()
+            ->active()
+            ->whereNotNull('category')
+            ->distinct()
+            ->orderBy('category')
+            ->pluck('category')
+            ->toArray();
+
         // Make sure this matches your Blade path
-        return view('admin.office-ledger-transaction');
+        return view('admin.office-ledger.category', [
+            'categories' => $categories,
+        ]);
     }
 
     /** API: category-grouped ledger the Blade expects */
@@ -38,20 +49,20 @@ class OfficeLedgerController extends Controller
             ->when($cat,         fn($qq) => $qq->where('category', $cat));
 
         $rows = $q->orderBy('entry_date', 'desc')
-                  ->orderBy('id', 'desc')
-                  ->get([
-                      'id',
-                      'entry_date',
-                      'category',
-                      'direction',
-                      'amount',
-                      'mode_of_payment',
-                      'paid_by',
-                      'received_by',
-                      'description',
-                      'source_type',
-                      'source_id',
-                  ]);
+            ->orderBy('id', 'desc')
+            ->get([
+                'id',
+                'entry_date',
+                'category',
+                'direction',
+                'amount',
+                'mode_of_payment',
+                'paid_by',
+                'received_by',
+                'description',
+                'source_type',
+                'source_id',
+            ]);
 
         // Totals (compute once on filtered set)
         $inTotal  = (float) $rows->where('direction', 'in')->sum('amount');
@@ -70,7 +81,7 @@ class OfficeLedgerController extends Controller
             ]);
         }
 
-        // Normalize values + collect categories
+        // Normalize values
         $rows = $rows->map(function ($r) {
             return [
                 'id'          => $r->id,
