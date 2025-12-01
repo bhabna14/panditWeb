@@ -462,11 +462,11 @@
         <div class="toolbar mb-3">
             <div class="toolbar-left">
                 <div class="date-range">
-                    <span class="label">From</span>
+                    <span class="label">F</span>
                     <input type="date" id="from_date" placeholder="dd-mm-yyyy">
                 </div>
                 <div class="date-range">
-                    <span class="label">To</span>
+                    <span class="label">T</span>
                     <input type="date" id="to_date" placeholder="dd-mm-yyyy">
                 </div>
             </div>
@@ -480,12 +480,12 @@
                 <button class="btn-chip" type="button" data-range="month">
                     <i class="bi bi-calendar3"></i><span>This Month</span>
                 </button>
-                <button class="btn-chip" type="button" data-range="last30">
+                {{-- <button class="btn-chip" type="button" data-range="last30">
                     <i class="bi bi-calendar-range"></i><span>Last 30 Days</span>
-                </button>
-                <button class="btn-chip" type="button" data-range="fy">
+                </button> --}}
+                {{-- <button class="btn-chip" type="button" data-range="fy">
                     <i class="bi bi-graph-up-arrow"></i><span>FY (Apr–Mar)</span>
-                </button>
+                </button> --}}
                 <button id="searchBtn" class="btn-chip apply-btn" type="button">
                     <i class="fas fa-search"></i><span>Apply</span>
                 </button>
