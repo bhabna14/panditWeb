@@ -28,13 +28,22 @@ class OfficeLedgerController extends Controller
         $to   = $request->query('to_date');
         $cat  = $request->query('category');
 
-        // Base query: ACTIVE ledger rows, optional filters
+        // ✅ FIX: use whereDate for the full range so whole days are included
         $q = OfficeLedger::query()
             ->active()
-            ->when($from && $to,  fn($qq) => $qq->whereBetween('entry_date', [$from, $to]))
-            ->when($from && !$to, fn($qq) => $qq->whereDate('entry_date', '>=', $from))
-            ->when(!$from && $to, fn($qq) => $qq->whereDate('entry_date', '<=', $to))
-            ->when($cat,         fn($qq) => $qq->where('category', $cat));
+            ->when($from && $to, function ($qq) use ($from, $to) {
+                $qq->whereDate('entry_date', '>=', $from)
+                   ->whereDate('entry_date', '<=', $to);
+            })
+            ->when($from && !$to, function ($qq) use ($from) {
+                $qq->whereDate('entry_date', '>=', $from);
+            })
+            ->when(!$from && $to, function ($qq) use ($to) {
+                $qq->whereDate('entry_date', '<=', $to);
+            })
+            ->when($cat, function ($qq) use ($cat) {
+                $qq->where('category', $cat);
+            });
 
         $rows = $q->orderBy('entry_date', 'desc')
                   ->orderBy('id', 'desc')

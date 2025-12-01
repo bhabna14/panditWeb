@@ -9,7 +9,7 @@ class OfficeLedger extends Model
 {
     use HasFactory;
 
-    protected $table = 'office_ledgers'; // make sure this matches your table name
+    protected $table = 'office_ledgers';
 
     protected $fillable = [
         'entry_date',     // date

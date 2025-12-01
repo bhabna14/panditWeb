@@ -1,3 +1,4 @@
+{{-- resources/views/admin/office-ledger-transaction.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -466,7 +467,7 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h4 class="mb-0" style="font-weight:600;">Office Ledger — Category View</h4>
-                <div class="small text-muted">Review funds received & payments by category</div>
+                <div class="small text-muted">Review funds received &amp; payments by category</div>
             </div>
             <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm">
                 ← Back
@@ -540,7 +541,7 @@
                 <div>
                     <div class="workbook-title">Categories — Detailed View</div>
                     <div class="workbook-sub">
-                        Category-wise funds received & payments. Click a category row to expand.
+                        Category-wise funds received &amp; payments. Click a category row to expand.
                     </div>
                 </div>
             </div>
@@ -555,15 +556,15 @@
 @section('scripts')
 <script>
 (function () {
-    const container = document.getElementById('categoryContainer');
-    const inEl  = document.getElementById('ledgerIn');
-    const outEl = document.getElementById('ledgerOut');
-    const netEl = document.getElementById('ledgerNet');
-    const rangeLabelEl = document.getElementById('summaryRangeLabel');
+    const container      = document.getElementById('categoryContainer');
+    const inEl           = document.getElementById('ledgerIn');
+    const outEl          = document.getElementById('ledgerOut');
+    const netEl          = document.getElementById('ledgerNet');
+    const rangeLabelEl   = document.getElementById('summaryRangeLabel');
 
-    const fromEl = document.getElementById('from_date');
-    const toEl   = document.getElementById('to_date');
-    const catEl  = document.getElementById('ledger_category');
+    const fromEl         = document.getElementById('from_date');
+    const toEl           = document.getElementById('to_date');
+    const catEl          = document.getElementById('ledger_category');
 
     const toNumber = v => {
         if (v === null || v === undefined) return 0;
@@ -760,7 +761,7 @@
             outEl.textContent = fmtINR(outTotal);
             netEl.textContent = fmtINR(netTotal);
 
-            const cats = Array.isArray(data.categories) ? data.categories : [];
+            const cats   = Array.isArray(data.categories) ? data.categories : [];
             const groups = data.groups || {};
 
             if (!cats.length) {
@@ -844,7 +845,7 @@
         load();
     });
 
-    // 🔹 RANGE BUTTONS (Today / Yesterday / This Week / This Month)
+    // RANGE BUTTONS (Today / Yesterday / This Week / This Month)
     document.querySelectorAll('[data-range]').forEach(btn => {
         btn.addEventListener('click', () => {
             const range = btn.getAttribute('data-range');
