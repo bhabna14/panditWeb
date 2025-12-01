@@ -475,14 +475,14 @@
                 </select>
             </div>
 
-            <div style="display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end">
+            {{-- <div style="display:flex; gap:.4rem; flex-wrap:wrap; justify-content:flex-end">
                 <button class="btn-chip" type="button" data-range="today">Today</button>
                 <button class="btn-chip" type="button" data-range="yesterday">Yesterday</button>
                 <button class="btn-chip" type="button" data-range="this_week">This Week</button>
                 <button class="btn-chip" type="button" data-range="this_month">This Month</button>
                 <button class="btn-chip btn-apply" id="searchBtn" type="button">Apply</button>
                 <button class="btn-chip" id="resetBtn" type="button">Reset</button>
-            </div>
+            </div> --}}
         </form>
 
         {{-- Summary band (global ledger metrics) --}}
