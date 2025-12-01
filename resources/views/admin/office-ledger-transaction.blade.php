@@ -1,4 +1,4 @@
-{{-- resources/views/admin/office-ledger/category.blade.php (example path) --}}
+{{-- resources/views/admin/office-ledger/category.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -28,17 +28,17 @@
             padding: 14px 16px;
             background: #fff;
             border: 1px solid var(--line);
-            box-shadow: 0 10px 24px rgba(15, 23, 42, .06)
+            box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
         }
 
         .metric .label {
             color: var(--muted);
-            font-weight: 600
+            font-weight: 600;
         }
 
         .metric .value {
             color: var(--ink);
-            font-weight: 800
+            font-weight: 800;
         }
 
         .badge-soft {
@@ -47,19 +47,19 @@
             border: 1px solid rgba(79, 70, 229, .25);
             border-radius: 999px;
             padding: .25rem .5rem;
-            font-weight: 600
+            font-weight: 600;
         }
 
         .section-title {
             font-weight: 700;
-            color: var(--ink)
+            color: var(--ink);
         }
 
         .cat-card {
             border: 1px solid var(--line);
             border-radius: 14px;
             overflow: hidden;
-            background: #fff
+            background: #fff;
         }
 
         .cat-header {
@@ -68,41 +68,41 @@
             justify-content: space-between;
             padding: 14px 16px;
             background: linear-gradient(180deg, #f9fbff, #f6f8fe);
-            cursor: pointer
+            cursor: pointer;
         }
 
         .cat-header .title {
-            font-weight: 700
+            font-weight: 700;
         }
 
         .chip {
             border-radius: 999px;
             padding: 4px 10px;
             border: 1px solid var(--line);
-            font-weight: 700
+            font-weight: 700;
         }
 
         .chip-net-pos {
             background: var(--success-bg);
             color: var(--success-fg);
-            border-color: var(--success-br)
+            border-color: var(--success-br);
         }
 
         .chip-net-neg {
             background: var(--danger-bg);
             color: var(--danger-fg);
-            border-color: var(--danger-br)
+            border-color: var(--danger-br);
         }
 
         .cat-body {
             padding: 14px 16px;
-            display: none
+            display: none;
         }
 
         .table-premium {
             border: 1px solid var(--line);
             border-radius: 12px;
-            overflow: hidden
+            overflow: hidden;
         }
 
         .table-premium thead th {
@@ -111,38 +111,38 @@
             z-index: 2;
             background: linear-gradient(180deg, #f9fbff, #f6f8fe);
             font-weight: 700;
-            border-bottom: 1px solid var(--line) !important
+            border-bottom: 1px solid var(--line) !important;
         }
 
         .text-cap {
-            text-transform: capitalize
+            text-transform: capitalize;
         }
 
         .btn-brand {
             background: linear-gradient(135deg, var(--brand), var(--brand-2));
             border: none;
             color: #fff;
-            box-shadow: 0 10px 20px rgba(79, 70, 229, .25)
+            box-shadow: 0 10px 20px rgba(79, 70, 229, .25);
         }
 
         .btn-brand:hover {
-            opacity: .95
+            opacity: .95;
         }
 
         .caret {
-            transition: transform .2s ease
+            transition: transform .2s ease;
         }
 
         .rot-90 {
-            transform: rotate(90deg)
+            transform: rotate(90deg);
         }
 
         .muted {
-            color: var(--muted)
+            color: var(--muted);
         }
 
         .mono {
-            font-variant-numeric: tabular-nums
+            font-variant-numeric: tabular-nums;
         }
 
         /* Quick range chips */
@@ -277,6 +277,7 @@
                 const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
                 return Number.isFinite(n) ? n : 0;
             };
+
             const fmtINR = n =>
                 new Intl.NumberFormat('en-IN', {
                     style: 'currency',
@@ -289,24 +290,24 @@
                 .replace(/\b\w/g, m => m.toUpperCase());
 
             const container = document.getElementById('categoryContainer');
-            const inEl = document.getElementById('ledgerIn');
-            const outEl = document.getElementById('ledgerOut');
-            const netEl = document.getElementById('ledgerNet');
+            const inEl      = document.getElementById('ledgerIn');
+            const outEl     = document.getElementById('ledgerOut');
+            const netEl     = document.getElementById('ledgerNet');
 
             const params = new URLSearchParams(location.search);
             const fromEl = document.getElementById('from_date');
-            const toEl = document.getElementById('to_date');
-            const catEl = document.getElementById('ledger_category');
+            const toEl   = document.getElementById('to_date');
+            const catEl  = document.getElementById('ledger_category');
 
             if (params.get('from_date')) fromEl.value = params.get('from_date');
-            if (params.get('to_date')) toEl.value = params.get('to_date');
-            if (params.get('category')) catEl.value = params.get('category');
+            if (params.get('to_date'))   toEl.value   = params.get('to_date');
+            if (params.get('category'))  catEl.value  = params.get('category');
 
             const chips = document.querySelectorAll('.quick-chip');
 
             const toLocalYMD = (d) => {
-                const y = d.getFullYear();
-                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const y   = d.getFullYear();
+                const m   = String(d.getMonth() + 1).padStart(2, '0');
                 const day = String(d.getDate()).padStart(2, '0');
                 return `${y}-${m}-${day}`;
             };
@@ -320,9 +321,8 @@
             const today = new Date();
 
             const weekStart = () => {
-                const d = new Date(today);
-                // Monday = 0
-                const day = (d.getDay() + 6) % 7;
+                const d   = new Date(today);
+                const day = (d.getDay() + 6) % 7; // Monday = 0
                 d.setDate(d.getDate() - day);
                 return d;
             };
@@ -334,8 +334,7 @@
             }
 
             function setRange(range) {
-                let f = null,
-                    t = null;
+                let f = null, t = null;
 
                 switch (range) {
                     case 'today':
@@ -356,7 +355,7 @@
 
                 if (f && t) {
                     fromEl.value = toLocalYMD(f);
-                    toEl.value = toLocalYMD(t);
+                    toEl.value   = toLocalYMD(t);
                     setActiveChip(range);
                     load();
                 }
@@ -365,11 +364,12 @@
             function sectionTemplate(key, group, expand = false) {
                 const net = toNumber(group.received_total) - toNumber(group.paid_total);
                 const pos = net >= 0;
+
                 return `
         <div class="cat-card" data-cat="${key}">
             <div class="cat-header" data-toggle="cat" role="button">
                 <div class="d-flex align-items-center gap-2">
-                    <svg width="16" height="16" class="caret ${expand?'rot-90':''}"
+                    <svg width="16" height="16" class="caret ${expand ? 'rot-90' : ''}"
                          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
@@ -384,11 +384,11 @@
                         <strong class="mono">${fmtINR(group.paid_total)}</strong>
                     </span>
                 </div>
-                <div class="chip ${pos ? 'chip-net-pos':'chip-net-neg'} mono">
+                <div class="chip ${pos ? 'chip-net-pos' : 'chip-net-neg'} mono">
                     Available: ${fmtINR(net)}
                 </div>
             </div>
-            <div class="cat-body" style="display:${expand?'block':'none'}">
+            <div class="cat-body" style="display:${expand ? 'block' : 'none'}">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="section-title mb-2">Funds Received</div>
@@ -407,19 +407,19 @@
                                     </thead>
                                     <tbody>
                                         ${(group.received || []).map(r => `
-                                                <tr>
-                                                    <td>${r.date ?? ''}</td>
-                                                    <td class="text-end mono">${fmtINR(r.amount)}</td>
-                                                    <td class="text-cap">${r.mode || ''}</td>
-                                                    <td class="text-cap">${r.paid_by || ''}</td>
-                                                    <td class="text-cap">${r.received_by || ''}</td>
-                                                    <td>${r.description || ''}</td>
-                                                </tr>
-                                            `).join('') || `
-                                                <tr>
-                                                    <td colspan="6" class="text-center text-muted">No records</td>
-                                                </tr>
-                                            `}
+                                            <tr>
+                                                <td>${r.date ?? ''}</td>
+                                                <td class="text-end mono">${fmtINR(r.amount)}</td>
+                                                <td class="text-cap">${r.mode || ''}</td>
+                                                <td class="text-cap">${r.paid_by || ''}</td>
+                                                <td class="text-cap">${r.received_by || ''}</td>
+                                                <td>${r.description || ''}</td>
+                                            </tr>
+                                        `).join('') || `
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted">No records</td>
+                                            </tr>
+                                        `}
                                     </tbody>
                                     <tfoot class="table-light">
                                         <tr>
@@ -449,18 +449,18 @@
                                     </thead>
                                     <tbody>
                                         ${(group.paid || []).map(r => `
-                                                <tr>
-                                                    <td>${r.date ?? ''}</td>
-                                                    <td class="text-cap mono">${fmtINR(r.amount)}</td>
-                                                    <td class="text-cap">${r.mode || ''}</td>
-                                                    <td class="text-cap">${r.paid_by || ''}</td>
-                                                    <td>${r.description || ''}</td>
-                                                </tr>
-                                            `).join('') || `
-                                                <tr>
-                                                    <td colspan="5" class="text-center text-muted">No records</td>
-                                                </tr>
-                                            `}
+                                            <tr>
+                                                <td>${r.date ?? ''}</td>
+                                                <td class="text-cap mono">${fmtINR(r.amount)}</td>
+                                                <td class="text-cap">${r.mode || ''}</td>
+                                                <td class="text-cap">${r.paid_by || ''}</td>
+                                                <td>${r.description || ''}</td>
+                                            </tr>
+                                        `).join('') || `
+                                            <tr>
+                                                <td colspan="5" class="text-center text-muted">No records</td>
+                                            </tr>
+                                        `}
                                     </tbody>
                                     <tfoot class="table-light">
                                         <tr>
@@ -482,7 +482,7 @@
             function bindToggles() {
                 container.querySelectorAll('[data-toggle="cat"]').forEach(h => {
                     h.onclick = () => {
-                        const body = h.parentElement.querySelector('.cat-body');
+                        const body  = h.parentElement.querySelector('.cat-body');
                         const caret = h.querySelector('.caret');
                         const visible = body.style.display === 'block';
                         body.style.display = visible ? 'none' : 'block';
@@ -494,28 +494,29 @@
             async function load() {
                 const qs = new URLSearchParams();
                 if (fromEl.value) qs.append('from_date', fromEl.value);
-                if (toEl.value) qs.append('to_date', toEl.value);
-                if (catEl.value) qs.append('category', catEl.value);
+                if (toEl.value)   qs.append('to_date', toEl.value);
+                if (catEl.value)  qs.append('category', catEl.value);
 
-                const url = `{{ route('officeLedger.category.filter') }}` + (qs.toString() ? `?${qs.toString()}` :
-                    '');
+                const url = `{{ route('officeLedger.category.filter') }}` +
+                    (qs.toString() ? `?${qs.toString()}` : '');
 
                 container.innerHTML = `<div class="muted">Loading…</div>`;
 
                 try {
                     const res = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
+                        headers: { 'Accept': 'application/json' }
                     });
-                    const data = await res.json();
-                    if (!data?.success) throw new Error(data?.message || 'Failed');
 
-                    inEl.textContent = fmtINR(data.in_total || 0);
+                    const data = await res.json();
+                    if (!data?.success) {
+                        throw new Error(data?.message || 'Failed');
+                    }
+
+                    inEl.textContent  = fmtINR(data.in_total  || 0);
                     outEl.textContent = fmtINR(data.out_total || 0);
                     netEl.textContent = fmtINR((data.in_total || 0) - (data.out_total || 0));
 
-                    const cats = Array.isArray(data.categories) ? data.categories : [];
+                    const cats   = Array.isArray(data.categories) ? data.categories : [];
                     const groups = data.groups || {};
 
                     if (!cats.length) {
@@ -534,25 +535,29 @@
                         };
                         html += sectionTemplate(key, g, idx === 0); // first expanded
                     });
+
                     container.innerHTML = html;
                     bindToggles();
                 } catch (e) {
                     console.error(e);
-                    container.innerHTML = `<div class="text-danger">Error loading data. Please try again.</div>`;
-                    inEl.textContent = outEl.textContent = netEl.textContent = fmtINR(0);
+                    container.innerHTML =
+                        `<div class="text-danger">Error loading data. Please try again.</div>`;
+                    inEl.textContent  = fmtINR(0);
+                    outEl.textContent = fmtINR(0);
+                    netEl.textContent = fmtINR(0);
                 }
             }
 
             // Button events
             document.getElementById('searchBtn').addEventListener('click', () => {
-                setActiveChip(null);
+                setActiveChip(null);  // clear chip highlight
                 load();
             });
 
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = '';
-                toEl.value = '';
-                catEl.value = '';
+                toEl.value   = '';
+                catEl.value  = '';
                 history.replaceState(null, '', location.pathname);
                 setActiveChip(null);
                 load();
