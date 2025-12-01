@@ -603,8 +603,8 @@
                     <button class="chip" data-range="yesterday">Yesterday</button>
                     <button class="chip" data-range="week">This Week</button>
                     <button class="chip" data-range="month">This Month</button>
-                    <button class="chip" data-range="last30">Last 30 Days</button>
-                    <button class="chip" data-range="fy">FY (Apr–Mar)</button>
+                    {{-- <button class="chip" data-range="last30">Last 30 Days</button> --}}
+                    {{-- <button class="chip" data-range="fy">FY (Apr–Mar)</button> --}}
                 </div>
                 <div class="toolbar-actions">
                     <button id="searchBtn" class="btn-grad">
