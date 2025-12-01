@@ -67,7 +67,7 @@
             max-width: 1320px;
         }
 
-        /* Toolbar (same structure as pickups page) */
+        /* Toolbar */
         .toolbar {
             position: sticky;
             top: 0;
@@ -370,7 +370,7 @@
             margin-bottom: .35rem;
         }
 
-        /* Inner tables (reuse excel visual language) */
+        /* Inner tables */
         .ledger-table {
             width: 100%;
             border-collapse: separate;
@@ -500,16 +500,16 @@
             </div>
 
             <div class="toolbar-right">
-                <button class="btn-chip range-btn" type="button" data-range="today">Today</button>
-                <button class="btn-chip range-btn" type="button" data-range="yesterday">Yesterday</button>
-                <button class="btn-chip range-btn" type="button" data-range="this_week">This Week</button>
-                <button class="btn-chip range-btn" type="button" data-range="this_month">This Month</button>
+                <button class="btn-chip" type="button" data-range="today">Today</button>
+                <button class="btn-chip" type="button" data-range="yesterday">Yesterday</button>
+                <button class="btn-chip" type="button" data-range="this_week">This Week</button>
+                <button class="btn-chip" type="button" data-range="this_month">This Month</button>
                 <button class="btn-chip btn-apply" id="searchBtn" type="button">Apply</button>
                 <button class="btn-chip" id="resetBtn" type="button">Reset</button>
             </div>
         </form>
 
-        {{-- Summary band (global ledger metrics) --}}
+        {{-- Summary band --}}
         <div class="band">
             <h3>
                 <span id="summaryRangeLabel">All Dates</span>
@@ -534,7 +534,7 @@
             </div>
         </div>
 
-        {{-- Workbook shell: category-wise sections --}}
+        {{-- Workbook --}}
         <div class="workbook">
             <div class="workbook-head">
                 <div>
@@ -553,64 +553,62 @@
 @endsection
 
 @section('scripts')
-    <script>
-        (function() {
-            const container = document.getElementById('categoryContainer');
-            const inEl = document.getElementById('ledgerIn');
-            const outEl = document.getElementById('ledgerOut');
-            const netEl = document.getElementById('ledgerNet');
-            const rangeLabelEl = document.getElementById('summaryRangeLabel');
+<script>
+(function () {
+    const container = document.getElementById('categoryContainer');
+    const inEl  = document.getElementById('ledgerIn');
+    const outEl = document.getElementById('ledgerOut');
+    const netEl = document.getElementById('ledgerNet');
+    const rangeLabelEl = document.getElementById('summaryRangeLabel');
 
-            const fromEl = document.getElementById('from_date');
-            const toEl = document.getElementById('to_date');
-            const catEl = document.getElementById('ledger_category');
+    const fromEl = document.getElementById('from_date');
+    const toEl   = document.getElementById('to_date');
+    const catEl  = document.getElementById('ledger_category');
 
-            const toNumber = v => {
-                if (v === null || v === undefined) return 0;
-                const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
-                return Number.isFinite(n) ? n : 0;
-            };
+    const toNumber = v => {
+        if (v === null || v === undefined) return 0;
+        const n = parseFloat(String(v).replace(/[₹,\s]/g, ''));
+        return Number.isFinite(n) ? n : 0;
+    };
 
-            const fmtINR = n => new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                maximumFractionDigits: 2
-            }).format(toNumber(n));
+    const fmtINR = n => new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 2
+    }).format(toNumber(n));
 
-            const cap = s => (s || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
+    const cap = s => (s || '').replace(/_/g, ' ').replace(/\b\w/g, m => m.toUpperCase());
 
-            const fmtDateLabel = (str) => {
-                if (!str) return '';
-                const d = new Date(str);
-                if (isNaN(d.getTime())) return str;
-                const day = String(d.getDate()).padStart(2, '0');
-                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov',
-                    'Dec'
-                ];
-                const month = monthNames[d.getMonth()];
-                const year = d.getFullYear();
-                return `${day} ${month} ${year}`;
-            };
+    const fmtDateLabel = (str) => {
+        if (!str) return '';
+        const d = new Date(str);
+        if (isNaN(d.getTime())) return str;
+        const day = String(d.getDate()).padStart(2, '0');
+        const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const month = monthNames[d.getMonth()];
+        const year = d.getFullYear();
+        return `${day} ${month} ${year}`;
+    };
 
-            function updateRangeLabel() {
-                const f = fromEl.value;
-                const t = toEl.value;
-                if (!f && !t) {
-                    rangeLabelEl.textContent = 'All Dates';
-                } else if (f && t) {
-                    rangeLabelEl.textContent = `${fmtDateLabel(f)} – ${fmtDateLabel(t)}`;
-                } else if (f && !t) {
-                    rangeLabelEl.textContent = `From ${fmtDateLabel(f)}`;
-                } else {
-                    rangeLabelEl.textContent = `Up to ${fmtDateLabel(t)}`;
-                }
-            }
+    function updateRangeLabel() {
+        const f = fromEl.value;
+        const t = toEl.value;
+        if (!f && !t) {
+            rangeLabelEl.textContent = 'All Dates';
+        } else if (f && t) {
+            rangeLabelEl.textContent = `${fmtDateLabel(f)} – ${fmtDateLabel(t)}`;
+        } else if (f && !t) {
+            rangeLabelEl.textContent = `From ${fmtDateLabel(f)}`;
+        } else {
+            rangeLabelEl.textContent = `Up to ${fmtDateLabel(t)}`;
+        }
+    }
 
-            function sectionTemplate(key, group, expand = false) {
-                const net = toNumber(group.received_total) - toNumber(group.paid_total);
-                const positive = net >= 0;
+    function sectionTemplate(key, group, expand = false) {
+        const net = toNumber(group.received_total) - toNumber(group.paid_total);
+        const positive = net >= 0;
 
-                const receivedRows = (group.received || []).map(r => `
+        const receivedRows = (group.received || []).map(r => `
             <tr>
                 <td>${r.date ?? ''}</td>
                 <td class="mono text-end">${fmtINR(r.amount)}</td>
@@ -621,7 +619,7 @@
             </tr>
         `).join('');
 
-                const paidRows = (group.paid || []).map(r => `
+        const paidRows = (group.paid || []).map(r => `
             <tr>
                 <td>${r.date ?? ''}</td>
                 <td class="mono text-end">${fmtINR(r.amount)}</td>
@@ -631,7 +629,7 @@
             </tr>
         `).join('');
 
-                return `
+        return `
         <div class="cat-card" data-cat="${key}">
             <div class="cat-header" data-toggle="cat">
                 <div class="cat-header-left">
@@ -709,168 +707,153 @@
                 </div>
             </div>
         </div>`;
+    }
+
+    function bindToggles() {
+        container.querySelectorAll('[data-toggle="cat"]').forEach(h => {
+            h.addEventListener('click', () => {
+                const card = h.closest('.cat-card');
+                const body = card.querySelector('.cat-body');
+                const caret = h.querySelector('.caret');
+                const visible = body.style.display === 'block';
+                body.style.display = visible ? 'none' : 'block';
+                caret.classList.toggle('rot-90', !visible);
+            });
+        });
+    }
+
+    function syncQueryString() {
+        const qs = new URLSearchParams();
+        if (fromEl.value) qs.set('from_date', fromEl.value);
+        if (toEl.value)   qs.set('to_date', toEl.value);
+        if (catEl.value)  qs.set('category', catEl.value);
+        const qStr = qs.toString();
+        const newUrl = qStr ? `${location.pathname}?${qStr}` : location.pathname;
+        window.history.replaceState(null, '', newUrl);
+    }
+
+    async function load() {
+        syncQueryString();
+        updateRangeLabel();
+
+        const qs = new URLSearchParams();
+        if (fromEl.value) qs.append('from_date', fromEl.value);
+        if (toEl.value)   qs.append('to_date', toEl.value);
+        if (catEl.value)  qs.append('category', catEl.value);
+
+        const url = `{{ route('officeLedger.category.filter') }}` + (qs.toString() ? `?${qs.toString()}` : '');
+
+        container.innerHTML = `<div class="muted">Loading…</div>`;
+
+        try {
+            const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+            const data = await res.json();
+            if (!data || data.success === false) {
+                throw new Error(data && data.message ? data.message : 'Failed to load ledger data');
             }
 
-            function bindToggles() {
-                container.querySelectorAll('[data-toggle="cat"]').forEach(h => {
-                    h.addEventListener('click', () => {
-                        const card = h.closest('.cat-card');
-                        const body = card.querySelector('.cat-body');
-                        const caret = h.querySelector('.caret');
-                        const visible = body.style.display === 'block';
-                        body.style.display = visible ? 'none' : 'block';
-                        caret.classList.toggle('rot-90', !visible);
-                    });
-                });
+            const inTotal  = toNumber(data.in_total || 0);
+            const outTotal = toNumber(data.out_total || 0);
+            const netTotal = inTotal - outTotal;
+
+            inEl.textContent  = fmtINR(inTotal);
+            outEl.textContent = fmtINR(outTotal);
+            netEl.textContent = fmtINR(netTotal);
+
+            const cats = Array.isArray(data.categories) ? data.categories : [];
+            const groups = data.groups || {};
+
+            if (!cats.length) {
+                container.innerHTML = `<div class="muted">No records for the selected range.</div>`;
+                return;
             }
 
-            function syncQueryString() {
-                const qs = new URLSearchParams();
-                if (fromEl.value) qs.set('from_date', fromEl.value);
-                if (toEl.value) qs.set('to_date', toEl.value);
-                if (catEl.value) qs.set('category', catEl.value);
-                const qStr = qs.toString();
-                const newUrl = qStr ? `${location.pathname}?${qStr}` : location.pathname;
-                window.history.replaceState(null, '', newUrl);
-            }
-
-            async function load() {
-                syncQueryString();
-                updateRangeLabel();
-
-                const qs = new URLSearchParams();
-                if (fromEl.value) qs.append('from_date', fromEl.value);
-                if (toEl.value) qs.append('to_date', toEl.value);
-                if (catEl.value) qs.append('category', catEl.value);
-
-                const url = `{{ route('officeLedger.category.filter') }}` + (qs.toString() ? `?${qs.toString()}` :
-                    '');
-
-                container.innerHTML = `<div class="muted">Loading…</div>`;
-
-                try {
-                    const res = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    });
-                    const data = await res.json();
-                    if (!data || data.success === false) {
-                        throw new Error(data && data.message ? data.message : 'Failed to load ledger data');
-                    }
-
-                    const inTotal = toNumber(data.in_total || 0);
-                    const outTotal = toNumber(data.out_total || 0);
-                    const netTotal = inTotal - outTotal;
-
-                    inEl.textContent = fmtINR(inTotal);
-                    outEl.textContent = fmtINR(outTotal);
-                    netEl.textContent = fmtINR(netTotal);
-
-                    const cats = Array.isArray(data.categories) ? data.categories : [];
-                    const groups = data.groups || {};
-
-                    if (!cats.length) {
-                        container.innerHTML = `<div class="muted">No records for the selected range.</div>`;
-                        return;
-                    }
-
-                    let html = '';
-                    cats.forEach((key, idx) => {
-                        const g = groups[key] || {
-                            label: key,
-                            received: [],
-                            paid: [],
-                            received_total: 0,
-                            paid_total: 0
-                        };
-                        html += sectionTemplate(key, g, idx === 0); // first expanded
-                    });
-
-                    container.innerHTML = html;
-                    bindToggles();
-                } catch (err) {
-                    console.error(err);
-                    container.innerHTML = `<div class="text-danger">Error loading data. Please try again.</div>`;
-                    inEl.textContent = outEl.textContent = netEl.textContent = fmtINR(0);
-                }
-            }
-
-            // Preset date ranges (front-end only)
-            function setRange(range) {
-                const today = new Date();
-                const toISO = d => d.toISOString().split('T')[0];
-
-                let start, end;
-
-                switch (range) {
-                    case 'today':
-                        start = end = toISO(today);
-                        break;
-                    case 'yesterday': {
-                        const y = new Date(today);
-                        y.setDate(y.getDate() - 1);
-                        start = end = toISO(y);
-                        break;
-                    }
-                    case 'this_week': {
-                        const d = new Date(today);
-                        const day = d.getDay(); // 0=Sun..6=Sat
-                        const diff = (day === 0 ? -6 : 1) - day; // Monday as start
-                        const startDate = new Date(d);
-                        startDate.setDate(d.getDate() + diff);
-                        const endDate = new Date(startDate);
-                        endDate.setDate(startDate.getDate() + 6);
-                        start = toISO(startDate);
-                        end = toISO(endDate);
-                        break;
-                    }
-                    case 'this_month': {
-                        const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                        const endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-                        start = toISO(startDate);
-                        end = toISO(endDate);
-                        break;
-                    }
-                    default:
-                        return;
-                }
-
-                fromEl.value = start;
-                toEl.value = end;
-                load();
-            }
-
-            // Restore from query string (refresh with ?from_date=... etc.)
-            (function hydrateFromQuery() {
-                const params = new URLSearchParams(location.search);
-                if (params.get('from_date')) fromEl.value = params.get('from_date');
-                if (params.get('to_date')) toEl.value = params.get('to_date');
-                if (params.get('category')) catEl.value = params.get('category');
-                updateRangeLabel();
-            })();
-
-            document.getElementById('searchBtn').addEventListener('click', load);
-
-            document.getElementById('resetBtn').addEventListener('click', () => {
-                fromEl.value = '';
-                toEl.value = '';
-                catEl.value = '';
-                syncQueryString();
-                updateRangeLabel();
-                load();
+            let html = '';
+            cats.forEach((key, idx) => {
+                const g = groups[key] || { label: key, received: [], paid: [], received_total: 0, paid_total: 0 };
+                html += sectionTemplate(key, g, idx === 0);
             });
 
-            // RANGE BUTTONS (Today / Yesterday / This Week / This Month)
-            document.querySelectorAll('.range-btn[data-range]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const range = btn.getAttribute('data-range');
-                    setRange(range);
-                });
-            });
+            container.innerHTML = html;
+            bindToggles();
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = `<div class="text-danger">Error loading data. Please try again.</div>`;
+            inEl.textContent = outEl.textContent = netEl.textContent = fmtINR(0);
+        }
+    }
 
-            // Initial load with current filters
-            load();
-        })();
-    </script>
+    // Build YYYY-MM-DD without toISOString (avoids timezone issues)
+    const pad = n => String(n).padStart(2, '0');
+    const asDateInput = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    // Preset date ranges
+    function setRange(range) {
+        const today = new Date();
+        let startDate, endDate;
+
+        switch (range) {
+            case 'today':
+                startDate = endDate = today;
+                break;
+            case 'yesterday':
+                startDate = new Date(today);
+                startDate.setDate(startDate.getDate() - 1);
+                endDate = new Date(startDate);
+                break;
+            case 'this_week': {
+                const d = new Date(today);
+                const day = d.getDay(); // 0=Sun..6=Sat
+                const diff = (day === 0 ? -6 : 1) - day; // Monday start
+                startDate = new Date(d);
+                startDate.setDate(d.getDate() + diff);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+                break;
+            }
+            case 'this_month':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate   = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                break;
+            default:
+                return;
+        }
+
+        fromEl.value = asDateInput(startDate);
+        toEl.value   = asDateInput(endDate);
+        load();
+    }
+
+    // Restore from query string if present
+    (function hydrateFromQuery() {
+        const params = new URLSearchParams(location.search);
+        if (params.get('from_date')) fromEl.value = params.get('from_date');
+        if (params.get('to_date'))   toEl.value   = params.get('to_date');
+        if (params.get('category'))  catEl.value  = params.get('category');
+        updateRangeLabel();
+    })();
+
+    document.getElementById('searchBtn').addEventListener('click', load);
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        fromEl.value = '';
+        toEl.value   = '';
+        catEl.value  = '';
+        syncQueryString();
+        updateRangeLabel();
+        load();
+    });
+
+    // 🔹 RANGE BUTTONS (Today / Yesterday / This Week / This Month)
+    document.querySelectorAll('[data-range]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const range = btn.getAttribute('data-range');
+            setRange(range);
+        });
+    });
+
+    // Initial load with whatever is in the inputs / URL
+    load();
+})();
+</script>
 @endsection
