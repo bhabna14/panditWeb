@@ -247,13 +247,6 @@
                         </div>
                     </div>
 
-                    {{-- Quick range chips --}}
-                    <div class="quick-row mt-3">
-                        <span class="quick-chip" data-range="today">Today</span>
-                        <span class="quick-chip" data-range="yesterday">Yesterday</span>
-                        <span class="quick-chip" data-range="week">This Week</span>
-                        <span class="quick-chip" data-range="month">This Month</span>
-                    </div>
                 </div>
             </div>
 
