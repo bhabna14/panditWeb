@@ -7,249 +7,469 @@
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <!-- Inter Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
         :root {
-            --bg-subtle: #F5F7FC;
-            --surface: #FFF;
-            --border: #E7EAF3;
-            --text: #0F172A;
-            --muted: #6B7280;
-            --indigo: #6F6BFE;
-            --indigo-600: #5F59F2;
-            --cyan: #0EC5D7;
-            --accent-red: #F24B5B;
-            --accent-red-2: #E34050;
-            --sh-sm: 0 2px 10px rgba(15, 23, 42, .06);
-            --sh-md: 0 12px 28px rgba(2, 6, 23, .10)
+            /* Page + surfaces */
+            --bg-subtle: #f4f5fb;
+            --surface: #ffffff;
+            --border: #e2e4f0;
+            --ring: #d4d7e8;
+
+            --text: #0f172a;
+            --muted: #6b7280;
+
+            /* Accent / gradient */
+            --indigo: #6366f1;
+            --indigo-600: #4f46e5;
+            --cyan: #06b6d4;
+
+            /* Chips / status colors */
+            --success-soft: #ecfdf3;
+            --success-fg: #166534;
+            --warning-soft: #fff7ed;
+            --warning-fg: #9a3412;
+            --danger-soft: #fef2f2;
+            --danger-fg: #b91c1c;
+            --info-soft: #eff6ff;
+            --info-fg: #1d4ed8;
+            --neutral-soft: #e5e7eb;
+            --neutral-fg: #111827;
+
+            /* Shadows */
+            --sh-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
+            --sh-md: 0 10px 28px rgba(15, 23, 42, 0.1);
         }
 
+        html,
         body {
-            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif !important;
+            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif !important;
             color: var(--text);
             background:
-                radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%),
-                radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%),
+                radial-gradient(900px 500px at 100% -10%, rgba(99, 102, 241, .14), transparent 60%),
+                radial-gradient(900px 500px at 0% 10%, rgba(6, 182, 212, .10), transparent 55%),
                 var(--bg-subtle);
         }
 
-        .stats-card {
-            border-radius: 16px;
-            padding: 18px 20px;
-            background: linear-gradient(180deg, #fff, #FAFBFF);
-            box-shadow: var(--sh-md);
-            border: 1px solid var(--border);
-            transition: transform .18s ease, box-shadow .18s ease
+        .container-page {
+            max-width: 1320px;
         }
 
-        .stats-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 18px 36px rgba(2, 6, 23, .12)
+        .mono {
+            font-variant-numeric: tabular-nums;
         }
 
-        .stats-card .card-title {
-            color: var(--muted);
+        /* ============================
+           Page header
+        ============================ */
+        .page-header-title {
             font-weight: 600;
-            letter-spacing: .2px
+            color: #020617;
         }
 
-        .stats-card .fw-bold {
-            font-weight: 800 !important
-        }
-
-        .filter-wrap {
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            background: var(--surface);
-            box-shadow: var(--sh-sm);
-            padding: 16px
-        }
-
-        .form-label {
+        .page-header-sub {
+            font-size: .85rem;
             color: var(--muted);
-            font-weight: 600
         }
 
-        .form-control,
-        .form-select {
-            border-radius: 12px;
-            border-color: var(--border)
+        /* ============================
+           KPI band (top summary)
+        ============================ */
+        .band {
+            background: linear-gradient(135deg, #e0f2fe, #eef2ff);
+            border-radius: 18px;
+            border: 1px solid #c7d2fe;
+            padding: .9rem 1.2rem;
+            box-shadow: var(--sh-md);
+            margin-bottom: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: .5rem;
         }
 
-        .select2-container .select2-selection--single {
-            height: 38px;
-            border-radius: 12px;
-            border: 1px solid var(--border)
+        .band-header {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            flex-wrap: wrap;
         }
 
-        .select2-selection__rendered {
-            line-height: 36px !important;
-            padding-left: 12px !important
+        .band-title {
+            font-weight: 600;
+            font-size: .98rem;
+            color: #0b2a5b;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
         }
 
-        .select2-selection__arrow {
-            height: 36px !important
+        .band-pill {
+            font-size: .74rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            padding: .12rem .6rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, .1);
+            color: #020617;
+        }
+
+        .band-sub {
+            font-size: .82rem;
+            color: var(--muted);
+        }
+
+        .band-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .45rem;
+        }
+
+        .band-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .35rem .75rem;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            font-size: .8rem;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .12);
+            background: #fff;
+        }
+
+        .band-chip span.icon {
+            font-size: 1rem;
+        }
+
+        .band-chip.total {
+            background: #ecfdf3;
+            color: var(--success-fg);
+            border-color: #bbf7d0;
+        }
+
+        .band-chip.today {
+            background: #fef9c3;
+            color: #92400e;
+            border-color: #fde68a;
+        }
+
+        .band-chip.vendors {
+            background: #eef2ff;
+            color: #3730a3;
+            border-color: #c7d2fe;
+        }
+
+        /* ============================
+           Toolbar (filters + quick ranges)
+        ============================ */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--surface);
+            border: 1px solid var(--ring);
+            border-radius: 18px;
+            padding: .9rem 1.1rem;
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.2fr);
+            gap: .75rem;
+            align-items: center;
+            box-shadow: var(--sh-md);
+            margin-bottom: 1.25rem;
+        }
+
+        .toolbar-left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            align-items: flex-end;
+        }
+
+        .toolbar-block {
+            display: flex;
+            flex-direction: column;
+            gap: .25rem;
+            min-width: 0;
+        }
+
+        .toolbar-label {
+            font-size: .78rem;
+            font-weight: 600;
+            color: var(--muted);
+        }
+
+        .toolbar-input,
+        .toolbar-select {
+            border-radius: 999px;
+            border: 1px solid var(--ring);
+            padding: .45rem .9rem;
+            font-size: .85rem;
+            font-weight: 500;
+        }
+
+        .toolbar-input:focus,
+        .toolbar-select:focus {
+            outline: none;
+            border-color: var(--indigo-600);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, .25);
+        }
+
+        .toolbar-right {
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+            align-items: flex-end;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem;
+            justify-content: flex-end;
         }
 
         .chip {
             display: inline-flex;
             align-items: center;
             gap: .35rem;
-            padding: .45rem .8rem;
+            padding: .4rem .8rem;
             border-radius: 999px;
             background: #fff;
-            border: 1px dashed var(--border);
+            border: 1px dashed var(--ring);
             color: #334155;
-            font-weight: 700;
-            font-size: .85rem;
+            font-weight: 600;
+            font-size: .8rem;
             cursor: pointer;
-            transition: all .15s ease
+            transition: all .15s ease;
         }
 
         .chip:hover {
             border-color: var(--indigo);
-            color: var(--indigo)
+            color: var(--indigo);
         }
 
         .chip.active {
-            background: linear-gradient(90deg, var(--indigo), var(--cyan));
+            background: linear-gradient(135deg, var(--indigo), var(--cyan));
             border-color: transparent;
-            color: #0e0e0e;
-            box-shadow: 0 6px 16px rgba(14, 197, 215, .25)
+            color: #0b1120;
+            box-shadow: 0 6px 16px rgba(6, 182, 212, .25);
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: .4rem;
+            justify-content: flex-end;
         }
 
         .btn-grad {
             border: none;
             color: #fff;
-            font-weight: 800;
-            letter-spacing: .2px;
-            background-image: linear-gradient(90deg, var(--indigo), var(--cyan));
+            font-weight: 700;
+            letter-spacing: .02em;
+            background-image: linear-gradient(120deg, var(--indigo-600), var(--cyan));
             border-radius: 999px;
-            box-shadow: 0 6px 18px rgba(14, 197, 215, .25)
+            padding: .42rem 1.05rem;
+            box-shadow: 0 8px 20px rgba(6, 182, 212, .32);
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .82rem;
+        }
+
+        .btn-grad i {
+            font-size: .85rem;
         }
 
         .btn-grad:hover {
-            filter: brightness(.96)
+            filter: brightness(.96);
         }
 
         .btn-reset {
-            color: #6b7280;
-            font-weight: 700
+            border-radius: 999px;
+            border: 1px dashed var(--ring);
+            padding: .42rem .9rem;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--muted);
+            background: #fff;
         }
 
         .btn-reset:hover {
-            color: #374151
+            color: #111827;
+            border-color: #9ca3af;
+        }
+
+        /* ============================
+           Vendor cards section
+        ============================ */
+        .section-title {
+            font-size: .9rem;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: .35rem;
+        }
+
+        .section-sub {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-bottom: .6rem;
         }
 
         .vendor-card {
             position: relative;
             background: #fff;
-            border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 16px;
+            border: 1px solid var(--border);
+            padding: 14px 15px;
             box-shadow: var(--sh-sm);
             height: 100%;
-            transition: transform .15s ease, box-shadow .15s ease;
-            cursor: pointer
+            cursor: pointer;
+            transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
         }
 
         .vendor-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 16px 32px rgba(2, 6, 23, .10)
+            box-shadow: 0 14px 28px rgba(15, 23, 42, .14);
+            border-color: #c7d2fe;
         }
 
         .vendor-title {
-            font-weight: 800;
-            margin-bottom: .4rem
+            font-weight: 700;
+            font-size: .92rem;
         }
 
         .vendor-sub {
+            font-size: .8rem;
             color: var(--muted);
-            font-size: .85rem
         }
 
         .vendor-amount {
-            font-size: 1.25rem;
-            font-weight: 900
+            font-size: 1.15rem;
+            font-weight: 800;
         }
 
         .vendor-chip {
             display: inline-block;
-            padding: .25rem .6rem;
+            padding: .2rem .55rem;
             border-radius: 999px;
-            background: #F3F6FF;
-            border: 1px dashed var(--border);
-            font-size: .75rem;
-            font-weight: 700;
-            color: #334155
+            background: #eef2ff;
+            border: 1px dashed #c7d2fe;
+            font-size: .72rem;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        /* ============================
+           Table block
+        ============================ */
+        .table-shell {
+            margin-top: 1rem;
+            background: var(--surface);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: var(--sh-md);
+            padding: .9rem 1rem 1.1rem;
+        }
+
+        .table-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: .4rem;
+        }
+
+        .table-title {
+            font-size: .95rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .table-sub {
+            font-size: .8rem;
+            color: var(--muted);
         }
 
         .export-table .dataTables_wrapper .dt-buttons .btn {
-            margin-left: .4rem
+            margin-left: .25rem;
+        }
+
+        .export-table .btn {
+            border-radius: 999px !important;
+            font-size: .75rem;
+            padding: .3rem .7rem;
         }
 
         .table {
-            border-color: var(--border) !important
+            border-color: var(--border) !important;
+            font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: .85rem;
         }
 
         .table thead th {
-            background: #F3F6FF !important;
+            background: #f3f4ff !important;
             border-bottom: 1px solid var(--border) !important;
-            color: #0F172A;
-            font-weight: 800
+            color: #020617 !important;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: .7rem;
+            letter-spacing: .06em;
         }
 
         .table-hover tbody tr:hover {
-            background: #F8FBFF
+            background: #f9fbff;
         }
 
+        /* Status badge */
         .status-badge {
-            padding: .38rem .68rem;
+            padding: .32rem .7rem;
             border-radius: 999px;
-            font-weight: 800;
+            font-weight: 700;
             font-size: .78rem;
             color: #fff;
             border: 1px solid transparent;
-            display: inline-block
+            display: inline-block;
         }
 
         .status-badge--success {
-            background: #0E9F6E;
-            border-color: #0A6B4B
+            background: #16a34a;
+            border-color: #15803d;
         }
 
         .status-badge--warning {
-            background: #D97706;
-            border-color: #B65F04
+            background: #d97706;
+            border-color: #b45309;
         }
 
         .status-badge--danger {
-            background: #DC2626;
-            border-color: #A51B1B
+            background: #dc2626;
+            border-color: #b91c1c;
         }
 
         .status-badge--info {
-            background: #1D4ED8;
-            border-color: #153AA3
+            background: #1d4ed8;
+            border-color: #1e40af;
         }
 
         .status-badge--neutral {
             background: #334155;
-            border-color: #1F2937
+            border-color: #1f2937;
         }
 
         .link-vendor {
-            font-weight: 700;
-            text-decoration: none
+            font-weight: 600;
+            color: #1d4ed8;
+            text-decoration: none;
         }
 
         .link-vendor:hover {
-            text-decoration: underline
+            text-decoration: underline;
         }
 
-        /* ===== Flower details mini-table inside cell (column-wise) ===== */
+        /* Flower details mini-table */
         .flower-detail-table {
             width: 100%;
             border-collapse: collapse;
@@ -257,16 +477,16 @@
         }
 
         .flower-detail-table thead th {
-            border-bottom: 1px solid #E5E7EB;
+            border-bottom: 1px solid #e5e7eb;
             padding: 2px 4px;
             font-weight: 700;
-            color: #4B5563;
-            background: #F9FAFB;
+            color: #4b5563;
+            background: #f9fafb;
         }
 
         .flower-detail-table tbody td {
             padding: 2px 4px;
-            border-bottom: 1px dashed #E5E7EB;
+            border-bottom: 1px dashed #e5e7eb;
             vertical-align: middle;
         }
 
@@ -276,6 +496,20 @@
 
         .flower-detail-table .text-end {
             text-align: right;
+        }
+
+        @media (max-width: 992px) {
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar-right {
+                align-items: flex-start;
+            }
+
+            .chip-row {
+                justify-content: flex-start;
+            }
         }
 
         @media (max-width: 767.98px) {
@@ -289,57 +523,82 @@
 @section('content')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    {{-- KPIs --}}
-    <div class="row mb-4 mt-4">
-        <div class="col-md-6">
-            <div class="stats-card">
-                <div class="card-body text-center py-2">
-                    <h6 class="card-title mb-1">Total Price</h6>
-                    <h4 class="fw-bold mb-0" id="totalPrice">₹{{ number_format((float) $total_price, 2) }}</h4>
+    <div class="container container-page py-4">
+
+        {{-- Page header --}}
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <div>
+                <h4 class="page-header-title mb-0">
+                    <i class="bi bi-flower3 me-1"></i> Flower Vendor Pickups
+                </h4>
+                <div class="page-header-sub">
+                    Analyze pickup amounts by vendor, date range, payment mode and status.
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="stats-card">
-                <div class="card-body text-center py-2">
-                    <h6 class="card-title mb-1">Today's Price</h6>
-                    <h4 class="fw-bold mb-0" id="todayPrice">₹{{ number_format((float) $today_price, 2) }}</h4>
+
+        {{-- KPI band --}}
+        <div class="band">
+            <div class="band-header">
+                <div class="band-title">
+                    <span>Pickup Revenue Overview</span>
+                    <span class="band-pill">Live</span>
                 </div>
             </div>
+            <div class="band-sub">
+                These values are calculated for the currently applied filters (date range, vendor, mode).
+            </div>
+            <div class="band-chips">
+                <span class="band-chip total">
+                    <span class="icon">💰</span>
+                    <span>Total Price</span>
+                    <span class="mono" id="totalPrice">₹{{ number_format((float) $total_price, 2) }}</span>
+                </span>
+                <span class="band-chip today">
+                    <span class="icon">📅</span>
+                    <span>Today's Price</span>
+                    <span class="mono" id="todayPrice">₹{{ number_format((float) $today_price, 2) }}</span>
+                </span>
+                <span class="band-chip vendors">
+                    <span class="icon">🏷️</span>
+                    <span>Vendors in view</span>
+                    <span class="mono">{{ isset($vendorSummariesAll) ? count($vendorSummariesAll) : 0 }}</span>
+                </span>
+            </div>
         </div>
-    </div>
 
-    {{-- Filters --}}
-    <div class="filter-wrap mb-3">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-3">
-                <label for="from_date" class="form-label">From Date</label>
-                <input type="date" id="from_date" class="form-control" value="{{ $fromDate }}">
-            </div>
-            <div class="col-md-3">
-                <label for="to_date" class="form-label">To Date</label>
-                <input type="date" id="to_date" class="form-control" value="{{ $toDate }}">
-            </div>
-            <div class="col-md-3">
-                <label for="vendor_id" class="form-label">Vendor Name</label>
-                <select id="vendor_id" class="form-select select2">
-                    <option value="">All Vendors</option>
-                    @foreach ($vendors as $vendor)
-                        <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label for="payment_mode" class="form-label">Mode of Payment</label>
-                <select id="payment_mode" class="form-select">
-                    <option value="">All</option>
-                    <option value="Cash">Cash</option>
-                    <option value="Upi">UPI</option>
-                </select>
+        {{-- Toolbar with filters + quick ranges --}}
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="toolbar-block">
+                    <span class="toolbar-label">From Date</span>
+                    <input type="date" id="from_date" class="toolbar-input" value="{{ $fromDate }}">
+                </div>
+                <div class="toolbar-block">
+                    <span class="toolbar-label">To Date</span>
+                    <input type="date" id="to_date" class="toolbar-input" value="{{ $toDate }}">
+                </div>
+                <div class="toolbar-block flex-grow-1">
+                    <span class="toolbar-label">Vendor Name</span>
+                    <select id="vendor_id" class="toolbar-select select2 w-100">
+                        <option value="">All Vendors</option>
+                        @foreach ($vendors as $vendor)
+                            <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="toolbar-block">
+                    <span class="toolbar-label">Mode of Payment</span>
+                    <select id="payment_mode" class="toolbar-select">
+                        <option value="">All</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Upi">UPI</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="col-12">
-                <div class="d-flex flex-wrap gap-2">
+            <div class="toolbar-right">
+                <div class="chip-row">
                     <button class="chip" data-range="today">Today</button>
                     <button class="chip" data-range="yesterday">Yesterday</button>
                     <button class="chip" data-range="week">This Week</button>
@@ -347,171 +606,188 @@
                     <button class="chip" data-range="last30">Last 30 Days</button>
                     <button class="chip" data-range="fy">FY (Apr–Mar)</button>
                 </div>
-            </div>
-
-            <div class="col-md-3 ms-auto d-flex align-items-end gap-2">
-                <button id="searchBtn" class="btn btn-grad w-100">
-                    <i class="fas fa-search me-1"></i> Search
-                </button>
-                <button id="resetBtn" class="btn btn-reset">Reset</button>
+                <div class="toolbar-actions">
+                    <button id="searchBtn" class="btn-grad">
+                        <i class="bi bi-funnel"></i> Search
+                    </button>
+                    <button id="resetBtn" class="btn btn-reset">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Reset
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    {{-- Vendor Cards --}}
-    <div class="mb-3">
-        <h6 class="mb-2" style="font-weight:800;">Vendors</h6>
-        <div class="row g-3" id="vendorCards">
-            @foreach ($vendorSummariesAll ?? [] as $v)
-                <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
-                    <div class="vendor-card" data-vendor-id="{{ $v['vendor_id'] }}">
-                        <div class="vendor-title">{{ $v['vendor_name'] }}</div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="vendor-sub">Total Amount</div>
-                                <div class="vendor-amount">₹{{ number_format($v['total_amount'], 2) }}</div>
-                            </div>
-                            <div class="text-end">
-                                <span class="vendor-chip">{{ $v['pickups_count'] }} pickups</span>
-                                @if (!empty($v['last_pickup']))
-                                    <div class="vendor-sub mt-1">
-                                        Last: {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}
-                                    </div>
-                                @endif
+        {{-- Vendor cards --}}
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <div>
+                    <div class="section-title">Vendors</div>
+                    <div class="section-sub">Click a vendor card to filter the report by that vendor.</div>
+                </div>
+            </div>
+
+            <div class="row g-3" id="vendorCards">
+                @foreach ($vendorSummariesAll ?? [] as $v)
+                    <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                        <div class="vendor-card" data-vendor-id="{{ $v['vendor_id'] }}">
+                            <div class="vendor-title">{{ $v['vendor_name'] }}</div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <div>
+                                    <div class="vendor-sub">Total Amount</div>
+                                    <div class="vendor-amount">₹{{ number_format($v['total_amount'], 2) }}</div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="vendor-chip">{{ $v['pickups_count'] }} pickups</span>
+                                    @if (!empty($v['last_pickup']))
+                                        <div class="vendor-sub mt-1">
+                                            Last: {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            @endforeach
-            @if (empty($vendorSummariesAll) || count($vendorSummariesAll) === 0)
-                <div class="col-12">
-                    <div class="vendor-card text-center">
-                        <span class="vendor-sub">No data available for current filters.</span>
-                    </div>
-                </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- Table --}}
-    <div class="table-responsive export-table">
-        <table id="file-datatable" class="table table-bordered table-hover align-middle w-100">
-            <thead>
-                <tr>
-                    <th>Pickup Date</th>
-                    <th>Vendor Name</th>
-                    <th>Flower Details</th>
-                    <th class="text-end">Total Price</th>
-                    <th>Status</th>
-                    <th>Paid By</th>
-                    <th>Rider Name</th>
-                </tr>
-            </thead>
-            <tbody id="reportTableBody">
-                @foreach ($reportData as $item)
-                    <tr>
-                        <td>{{ \Carbon\Carbon::parse($item->pickup_date)->format('d M Y') }}</td>
-                        <td>
-                            @php
-                                $vId = $item->vendor_id;
-                                $vName = $item->vendor->vendor_name ?? '—';
-                            @endphp
-                            @if ($vId && $vName !== '—')
-                                <a href="#" class="link-vendor" data-vendor-id="{{ $vId }}">
-                                    {{ $vName }}
-                                </a>
-                            @else
-                                —
-                            @endif
-                        </td>
-                        {{-- FLOWER DETAILS – COLUMN-WISE MINI TABLE --}}
-                        <td>
-                            @if ($item->flowerPickupItems->isNotEmpty())
-                                @php
-                                    $rows = $item->flowerPickupItems;
-                                @endphp
-                                <table class="flower-detail-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Item</th>
-                                            <th class="text-end">Qty</th>
-                                            <th class="text-end">Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($rows as $f)
-                                            @php
-                                                $qty = $f->quantity ?? 0;
-                                                $qtyFormatted = rtrim(rtrim(number_format((float) $qty, 2, '.', ''), '0'), '.');
-                                                $price = $f->price ?? 0;
-                                                $priceFormatted = rtrim(rtrim(number_format((float) $price, 2, '.', ''), '0'), '.');
-                                            @endphp
-                                            <tr>
-                                                <td>{{ $f->flower?->name ?? '—' }}</td>
-                                                <td class="text-end">{{ $qtyFormatted }} {{ $f->unit?->unit_name ?? '' }}</td>
-                                                <td class="text-end">₹{{ $priceFormatted }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            @else
-                                —
-                            @endif
-                        </td>
-                        <td class="text-end">
-                            ₹{{ number_format((float) $item->total_price, 2) }}
-                        </td>
-                        <td>
-                            @php
-                                $s = strtolower($item->status ?? '');
-                                $map = [
-                                    // success-ish
-                                    'success' => 'status-badge--success',
-                                    'completed' => 'status-badge--success',
-                                    'complete' => 'status-badge--success',
-                                    'active' => 'status-badge--success',
-                                    'ok' => 'status-badge--success',
-                                    'paid' => 'status-badge--success',
-                                    'delivered' => 'status-badge--success',
-                                    'resume' => 'status-badge--success',
-
-                                    // warning-ish
-                                    'pending' => 'status-badge--warning',
-                                    'processing' => 'status-badge--warning',
-                                    'in-progress' => 'status-badge--warning',
-                                    'on hold' => 'status-badge--warning',
-                                    'hold' => 'status-badge--warning',
-                                    'awaiting' => 'status-badge--warning',
-
-                                    // danger-ish
-                                    'cancel' => 'status-badge--danger',
-                                    'cancelled' => 'status-badge--danger',
-                                    'failed' => 'status-badge--danger',
-                                    'rejected' => 'status-badge--danger',
-                                    'expired' => 'status-badge--danger',
-                                    'unpaid' => 'status-badge--danger',
-                                ];
-
-                                if (isset($map[$s])) {
-                                    $badgeClass = $map[$s];
-                                } elseif (in_array($s, ['new', 'created', 'open'])) {
-                                    $badgeClass = 'status-badge--neutral';
-                                } else {
-                                    $badgeClass = 'status-badge--info';
-                                }
-                            @endphp
-
-                            <span class="status-badge {{ $badgeClass }}">
-                                {{ $item->status ? ucfirst($item->status) : '—' }}
-                            </span>
-                        </td>
-                        <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
-                        <td>{{ $item->rider->rider_name ?? '—' }}</td>
-                    </tr>
                 @endforeach
-            </tbody>
-        </table>
-    </div>
+
+                @if (empty($vendorSummariesAll) || count($vendorSummariesAll) === 0)
+                    <div class="col-12">
+                        <div class="vendor-card text-center">
+                            <span class="vendor-sub">No data available for current filters.</span>
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        {{-- Table block --}}
+        <div class="table-shell export-table">
+            <div class="table-header-row">
+                <div>
+                    <div class="table-title">Pickup Details</div>
+                    <div class="table-sub">Flower-wise breakdown per pickup, grouped by vendor & rider.</div>
+                </div>
+                {{-- DataTables buttons will render to the right via DOM config --}}
+            </div>
+
+            <div class="table-responsive">
+                <table id="file-datatable" class="table table-bordered table-hover align-middle w-100">
+                    <thead>
+                        <tr>
+                            <th>Pickup Date</th>
+                            <th>Vendor Name</th>
+                            <th>Flower Details</th>
+                            <th class="text-end">Total Price</th>
+                            <th>Status</th>
+                            <th>Paid By</th>
+                            <th>Rider Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        @foreach ($reportData as $item)
+                            <tr>
+                                <td>{{ \Carbon\Carbon::parse($item->pickup_date)->format('d M Y') }}</td>
+                                <td>
+                                    @php
+                                        $vId = $item->vendor_id;
+                                        $vName = $item->vendor->vendor_name ?? '—';
+                                    @endphp
+                                    @if ($vId && $vName !== '—')
+                                        <a href="#" class="link-vendor" data-vendor-id="{{ $vId }}">
+                                            {{ $vName }}
+                                        </a>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+
+                                {{-- Flower details mini-table --}}
+                                <td>
+                                    @if ($item->flowerPickupItems->isNotEmpty())
+                                        @php
+                                            $rows = $item->flowerPickupItems;
+                                        @endphp
+                                        <table class="flower-detail-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th class="text-end">Qty</th>
+                                                    <th class="text-end">Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($rows as $f)
+                                                    @php
+                                                        $qty = $f->quantity ?? 0;
+                                                        $qtyFormatted = rtrim(rtrim(number_format((float) $qty, 2, '.', ''), '0'), '.');
+                                                        $price = $f->price ?? 0;
+                                                        $priceFormatted = rtrim(rtrim(number_format((float) $price, 2, '.', ''), '0'), '.');
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $f->flower?->name ?? '—' }}</td>
+                                                        <td class="text-end">{{ $qtyFormatted }} {{ $f->unit?->unit_name ?? '' }}</td>
+                                                        <td class="text-end">₹{{ $priceFormatted }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+
+                                <td class="text-end">
+                                    ₹{{ number_format((float) $item->total_price, 2) }}
+                                </td>
+
+                                <td>
+                                    @php
+                                        $s = strtolower($item->status ?? '');
+                                        $map = [
+                                            'success' => 'status-badge--success',
+                                            'completed' => 'status-badge--success',
+                                            'complete' => 'status-badge--success',
+                                            'active' => 'status-badge--success',
+                                            'ok' => 'status-badge--success',
+                                            'paid' => 'status-badge--success',
+                                            'delivered' => 'status-badge--success',
+                                            'resume' => 'status-badge--success',
+                                            'pending' => 'status-badge--warning',
+                                            'processing' => 'status-badge--warning',
+                                            'in-progress' => 'status-badge--warning',
+                                            'on hold' => 'status-badge--warning',
+                                            'hold' => 'status-badge--warning',
+                                            'awaiting' => 'status-badge--warning',
+                                            'cancel' => 'status-badge--danger',
+                                            'cancelled' => 'status-badge--danger',
+                                            'failed' => 'status-badge--danger',
+                                            'rejected' => 'status-badge--danger',
+                                            'expired' => 'status-badge--danger',
+                                            'unpaid' => 'status-badge--danger',
+                                        ];
+
+                                        if (isset($map[$s])) {
+                                            $badgeClass = $map[$s];
+                                        } elseif (in_array($s, ['new', 'created', 'open'])) {
+                                            $badgeClass = 'status-badge--neutral';
+                                        } else {
+                                            $badgeClass = 'status-badge--info';
+                                        }
+                                    @endphp
+
+                                    <span class="status-badge {{ $badgeClass }}">
+                                        {{ $item->status ? ucfirst($item->status) : '—' }}
+                                    </span>
+                                </td>
+
+                                <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
+                                <td>{{ $item->rider->rider_name ?? '—' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div> {{-- /table-shell --}}
+    </div> {{-- /container --}}
 @endsection
 
 @section('scripts')
@@ -548,9 +824,7 @@
         }
 
         $(function() {
-            $('.select2').select2({
-                width: '100%'
-            });
+            $('.select2').select2({ width: '100%' });
 
             const $from = $('#from_date'),
                 $to = $('#to_date');
@@ -635,7 +909,7 @@
                         <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
                             <div class="vendor-card" data-vendor-id="${v.vendor_id || ''}">
                                 <div class="vendor-title">${name}</div>
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center mt-1">
                                     <div>
                                         <div class="vendor-sub">Total Amount</div>
                                         <div class="vendor-amount">${total}</div>
@@ -651,7 +925,7 @@
                 });
             }
 
-            // Click-to-filter on vendor cards
+            // click vendor card -> filter
             $(document).on('click', '.vendor-card', function() {
                 const id = $(this).data('vendor-id');
                 setVendorFilter(id);
@@ -674,14 +948,13 @@
                 ],
                 columnDefs: [
                     {
-                        // Total Price column right aligned (index 3)
                         targets: 3,
                         className: 'text-end'
                     }
                 ]
             });
 
-            // Click-to-filter on vendor name inside the table
+            // click vendor name link inside table -> filter
             $(document).on('click', 'a.link-vendor', function(e) {
                 e.preventDefault();
                 const id = $(this).data('vendor-id');
@@ -713,7 +986,6 @@
                         table.clear();
 
                         (response.data || []).forEach(item => {
-                            // Build flower details mini-table rows
                             const rowsHtml = (item.flower_pickup_items || []).map(i => {
                                 const name = (i.flower && i.flower.name) ? i.flower.name : '—';
                                 const unit = (i.unit && i.unit.unit_name) ? i.unit.unit_name : '';
@@ -768,8 +1040,8 @@
                                     ? moment(item.pickup_date).format('DD MMM YYYY')
                                     : (item.pickup_date || '—'),
                                 vendorCell,
-                                detailsTable, // Flower Details column
-                                money(item.total_price), // Total Price column
+                                detailsTable,
+                                money(item.total_price),
                                 `<span class="status-badge ${cls}">${capFirst(item.status || '—')}</span>`,
                                 capFirst(item.paid_by),
                                 (item.rider && item.rider.rider_name) ? item.rider.rider_name : '—'
@@ -778,11 +1050,10 @@
 
                         table.draw(false);
 
-                        // KPIs always reflect the filtered list
+                        // KPIs for filtered result
                         $('#totalPrice').text(money(response.total_price));
                         $('#todayPrice').text(money(response.today_price));
 
-                        // ALWAYS render vendor cards from ALL vendors (for current date/payment filter)
                         renderVendorCards(response.vendor_summaries_all || []);
                     },
                     error: function() {
