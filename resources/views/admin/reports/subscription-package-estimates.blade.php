@@ -256,7 +256,7 @@
 
         .btn-grad {
             border: none;
-            color: #fff;
+            color: #0a0909;
             font-weight: 700;
             letter-spacing: .02em;
             background-image: linear-gradient(120deg, var(--indigo-600), var(--cyan));
