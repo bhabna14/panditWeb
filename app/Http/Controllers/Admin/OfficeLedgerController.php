@@ -22,7 +22,7 @@ class OfficeLedgerController extends Controller
             ->toArray();
 
         // Make sure this matches your Blade path
-        return view('admin.office-ledger.category', [
+        return view('admin.office-ledger-transaction', [
             'categories' => $categories,
         ]);
     }
