@@ -739,7 +739,7 @@
                                     ],
                                     [
                                         'key'   => 'pause',
-                                        'title' => 'Pausing from',
+                                        'title' => 'Pausing from Tomorrow',
                                         'count' => count($pausingTomorrow),
                                         'icon'  => 'bi-pause-circle',
                                         'btn'   => 'btn-tab-pause',
