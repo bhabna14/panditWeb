@@ -13,7 +13,7 @@ class OfficeLedgerController extends Controller
     public function index()
     {
         // Make sure this matches your Blade path
-        return view('admin.office-ledger.category');
+        return view('admin.office-ledger-transaction');
     }
 
     /** API: category-grouped ledger the Blade expects */
