@@ -461,16 +461,16 @@
                     class="btn-chip {{ $mode === 'day' ? 'btn-chip--active' : '' }}">
                     Day
                 </a>
-                <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'month'])) }}"
+                {{-- <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'month'])) }}"
                     class="btn-chip {{ $mode === 'month' ? 'btn-chip--active' : '' }}">
                     Month
-                </a>
+                </a> --}}
 
                 {{-- Presets --}}
-                <button class="btn-chip {{ $preset === 'today' ? 'btn-chip--active' : '' }}" data-preset="today"
+                {{-- <button class="btn-chip {{ $preset === 'today' ? 'btn-chip--active' : '' }}" data-preset="today"
                     type="button">
                     Today
-                </button>
+                </button> --}}
                 <button class="btn-chip {{ $preset === 'yesterday' ? 'btn-chip--active' : '' }}" data-preset="yesterday"
                     type="button">
                     Yesterday
