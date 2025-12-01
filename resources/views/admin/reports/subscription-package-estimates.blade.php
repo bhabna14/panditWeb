@@ -464,10 +464,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <div class="toolbar-subtext">
-                        Only Subscription products appear here. Calculations use bundle → per-unit for estimates;
-                        the Day “Price List” table shows bundle prices per subscription.
-                    </div>
+                   
                 </div>
 
                 <div class="toolbar-block d-flex align-items-end justify-content-end">
