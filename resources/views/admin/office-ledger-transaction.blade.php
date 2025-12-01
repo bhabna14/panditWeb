@@ -501,10 +501,6 @@
             </div>
 
             <div class="toolbar-right">
-                <button class="btn-chip" type="button" data-range="today">Today</button>
-                <button class="btn-chip" type="button" data-range="yesterday">Yesterday</button>
-                <button class="btn-chip" type="button" data-range="this_week">This Week</button>
-                <button class="btn-chip" type="button" data-range="this_month">This Month</button>
                 <button class="btn-chip btn-apply" id="searchBtn" type="button">Apply</button>
                 <button class="btn-chip" id="resetBtn" type="button">Reset</button>
             </div>
