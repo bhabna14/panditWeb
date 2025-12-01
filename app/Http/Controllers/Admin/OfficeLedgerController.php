@@ -10,30 +10,18 @@ use Illuminate\Http\Request;
 class OfficeLedgerController extends Controller
 {
     /** Render the category-first ledger view */
-    public function index(Request $request)
+    public function index()
     {
-        // Distinct categories for the dropdown
-        $categories = OfficeLedger::query()
-            ->active()
-            ->whereNotNull('category')
-            ->distinct()
-            ->orderBy('category')
-            ->pluck('category')
-            ->toArray();
-
-        // Make sure this matches your Blade path
-        return view('admin.office-ledger-transaction', [
-            'categories' => $categories,
-        ]);
+        return view('admin.office-ledger-transaction');
     }
 
     /** API: category-grouped ledger the Blade expects */
     public function filter(Request $request)
     {
         $request->validate([
-            'from_date' => ['nullable', 'date'],
-            'to_date'   => ['nullable', 'date', 'after_or_equal:from_date'],
-            'category'  => ['nullable', 'string', 'max:255'],
+            'from_date' => ['nullable','date'],
+            'to_date'   => ['nullable','date','after_or_equal:from_date'],
+            'category'  => ['nullable','string','max:255'],
         ]);
 
         $from = $request->query('from_date');
@@ -43,34 +31,19 @@ class OfficeLedgerController extends Controller
         // Base query: ACTIVE ledger rows, optional filters
         $q = OfficeLedger::query()
             ->active()
-            // ✅ FIX: always use whereDate so the full day is covered
-            ->when($from && $to, function ($qq) use ($from, $to) {
-                $qq->whereDate('entry_date', '>=', $from)
-                   ->whereDate('entry_date', '<=', $to);
-            })
+            ->when($from && $to,  fn($qq) => $qq->whereBetween('entry_date', [$from, $to]))
             ->when($from && !$to, fn($qq) => $qq->whereDate('entry_date', '>=', $from))
             ->when(!$from && $to, fn($qq) => $qq->whereDate('entry_date', '<=', $to))
             ->when($cat,         fn($qq) => $qq->where('category', $cat));
 
-        $rows = $q->orderBy('entry_date', 'desc')
-            ->orderBy('id', 'desc')
-            ->get([
-                'id',
-                'entry_date',
-                'category',
-                'direction',
-                'amount',
-                'mode_of_payment',
-                'paid_by',
-                'received_by',
-                'description',
-                'source_type',
-                'source_id',
-            ]);
+        $rows = $q->orderBy('entry_date', 'desc')->orderBy('id','desc')->get([
+            'id','entry_date','category','direction','amount','mode_of_payment',
+            'paid_by','received_by','description','source_type','source_id'
+        ]);
 
         // Totals (compute once on filtered set)
-        $inTotal  = (float) $rows->where('direction', 'in')->sum('amount');
-        $outTotal = (float) $rows->where('direction', 'out')->sum('amount');
+        $inTotal  = (float) $rows->where('direction','in')->sum('amount');
+        $outTotal = (float) $rows->where('direction','out')->sum('amount');
 
         // If absolutely no rows, return a minimal payload (Blade shows message).
         if ($rows->isEmpty()) {
@@ -85,7 +58,7 @@ class OfficeLedgerController extends Controller
             ]);
         }
 
-        // Normalize values
+        // Normalize values + collect categories
         $rows = $rows->map(function ($r) {
             return [
                 'id'          => $r->id,
@@ -119,7 +92,6 @@ class OfficeLedgerController extends Controller
 
         foreach ($rows as $r) {
             $ck = $r['category'];
-
             if ($r['direction'] === 'in') {
                 $groups[$ck]['received'][] = [
                     'id'          => $r['id'],
@@ -148,24 +120,16 @@ class OfficeLedgerController extends Controller
 
         // Sort inner arrays and finalize totals
         foreach ($groups as $ck => $g) {
-            usort(
-                $groups[$ck]['received'],
-                fn($a, $b) => ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id'])
-            );
-            usort(
-                $groups[$ck]['paid'],
-                fn($a, $b) => ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id'])
-            );
-
+            usort($groups[$ck]['received'], fn($a,$b) => ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id']));
+            usort($groups[$ck]['paid'],     fn($a,$b) => ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id']));
             $groups[$ck]['received_total'] = round($groups[$ck]['received_total'], 2);
             $groups[$ck]['paid_total']     = round($groups[$ck]['paid_total'], 2);
             $groups[$ck]['net']            = round($groups[$ck]['received_total'] - $groups[$ck]['paid_total'], 2);
         }
 
-        // Optional flat ledger (for export, if needed later)
+        // Optional flat ledger (for export)
         $flat = [];
-        $sl   = 1;
-
+        $sl = 1;
         foreach ($categories as $ck) {
             foreach ($groups[$ck]['received'] as $r) {
                 $flat[] = [
@@ -196,8 +160,7 @@ class OfficeLedgerController extends Controller
                 ];
             }
         }
-
-        usort($flat, fn($a, $b) => ($b['date'] <=> $a['date']) ?: ($b['sl'] <=> $a['sl']));
+        usort($flat, fn($a,$b) => ($b['date'] <=> $a['date']) ?: ($b['sl'] <=> $a['sl']));
 
         return response()->json([
             'success'    => true,
