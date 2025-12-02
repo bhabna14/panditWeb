@@ -472,7 +472,6 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <div>
                 <h4 class="mb-0" style="font-weight:600;">Subscription Revenue — Report</h4>
-                <div class="small text-muted">Track renew vs new subscriptions over time</div>
             </div>
             <a href="{{ url()->previous() }}" class="btn btn-outline-secondary btn-sm" style="border-radius:999px;">
                 ← Back
@@ -552,13 +551,7 @@
 
         {{-- Band summary (range label + short info) --}}
         <div class="band mb-3">
-            <h3>
-                <span id="bandRangeLabel">Today</span>
-                <span class="label">Subscription Summary</span>
-            </h3>
-            <div class="band-sub">
-                Revenue shown below is filtered by the selected date range and split into renew vs new subscriptions.
-            </div>
+          
             <div class="chips-row">
                 <span class="chip-pill green">
                     <span class="icon">💰</span>
@@ -583,9 +576,7 @@
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Subscription Lists — Detailed</div>
-                    <div class="workbook-sub">
-                        Switch between renew and new subscriptions. Data is server-side loaded & filter aware.
-                    </div>
+                  
                 </div>
                 <div class="d-flex gap-2">
                     <button id="refreshBtn" class="btn btn-outline-secondary btn-sm" style="border-radius:999px;">
