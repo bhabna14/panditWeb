@@ -299,7 +299,7 @@
             border-top-right-radius: 18px;
         }
 
-        /* === CUSTOM HEADER COLORS (YOUR REQUIREMENT) ================= */
+        /* === CUSTOM HEADER COLORS ================= */
 
         /* Date header cell */
         .colorful-metrics-table thead th.col-date {
@@ -319,9 +319,15 @@
             color: #f9fafb !important;
         }
 
-        /* Purchase header cell (NEW) */
+        /* Purchase header cell */
         .colorful-metrics-table thead th.purchase-head {
             background: #16a34a !important;
+            color: #f9fafb !important;
+        }
+
+        /* Vendor Fund header cell */
+        .colorful-metrics-table thead th.vendorfund-head {
+            background: #0284c7 !important;
             color: #f9fafb !important;
         }
 
@@ -367,7 +373,7 @@
         /* 1: Date */
         .colorful-metrics-table tbody td:nth-child(1) {
             font-weight: 600;
-            color:#7987A1;
+            color: #7987A1;
         }
 
         /* 2: Day */
@@ -382,43 +388,49 @@
             color: #16a34a;
         }
 
-        /* 4: Purch – green (UPDATED) */
+        /* 4: Purch – green */
         .colorful-metrics-table tbody td:nth-child(4) {
             font-weight: 700;
             color: #16a34a;
         }
 
-        /* 5–8: Renew / New / Pause / Customize – soft pills */
-        .colorful-metrics-table tbody td:nth-child(5),
+        /* 5: Vendor Fund – blue */
+        .colorful-metrics-table tbody td:nth-child(5) {
+            font-weight: 700;
+            color: #0369a1;
+        }
+
+        /* 6–9: Renew / New / Pause / Customize – soft pills */
         .colorful-metrics-table tbody td:nth-child(6),
         .colorful-metrics-table tbody td:nth-child(7),
-        .colorful-metrics-table tbody td:nth-child(8) {
+        .colorful-metrics-table tbody td:nth-child(8),
+        .colorful-metrics-table tbody td:nth-child(9) {
             text-align: center;
             font-weight: 600;
         }
 
-        .colorful-metrics-table tbody td:nth-child(5) {
+        .colorful-metrics-table tbody td:nth-child(6) {
             background: rgba(34, 197, 94, 0.16) !important;
             color: #15803d;
         }
 
-        .colorful-metrics-table tbody td:nth-child(6) {
+        .colorful-metrics-table tbody td:nth-child(7) {
             background: rgba(56, 189, 248, 0.16) !important;
             color: #0369a1;
         }
 
-        .colorful-metrics-table tbody td:nth-child(7) {
+        .colorful-metrics-table tbody td:nth-child(8) {
             background: rgba(245, 158, 11, 0.18) !important;
             color: #b45309;
         }
 
-        .colorful-metrics-table tbody td:nth-child(8) {
+        .colorful-metrics-table tbody td:nth-child(9) {
             background: rgba(244, 114, 182, 0.18) !important;
             color: #be185d;
         }
 
-        /* vendors text (after col 8) */
-        .colorful-metrics-table tbody td:nth-child(n+9) {
+        /* vendors text (after col 9) */
+        .colorful-metrics-table tbody td:nth-child(n+10) {
             font-weight: 600;
             color: #045e06;
         }
@@ -569,7 +581,7 @@
                                                     <tr>
                                                         <th rowspan="2" class="col-date">Date</th>
                                                         <th rowspan="2" class="col-dow">Day</th>
-                                                        <th colspan="2" class="col-finance">Finance</th>
+                                                        <th colspan="3" class="col-finance">Finance</th>
                                                         <th colspan="4">Customer</th>
                                                         <th colspan="{{ $weekVendorCount }}"
                                                             class="col-vendor">Vendor Report
@@ -581,6 +593,7 @@
                                                     <tr>
                                                         <th class="col-finance income-head">Incm</th>
                                                         <th class="col-finance purchase-head">Purch</th>
+                                                        <th class="col-finance vendorfund-head">VendF</th>
 
                                                         <th>Renew</th>
                                                         <th>New</th>
@@ -619,6 +632,9 @@
                                                                 ₹{{ number_format($d['finance']['income']) }}</td>
                                                             <td class="money col-finance">
                                                                 ₹{{ number_format($d['finance']['expenditure']) }}</td>
+                                                            <td class="money col-finance">
+                                                                ₹{{ number_format($d['finance']['vendor_fund'] ?? 0) }}
+                                                            </td>
 
                                                             <td><span
                                                                     class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
@@ -660,6 +676,8 @@
                                                         </td>
                                                         <td class="money col-finance">
                                                             ₹{{ number_format($w['totals']['expenditure']) }}</td>
+                                                        <td class="money col-finance">
+                                                            ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}</td>
 
                                                         <td>{{ $w['totals']['renew'] }}</td>
                                                         <td>{{ $w['totals']['new'] }}</td>
@@ -713,7 +731,7 @@
                                             Vendor Fund ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</span>
                                         <span class="chip balance">
                                             Avail Bal ₹{{ number_format($monthTotals['available_balance'] ?? 0) }}</span>
-                                        <span class="chip deliv">Deliveries {{ $monthTotals['total_delivery'] }}</span>
+                                        {{-- <span class="chip deliv">Deliveries {{ $monthTotals['total_delivery'] }}</span> --}}
                                     </div>
                                 </button>
                             </h2>
@@ -727,7 +745,7 @@
                                                 <tr>
                                                     <th rowspan="2" class="col-date">Date</th>
                                                     <th rowspan="2" class="col-dow">Day</th>
-                                                    <th colspan="2" class="col-finance">Finance</th>
+                                                    <th colspan="3" class="col-finance">Finance</th>
                                                     <th colspan="4">Customer</th>
                                                     <th colspan="{{ max(count($vendorColumns), 1) }}"
                                                         class="col-vendor">Vendor Report</th>
@@ -738,6 +756,7 @@
                                                 <tr>
                                                     <th class="col-finance income-head">Incm</th>
                                                     <th class="col-finance purchase-head">Purch</th>
+                                                    <th class="col-finance vendorfund-head">VendF</th>
                                                     <th>Renew</th>
                                                     <th>New</th>
                                                     <th>Pause</th>
@@ -775,6 +794,8 @@
                                                         </td>
                                                         <td class="money col-finance">
                                                             ₹{{ number_format($d['finance']['expenditure']) }}</td>
+                                                        <td class="money col-finance">
+                                                            ₹{{ number_format($d['finance']['vendor_fund'] ?? 0) }}</td>
 
                                                         <td><span
                                                                 class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
@@ -811,6 +832,9 @@
                                                         ₹{{ number_format($monthTotals['income']) }}</td>
                                                     <td class="money col-finance">
                                                         ₹{{ number_format($monthTotals['expenditure']) }}
+                                                    </td>
+                                                    <td class="money col-finance">
+                                                        ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}
                                                     </td>
 
                                                     <td>{{ $monthTotals['renew'] }}</td>
