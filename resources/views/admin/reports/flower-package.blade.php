@@ -317,6 +317,23 @@
             white-space: nowrap;
         }
 
+         .excel tfoot th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: linear-gradient(135deg, var(--table-head-bg), var(--table-head-bg-soft));
+            color: var(--table-head-text);
+            text-transform: uppercase;
+            font-size: .72rem;
+            letter-spacing: .08em;
+            padding: .6rem .7rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 0;
+            border-right: 1px solid rgba(55, 65, 81, 0.7);
+            white-space: nowrap;
+        }
+
         .excel thead th:first-child {
             border-top-left-radius: 14px;
         }
@@ -594,13 +611,13 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="2" class="col-text">
+                                <th colspan="2" class="col-text">
                                     Subtotal ({{ $rangeDaysWithData }} active
                                     day{{ $rangeDaysWithData == 1 ? '' : 's' }})
-                                </td>
-                                <td class="col-money">
+                                </th>
+                                <th class="col-money">
                                     <span class="currency">₹</span>{{ number_format($rangeTotal, 2) }}
-                                </td>
+                                </th>
                             </tr>
                         </tfoot>
                     </table>
