@@ -461,16 +461,7 @@
                     class="btn-chip {{ $mode === 'day' ? 'btn-chip--active' : '' }}">
                     Day
                 </a>
-                {{-- <a href="{{ route('admin.flowerPackage', array_merge(request()->query(), ['mode' => 'month'])) }}"
-                    class="btn-chip {{ $mode === 'month' ? 'btn-chip--active' : '' }}">
-                    Month
-                </a> --}}
-
-                {{-- Presets --}}
-                {{-- <button class="btn-chip {{ $preset === 'today' ? 'btn-chip--active' : '' }}" data-preset="today"
-                    type="button">
-                    Today
-                </button> --}}
+               
                 <button class="btn-chip {{ $preset === 'yesterday' ? 'btn-chip--active' : '' }}" data-preset="yesterday"
                     type="button">
                     Yesterday
@@ -523,13 +514,7 @@
             @endphp
 
             <div class="band">
-                <h3>
-                    {{ \Carbon\Carbon::parse($start)->format('M d') }} – {{ \Carbon\Carbon::parse($end)->format('M d, Y') }}
-                    <span class="label">
-                        Flower Package Estimate
-                        {{ $mode === 'day' ? '(Day View)' : '(Month View)' }}
-                    </span>
-                </h3>
+              
                 <div class="chips">
                     @if ($mode === 'day')
                         <span class="chip green">
@@ -573,7 +558,6 @@
             <div class="workbook">
                 <div class="workbook-head">
                     <div>
-                        <div class="workbook-title">Estimate of Flower Cost — By Day</div>
                         <div class="workbook-sub">
                             Range: {{ \Carbon\Carbon::parse($start)->format('d M Y') }} —
                             {{ \Carbon\Carbon::parse($end)->format('d M Y') }} |
@@ -640,9 +624,7 @@
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Detail Flower Estimate</div>
-                    <div class="workbook-sub">
-                        {{ $mode === 'day' ? 'Per-day package breakdown with items' : 'Monthly aggregated package and item totals' }}
-                    </div>
+                   
                 </div>
             </div>
             <div class="excel-wrap">
