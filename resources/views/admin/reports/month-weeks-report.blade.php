@@ -567,6 +567,7 @@
                                             <span class="chip deliv">
                                                 Deliveries {{ $w['totals']['total_delivery'] }}
                                             </span> --}}
+                                            
                                         </div>
                                     </button>
                                 </h2>
