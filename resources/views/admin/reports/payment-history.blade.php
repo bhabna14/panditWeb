@@ -508,9 +508,7 @@
                 <h4 class="page-header-title mb-0">
                     <i class="bi bi-cash-coin me-1"></i> Payments — Subscription View
                 </h4>
-                <div class="page-header-sub">
-                    Review subscription payments by user, type, method and status for a chosen date range.
-                </div>
+              
             </div>
         </div>
 
