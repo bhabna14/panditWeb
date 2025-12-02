@@ -303,7 +303,7 @@
 
         /* Date header cell */
         .colorful-metrics-table thead th.col-date {
-            background: rgba(56, 189, 248, 0.9) !important;
+            background: rgba(56, 189, 248, 0.5) !important;
             color: #0f172a !important;
         }
 
