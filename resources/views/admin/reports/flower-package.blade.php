@@ -317,9 +317,9 @@
             white-space: nowrap;
         }
 
-         .excel tfoot th {
+        .excel tfoot th {
             position: sticky;
-            top: 0;
+            bottom: 0;
             z-index: 1;
             background: linear-gradient(135deg, var(--table-head-bg), var(--table-head-bg-soft));
             color: var(--table-head-text);
@@ -329,7 +329,7 @@
             padding: .6rem .7rem;
             text-align: left;
             font-weight: 600;
-            border-bottom: 0;
+            border-top: 1px solid rgba(55, 65, 81, 0.7);
             border-right: 1px solid rgba(55, 65, 81, 0.7);
             white-space: nowrap;
         }
@@ -439,15 +439,15 @@
             $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
 
             $catBase = ['weight' => 0.0, 'volume' => 0.0, 'count' => 0.0];
-            $distinctItems = [];
+            $distinctItemsTomorrow = [];
             foreach ($tProducts as $row) {
                 foreach ($row['items'] ?? [] as $it) {
                     $cat = $it['category'] ?? 'count';
                     $catBase[$cat] += (float) ($it['total_qty_base'] ?? 0);
-                    $distinctItems[strtolower(trim($it['item_name']))] = true;
+                    $distinctItemsTomorrow[strtolower(trim($it['item_name']))] = true;
                 }
             }
-            $tomorrowDistinctItemCount = count($distinctItems);
+            $tomorrowDistinctItemCount = count($distinctItemsTomorrow);
 
             $fmtCat = function (float $qtyBase, string $cat): array {
                 if ($cat === 'weight') {
@@ -461,6 +461,10 @@
             [$wQty, $wUnit] = $fmtCat($catBase['weight'], 'weight');
             [$vQty, $vUnit] = $fmtCat($catBase['volume'], 'volume');
             [$cQty, $cUnit] = $fmtCat($catBase['count'], 'count');
+
+            // NEW: safe defaults for range item data
+            $rangeItems = $rangeItems ?? [];
+            $rangeItemCount = $rangeItemCount ?? count($rangeItems);
         @endphp
 
         {{-- ========= FILTER TOOLBAR (report-style) ========= --}}
@@ -478,7 +482,7 @@
                     class="btn-chip {{ $mode === 'day' ? 'btn-chip--active' : '' }}">
                     Day
                 </a>
-               
+
                 <button class="btn-chip {{ $preset === 'yesterday' ? 'btn-chip--active' : '' }}" data-preset="yesterday"
                     type="button">
                     Yesterday
@@ -531,7 +535,6 @@
             @endphp
 
             <div class="band">
-              
                 <div class="chips">
                     @if ($mode === 'day')
                         <span class="chip green">
@@ -549,6 +552,12 @@
                             <span>Active Days</span>
                             {{ number_format($rangeDaysSafe) }}
                         </span>
+                        {{-- NEW: Distinct items in current filter --}}
+                        <span class="chip blue">
+                            <span class="icon">🌼</span>
+                            <span>Distinct Items</span>
+                            {{ number_format($rangeItemCount) }}
+                        </span>
                     @else
                         <span class="chip green">
                             <span class="icon">💰</span>
@@ -560,12 +569,91 @@
                             <span>Months</span>
                             {{ number_format($monthCount) }}
                         </span>
-                            <span class="chip blue">
-                                <span class="icon">📊</span>
-                                <span>Avg / Month</span>
-                                ₹{{ number_format($monthAvg, 2) }}
-                            </span>
+                        <span class="chip blue">
+                            <span class="icon">📊</span>
+                            <span>Avg / Month</span>
+                            ₹{{ number_format($monthAvg, 2) }}
+                        </span>
+                        {{-- Still show distinct items across filter range --}}
+                        <span class="chip blue">
+                            <span class="icon">🌼</span>
+                            <span>Distinct Items</span>
+                            {{ number_format($rangeItemCount) }}
+                        </span>
                     @endif
+                </div>
+            </div>
+        @endif
+
+        {{-- ========= NEW: FILTER-RANGE ITEM SUMMARY TABLE ========= --}}
+        @if (!empty($rangeItems))
+            <div class="workbook">
+                <div class="workbook-head">
+                    <div>
+                        <div class="workbook-title">Item-wise Summary (Filter Range)</div>
+                        <div class="workbook-sub">
+                            Aggregated for
+                            {{ \Carbon\Carbon::parse($start)->format('d M Y') }}
+                            —
+                            {{ \Carbon\Carbon::parse($end)->format('d M Y') }}
+                            • {{ $rangeItemCount }} distinct item{{ $rangeItemCount == 1 ? '' : 's' }}
+                        </div>
+                    </div>
+                    <div class="workbook-tools">
+                        <span class="badge bg-success-subtle text-success">
+                            Total Value:
+                            <span class="money">₹{{ number_format($rangeTotal ?? 0, 2) }}</span>
+                        </span>
+                    </div>
+                </div>
+                <div class="excel-wrap">
+                    <table class="excel">
+                        <thead>
+                            <tr>
+                                <th class="col-index">#</th>
+                                <th class="col-text">Item</th>
+                                <th class="col-money">Total Qty (Filter Range)</th>
+                                <th class="col-money">Total Price (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $i = 0; @endphp
+                            @foreach ($rangeItems as $it)
+                                @php
+                                    $i++;
+                                @endphp
+                                <tr>
+                                    <td class="col-index">{{ $i }}</td>
+                                    <td class="col-text">
+                                        {{ $it['item_name'] }}
+                                    </td>
+                                    <td class="col-money">
+                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                        {{ $it['total_unit_disp'] }}
+                                    </td>
+                                    <td class="col-money">
+                                        <span class="currency">₹</span>
+                                        {{ number_format($it['total_price'], 2) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2" class="col-text">
+                                    Total ({{ $rangeItemCount }} item{{ $rangeItemCount == 1 ? '' : 's' }})
+                                </th>
+                                <th class="col-money">
+                                    {{-- qty total would mix units, so we keep it blank / “—” --}}
+                                    —
+                                </th>
+                                <th class="col-money">
+                                    <span class="currency">₹</span>
+                                    {{ number_format($rangeTotal ?? 0, 2) }}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         @endif
@@ -641,7 +729,6 @@
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Detail Flower Estimate</div>
-                   
                 </div>
             </div>
             <div class="excel-wrap">
@@ -702,7 +789,8 @@
                                                                         class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
                                                                         {{-- LEFT: Package info --}}
                                                                         <div class="d-flex align-items-start gap-3">
-                                                                          <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0"
+                                                                            <div
+                                                                                class="d-flex align-items-center justify-content-center rounded-circle bg-primary-subtle text-primary flex-shrink-0"
                                                                                 style="width: 42px; height: 42px;">
                                                                                 <i class="bi bi-box-seam-fill"></i>
                                                                             </div>

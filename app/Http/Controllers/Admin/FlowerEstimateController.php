@@ -115,269 +115,312 @@ class FlowerEstimateController extends Controller
         ]);
     }
     
-    public function flowerPackage(Request $request)
-    {
-        // ---- Filters ---------------------------------------------------------
-        $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
-        $mode   = $request->string('mode')->toString() ?: 'day'; // day|month
+   public function flowerPackage(Request $request)
+{
+    // ---- Filters ---------------------------------------------------------
+    $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
+    $mode   = $request->string('mode')->toString() ?: 'day'; // day|month
 
-        [$start, $end] = $this->resolveRange($request, $preset);
+    [$start, $end] = $this->resolveRange($request, $preset);
 
-        if ($mode === 'month' && !$request->filled('start_date') && !$request->filled('end_date') && !$preset) {
-            $today = Carbon::today();
-            $start = $today->copy()->startOfMonth();
-            $end   = $today->copy()->endOfMonth();
-        }
+    if ($mode === 'month' && !$request->filled('start_date') && !$request->filled('end_date') && !$preset) {
+        $today = Carbon::today();
+        $start = $today->copy()->startOfMonth();
+        $end   = $today->copy()->endOfMonth();
+    }
 
-        if ($end->lt($start)) {
-            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
-        }
+    if ($end->lt($start)) {
+        [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+    }
 
-        // ---- FlowerDetails live price index (name → {unit, price}) ----------
-        $fdIndex = FlowerDetails::query()
-            ->select(['name', 'unit', 'price'])
-            ->where('status', 'active')
-            ->get()
-            ->keyBy(function ($fd) {
-                return strtolower(trim((string) $fd->name));
-            });
+    // ---- FlowerDetails live price index (name → {unit, price}) ----------
+    $fdIndex = FlowerDetails::query()
+        ->select(['name', 'unit', 'price'])
+        ->where('status', 'active')
+        ->get()
+        ->keyBy(function ($fd) {
+            return strtolower(trim((string) $fd->name));
+        });
 
-        // ---- Tomorrow (for bottom disclosure block + stats) ------------------
-        $tomorrow = Carbon::tomorrow()->startOfDay();
+    // ---- Tomorrow (for bottom disclosure block + stats) ------------------
+    $tomorrow = Carbon::tomorrow()->startOfDay();
 
-        $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
-        $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow, $fdIndex);
+    $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
+    $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow, $fdIndex);
 
-        [$requestsProductBlock, $requestsGrand] = $this->buildRequestsProductBlock($tomorrow, $fdIndex);
+    [$requestsProductBlock, $requestsGrand] = $this->buildRequestsProductBlock($tomorrow, $fdIndex);
 
-        if (!empty($requestsProductBlock['items'])) {
-            $tomorrowEstimate['products']['__requests__'] = $requestsProductBlock;
-            $tomorrowEstimate['grand_total_amount'] = round(
-                (float) ($tomorrowEstimate['grand_total_amount'] ?? 0) + (float) $requestsGrand,
-                2
-            );
-            $tomorrowEstimate['totals_by_item'] =
-                $this->recomputeTotalsByItemFromProducts($tomorrowEstimate['products']);
-        }
+    if (!empty($requestsProductBlock['items'])) {
+        $tomorrowEstimate['products']['__requests__'] = $requestsProductBlock;
+        $tomorrowEstimate['grand_total_amount'] = round(
+            (float) ($tomorrowEstimate['grand_total_amount'] ?? 0) + (float) $requestsGrand,
+            2
+        );
+        $tomorrowEstimate['totals_by_item'] =
+            $this->recomputeTotalsByItemFromProducts($tomorrowEstimate['products']);
+    }
 
-        // ---- Build daily numbers --------------------------------------------
-        $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
-        $dailyEstimates = [];
+    // ---- Build daily numbers --------------------------------------------
+    $period         = CarbonPeriod::create($start->toDateString(), $end->toDateString());
+    $dailyEstimates = [];
 
-        $excludeStats = ['expired', 'dead'];
+    $excludeStats   = ['expired', 'dead'];
 
-        foreach ($period as $day) {
-            $subs = Subscription::with([
-                    // UPDATED: also load per_day_price (and price if needed)
-                    'flowerProducts:id,product_id,name,per_day_price,price',
-                    'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
-                ])
-                ->whereNotIn('status', $excludeStats)
-                ->activeOn($day)
-                ->get();
+    // NEW: filter-range item-wise aggregation base
+    $rangeItemsBase = [];
 
-            $byProduct = $subs->groupBy('product_id');
+    foreach ($period as $day) {
+        $subs = Subscription::with([
+                // UPDATED: also load per_day_price (and price if needed)
+                'flowerProducts:id,product_id,name,per_day_price,price',
+                'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
+            ])
+            ->whereNotIn('status', $excludeStats)
+            ->activeOn($day)
+            ->get();
 
-            $productsForDay   = [];
-            $grandTotalForDay = 0.0;
+        $byProduct = $subs->groupBy('product_id');
 
-            $dayTotalsByItemBase = [];
+        $productsForDay   = [];
+        $grandTotalForDay = 0.0;
 
-            foreach ($byProduct as $productId => $subsForProduct) {
-                $product   = optional($subsForProduct->first())->flowerProducts;
-                $subsCount = $subsForProduct->count();
+        $dayTotalsByItemBase = [];
 
-                $items        = [];
-                $productTotal = 0.0;
+        foreach ($byProduct as $productId => $subsForProduct) {
+            $product   = optional($subsForProduct->first())->flowerProducts;
+            $subsCount = $subsForProduct->count();
 
-                if ($product) {
-                    foreach ($product->packageItems as $pi) {
-                        $perItemQty = (float) ($pi->quantity ?? 0);
-                        $origUnit   = strtolower(trim((string) $pi->unit));
+            $items        = [];
+            $productTotal = 0.0;
 
-                        // ----- CATEGORY & QTY (base) --------------------------------
-                        $category = $this->inferCategory($origUnit);
-                        if ($category === 'unknown') {
-                            $category = 'count';
-                            $origUnit = 'pcs';
-                        }
-                        $toBaseFactor = $this->toBaseFactor($origUnit); // item unit → base
-                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
-                        [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
+            if ($product) {
+                foreach ($product->packageItems as $pi) {
+                    $perItemQty = (float) ($pi->quantity ?? 0);
+                    $origUnit   = strtolower(trim((string) $pi->unit));
 
-                        // ----- DYNAMIC PRICING from FlowerDetails -------------------
-                        $nameKey = strtolower(trim((string) $pi->item_name));
-                        $fd      = $fdIndex->get($nameKey);
-                        $itemPricePerSub = 0.0;
-
-                        if ($fd) {
-                            $fdUnit   = strtolower(trim((string) $fd->unit));
-                            $fdPrice  = (float) $fd->price;
-
-                            $perSubQtyBase  = $perItemQty * $this->toBaseFactor($origUnit);
-                            $fdUnitBase     = $this->toBaseFactor($fdUnit) ?: 1.0;
-
-                            $fdUnitsCount   = $perSubQtyBase / $fdUnitBase;
-                            $itemPricePerSub = $fdPrice * $fdUnitsCount;
-                        }
-
-                        $totalPrice = $itemPricePerSub * $subsCount;
-
-                        $items[] = [
-                            'item_name'          => $pi->item_name,
-                            'category'           => $category,
-                            'per_item_qty'       => $perItemQty,
-                            'per_item_unit'      => $origUnit,
-                            'item_price_per_sub' => round($itemPricePerSub, 2),
-                            'total_qty_base'     => $totalQtyBase,
-                            'total_qty_disp'     => $qtyDisp,
-                            'total_unit_disp'    => $unitDisp,
-                            'total_price'        => round($totalPrice, 2),
-                        ];
-
-                        $productTotal += $totalPrice;
-
-                        // --- aggregate to DAY totals (by item)
-                        $key = strtolower($pi->item_name) . '|' . $category;
-                        if (!isset($dayTotalsByItemBase[$key])) {
-                            $dayTotalsByItemBase[$key] = [
-                                'item_name'      => $pi->item_name,
-                                'category'       => $category,
-                                'total_qty_base' => 0.0,
-                            ];
-                        }
-                        $dayTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
+                    // ----- CATEGORY & QTY (base) --------------------------------
+                    $category = $this->inferCategory($origUnit);
+                    if ($category === 'unknown') {
+                        $category = 'count';
+                        $origUnit = 'pcs';
                     }
+                    $toBaseFactor = $this->toBaseFactor($origUnit); // item unit → base
+                    $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
+                    [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
+
+                    // ----- DYNAMIC PRICING from FlowerDetails -------------------
+                    $nameKey = strtolower(trim((string) $pi->item_name));
+                    $fd      = $fdIndex->get($nameKey);
+                    $itemPricePerSub = 0.0;
+
+                    if ($fd) {
+                        $fdUnit   = strtolower(trim((string) $fd->unit));
+                        $fdPrice  = (float) $fd->price;
+
+                        $perSubQtyBase  = $perItemQty * $this->toBaseFactor($origUnit);
+                        $fdUnitBase     = $this->toBaseFactor($fdUnit) ?: 1.0;
+
+                        $fdUnitsCount    = $perSubQtyBase / $fdUnitBase;
+                        $itemPricePerSub = $fdPrice * $fdUnitsCount;
+                    }
+
+                    $totalPrice = $itemPricePerSub * $subsCount;
+
+                    $items[] = [
+                        'item_name'          => $pi->item_name,
+                        'category'           => $category,
+                        'per_item_qty'       => $perItemQty,
+                        'per_item_unit'      => $origUnit,
+                        'item_price_per_sub' => round($itemPricePerSub, 2),
+                        'total_qty_base'     => $totalQtyBase,
+                        'total_qty_disp'     => $qtyDisp,
+                        'total_unit_disp'    => $unitDisp,
+                        'total_price'        => round($totalPrice, 2),
+                    ];
+
+                    $productTotal += $totalPrice;
+
+                    // --- aggregate to DAY totals (by item)
+                    $key = strtolower($pi->item_name) . '|' . $category;
+                    if (!isset($dayTotalsByItemBase[$key])) {
+                        $dayTotalsByItemBase[$key] = [
+                            'item_name'      => $pi->item_name,
+                            'category'       => $category,
+                            'total_qty_base' => 0.0,
+                        ];
+                    }
+                    $dayTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
+
+                    // --- NEW: aggregate to FILTER-RANGE totals (by item) ------
+                    if (!isset($rangeItemsBase[$key])) {
+                        $rangeItemsBase[$key] = [
+                            'item_name'      => $pi->item_name,
+                            'category'       => $category,
+                            'total_qty_base' => 0.0,
+                            'total_price'    => 0.0,
+                        ];
+                    }
+                    $rangeItemsBase[$key]['total_qty_base'] += $totalQtyBase;
+                    $rangeItemsBase[$key]['total_price']    += $totalPrice;
                 }
-
-                $grandTotalForDay += $productTotal;
-
-                $productsForDay[$productId] = [
-                    'product'              => $product,
-                    'subs_count'           => $subsCount,
-                    'items'                => $items,
-                    'product_total'        => round($productTotal, 2),
-                    'bundle_total_per_sub' => round(array_sum(array_column($items, 'item_price_per_sub')), 2),
-                ];
             }
 
-            $dayTotalsForDisplay = $this->formatTotalsByItem($dayTotalsByItemBase);
+            $grandTotalForDay += $productTotal;
 
-            $dailyEstimates[$day->toDateString()] = [
-                'products'           => $productsForDay,
-                'grand_total_amount' => round($grandTotalForDay, 2),
-                'totals_by_item'     => $dayTotalsForDisplay,
+            $productsForDay[$productId] = [
+                'product'              => $product,
+                'subs_count'           => $subsCount,
+                'items'                => $items,
+                'product_total'        => round($productTotal, 2),
+                'bundle_total_per_sub' => round(array_sum(array_column($items, 'item_price_per_sub')), 2),
             ];
         }
 
-        // ---- Range summary (for filtered date range) --------------------------
-        $rangeTotal        = 0.0;   // overall total for filter range
-        $rangeDaysWithData = 0;     // how many days have > 0 cost
+        $dayTotalsForDisplay = $this->formatTotalsByItem($dayTotalsByItemBase);
 
-        foreach ($dailyEstimates as $dateStr => $payload) {
-            $amount = (float) ($payload['grand_total_amount'] ?? 0);
-            $rangeTotal += $amount;
-            if ($amount > 0) {
-                $rangeDaysWithData++;
-            }
+        $dailyEstimates[$day->toDateString()] = [
+            'products'           => $productsForDay,
+            'grand_total_amount' => round($grandTotalForDay, 2),
+            'totals_by_item'     => $dayTotalsForDisplay,
+        ];
+    }
+
+    // ---- Range summary (for filtered date range) --------------------------
+    $rangeTotal        = 0.0;   // overall total for filter range
+    $rangeDaysWithData = 0;     // how many days have > 0 cost
+
+    foreach ($dailyEstimates as $dateStr => $payload) {
+        $amount = (float) ($payload['grand_total_amount'] ?? 0);
+        $rangeTotal += $amount;
+        if ($amount > 0) {
+            $rangeDaysWithData++;
         }
+    }
 
-        $rangeAvgPerDay = $rangeDaysWithData > 0
-            ? round($rangeTotal / $rangeDaysWithData, 2)
-            : 0.0;
+    $rangeAvgPerDay = $rangeDaysWithData > 0
+        ? round($rangeTotal / $rangeDaysWithData, 2)
+        : 0.0;
 
-        // ---- Month-wise rollup ----------------------------------------------
-        $monthlyEstimates = [];
-        if ($mode === 'month') {
-            foreach ($dailyEstimates as $dateStr => $payload) {
-                $monthKey = Carbon::parse($dateStr)->format('Y-m');
+    // ---- NEW: filter-range item summary (convert base → display) ----------
+    $rangeItems = [];
+    foreach ($rangeItemsBase as $key => $r) {
+        [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase(
+            $r['total_qty_base'],
+            $r['category']
+        );
 
-                if (!isset($monthlyEstimates[$monthKey])) {
-                    $monthlyEstimates[$monthKey] = [
-                        'month_label'        => Carbon::parse($dateStr)->format('M Y'),
-                        'products'           => [],
-                        'grand_total'        => 0.0,
-                        'totals_by_item_base'=> [],
+        $rangeItems[] = [
+            'item_name'       => $r['item_name'],
+            'category'        => $r['category'],
+            'total_qty_disp'  => $qtyDisp,
+            'total_unit_disp' => $unitDisp,
+            'total_price'     => round($r['total_price'], 2),
+        ];
+    }
+
+    // Sort items by highest total price first (nice for report)
+    usort($rangeItems, function ($a, $b) {
+        return $b['total_price'] <=> $a['total_price'];
+    });
+
+    $rangeItemCount = count($rangeItems);
+
+    // ---- Month-wise rollup ----------------------------------------------
+    $monthlyEstimates = [];
+    if ($mode === 'month') {
+        foreach ($dailyEstimates as $dateStr => $payload) {
+            $monthKey = Carbon::parse($dateStr)->format('Y-m');
+
+            if (!isset($monthlyEstimates[$monthKey])) {
+                $monthlyEstimates[$monthKey] = [
+                    'month_label'         => Carbon::parse($dateStr)->format('M Y'),
+                    'products'            => [],
+                    'grand_total'         => 0.0,
+                    'totals_by_item_base' => [],
+                ];
+            }
+
+            foreach ($payload['products'] as $pid => $row) {
+                if (!isset($monthlyEstimates[$monthKey]['products'][$pid])) {
+                    $monthlyEstimates[$monthKey]['products'][$pid] = [
+                        'product'       => $row['product'],
+                        'subs_days'     => 0,
+                        'items'         => [],
+                        'product_total' => 0.0,
                     ];
                 }
 
-                foreach ($payload['products'] as $pid => $row) {
-                    if (!isset($monthlyEstimates[$monthKey]['products'][$pid])) {
-                        $monthlyEstimates[$monthKey]['products'][$pid] = [
-                            'product'       => $row['product'],
-                            'subs_days'     => 0,
-                            'items'         => [],
-                            'product_total' => 0.0,
+                $monthlyEstimates[$monthKey]['products'][$pid]['subs_days'] += $row['subs_count'];
+
+                foreach ($row['items'] as $it) {
+                    $key = strtolower($it['item_name']) . '|' . $it['category'];
+
+                    if (!isset($monthlyEstimates[$monthKey]['products'][$pid]['items'][$key])) {
+                        $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key] = [
+                            'item_name'      => $it['item_name'],
+                            'category'       => $it['category'],
+                            'total_qty_base' => 0.0,
+                            'total_price'    => 0.0,
                         ];
                     }
 
-                    $monthlyEstimates[$monthKey]['products'][$pid]['subs_days'] += $row['subs_count'];
+                    $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_qty_base'] += $it['total_qty_base'];
+                    $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_price']    += $it['total_price'];
 
-                    foreach ($row['items'] as $it) {
-                        $key = strtolower($it['item_name']) . '|' . $it['category'];
-
-                        if (!isset($monthlyEstimates[$monthKey]['products'][$pid]['items'][$key])) {
-                            $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key] = [
-                                'item_name'      => $it['item_name'],
-                                'category'       => $it['category'],
-                                'total_qty_base' => 0.0,
-                                'total_price'    => 0.0,
-                            ];
-                        }
-
-                        $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_qty_base'] += $it['total_qty_base'];
-                        $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_price']    += $it['total_price'];
-
-                        if (!isset($monthlyEstimates[$monthKey]['totals_by_item_base'][$key])) {
-                            $monthlyEstimates[$monthKey]['totals_by_item_base'][$key] = [
-                                'item_name'      => $it['item_name'],
-                                'category'       => $it['category'],
-                                'total_qty_base' => 0.0,
-                            ];
-                        }
-                        $monthlyEstimates[$monthKey]['totals_by_item_base'][$key]['total_qty_base'] += $it['total_qty_base'];
+                    if (!isset($monthlyEstimates[$monthKey]['totals_by_item_base'][$key])) {
+                        $monthlyEstimates[$monthKey]['totals_by_item_base'][$key] = [
+                            'item_name'      => $it['item_name'],
+                            'category'       => $it['category'],
+                            'total_qty_base' => 0.0,
+                        ];
                     }
-
-                    $monthlyEstimates[$monthKey]['products'][$pid]['product_total'] += $row['product_total'];
-                    $monthlyEstimates[$monthKey]['grand_total']                      += $row['product_total'];
+                    $monthlyEstimates[$monthKey]['totals_by_item_base'][$key]['total_qty_base'] += $it['total_qty_base'];
                 }
-            }
 
-            foreach ($monthlyEstimates as &$mBlock) {
-                foreach ($mBlock['products'] as &$pBlock) {
-                    foreach ($pBlock['items'] as &$iBlock) {
-                        [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase(
-                            $iBlock['total_qty_base'],
-                            $iBlock['category']
-                        );
-                        $iBlock['total_qty_disp']  = $qtyDisp;
-                        $iBlock['total_unit_disp'] = $unitDisp;
-                        $iBlock['total_price']     = round($iBlock['total_price'], 2);
-                    }
-                    $pBlock['product_total'] = round($pBlock['product_total'], 2);
-                }
-                $mBlock['totals_by_item'] = $this->formatTotalsByItem($mBlock['totals_by_item_base']);
-                unset($mBlock['totals_by_item_base']);
-                $mBlock['grand_total'] = round($mBlock['grand_total'], 2);
+                $monthlyEstimates[$monthKey]['products'][$pid]['product_total'] += $row['product_total'];
+                $monthlyEstimates[$monthKey]['grand_total']                      += $row['product_total'];
             }
-            unset($mBlock, $pBlock, $iBlock);
         }
 
-        return view('admin.reports.flower-package', [
-            'start'              => $start->toDateString(),
-            'end'                => $end->toDateString(),
-            'mode'               => $mode,
-            'preset'             => $preset,
-            'dailyEstimates'     => $dailyEstimates,
-            'monthlyEstimates'   => $monthlyEstimates,
-            'tomorrowDate'       => $tomorrow->toDateString(),
-            'tomorrowEstimate'   => $tomorrowEstimate,
-            // NEW: range-wise summary fields for UI
-            'rangeTotal'         => round($rangeTotal, 2),
-            'rangeDaysWithData'  => $rangeDaysWithData,
-            'rangeAvgPerDay'     => $rangeAvgPerDay,
-        ]);
+        foreach ($monthlyEstimates as &$mBlock) {
+            foreach ($mBlock['products'] as &$pBlock) {
+                foreach ($pBlock['items'] as &$iBlock) {
+                    [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase(
+                        $iBlock['total_qty_base'],
+                        $iBlock['category']
+                    );
+                    $iBlock['total_qty_disp']  = $qtyDisp;
+                    $iBlock['total_unit_disp'] = $unitDisp;
+                    $iBlock['total_price']     = round($iBlock['total_price'], 2);
+                }
+                $pBlock['product_total'] = round($pBlock['product_total'], 2);
+            }
+            $mBlock['totals_by_item'] = $this->formatTotalsByItem($mBlock['totals_by_item_base']);
+            unset($mBlock['totals_by_item_base']);
+            $mBlock['grand_total'] = round($mBlock['grand_total'], 2);
+        }
+        unset($mBlock, $pBlock, $iBlock);
     }
+
+    return view('admin.reports.flower-package', [
+        'start'             => $start->toDateString(),
+        'end'               => $end->toDateString(),
+        'mode'              => $mode,
+        'preset'            => $preset,
+        'dailyEstimates'    => $dailyEstimates,
+        'monthlyEstimates'  => $monthlyEstimates,
+        'tomorrowDate'      => $tomorrow->toDateString(),
+        'tomorrowEstimate'  => $tomorrowEstimate,
+        // range-wise summary fields for UI
+        'rangeTotal'        => round($rangeTotal, 2),
+        'rangeDaysWithData' => $rangeDaysWithData,
+        'rangeAvgPerDay'    => $rangeAvgPerDay,
+        // NEW: filter-range item summary
+        'rangeItems'        => $rangeItems,
+        'rangeItemCount'    => $rangeItemCount,
+    ]);
+}
+
 
     public function tomorrowFlower(Request $request)
     {
