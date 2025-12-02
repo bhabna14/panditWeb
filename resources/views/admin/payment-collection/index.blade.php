@@ -588,9 +588,9 @@
         <form method="GET" action="{{ route('payment.collection.index') }}" id="filterForm" class="toolbar">
             {{-- Left: Date + Method --}}
             <div class="date-range">
-                <span class="label">From</span>
+                <span class="label">F</span>
                 <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" />
-                <span class="label">To</span>
+                <span class="label">T</span>
                 <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" />
                 <span class="label">Method</span>
                 <select name="method">
