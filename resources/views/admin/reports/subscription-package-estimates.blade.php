@@ -390,9 +390,7 @@
                 <h4 class="page-header-title mb-1">
                     Subscription Package — Estimates
                 </h4>
-                <div class="page-header-sub">
-                    Day-wise & month-wise subscription consumption and value, derived from package items.
-                </div>
+              
             </div>
             <ol class="breadcrumb page-breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
@@ -403,10 +401,7 @@
         {{-- Summary band --}}
         <div class="band">
             <div class="band-header">
-                <div class="band-title">
-                    <span class="label-main">Estimate Overview</span>
-                    <span class="band-pill">Calculated</span>
-                </div>
+               
                 <div class="band-sub">
                     Date: <strong>{{ $date->toFormattedDateString() }}</strong> · Month:
                     <strong>{{ $monthStart->format('F Y') }}</strong>
@@ -477,13 +472,7 @@
             </div>
 
             <div class="toolbar-row-bottom">
-                <div class="chip-row">
-                    {{-- You can hook these into query params later if needed --}}
-                    <span class="chip disabled" style="opacity:.65; cursor:default;">
-                        <i class="bi bi-info-circle"></i> Estimates are based on current active subscriptions
-                    </span>
-                </div>
-
+               
                 <a class="btn-export"
                    href="{{ route('admin.reports.subscription_package_estimates.export', ['date'=>$selectedDate,'month'=>$selectedMonth,'per_day_price'=>$selectedPdp]) }}">
                     <i class="bi bi-filetype-csv"></i> Export CSV
