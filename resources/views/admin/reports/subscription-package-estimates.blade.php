@@ -503,9 +503,9 @@
                 @else
                     {{-- Subscriptions contributing today (by product) --}}
                     @if (!empty($dayEstimate['by_product']))
-                        <div class="mb-2 fw-semibold">
+                        {{-- <div class="mb-2 fw-semibold">
                             Subscription products active on {{ $date->toFormattedDateString() }}
-                        </div>
+                        </div> --}}
                         <div class="table-responsive mb-3">
                             <table class="table table-sm table-bordered table-hover align-middle">
                                 <thead>
