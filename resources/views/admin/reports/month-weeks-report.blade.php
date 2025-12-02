@@ -361,7 +361,7 @@
         /* 1: Date */
         .colorful-metrics-table tbody td:nth-child(1) {
             font-weight: 600;
-            color: var(--col-date);
+            color:#7987A1;
         }
 
         /* 2: Day */
