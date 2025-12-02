@@ -319,6 +319,12 @@
             color: #f9fafb !important;
         }
 
+        /* Purchase header cell (NEW) */
+        .colorful-metrics-table thead th.purchase-head {
+            background: #16a34a !important;
+            color: #f9fafb !important;
+        }
+
         /* Vendor name headers (2nd header row) */
         .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-odd,
         .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-even {
@@ -376,10 +382,10 @@
             color: #16a34a;
         }
 
-        /* 4: Purch – teal/blue */
+        /* 4: Purch – green (UPDATED) */
         .colorful-metrics-table tbody td:nth-child(4) {
             font-weight: 700;
-            color: #0284c7;
+            color: #16a34a;
         }
 
         /* 5–8: Renew / New / Pause / Customize – soft pills */
@@ -566,7 +572,6 @@
                                                         <th colspan="2" class="col-finance">Finance</th>
                                                         <th colspan="4">Customer</th>
                                                         <th colspan="{{ $weekVendorCount }}"
-
                                                             class="col-vendor">Vendor Report
                                                         </th>
                                                         <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
@@ -575,7 +580,7 @@
                                                     </tr>
                                                     <tr>
                                                         <th class="col-finance income-head">Incm</th>
-                                                        <th class="col-finance">Purch</th>
+                                                        <th class="col-finance purchase-head">Purch</th>
 
                                                         <th>Renew</th>
                                                         <th>New</th>
@@ -732,7 +737,7 @@
                                                 </tr>
                                                 <tr>
                                                     <th class="col-finance income-head">Incm</th>
-                                                    <th class="col-finance">Purch</th>
+                                                    <th class="col-finance purchase-head">Purch</th>
                                                     <th>Renew</th>
                                                     <th>New</th>
                                                     <th>Pause</th>
