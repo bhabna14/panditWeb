@@ -66,64 +66,64 @@ class SubscriptionPackageEstimateController extends Controller
             'dayEstimate'         => $dayEstimate,
             'monthEstimate'       => $monthEstimate,
         ]);
-    }
-
-    protected function estimateForDate(
-        Carbon $date,
-        array $subscriptionProductIds,
-        Collection $subsByProductId
-    ): array {
-        $subs = $this->activeSubscriptionsOverlapping($date, $date, $subscriptionProductIds);
-        return $this->tallyPackageItemsForDay($subs, $subsByProductId, $date);
-    }
-
-    protected function estimateForRange(
-        Carbon $start,
-        Carbon $end,
-        array $subscriptionProductIds,
-        Collection $subsByProductId
-    ): array {
-        $subs = $this->activeSubscriptionsOverlapping($start, $end, $subscriptionProductIds);
-
-        $perDay = [];
-        $cursor = $start->copy();
-        while ($cursor->lte($end)) {
-            $perDay[$cursor->toDateString()] = $this->tallyPackageItemsForDay($subs, $subsByProductId, $cursor);
-            $cursor->addDay();
         }
 
-        // Aggregate by item (per-unit math stays the same)
-        $byItem = [];
-        $totalQty = 0.0;
-        $totalCost = 0.0;
+        protected function estimateForDate(
+            Carbon $date,
+            array $subscriptionProductIds,
+            Collection $subsByProductId
+        ): array {
+            $subs = $this->activeSubscriptionsOverlapping($date, $date, $subscriptionProductIds);
+            return $this->tallyPackageItemsForDay($subs, $subsByProductId, $date);
+        }
 
-        foreach ($perDay as $data) {
-            foreach ($data['lines'] as $key => $line) {
-                if (!isset($byItem[$key])) {
-                    $byItem[$key] = [
-                        'item_name'  => $line['item_name'],
-                        'unit'       => $line['unit'],
-                        'unit_price' => $line['unit_price'], // per-unit (derived)
-                        'qty'        => 0.0,
-                        'subtotal'   => 0.0,
-                    ];
-                }
-                $byItem[$key]['qty']      += $line['qty'];
-                $byItem[$key]['subtotal'] += $line['subtotal'];
+        protected function estimateForRange(
+            Carbon $start,
+            Carbon $end,
+            array $subscriptionProductIds,
+            Collection $subsByProductId
+        ): array {
+            $subs = $this->activeSubscriptionsOverlapping($start, $end, $subscriptionProductIds);
 
-                $totalQty  += $line['qty'];
-                $totalCost += $line['subtotal'];
+            $perDay = [];
+            $cursor = $start->copy();
+            while ($cursor->lte($end)) {
+                $perDay[$cursor->toDateString()] = $this->tallyPackageItemsForDay($subs, $subsByProductId, $cursor);
+                $cursor->addDay();
             }
-        }
 
-        uasort($byItem, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
+            // Aggregate by item (per-unit math stays the same)
+            $byItem = [];
+            $totalQty = 0.0;
+            $totalCost = 0.0;
 
-        return [
-            'per_day'    => $perDay,
-            'by_item'    => $byItem,
-            'total_qty'  => $totalQty,
-            'total_cost' => round($totalCost, 2),
-        ];
+            foreach ($perDay as $data) {
+                foreach ($data['lines'] as $key => $line) {
+                    if (!isset($byItem[$key])) {
+                        $byItem[$key] = [
+                            'item_name'  => $line['item_name'],
+                            'unit'       => $line['unit'],
+                            'unit_price' => $line['unit_price'], // per-unit (derived)
+                            'qty'        => 0.0,
+                            'subtotal'   => 0.0,
+                        ];
+                    }
+                    $byItem[$key]['qty']      += $line['qty'];
+                    $byItem[$key]['subtotal'] += $line['subtotal'];
+
+                    $totalQty  += $line['qty'];
+                    $totalCost += $line['subtotal'];
+                }
+            }
+
+            uasort($byItem, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
+
+            return [
+                'per_day'    => $perDay,
+                'by_item'    => $byItem,
+                'total_qty'  => $totalQty,
+                'total_cost' => round($totalCost, 2),
+            ];
     }
 
     protected function activeSubscriptionsOverlapping(Carbon $start, Carbon $end, array $subscriptionProductIds)

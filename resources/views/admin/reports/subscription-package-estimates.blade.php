@@ -485,14 +485,14 @@
             <div class="card-header">
                 <div class="hstack">
                     <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
-                    <div class="chip-inline">
+                    {{-- <div class="chip-inline">
                         <span>Lines</span>
                         <span class="mono">{{ count($dayEstimate['lines']) }}</span>
                     </div>
                     <div class="chip-inline">
                         <span>Est. Day Value</span>
                         <span class="mono">₹ {{ number_format($dayEstimate['total_cost'], 2) }}</span>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <div class="card-body">
