@@ -50,7 +50,7 @@ class WeeklyReportController extends Controller
                 'finance'  => [
                     'income'            => 0,  // from FlowerPayment
                     'expenditure'       => 0,  // Purch from FlowerPickupDetails.total_price
-                    'vendor_fund'       => 0,  // from OfficeFund
+                    'vendor_fund'       => 0,  // from OfficeFund (categories = vendor_payment)
                     'available_balance' => 0,  // vendor_fund - expenditure
                 ],
                 'customer' => [
@@ -110,9 +110,11 @@ class WeeklyReportController extends Controller
         }
 
         // NEW: Vendor Fund (OfficeFund) per day
-        // Use same "active" scope as manage-office-fund so deleted/void entries are excluded.
+        // Only rows where categories = 'vendor_payment' are considered.
+        // NOTE: 'date' column is a DATE (no timezone conversion needed).
         $vendorFund = OfficeFund::query()
-            ->active()
+            ->active() // will be a no-op if 'status' is not present/fillable
+            ->where('categories', 'vendor_payment')
             ->select([
                 DB::raw("DATE(date) as d"),
                 DB::raw("SUM(amount) as amt"),

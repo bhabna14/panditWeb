@@ -373,7 +373,7 @@
         /* 1: Date */
         .colorful-metrics-table tbody td:nth-child(1) {
             font-weight: 600;
-            color: #7987A1;
+            color:#7987A1;
         }
 
         /* 2: Day */
@@ -563,10 +563,10 @@
                                             <span class="chip balance">
                                                 Avail Bal ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}
                                             </span>
-
+{{-- 
                                             <span class="chip deliv">
                                                 Deliveries {{ $w['totals']['total_delivery'] }}
-                                            </span>
+                                            </span> --}}
                                         </div>
                                     </button>
                                 </h2>
@@ -731,7 +731,7 @@
                                             Vendor Fund ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</span>
                                         <span class="chip balance">
                                             Avail Bal ₹{{ number_format($monthTotals['available_balance'] ?? 0) }}</span>
-                                        {{-- <span class="chip deliv">Deliveries {{ $monthTotals['total_delivery'] }}</span> --}}
+                                        <span class="chip deliv">Deliveries {{ $monthTotals['total_delivery'] }}</span>
                                     </div>
                                 </button>
                             </h2>
