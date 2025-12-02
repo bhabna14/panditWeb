@@ -605,10 +605,10 @@
 
             {{-- Right: Search + Preset chips + actions --}}
             <div class="toolbar-right">
-                <div class="toolbar-search-row">
+                {{-- <div class="toolbar-search-row">
                     <input type="text" name="q" value="{{ $filters['q'] ?? '' }}"
                         placeholder="Search: name, mobile, order..." />
-                </div>
+                </div> --}}
                 <div class="toolbar-chips-row">
                     <button class="btn-chip" data-preset="today" type="button">Today</button>
                     <button class="btn-chip" data-preset="yesterday" type="button">Yesterday</button>
