@@ -616,7 +616,7 @@
                             <th class="col-num">Est. Qty / Unit</th>
                             <th class="col-num">Act. Qty / Unit</th>
                             <th class="col-money">Unit Price</th>
-                            <th class="col-money">Line Total</th>
+                            <th class="col-money">Total Amount</th>
                             <th class="col-diff">Qty Diff</th>
                         </tr>
                     </thead>
