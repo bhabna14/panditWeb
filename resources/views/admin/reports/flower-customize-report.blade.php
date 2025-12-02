@@ -488,9 +488,7 @@
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Customize Orders — Detailed Table</div>
-                    <div class="workbook-sub">
-                        Server-side DataTable with export options & tooltips for quick inspection.
-                    </div>
+                 
                 </div>
             </div>
             <div class="workbook-body export-table">
