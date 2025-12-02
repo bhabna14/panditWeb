@@ -518,11 +518,7 @@
         <div class="band">
             <h3>
                 <span>Payments Summary</span>
-                <span class="label">Filtered Range</span>
             </h3>
-            <div class="band-sub">
-                These values are calculated for the current filters and date range below.
-            </div>
             <div class="band-chips">
                 <span class="band-chip slate">
                     <span class="icon">🧾</span>
@@ -563,7 +559,7 @@
 
             <div class="toolbar-left">
                 {{-- User --}}
-                <div class="toolbar-block flex-grow-1">
+                {{-- <div class="toolbar-block flex-grow-1">
                     <span class="toolbar-label">User</span>
                     <select name="user_id" class="toolbar-select w-100">
                         <option value="">All users</option>
@@ -573,7 +569,7 @@
                             </option>
                         @endforeach
                     </select>
-                </div>
+                </div> --}}
 
                 {{-- Status --}}
                 <div class="toolbar-block">
@@ -633,14 +629,14 @@
                 </a>
 
                 {{-- Search box --}}
-                <div class="search-wrapper">
+                {{-- <div class="search-wrapper">
                     <i class="bi bi-search"></i>
                     <input type="text"
                            name="q"
                            class="search-input"
                            placeholder="Search order id / payment id / user..."
                            value="{{ $search }}">
-                </div>
+                </div> --}}
 
                 {{-- Submit & reset --}}
                 <button class="btn-chip apply-btn" type="submit">
