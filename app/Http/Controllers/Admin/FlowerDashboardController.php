@@ -207,20 +207,20 @@ class FlowerDashboardController extends Controller
 
         // TODAY END SUBSCRIPTIONS
         $todayDate = Carbon::today($tz)->toDateString();
-     $todayEndSubscription = Subscription::where(function ($q) use ($todayDate) {
+        $todayEndSubscription = Subscription::where(function ($q) use ($todayDate) {
         // Ends today: either new_date == today OR (no new_date && end_date == today)
         $q->where(function ($subQuery) use ($todayDate) {
                 $subQuery->whereNotNull('new_date')
-                         ->whereDate('new_date', $todayDate);
+                        ->whereDate('new_date', $todayDate);
             })
           ->orWhere(function ($subQuery) use ($todayDate) {
                 $subQuery->whereNull('new_date')
                          ->whereDate('end_date', $todayDate);
             });
-    })
-    ->where('status', 'active')
-    // skip users who have another future sub with paid payment
-    ->whereNotExists(function ($sq) use ($todayDate) {
+        })
+        ->where('status', 'active')
+        // skip users who have another future sub with paid payment
+        ->whereNotExists(function ($sq) use ($todayDate) {
         $sq->select(DB::raw(1))
             ->from('subscriptions as s2')
             ->whereColumn('s2.user_id', 'subscriptions.user_id')   // same user
@@ -234,9 +234,9 @@ class FlowerDashboardController extends Controller
                    ->whereColumn('fp.order_id', 's2.order_id')
                    ->where('fp.payment_status', 'paid');
             });
-    })
-    ->withoutOtherActiveOrPending() // keep your existing scope if you still need it
-    ->count();
+        })
+        ->withoutOtherActiveOrPending() // keep your existing scope if you still need it
+        ->count();
 
         // FIVE DAY END SUBSCRIPTIONS
         $winStart = $today->copy()->addDay()->startOfDay();
