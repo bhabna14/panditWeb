@@ -68,6 +68,7 @@
             text-transform: uppercase;
             letter-spacing: 0.10em;
             margin-bottom: 4px;
+            color: #6b7280;
         }
 
         .sales-card h4,
@@ -76,13 +77,14 @@
             font-weight: 700;
             font-size: 18px;
             margin-bottom: 0;
+            color: #111827;
         }
 
         .sales-card .tx-12 {
             font-size: 12px;
         }
 
-        /* ---------- Gradient card styling ---------- */
+        /* ---------- Gradient card styling (only when gradient-* class is present) ---------- */
         .sales-card[class*="gradient-"] {
             color: #f9fafb;
             border: none;
@@ -182,7 +184,7 @@
                 <!-- New Subscription -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card gradient-1">
+                        <div class="card sales-card {{ $newUserSubscription > 0 ? 'gradient-1' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -202,7 +204,7 @@
                 <!-- Renewed Subscription -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card gradient-2">
+                        <div class="card sales-card {{ $renewSubscription > 0 ? 'gradient-2' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -222,7 +224,7 @@
                 <!-- Customize Order (Today) -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card gradient-3">
+                        <div class="card sales-card {{ $ordersRequestedToday > 0 ? 'gradient-3' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -242,7 +244,7 @@
                 <!-- Customize Order (Next 3 Days) -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
-                        <div class="card sales-card gradient-4">
+                        <div class="card sales-card {{ $upcomingCustomizeOrders > 0 ? 'gradient-4' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -267,7 +269,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card gradient-5">
+                        <div class="card sales-card {{ $todayEndSubscription > 0 ? 'gradient-5' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -284,7 +286,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card gradient-6">
+                        <div class="card sales-card {{ $subscriptionEndFiveDays > 0 ? 'gradient-6' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -301,7 +303,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card gradient-7">
+                        <div class="card sales-card {{ $expiredSubscriptions > 0 ? 'gradient-7' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -318,7 +320,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card gradient-8">
+                        <div class="card sales-card {{ $nonAssignedRidersCount > 0 ? 'gradient-8' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -343,7 +345,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card gradient-9">
+                        <div class="card sales-card {{ $todayPausedRequest > 0 ? 'gradient-9' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -360,7 +362,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card gradient-10">
+                        <div class="card sales-card {{ $pausedSubscriptions > 0 ? 'gradient-10' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -377,7 +379,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
-                        <div class="card sales-card gradient-11">
+                        <div class="card sales-card {{ $nextDayPaused > 0 ? 'gradient-11' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -394,7 +396,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card gradient-12">
+                        <div class="card sales-card {{ $nextDayResumed > 0 ? 'gradient-12' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -419,7 +421,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card gradient-2">
+                        <div class="card sales-card {{ $totalDeliveriesTodayCount > 0 ? 'gradient-2' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -437,7 +439,7 @@
                 <!-- Today Total Income -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.payments.index') }}" target="_blank">
-                        <div class="card sales-card gradient-3">
+                        <div class="card sales-card {{ $totalIncomeToday > 0 ? 'gradient-3' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -455,7 +457,7 @@
                 <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
-                        <div class="card sales-card position-relative gradient-4">
+                        <div class="card sales-card position-relative {{ $todayTotalExpenditure > 0 ? 'gradient-4' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -474,7 +476,7 @@
                 <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
-                        <div class="card sales-card gradient-1">
+                        <div class="card sales-card {{ $activeTomorrowCount > 0 ? 'gradient-1' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -499,7 +501,8 @@
             <div class="row">
                 @foreach ($ridersData as $index => $data)
                     @php
-                        $gradientClass = 'gradient-' . (($index % 6) + 1);
+                        $hasData = ($data['totalAssignedOrders'] > 0) || ($data['totalDeliveredToday'] > 0);
+                        $gradientClass = $hasData ? 'gradient-' . (($index % 6) + 1) : '';
                     @endphp
                     <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}"
@@ -538,7 +541,7 @@
                 <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card gradient-5">
+                        <div class="card sales-card {{ $totalRiders > 0 ? 'gradient-5' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -556,7 +559,7 @@
                 <!-- Total Delivery Today -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card gradient-6">
+                        <div class="card sales-card {{ $totalDeliveriesToday > 0 ? 'gradient-6' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -577,7 +580,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
                        target="_blank">
-                        <div class="card sales-card gradient-7">
+                        <div class="card sales-card {{ $totalDeliveriesThisMonth > 0 ? 'gradient-7' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -595,7 +598,7 @@
                 <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card gradient-8">
+                        <div class="card sales-card {{ $totalDeliveries > 0 ? 'gradient-8' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -620,7 +623,7 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.visitPlace', ['filter' => 'todayVisitPlace']) }}" target="_blank">
-                        <div class="card sales-card gradient-9">
+                        <div class="card sales-card {{ $visitPlaceCountToday > 0 ? 'gradient-9' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -653,7 +656,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
                        target="_blank">
-                        <div class="card sales-card gradient-10">
+                        <div class="card sales-card {{ $tc > 0 ? 'gradient-10' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -670,8 +673,8 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
-                       target="_blank">
-                        <div class="card sales-card gradient-11">
+                       target##_blank">
+                        <div class="card sales-card {{ $ta > 0 ? 'gradient-11' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -688,7 +691,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
-                        <div class="card sales-card gradient-12">
+                        <div class="card sales-card {{ $tr > 0 ? 'gradient-12' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -705,7 +708,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
-                        <div class="card sales-card gradient-8">
+                        <div class="card sales-card {{ $tt > 0 ? 'gradient-8' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
