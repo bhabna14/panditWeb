@@ -621,11 +621,11 @@
                 </a>
                 <a href="{{ $makeLink('this_week') }}"
                    class="btn-chip {{ in_array($p, ['this_week', 'week', '']) ? 'preset-active' : '' }}">
-                    <i class="bi bi-calendar-week"></i><span>This Week</span>
+                    <i class="bi bi-calendar-week"></i><span>Week</span>
                 </a>
                 <a href="{{ $makeLink('this_month') }}"
                    class="btn-chip {{ in_array($p, ['this_month', 'month']) ? 'preset-active' : '' }}">
-                    <i class="bi bi-calendar-month"></i><span>This Month</span>
+                    <i class="bi bi-calendar-month"></i><span>Month</span>
                 </a>
 
                 {{-- Search box --}}
