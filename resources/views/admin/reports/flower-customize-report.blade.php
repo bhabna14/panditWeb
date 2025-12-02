@@ -431,19 +431,12 @@
         <div class="d-flex align-items-center justify-content-between mb-2">
             <div>
                 <h4 class="page-header-title mb-0">Customize Orders — Report</h4>
-                <div class="page-header-sub">Analyze customize orders by date, status, and amount</div>
             </div>
         </div>
 
         {{-- Summary band with KPIs --}}
         <div class="band">
-            <h3>
-                <span>Customize Orders Summary</span>
-                <span class="label">Overview</span>
-            </h3>
-            <div class="band-sub">
-                These values reflect the current date filters applied below.
-            </div>
+         
             <div class="band-chips">
                 <span class="band-chip green">
                     <span class="icon">💰</span>
@@ -480,12 +473,7 @@
                 <button class="btn-chip" type="button" data-range="month">
                     <i class="bi bi-calendar3"></i><span>This Month</span>
                 </button>
-                {{-- <button class="btn-chip" type="button" data-range="last30">
-                    <i class="bi bi-calendar-range"></i><span>Last 30 Days</span>
-                </button> --}}
-                {{-- <button class="btn-chip" type="button" data-range="fy">
-                    <i class="bi bi-graph-up-arrow"></i><span>FY (Apr–Mar)</span>
-                </button> --}}
+               
                 <button id="searchBtn" class="btn-chip apply-btn" type="button">
                     <i class="fas fa-search"></i><span>Apply</span>
                 </button>
