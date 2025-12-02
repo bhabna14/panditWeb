@@ -1,4 +1,4 @@
-{{-- resources/views/admin/office-fund/index.blade.php --}}
+{{-- resources/views/admin/manage-office-fund.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -82,7 +82,7 @@
             padding: .85rem 1rem;
             display: grid;
             gap: .75rem;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.2fr);
             align-items: center;
             box-shadow: var(--shadow);
             margin-bottom: 1.1rem;
@@ -97,7 +97,7 @@
             font-size: .85rem;
         }
 
-        .date-range span {
+        .date-range span.label-text {
             font-weight: 500;
         }
 
@@ -112,6 +112,22 @@
         }
 
         .date-range input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, .22);
+        }
+
+        .date-range select {
+            border: 1px solid var(--ring);
+            border-radius: 999px;
+            padding: .45rem .85rem;
+            background: #fff;
+            font-weight: 500;
+            font-size: .88rem;
+            min-width: 190px;
+        }
+
+        .date-range select:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, .22);
@@ -524,10 +540,22 @@
         {{-- ========= FILTER TOOLBAR ========= --}}
         <form id="filterForm" class="toolbar" onsubmit="return false;">
             <div class="date-range">
-                <span>From</span>
+                <span class="label-text">From</span>
                 <input type="date" id="from_date" name="from_date" />
-                <span>To</span>
+                <span class="label-text">To</span>
                 <input type="date" id="to_date" name="to_date" />
+
+                <span class="label-text">Category</span>
+                <select id="category" name="category">
+                    <option value="">All Categories</option>
+                    <option value="rent">Rent</option>
+                    <option value="rider_salary">Rider Salary</option>
+                    <option value="vendor_payment">Vendor Payment</option>
+                    <option value="fuel">Fuel</option>
+                    <option value="package">Package</option>
+                    <option value="bus_fare">Bus Fare</option>
+                    <option value="miscellaneous">Miscellaneous</option>
+                </select>
             </div>
 
             <div class="toolbar-right">
@@ -560,7 +588,7 @@
                 <span class="label">Summary</span>
             </h3>
             <div class="band-sub">
-                <span id="rangeLabel">All-time total</span> •
+                <span id="rangeLabel">All-time total (all categories)</span> •
                 <strong>{{ $initialTransactionsCount }}</strong> record{{ $initialTransactionsCount == 1 ? '' : 's' }}
                 loaded
             </div>
@@ -595,7 +623,7 @@
                 <div>
                     <div class="workbook-title">Office Fund — Detailed</div>
                     <div class="workbook-sub">
-                        Filter by date range above. Search, export and pagination powered by DataTables.
+                        Filter by date range and category above. Search, export and pagination powered by DataTables.
                     </div>
                 </div>
                 <div class="workbook-tools">
@@ -605,8 +633,6 @@
 
             <div class="excel-wrap">
                 <div class="position-relative">
-                    <!-- (we don’t need full overlay div here, skeleton rows are used inside table) -->
-
                     <div class="table-responsive">
                         <table id="file-datatable"
                             class="excel table table-hover align-middle text-nowrap mb-0">
@@ -860,6 +886,7 @@
 
             const fromEl = document.getElementById('from_date');
             const toEl = document.getElementById('to_date');
+            const categoryEl = document.getElementById('category');
             const today = new Date();
 
             const fyStart = () => {
@@ -911,6 +938,7 @@
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = '';
                 toEl.value = '';
+                categoryEl.value = '';
                 doSearch();
             });
 
@@ -1040,7 +1068,6 @@
                 dropdownParent: $('#editModal')
             });
 
-            // AJAX filter
             const btn = document.getElementById('searchBtn');
             const body = document.getElementById('transactionsBody');
             const todayCard = document.getElementById('todayPayment');
@@ -1049,7 +1076,6 @@
 
             function setLoadingState(loading) {
                 if (loading) {
-                    // Destroy DT BEFORE changing tbody
                     if ($.fn.dataTable.isDataTable($table)) {
                         $table.DataTable().clear().destroy();
                         dt = null;
@@ -1058,14 +1084,32 @@
                     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching…';
                     todayCard.classList.add('skeleton');
                     rangeCard.classList.add('skeleton');
-
-                    // Insert safe skeleton rows (no colspan)
                     body.innerHTML = skeletonRow() + skeletonRow() + skeletonRow() + skeletonRow();
                 } else {
                     btn.disabled = false;
                     btn.textContent = 'Search';
                     todayCard.classList.remove('skeleton');
                     rangeCard.classList.remove('skeleton');
+                }
+            }
+
+            function buildRangeLabel() {
+                if (!rangeLabel) return;
+
+                let base;
+                if (fromEl.value || toEl.value) {
+                    const fromTxt = fromEl.value ? fromEl.value : 'Start';
+                    const toTxt = toEl.value ? toEl.value : 'Today';
+                    base = `Range: ${fromTxt} → ${toTxt}`;
+                } else {
+                    base = 'All-time total';
+                }
+
+                if (categoryEl.value) {
+                    const text = categoryEl.options[categoryEl.selectedIndex].text;
+                    rangeLabel.textContent = `${base} · ${text}`;
+                } else {
+                    rangeLabel.textContent = `${base} (all categories)`;
                 }
             }
 
@@ -1110,6 +1154,7 @@
                 const params = new URLSearchParams();
                 if (fromEl.value) params.append('from_date', fromEl.value);
                 if (toEl.value) params.append('to_date', toEl.value);
+                if (categoryEl.value) params.append('category', categoryEl.value);
 
                 const url = `{{ route('officeFund.filter') }}?${params.toString()}`;
 
@@ -1136,13 +1181,7 @@
                     rangeCard.textContent = fmtINR(data.range_total || 0);
                     todayCard.textContent = fmtINR(data.today_total || 0);
 
-                    if ((fromEl.value || toEl.value) && rangeLabel) {
-                        const fromTxt = fromEl.value ? fromEl.value : 'Start';
-                        const toTxt = toEl.value ? toEl.value : 'Today';
-                        rangeLabel.textContent = `Range: ${fromTxt} → ${toTxt}`;
-                    } else if (rangeLabel) {
-                        rangeLabel.textContent = 'All-time total';
-                    }
+                    buildRangeLabel();
 
                     const list = Array.isArray(data.transactions) ? data.transactions : [];
                     const html = list.length ? list.map((row, i) => rowHTML(row, i + 1)).join('') :
@@ -1157,7 +1196,7 @@
                     initDT();
                     todayCard.textContent = fmtINR(0);
                     rangeCard.textContent = fmtINR(0);
-                    if (rangeLabel) rangeLabel.textContent = 'All-time total';
+                    if (rangeLabel) rangeLabel.textContent = 'All-time total (all categories)';
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops',
