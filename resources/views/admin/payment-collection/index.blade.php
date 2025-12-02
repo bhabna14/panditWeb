@@ -644,12 +644,12 @@
                 Payment Collection
                 <span class="label" id="bandLabel">Pending</span>
             </h3>
-            <div class="chips" style="margin-bottom:.2rem;">
+            {{-- <div class="chips" style="margin-bottom:.2rem;">
                 <span class="chip gray">
                     <span class="icon">📅</span>
                     <span>Range</span> {{ $fromText }} – {{ $toText }}
                 </span>
-            </div>
+            </div> --}}
             <div class="chips" id="summaryChips">
                 {{-- JS will inject chips based on active tab --}}
             </div>
