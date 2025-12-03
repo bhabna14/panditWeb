@@ -16,13 +16,13 @@
         {{-- Items --}}
         <td>
             <button class="btn btn-sm btn-outline-primary w-100"
-                data-bs-toggle="modal"
-                data-bs-target="#itemsModal{{ $request->id }}">
+                    data-bs-toggle="modal"
+                    data-bs-target="#itemsModal{{ $request->id }}">
                 View Items
             </button>
 
             <div class="modal fade" id="itemsModal{{ $request->id }}" tabindex="-1"
-                aria-labelledby="itemsModalLabel{{ $request->id }}" aria-hidden="true">
+                 aria-labelledby="itemsModalLabel{{ $request->id }}" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
@@ -200,7 +200,6 @@
                   method="POST"
                   class="mb-2">
                 @csrf
-                {{-- hidden field will be filled by JS (UPI / Razorpay / Cash) --}}
                 <input type="hidden" name="payment_method" value="">
 
                 @if ($request->status == 'approved' && $request->order && $request->order->total_price)
@@ -242,7 +241,7 @@
 
             {{-- Details modal --}}
             <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
-                aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
+                 aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header bg-dark text-white">

@@ -62,8 +62,9 @@
     <div class="row mb-4 mt-4">
         {{-- Total --}}
         <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'all']) }}" class="card-filter text-decoration-none"
-                data-filter="all">
+            <a href="{{ route('flower.customize.request', ['filter' => 'all']) }}"
+               class="card-filter text-decoration-none"
+               data-filter="all">
                 <div class="card metric-card h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
                     <div class="card-body d-flex align-items-center">
                         <div class="me-3">
@@ -71,7 +72,7 @@
                         </div>
                         <div>
                             <h5 class="card-title mb-1 label text-muted">Total Orders</h5>
-                            <h3 class="mb-0 text-warning " id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
+                            <h3 class="mb-0 text-warning" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
                         </div>
                     </div>
                 </div>
@@ -80,8 +81,9 @@
 
         {{-- Today --}}
         <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}" class="card-filter text-decoration-none"
-                data-filter="today">
+            <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}"
+               class="card-filter text-decoration-none"
+               data-filter="today">
                 <div class="card metric-card h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}" data-card="today">
                     <div class="card-body d-flex align-items-center">
                         <div class="me-3">
@@ -98,8 +100,9 @@
 
         {{-- Paid --}}
         <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'paid']) }}" class="card-filter text-decoration-none"
-                data-filter="paid">
+            <a href="{{ route('flower.customize.request', ['filter' => 'paid']) }}"
+               class="card-filter text-decoration-none"
+               data-filter="paid">
                 <div class="card metric-card h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}" data-card="paid">
                     <div class="card-body d-flex align-items-center">
                         <div class="me-3">
@@ -116,11 +119,12 @@
 
         {{-- Rejected --}}
         <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'rejected']) }}" class="card-filter text-decoration-none"
-                data-filter="rejected">
+            <a href="{{ route('flower.customize.request', ['filter' => 'rejected']) }}"
+               class="card-filter text-decoration-none"
+               data-filter="rejected">
                 <div class="card metric-card h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
                     <div class="card-body d-flex align-items-center">
-                        <div class="me-3 ">
+                        <div class="me-3">
                             <i class="fa fa-ban icon text-primary"></i>
                         </div>
                         <div>
@@ -174,14 +178,10 @@
             if ($.fn.DataTable.isDataTable('#file-datatable')) {
                 $('#file-datatable').DataTable().destroy();
             }
-            $('#file-datatable').DataTable({
-                // If you rely on table-data.js defaults, keep this empty so it uses defaults.
-                // Or paste your preferred options here.
-            });
+            $('#file-datatable').DataTable({});
         }
 
         function setActiveCard(filter) {
-            // Add opacity to all, remove from active
             $('[data-card]').addClass('opacity-90');
             $('[data-card="' + filter + '"]').removeClass('opacity-90');
         }
@@ -196,26 +196,23 @@
 
         function loadRequests(filter, pushUrl = true) {
             const url = "{{ route('admin.flower-request.data') }}";
-            // Optional tiny loading state
             const $tbody = $('#requestsBody');
             const prevHtml = $tbody.html();
+
             $tbody.html('<tr><td colspan="11" class="text-center py-5">Loading...</td></tr>');
 
-            $.get(url, {
-                    filter: filter
-                })
-                .done(function(res) {
+            $.get(url, { filter: filter })
+                .done(function (res) {
                     if (res && res.rows_html !== undefined) {
                         $tbody.html(res.rows_html);
                         reinitDataTable();
                         updateCounts(res.counts || {});
                         setActiveCard(res.active || filter);
+
                         if (pushUrl) {
                             const pageUrl = new URL(window.location);
                             pageUrl.searchParams.set('filter', res.active || filter);
-                            window.history.pushState({
-                                filter: res.active || filter
-                            }, '', pageUrl.toString());
+                            window.history.pushState({ filter: res.active || filter }, '', pageUrl.toString());
                         }
                     } else {
                         $tbody.html(
@@ -223,49 +220,70 @@
                         );
                     }
                 })
-                .fail(function(xhr) {
+                .fail(function () {
                     $tbody.html(prevHtml);
                     Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
                 });
         }
 
-        $(document).on('click', '.card-filter', function(e) {
+        $(document).on('click', '.card-filter', function (e) {
             e.preventDefault();
             const filter = $(this).data('filter') || 'all';
             loadRequests(filter, true);
         });
 
         // Handle back/forward navigation to keep filter in sync
-        window.addEventListener('popstate', function(event) {
+        window.addEventListener('popstate', function () {
             const params = new URLSearchParams(window.location.search);
             const filter = params.get('filter') || 'all';
             loadRequests(filter, false);
         });
 
-        // If your DataTable is already initialized by table-data.js on load,
-        // ensure it gets created once:
-        $(document).ready(function() {
+        // Ensure DataTable is created once on first load
+        $(document).ready(function () {
             if (!$.fn.DataTable.isDataTable('#file-datatable')) {
-                $('#file-datatable').DataTable();
+                $('#file-datatable').DataTable({});
             }
         });
 
-        // Existing confirmPayment remains unchanged
+        // ------- Mark Paid: choose payment method via SweetAlert -------
         function confirmPayment(requestId) {
             Swal.fire({
-                title: 'Are you sure?',
-                text: "Mark this payment as Paid?",
-                icon: 'warning',
+                title: 'Select payment method',
+                input: 'radio',
+                inputOptions: {
+                    upi: 'UPI',
+                    razorpay: 'Razorpay',
+                    cash: 'Cash'
+                },
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Please select a payment method';
+                    }
+                },
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, mark as Paid!'
+                confirmButtonText: 'Mark as Paid'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('markPaymentForm_' + requestId).submit();
+                    const form = document.getElementById('markPaymentForm_' + requestId);
+                    if (!form) {
+                        console.error('Form not found for request', requestId);
+                        return;
+                    }
+                    const input = form.querySelector('input[name="payment_method"]');
+                    if (!input) {
+                        console.error('payment_method input not found in form', form);
+                        return;
+                    }
+                    input.value = result.value; // upi | razorpay | cash
+                    form.submit();
                 }
             });
         }
-        window.confirmPayment = confirmPayment; // make accessible after AJAX swaps
+
+        // Make accessible after AJAX swaps
+        window.confirmPayment = confirmPayment;
     </script>
 @endsection

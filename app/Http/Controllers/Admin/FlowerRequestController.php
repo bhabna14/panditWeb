@@ -20,16 +20,16 @@ class FlowerRequestController extends Controller
 
 public function showRequests(Request $request)
 {
-    // First (initial) page render. Data is SSR.
+    // Initial page render. Data is SSR.
     $filter = $request->query('filter', 'all');
 
-    $tz           = config('app.timezone');
-    $todayCarbon  = Carbon::today($tz);
-    $today        = $todayCarbon->toDateString();
+    $tz          = config('app.timezone', 'Asia/Kolkata');
+    $todayCarbon = Carbon::today($tz);
+    $today       = $todayCarbon->toDateString();
 
     // Next 3 days (excluding today)
-    $startDateCarbon = $todayCarbon->copy()->addDay();      // tomorrow
-    $endDateCarbon   = $todayCarbon->copy()->addDays(3);    // 3 days from today
+    $startDateCarbon = $todayCarbon->copy()->addDay();   // tomorrow
+    $endDateCarbon   = $todayCarbon->copy()->addDays(3); // 3 days from today
 
     $startDate = $startDateCarbon->toDateString();
     $endDate   = $endDateCarbon->toDateString();
@@ -50,7 +50,6 @@ public function showRequests(Request $request)
             break;
 
         case 'upcoming':
-            // Exclude today, include next 3 days
             $query->whereBetween('date', [$startDate, $endDate]);
             break;
 
@@ -59,13 +58,12 @@ public function showRequests(Request $request)
             break;
 
         case 'rejected':
-            // Support both spellings in DB
             $query->whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled']);
             break;
 
         case 'all':
         default:
-            // no where
+            // No extra where
             break;
     }
 
@@ -74,8 +72,6 @@ public function showRequests(Request $request)
     $todayCustomizeOrders  = FlowerRequest::whereDate('date', $today)->count();
     $paidCustomizeOrders   = FlowerRequest::where('status', 'paid')->count();
     $rejectCustomizeOrders = FlowerRequest::whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled'])->count();
-
-    // Upcoming = next 3 days excluding today
     $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
     $riders = RiderDetails::where('status', 'active')->get();
@@ -203,7 +199,6 @@ public function saveOrder(Request $request, $id)
         return redirect()->back()->with('error', 'Failed to save order');
     }
 }
-
 public function markPayment(Request $request, $id)
 {
     // Validate payment method coming from SweetAlert
@@ -212,7 +207,7 @@ public function markPayment(Request $request, $id)
     ]);
 
     try {
-        $order = Order::where('request_id', $id)->firstOrFail();
+        $order         = Order::where('request_id', $id)->firstOrFail();
         $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
 
         DB::transaction(function () use ($request, $order, $flowerRequest) {
@@ -247,5 +242,4 @@ public function markPayment(Request $request, $id)
             ->with('error', 'Failed to mark payment as paid');
     }
 }
-
 }
