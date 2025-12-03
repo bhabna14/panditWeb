@@ -17,6 +17,7 @@ use Carbon\Carbon;
 
 class FlowerRequestController extends Controller
 {
+
 public function showRequests(Request $request)
 {
     // First (initial) page render. Data is SSR.
@@ -205,30 +206,45 @@ public function saveOrder(Request $request, $id)
 
 public function markPayment(Request $request, $id)
 {
+    // Validate payment method coming from SweetAlert
+    $request->validate([
+        'payment_method' => ['required', 'in:upi,razorpay,cash'],
+    ]);
+
     try {
         $order = Order::where('request_id', $id)->firstOrFail();
-
-        // Create a new flower payment entry
-        FlowerPayment::create([
-            'order_id' => $order->order_id,
-            'payment_id' => NULL, // Can be set later if available
-            'user_id' => $order->user_id,
-            'payment_method' => 'Razorpay',
-            'paid_amount' => $order->total_price,
-            'payment_status' => 'paid',
-        ]);
-
-        // Update the status of the FlowerRequest to "paid"
         $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
 
-        if ($flowerRequest->status === 'approved') {
-            $flowerRequest->status = 'paid';
-            $flowerRequest->save();
-        }
+        DB::transaction(function () use ($request, $order, $flowerRequest) {
+            // Create flower payment row
+            FlowerPayment::create([
+                'order_id'       => $order->order_id,
+                'payment_id'     => null, // set later if you want
+                'user_id'        => $order->user_id,
+                'payment_method' => $request->payment_method, // upi | razorpay | cash
+                'paid_amount'    => $order->total_price,
+                'payment_status' => 'paid',
+            ]);
 
-        return redirect()->back()->with('success', 'Payment marked as paid');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Failed to mark payment as paid');
+            // Update request status
+            if ($flowerRequest->status === 'approved') {
+                $flowerRequest->status = 'paid';
+                $flowerRequest->save();
+            }
+        });
+
+        return redirect()
+            ->back()
+            ->with('success', 'Payment marked as paid via ' . strtoupper($request->payment_method) . '.');
+    } catch (\Throwable $e) {
+        Log::error('Failed to mark payment as paid', [
+            'request_id' => $id,
+            'error'      => $e->getMessage(),
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('error', 'Failed to mark payment as paid');
     }
 }
 

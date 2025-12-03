@@ -1,17 +1,22 @@
 @foreach ($pendingRequests as $request)
     <tr>
+        {{-- # / User --}}
         <td>
             <strong>#{{ $request->request_id }}</strong><br>
             <small class="text-muted">{{ $request->user->name ?? 'N/A' }}</small><br>
             <small class="text-muted">{{ $request->user->mobile_number ?? 'N/A' }}</small>
         </td>
 
+        {{-- Purchase --}}
         <td>{{ optional($request->created_at)->format('d-m-Y h:i A') ?? 'N/A' }}</td>
 
+        {{-- Delivery --}}
         <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
 
+        {{-- Items --}}
         <td>
-            <button class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal"
+            <button class="btn btn-sm btn-outline-primary w-100"
+                data-bs-toggle="modal"
                 data-bs-target="#itemsModal{{ $request->id }}">
                 View Items
             </button>
@@ -35,7 +40,7 @@
                                                 <strong>Garland:</strong> {{ $item->garland_name ?? 'N/A' }}<br>
                                                 <small>Quantity: {{ $item->garland_quantity ?? 0 }}</small><br>
                                                 @if ($item->garland_size)
-                                                    <small>Size: {{ $item->garland_size }} ft</small>
+                                                    <small>Size: {{ $item->garland_size }} ft</small><br>
                                                 @endif
                                                 @if ($item->flower_count)
                                                     <small>Flower Count: {{ $item->flower_count }}</small>
@@ -44,8 +49,10 @@
                                         @else
                                             <li class="list-group-item">
                                                 <strong>Flower:</strong> {{ $item->flower_name ?? 'N/A' }}<br>
-                                                <small>Quantity: {{ $item->flower_quantity ?? 0 }}
-                                                    {{ $item->flower_unit ?? '' }}</small>
+                                                <small>
+                                                    Quantity: {{ $item->flower_quantity ?? 0 }}
+                                                    {{ $item->flower_unit ?? '' }}
+                                                </small>
                                             </li>
                                         @endif
                                     @endforeach
@@ -62,6 +69,7 @@
             </div>
         </td>
 
+        {{-- Status --}}
         <td>
             @switch($request->status)
                 @case('pending')
@@ -89,6 +97,7 @@
             @endswitch
         </td>
 
+        {{-- Price / Save Order --}}
         <td>
             @if ($request->order && $request->order->total_price)
                 <div><strong>₹{{ $request->order->total_price }}</strong></div>
@@ -97,15 +106,22 @@
             @else
                 <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST">
                     @csrf
-                    <input type="number" name="requested_flower_price" class="form-control mb-2"
-                        placeholder="Flower Price" required>
-                    <input type="number" name="delivery_charge" class="form-control mb-2" placeholder="Delivery Charge"
-                        required>
+                    <input type="number"
+                           name="requested_flower_price"
+                           class="form-control mb-2"
+                           placeholder="Flower Price"
+                           required>
+                    <input type="number"
+                           name="delivery_charge"
+                           class="form-control mb-2"
+                           placeholder="Delivery Charge"
+                           required>
                     <button type="submit" class="btn btn-sm btn-primary w-100">Save</button>
                 </form>
             @endif
         </td>
 
+        {{-- Rider (only after paid + price set) --}}
         <td>
             @if ($request->status == 'paid' && $request->order && $request->order->total_price)
                 @if ($request->order->rider_id)
@@ -127,7 +143,7 @@
             @endif
         </td>
 
-        {{-- ADDRESS (NULL-SAFE) --}}
+        {{-- Address (null-safe) --}}
         <td>
             @if ($request->address)
                 <small>
@@ -158,6 +174,7 @@
             @endif
         </td>
 
+        {{-- Cancel By --}}
         <td>
             @if ($request->cancel_by)
                 <span class="badge bg-dark">{{ ucfirst($request->cancel_by) }}</span>
@@ -166,6 +183,7 @@
             @endif
         </td>
 
+        {{-- Cancel Reason --}}
         <td>
             @if ($request->cancel_reason)
                 {{ $request->cancel_reason }}
@@ -174,43 +192,61 @@
             @endif
         </td>
 
+        {{-- Actions --}}
         <td class="action-btns">
+            {{-- Mark Payment form – used by SweetAlert --}}
             <form id="markPaymentForm_{{ $request->request_id }}"
-                action="{{ route('admin.markPayment', $request->request_id) }}" method="POST">
+                  action="{{ route('admin.markPayment', $request->request_id) }}"
+                  method="POST"
+                  class="mb-2">
                 @csrf
-                @if ($request->status == 'approved')
-                    <button type="button" class="btn btn-success btn-sm w-100"
-                        onclick="confirmPayment('{{ $request->request_id }}')">Mark Paid</button>
+                {{-- hidden field will be filled by JS (UPI / Razorpay / Cash) --}}
+                <input type="hidden" name="payment_method" value="">
+
+                @if ($request->status == 'approved' && $request->order && $request->order->total_price)
+                    <button type="button"
+                            class="btn btn-success btn-sm w-100"
+                            onclick="confirmPayment('{{ $request->request_id }}')">
+                        Mark Paid
+                    </button>
                 @elseif($request->status == 'paid')
                     <button type="button" class="btn btn-success btn-sm w-100" disabled>Paid</button>
+                @else
+                    <button type="button" class="btn btn-secondary btn-sm w-100" disabled>
+                        Mark Paid
+                    </button>
                 @endif
             </form>
 
-            {{-- NEW: Notify button --}}
+            {{-- Notify button --}}
             @if (!empty($request->user) && !empty($request->user->userid))
                 <a href="{{ route('admin.notification.create') }}?user={{ $request->user->userid }}"
-                    class="btn btn-outline-primary btn-sm w-100 mt-2"
-                    title="Send notification to {{ $request->user->name ?? '' }}">
+                   class="btn btn-outline-primary btn-sm w-100 mb-2"
+                   title="Send notification to {{ $request->user->name ?? '' }}">
                     Notify
                 </a>
             @endif
 
-            <button class="btn btn-outline-dark btn-sm w-100 mt-2" data-bs-toggle="modal"
-                data-bs-target="#detailsModal{{ $request->id }}">
+            {{-- Details modal trigger --}}
+            <button class="btn btn-outline-dark btn-sm w-100 mb-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#detailsModal{{ $request->id }}">
                 Details
             </button>
 
+            {{-- Re-order --}}
             <a href="{{ route('reorderCustomizeOrder', ['id' => $request->id]) }}"
-                class="btn btn-sm btn-secondary w-100 mt-2">
+               class="btn btn-sm btn-secondary w-100">
                 Re-order
             </a>
 
+            {{-- Details modal --}}
             <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
                 aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
                         <div class="modal-header bg-dark text-white">
-                            <h5 class="modal-title">Request Details</h5>
+                            <h5 class="modal-title" id="detailsModalLabel{{ $request->id }}">Request Details</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
