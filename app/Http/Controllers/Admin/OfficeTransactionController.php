@@ -121,7 +121,7 @@ class OfficeTransactionController extends Controller
         }
     }
 
-   public function manageOfficeFund()
+public function manageOfficeFund()
 {
     $transactions = OfficeFund::query()
         ->active()
@@ -141,6 +141,7 @@ class OfficeTransactionController extends Controller
 
     return view('admin.manage-office-fund', compact('transactions', 'todayTotal', 'rangeTotal'));
 }
+
 public function filterOfficeFund(Request $request)
 {
     // Always return JSON (avoid redirect/HTML on errors)

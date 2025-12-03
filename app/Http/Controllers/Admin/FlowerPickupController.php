@@ -489,31 +489,19 @@ class FlowerPickupController extends Controller
                     'status'         => 'active',
                 ]);
 
-                // // 3) Mirror it into OfficeLedger as an OUT entry
-                // OfficeLedger::create([
-                //     'entry_date'     => $officeTransaction->date,
-                //     'category'       => $officeTransaction->categories,
-                //     'direction'      => 'out',                       // money going out
-                //     'source_type'    => 'transaction',
-                //     'source_id'      => $officeTransaction->id,
-                //     'amount'         => $officeTransaction->amount,
-                //     'mode_of_payment'=> $officeTransaction->mode_of_payment,
-                //     'paid_by'        => $officeTransaction->paid_by,
-                //     'received_by'    => $vendorName,
-                //     'description'    => $officeTransaction->description,
-                //     'status'         => 'active',
-                // ]);
-
-                // 4) Log everything for debugging
-                Log::info('Vendor payment updated & pushed to ledger', [
-                    'pickup_id'          => $pickupDetail->id,
-                    'pick_up_code'       => $pickupDetail->pick_up_id,
-                    'vendor_id'          => $pickupDetail->vendor_id,
-                    'vendor_name'        => $vendorName,
-                    'payment_method'     => $pickupDetail->payment_method,
-                    'payment_id'         => $pickupDetail->payment_id,
-                    'paid_by'            => $pickupDetail->paid_by,
-                    'office_transaction' => $officeTransaction->id,
+                // 3) Mirror it into OfficeLedger as an OUT entry
+                OfficeLedger::create([
+                    'entry_date'     => $officeTransaction->date,
+                    'category'       => $officeTransaction->categories,
+                    'direction'      => 'out',                       // money going out
+                    'source_type'    => 'transaction',
+                    'source_id'      => $officeTransaction->id,
+                    'amount'         => $officeTransaction->amount,
+                    'mode_of_payment'=> $officeTransaction->mode_of_payment,
+                    'paid_by'        => $officeTransaction->paid_by,
+                    'received_by'    => $vendorName,
+                    'description'    => $officeTransaction->description,
+                    'status'         => 'active',
                 ]);
             });
 
