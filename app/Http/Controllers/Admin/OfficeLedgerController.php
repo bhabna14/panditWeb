@@ -28,7 +28,7 @@ class OfficeLedgerController extends Controller
         $to   = $request->query('to_date');
         $cat  = $request->query('category');
 
-        // ✅ FIX: use whereDate for the full range so whole days are included
+        // Use whereDate for full-day ranges
         $q = OfficeLedger::query()
             ->active()
             ->when($from && $to, function ($qq) use ($from, $to) {
@@ -42,18 +42,28 @@ class OfficeLedgerController extends Controller
                 $qq->whereDate('entry_date', '<=', $to);
             })
             ->when($cat, function ($qq) use ($cat) {
+                // exact match on stored category value
                 $qq->where('category', $cat);
             });
 
         $rows = $q->orderBy('entry_date', 'desc')
                   ->orderBy('id', 'desc')
                   ->get([
-                      'id','entry_date','category','direction','amount','mode_of_payment',
-                      'paid_by','received_by','description','source_type','source_id'
+                      'id',
+                      'entry_date',
+                      'category',
+                      'direction',
+                      'amount',
+                      'mode_of_payment',
+                      'paid_by',
+                      'received_by',
+                      'description',
+                      'source_type',
+                      'source_id',
                   ]);
 
-        $inTotal  = (float) $rows->where('direction','in')->sum('amount');
-        $outTotal = (float) $rows->where('direction','out')->sum('amount');
+        $inTotal  = (float) $rows->where('direction', 'in')->sum('amount');
+        $outTotal = (float) $rows->where('direction', 'out')->sum('amount');
 
         if ($rows->isEmpty()) {
             return response()->json([
@@ -67,6 +77,7 @@ class OfficeLedgerController extends Controller
             ]);
         }
 
+        // Normalise rows for front-end
         $rows = $rows->map(function ($r) {
             return [
                 'id'          => $r->id,
@@ -97,6 +108,7 @@ class OfficeLedgerController extends Controller
             ];
         }
 
+        // Split into in/out and accumulate totals
         foreach ($rows as $r) {
             $ck = $r['category'];
 
@@ -112,13 +124,14 @@ class OfficeLedgerController extends Controller
                     'source'      => $r['source'],
                 ];
                 $groups[$ck]['received_total'] += $r['amount'];
-            } else {
+            } elseif ($r['direction'] === 'out') {
                 $groups[$ck]['paid'][] = [
                     'id'          => $r['id'],
                     'date'        => $r['date'],
                     'amount'      => $r['amount'],
                     'mode'        => $r['mode'],
                     'paid_by'     => $r['paid_by'],
+                    'received_by' => $r['received_by'], // <- IMPORTANT: who we paid to (e.g. vendor)
                     'description' => $r['description'],
                     'source'      => $r['source'],
                 ];
@@ -126,14 +139,22 @@ class OfficeLedgerController extends Controller
             }
         }
 
+        // Sort inside groups and finalise net
         foreach ($groups as $ck => $g) {
-            usort($groups[$ck]['received'], fn($a,$b) => ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id']));
-            usort($groups[$ck]['paid'],     fn($a,$b) => ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id']));
+            usort($groups[$ck]['received'], function ($a, $b) {
+                return ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id']);
+            });
+
+            usort($groups[$ck]['paid'], function ($a, $b) {
+                return ($b['date'] <=> $a['date']) ?: ($b['id'] <=> $a['id']);
+            });
+
             $groups[$ck]['received_total'] = round($groups[$ck]['received_total'], 2);
             $groups[$ck]['paid_total']     = round($groups[$ck]['paid_total'], 2);
             $groups[$ck]['net']            = round($groups[$ck]['received_total'] - $groups[$ck]['paid_total'], 2);
         }
 
+        // Flatten for optional export/debug usage
         $flat = [];
         $sl = 1;
         foreach ($categories as $ck) {
@@ -160,14 +181,16 @@ class OfficeLedgerController extends Controller
                     'amount'      => $r['amount'],
                     'mode'        => $r['mode'],
                     'paid_by'     => $r['paid_by'],
-                    'received_by' => null,
+                    'received_by' => $r['received_by'], // keep vendor / payee
                     'description' => $r['description'],
                     'source'      => $r['source'],
                 ];
             }
         }
 
-        usort($flat, fn($a,$b) => ($b['date'] <=> $a['date']) ?: ($b['sl'] <=> $a['sl']));
+        usort($flat, function ($a, $b) {
+            return ($b['date'] <=> $a['date']) ?: ($b['sl'] <=> $a['sl']);
+        });
 
         return response()->json([
             'success'    => true,

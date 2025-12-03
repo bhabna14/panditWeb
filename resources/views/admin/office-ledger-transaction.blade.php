@@ -621,6 +621,7 @@
                 <td>${r.date ?? ''}</td>
                 <td class="mono text-end">${fmtINR(r.amount)}</td>
                 <td class="text-cap">${r.mode || ''}</td>
+                <td class="text-cap">${r.received_by || ''}</td>
                 <td class="text-cap">${r.paid_by || ''}</td>
                 <td>${r.description || ''}</td>
             </tr>
@@ -684,18 +685,19 @@
                                     <th>Date</th>
                                     <th class="text-end">Amount</th>
                                     <th>Mode</th>
+                                    <th>Paid To</th>
                                     <th>Paid By</th>
                                     <th>Description</th>
                                 </tr>
                                 </thead>
                                 <tbody>
-                                ${paidRows || `<tr><td colspan="5" class="text-center muted">No records</td></tr>`}
+                                ${paidRows || `<tr><td colspan="6" class="text-center muted">No records</td></tr>`}
                                 </tbody>
                                 <tfoot>
                                 <tr>
                                     <th class="text-end">Total:</th>
                                     <th class="text-end mono">${fmtINR(group.paid_total || 0)}</th>
-                                    <th colspan="3"></th>
+                                    <th colspan="4"></th>
                                 </tr>
                                 </tfoot>
                             </table>
