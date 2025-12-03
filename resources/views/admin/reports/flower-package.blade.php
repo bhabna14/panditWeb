@@ -402,7 +402,7 @@
         }
 
         .col-money {
-            text-align: right;
+            text-align: left;
         }
 
         .col-money span.currency {
@@ -585,6 +585,73 @@
             </div>
         @endif
 
+        
+        {{-- ========= DAY MODE: per-day table ========= --}}
+        @if ($mode === 'day' && $hasDaily)
+            <div class="workbook">
+                <div class="workbook-head">
+                    <div>
+                        <div class="workbook-sub">
+                            Range: {{ \Carbon\Carbon::parse($start)->format('d M Y') }} —
+                            {{ \Carbon\Carbon::parse($end)->format('d M Y') }} |
+                            Days with data: <strong>{{ $rangeDaysWithData }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="excel-wrap">
+                    <table class="excel">
+                        <thead>
+                            <tr>
+                                <th class="col-index">#</th>
+                                <th class="col-date">Date</th>
+                                <th class="col-money">Total Estimate (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $row = 0; @endphp
+                            @foreach ($dailyEstimates as $date => $payload)
+                                @php
+                                    $row++;
+                                    $grand = $payload['grand_total_amount'] ?? 0;
+                                @endphp
+                                <tr>
+                                    <td class="col-index">{{ $row }}</td>
+                                    <td class="col-date">
+                                        {{ \Carbon\Carbon::parse($date)->format('D, d M Y') }}
+                                    </td>
+                                    <td class="col-money">
+                                        <span class="currency">₹</span>{{ number_format($grand, 2) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2" class="col-text">
+                                    Subtotal ({{ $rangeDaysWithData }} active
+                                    day{{ $rangeDaysWithData == 1 ? '' : 's' }})
+                                </th>
+                                <th class="col-money">
+                                    <span class="currency">₹</span>{{ number_format($rangeTotal, 2) }}
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        @elseif ($mode === 'day' && !$hasDaily)
+            <div class="workbook">
+                <div class="workbook-head">
+                    <div>
+                        <div class="workbook-title">Estimate of Flower Cost — By Day</div>
+                        <div class="workbook-sub">
+                            No data for the selected range.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- ========= NEW: FILTER-RANGE ITEM SUMMARY TABLE ========= --}}
         @if (!empty($rangeItems))
             <div class="workbook">
@@ -654,72 +721,6 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-            </div>
-        @endif
-
-        {{-- ========= DAY MODE: per-day table ========= --}}
-        @if ($mode === 'day' && $hasDaily)
-            <div class="workbook">
-                <div class="workbook-head">
-                    <div>
-                        <div class="workbook-sub">
-                            Range: {{ \Carbon\Carbon::parse($start)->format('d M Y') }} —
-                            {{ \Carbon\Carbon::parse($end)->format('d M Y') }} |
-                            Days with data: <strong>{{ $rangeDaysWithData }}</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="excel-wrap">
-                    <table class="excel">
-                        <thead>
-                            <tr>
-                                <th class="col-index">#</th>
-                                <th class="col-date">Date</th>
-                                <th class="col-money">Total Estimate (₹)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @php $row = 0; @endphp
-                            @foreach ($dailyEstimates as $date => $payload)
-                                @php
-                                    $row++;
-                                    $grand = $payload['grand_total_amount'] ?? 0;
-                                @endphp
-                                <tr>
-                                    <td class="col-index">{{ $row }}</td>
-                                    <td class="col-date">
-                                        {{ \Carbon\Carbon::parse($date)->format('D, d M Y') }}
-                                    </td>
-                                    <td class="col-money">
-                                        <span class="currency">₹</span>{{ number_format($grand, 2) }}
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <th colspan="2" class="col-text">
-                                    Subtotal ({{ $rangeDaysWithData }} active
-                                    day{{ $rangeDaysWithData == 1 ? '' : 's' }})
-                                </th>
-                                <th class="col-money">
-                                    <span class="currency">₹</span>{{ number_format($rangeTotal, 2) }}
-                                </th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        @elseif ($mode === 'day' && !$hasDaily)
-            <div class="workbook">
-                <div class="workbook-head">
-                    <div>
-                        <div class="workbook-title">Estimate of Flower Cost — By Day</div>
-                        <div class="workbook-sub">
-                            No data for the selected range.
-                        </div>
-                    </div>
                 </div>
             </div>
         @endif
