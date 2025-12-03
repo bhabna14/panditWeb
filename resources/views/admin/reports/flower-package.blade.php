@@ -725,7 +725,7 @@
             </div>
         @endif
 
-         <div class="band">
+         <div class="band mt-4">
                 <div class="chips">
                   <h4>Package Flower Details</h4>
                 </div>
