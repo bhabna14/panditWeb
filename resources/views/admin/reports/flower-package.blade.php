@@ -725,6 +725,12 @@
             </div>
         @endif
 
+         <div class="band">
+                <div class="chips">
+                  <h4>Package Flower Details</h4>
+                </div>
+            </div>
+
         {{-- ========= DETAIL FLOWER ESTIMATE (DAY / MONTH) ========= --}}
         <div class="workbook">
             <div class="workbook-head">
