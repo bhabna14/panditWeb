@@ -28,7 +28,7 @@
 
 @section('content')
     <div class="container-fluid">
-        <div class="nu-hero p-4 mb-4">
+        <div class="nu-hero p-4 mb-4 mt-4">
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <h3 class="mb-1 fw-bold">Send WhatsApp Notification</h3>
