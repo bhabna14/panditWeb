@@ -29,7 +29,7 @@ class AdminNotificationController extends Controller
         $requiresParam = Msg91WhatsappService::requiresUrlParam();
         $buttonBase    = Msg91WhatsappService::buttonBase();
         $senderLabel   = Msg91WhatsappService::senderE164();
-        $templateName  = Msg91WhatsappService::templateName();   // e.g. 33_crores
+        $templateName  = Msg91WhatsappService::templateName();   // "customer"
 
         return view('admin.fcm-notification.send-whatsaap-notification', compact(
             'users',
@@ -46,9 +46,9 @@ class AdminNotificationController extends Controller
             'audience'    => ['required', Rule::in(['all', 'selected'])],
             'user'        => ['nullable', 'array'],
             'user.*'      => ['nullable', 'string'],
-            // Optional meta; only for preview/audit (NOT sent to MSG91)
-            'title'       => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            // These map to header_1 and body_1
+            'title'       => ['nullable', 'string', 'max:255'],  // header_1
+            'description' => ['nullable', 'string'],             // body_1
         ]);
 
         // Resolve recipients
@@ -83,7 +83,7 @@ class AdminNotificationController extends Controller
                 ->withInput();
         }
 
-        // You can still use title/description for local logging if you want
+        // Clean title/description before sending as template params
         $title = $this->sanitizeBodyValue($validated['title'] ?? '');
         $desc  = $this->sanitizeBodyValue($validated['description'] ?? '');
 
@@ -91,9 +91,9 @@ class AdminNotificationController extends Controller
         $wa = app(Msg91WhatsappService::class);
 
         try {
-            // IMPORTANT: Only pass recipients – NO template params,
-            // because your MSG91 template expects 0 header/body params.
-            $resp   = $wa->sendBulkTemplate($toMsisdns);
+            // title     -> header_1
+            // desc      -> body_1
+            $resp   = $wa->sendBulkTemplate($toMsisdns, $title, $desc);
             $status = $resp['http_status'] ?? 0;
             $json   = $resp['json'] ?? null;
 
@@ -183,7 +183,7 @@ class AdminNotificationController extends Controller
 
         return trim(preg_replace('/\s+/u', ' ', $s));
     }
-
+    
     public function create(Request $request)
     {
         $notifications = FCMNotification::orderBy('created_at', 'desc')->get();
