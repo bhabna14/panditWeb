@@ -16,7 +16,7 @@ use Twilio\Rest\Client;
 
 class AdminNotificationController extends Controller
 {
-    public function whatsappcreate(Request $request)
+   public function whatsappcreate(Request $request)
     {
         $users = User::query()
             ->select('id', 'name', 'email', 'mobile_number')
@@ -46,7 +46,7 @@ class AdminNotificationController extends Controller
             'audience'    => ['required', Rule::in(['all', 'selected'])],
             'user'        => ['nullable', 'array'],
             'user.*'      => ['nullable', 'string'],
-            // Optional meta; for template params / audit
+            // Optional meta; only for preview/audit (NOT sent to MSG91)
             'title'       => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
         ]);
@@ -83,7 +83,7 @@ class AdminNotificationController extends Controller
                 ->withInput();
         }
 
-        // Clean title/description before sending as template params
+        // You can still use title/description for local logging if you want
         $title = $this->sanitizeBodyValue($validated['title'] ?? '');
         $desc  = $this->sanitizeBodyValue($validated['description'] ?? '');
 
@@ -91,8 +91,9 @@ class AdminNotificationController extends Controller
         $wa = app(Msg91WhatsappService::class);
 
         try {
-            // NOW we send title & description as template params
-            $resp   = $wa->sendBulkTemplate($toMsisdns, $title, $desc);
+            // IMPORTANT: Only pass recipients – NO template params,
+            // because your MSG91 template expects 0 header/body params.
+            $resp   = $wa->sendBulkTemplate($toMsisdns);
             $status = $resp['http_status'] ?? 0;
             $json   = $resp['json'] ?? null;
 
