@@ -263,7 +263,7 @@
             background-image: linear-gradient(120deg, var(--indigo-600), var(--cyan));
             border-radius: 999px;
             padding: .42rem 1.1rem;
-            box-shadow: 0 8px 20px rgba(6, 182, 212, .32);
+            box-shadow: var(--sh-md);
             display: inline-flex;
             align-items: center;
             gap: .35rem;
@@ -512,7 +512,7 @@
             </div>
         </form>
 
-        {{-- Range Summary (earlier "Day Summary") --}}
+        {{-- Range Summary --}}
         <div class="card card-soft mb-4">
             <div class="card-header">
                 <div class="hstack">
@@ -568,7 +568,7 @@
                         </div>
                     @endif
 
-                    {{-- Price List per product (like your modal) --}}
+                    {{-- Price List per product (per subscription) --}}
                     @if (!empty($rangeEstimate['by_product_items']))
                         @foreach ($rangeEstimate['by_product_items'] as $pid => $group)
                             <div class="mb-1 fw-semibold">
@@ -609,6 +609,60 @@
                                 </table>
                             </div>
                         @endforeach
+                    @endif
+
+                    {{-- PRODUCT-WISE + DATE-WISE BREAKDOWN (package-wise, per day in range) --}}
+                    @if (!empty($rangeEstimate['per_product_per_day']))
+                        <div class="mt-4">
+                            <div class="fw-semibold mb-2">
+                                Product-wise day breakdown for
+                                {{ $fromDate->format('d M Y') }} – {{ $toDate->format('d M Y') }}
+                            </div>
+
+                            @foreach ($rangeEstimate['per_product_per_day'] as $pid => $prod)
+                                <div class="mb-4">
+                                    <div class="mb-1 fw-semibold">
+                                        {{ $prod['product_name'] }}
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-bordered table-hover align-middle">
+                                            <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th class="text-end">Active Subs</th>
+                                                <th class="text-end">Bundle Total / sub</th>
+                                                <th class="text-end">Subtotal</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @php $pSum = 0; @endphp
+                                            @foreach ($prod['days'] as $dKey => $row)
+                                                @php $pSum += $row['subtotal']; @endphp
+                                                <tr>
+                                                    <td>{{ \Carbon\Carbon::parse($row['date'])->format('D, d M Y') }}</td>
+                                                    <td class="text-end mono">{{ $row['subscriptions'] }}</td>
+                                                    <td class="text-end mono">
+                                                        ₹ {{ number_format($row['bundle_total'], 2) }}
+                                                    </td>
+                                                    <td class="text-end mono">
+                                                        ₹ {{ number_format($row['subtotal'], 2) }}
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                            <tfoot>
+                                            <tr>
+                                                <th colspan="3" class="text-end">Product Range Total</th>
+                                                <th class="text-end mono">
+                                                    <strong>₹ {{ number_format($pSum, 2) }}</strong>
+                                                </th>
+                                            </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     @endif
                 @endif
             </div>
