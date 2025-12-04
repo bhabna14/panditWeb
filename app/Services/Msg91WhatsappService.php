@@ -14,7 +14,7 @@ class Msg91WhatsappService
 
     // Template configuration (MATCH your MSG91 template setup)
     private const TEMPLATE_NAMESPACE = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
-    private const TEMPLATE_NAME      = '33_crores';
+    private const TEMPLATE_NAME      = 'customer';
     private const LANGUAGE_CODE      = 'en';
 
     private const ENDPOINT_BULK      = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
