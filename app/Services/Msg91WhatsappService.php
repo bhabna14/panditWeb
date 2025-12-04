@@ -7,26 +7,25 @@ use Illuminate\Support\Facades\Log;
 
 class Msg91WhatsappService
 {
-    /** ===== HARD-CODED MSG91 CONFIG (NO .env IN THIS EXAMPLE) ===== */
-    private const AUTHKEY            = '425546AOXNCrBOzpq6878de9cP1';      // <-- put your MSG91 authkey
-    private const INTEGRATED_NUMBER  = '919124420330';                 // digits only (no +)
-    private const SENDER_E164        = '+919124420330';                // for display/help only
+    /** ===== HARD-CODED MSG91 CONFIG ===== */
+    private const AUTHKEY            = '425546AOXNCrBOzpq6878de9cP1';
+    private const INTEGRATED_NUMBER  = '919124420330';   // digits only (no +)
+    private const SENDER_E164        = '+919124420330';  // for display/help only
 
     // Template configuration (MATCH your MSG91 template setup)
     private const TEMPLATE_NAMESPACE = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
-    private const TEMPLATE_NAME      = '33_crores';                    // <--- from your curl
-    private const LANGUAGE_CODE      = 'en';                           // <--- from your curl
+    private const TEMPLATE_NAME      = '33_crores';
+    private const LANGUAGE_CODE      = 'en';
 
     private const ENDPOINT_BULK      = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
-    // Template parameters count; 0 = no body/button variables
-    private const BODY_FIELDS        = 0;
+    // We now expect template variables: 1 header, 1 body
+    private const BODY_FIELDS        = 1;  // how many body_* vars we plan to use
 
-    // URL param/button support (not used here, but kept for future if you need it)
     private const REQUIRES_URL_PARAM = false;
     private const BUTTON_BASE        = '';
 
-    /** ============================================================ */
+    /** ==================================== */
 
     protected Client $http;
 
@@ -46,13 +45,15 @@ class Msg91WhatsappService
 
     /**
      * Send bulk template with MSG91 "bulk" endpoint.
-     * Currently assumes NO template parameters (components is {}).
      *
-     * @param array $to Array of MSISDN numbers (digits only, with country code)
+     * @param array       $to   Array of MSISDN numbers (digits only, with country code)
+     * @param string|null $title       -> will go into header_1
+     * @param string|null $description -> will go into body_1
+     *
      * @return array ['http_status' => int, 'json' => ?array, 'body' => string]
      * @throws \Throwable
      */
-    public function sendBulkTemplate(array $to): array
+    public function sendBulkTemplate(array $to, ?string $title = null, ?string $description = null): array
     {
         // Normalize: only keep digits, unique
         $to = array_values(array_unique(array_map(
@@ -60,27 +61,36 @@ class Msg91WhatsappService
             $to
         )));
 
-        // Build components. For 0-parameter template, MSG91 expects "components": {}
-        // i.e., an empty object, not an empty array.
-        if (self::BODY_FIELDS <= 0) {
-            $components = (object)[];  // -> "{}" in JSON
-        } else {
-            // If later you add body variables in your template,
-            // you can build the "components" structure here.
-            // Example skeleton (commented):
-            //
-            // $components = [
-            //     'body' => [
-            //         [
-            //             'type'       => 'text',
-            //             'parameters' => [
-            //                 ['type' => 'text', 'text' => 'Value 1'],
-            //                 ['type' => 'text', 'text' => 'Value 2'],
-            //             ],
-            //         ],
-            //     ],
-            // ];
-            $components = (object)[];
+        // Build components:
+        //
+        // For MSG91, dynamic vars are sent as:
+        // "components": {
+        //   "body_1":   { "type": "text", "value": "..." },
+        //   "header_1": { "type": "text", "value": "..." }
+        // }
+        //
+        // These keys MUST match the variables in your template.
+        $components = [];
+
+        // Body param (first body variable)
+        if (!empty($description)) {
+            $components['body_1'] = [
+                'type'  => 'text',
+                'value' => $description,
+            ];
+        }
+
+        // Header param (first header variable)
+        if (!empty($title)) {
+            $components['header_1'] = [
+                'type'  => 'text',
+                'value' => $title,
+            ];
+        }
+
+        // If template has zero params (no variables), components must be {}
+        if (!$components) {
+            $components = (object)[]; // "{}" in JSON
         }
 
         $payload = [
