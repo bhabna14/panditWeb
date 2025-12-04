@@ -9,9 +9,6 @@
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    {{-- Bootstrap Icons for WhatsApp icon --}}
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
 
     <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -653,16 +650,6 @@
                                    </a>`
                                 : '';
 
-                            // 🔹 New WhatsApp button
-                            const whatsappBtn = r.users?.mobile_number
-                                ? `<a href="{{ route('whatsapp-notification.create') }}?mobile=${r.users?.mobile_number || ''}"
-                                       class="btn btn-sm btn-success"
-                                       target="_blank" rel="noopener"
-                                       title="Send WhatsApp">
-                                       <i class="bi bi-whatsapp"></i>
-                                   </a>`
-                                : '';
-
                             let pauseResumeBtn = '';
                             if (r.status === 'active') {
                                 pauseResumeBtn =
@@ -695,7 +682,6 @@
                                             <i class="fas fa-map-marker-alt"></i>
                                         </button>
                                         ${notifyBtn}
-                                        ${whatsappBtn}
                                         ${viewSubscriptionBtn}
                                         ${pauseResumeBtn}
                                     </div>
