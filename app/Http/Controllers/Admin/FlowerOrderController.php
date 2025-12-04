@@ -109,11 +109,11 @@ class FlowerOrderController extends Controller
                 });
         }
 
-      if ($filter === 'end') {
-    // assuming $todayStart is Carbon for today 00:00:00
-    $todayDate = $todayStart->toDateString();
+        if ($filter === 'end') {
+        // assuming $todayStart is Carbon for today 00:00:00
+        $todayDate = $todayStart->toDateString();
 
-    $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
+        $query->where(function ($dateQuery) use ($todayStart, $todayEnd) {
             $dateQuery->where(function ($sq) use ($todayStart, $todayEnd) {
                     $sq->whereNotNull('new_date')
                        ->whereBetween('new_date', [$todayStart, $todayEnd]);
@@ -141,7 +141,7 @@ class FlowerOrderController extends Controller
                 });
         })
         ->withoutOtherActiveOrPending();
-}
+        }
 
         if ($filter === 'fivedays') {
             $tz    = config('app.timezone');
