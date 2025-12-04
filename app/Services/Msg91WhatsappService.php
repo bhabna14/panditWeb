@@ -7,21 +7,26 @@ use Illuminate\Support\Facades\Log;
 
 class Msg91WhatsappService
 {
-    /** ===== HARD-CODED MSG91 CONFIG (no .env) ===== */
-    private const AUTHKEY              = '425546AOXNCrBOzpq6878de9cP1';
-    private const INTEGRATED_NUMBER    = '919124420330';            // digits only (no +)
-    private const SENDER_E164          = '+919124420330';           // for display/help only
-    private const TEMPLATE_NAMESPACE   = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
-    private const TEMPLATE_NAME        = 'flower_wp_message';       // update if you duplicated template
-    private const LANGUAGE_CODE        = 'en_US';
-    private const ENDPOINT_BULK        = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
+    /** ===== HARD-CODED MSG91 CONFIG (NO .env IN THIS EXAMPLE) ===== */
+    private const AUTHKEY            = '425546AOXNCrBOzpq6878de9cP1';      // <-- put your MSG91 authkey
+    private const INTEGRATED_NUMBER  = '919124420330';                 // digits only (no +)
+    private const SENDER_E164        = '+919124420330';                // for display/help only
 
-    // Your template must have 0 placeholders (body/buttons). We will send no components.
-    private const BODY_FIELDS          = 0;     // 0 == don’t send body_*
-    private const REQUIRES_URL_PARAM   = false; // removed
-    private const BUTTON_BASE          = '';    // not used
+    // Template configuration (MATCH your MSG91 template setup)
+    private const TEMPLATE_NAMESPACE = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
+    private const TEMPLATE_NAME      = '33_crores';                    // <--- from your curl
+    private const LANGUAGE_CODE      = 'en';                           // <--- from your curl
 
-    /** ============================================ */
+    private const ENDPOINT_BULK      = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
+
+    // Template parameters count; 0 = no body/button variables
+    private const BODY_FIELDS        = 0;
+
+    // URL param/button support (not used here, but kept for future if you need it)
+    private const REQUIRES_URL_PARAM = false;
+    private const BUTTON_BASE        = '';
+
+    /** ============================================================ */
 
     protected Client $http;
 
@@ -37,16 +42,46 @@ class Msg91WhatsappService
     public static function requiresUrlParam(): bool   { return self::REQUIRES_URL_PARAM; }
     public static function buttonBase(): string       { return self::BUTTON_BASE; }
     public static function senderE164(): string       { return self::SENDER_E164; }
+    public static function templateName(): string     { return self::TEMPLATE_NAME; }
 
     /**
-     * Send bulk template without components (0 params).
+     * Send bulk template with MSG91 "bulk" endpoint.
+     * Currently assumes NO template parameters (components is {}).
+     *
+     * @param array $to Array of MSISDN numbers (digits only, with country code)
+     * @return array ['http_status' => int, 'json' => ?array, 'body' => string]
+     * @throws \Throwable
      */
     public function sendBulkTemplate(array $to): array
     {
+        // Normalize: only keep digits, unique
         $to = array_values(array_unique(array_map(
             fn($n) => preg_replace('/\D+/', '', (string)$n),
             $to
         )));
+
+        // Build components. For 0-parameter template, MSG91 expects "components": {}
+        // i.e., an empty object, not an empty array.
+        if (self::BODY_FIELDS <= 0) {
+            $components = (object)[];  // -> "{}" in JSON
+        } else {
+            // If later you add body variables in your template,
+            // you can build the "components" structure here.
+            // Example skeleton (commented):
+            //
+            // $components = [
+            //     'body' => [
+            //         [
+            //             'type'       => 'text',
+            //             'parameters' => [
+            //                 ['type' => 'text', 'text' => 'Value 1'],
+            //                 ['type' => 'text', 'text' => 'Value 2'],
+            //             ],
+            //         ],
+            //     ],
+            // ];
+            $components = (object)[];
+        }
 
         $payload = [
             'integrated_number' => self::INTEGRATED_NUMBER,
@@ -61,8 +96,12 @@ class Msg91WhatsappService
                         'policy' => 'deterministic',
                     ],
                     'namespace' => self::TEMPLATE_NAMESPACE,
-                    // IMPORTANT: No components if 0 params expected
-                    'to_and_components' => [[ 'to' => $to ]],
+                    'to_and_components' => [
+                        [
+                            'to'         => $to,
+                            'components' => $components,
+                        ],
+                    ],
                 ],
             ],
         ];
@@ -74,18 +113,30 @@ class Msg91WhatsappService
         ];
 
         try {
-            $res  = $this->http->post(self::ENDPOINT_BULK, ['headers' => $headers, 'json' => $payload]);
+            $res  = $this->http->post(self::ENDPOINT_BULK, [
+                'headers' => $headers,
+                'json'    => $payload,
+            ]);
+
             $code = $res->getStatusCode();
-            $body = (string) $res->getBody();
+            $body = (string)$res->getBody();
 
             $json = null;
-            try { $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR); } catch (\Throwable $e) {}
+            try {
+                $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
+            } catch (\Throwable $e) {
+                // If decode fails, leave $json = null.
+            }
 
             if ($json && isset($json['errors'])) {
                 Log::warning('MSG91 logical errors', ['errors' => $json['errors']]);
             }
 
-            return ['http_status' => $code, 'json' => $json, 'body' => $body];
+            return [
+                'http_status' => $code,
+                'json'        => $json,
+                'body'        => $body,
+            ];
         } catch (\Throwable $e) {
             Log::error('MSG91 bulk API error', ['error' => $e->getMessage()]);
             throw $e;

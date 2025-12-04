@@ -16,7 +16,172 @@ use App\Services\Msg91WhatsappService;
 
 class AdminNotificationController extends Controller
 {
-    public function create(Request $request)
+    public function whatsappcreate(Request $request)
+    {
+        $users = User::query()
+            ->select('id', 'name', 'email', 'mobile_number')
+            ->whereNotNull('mobile_number')
+            ->where('mobile_number', '!=', '')
+            ->orderBy('name')
+            ->limit(1000)
+            ->get();
+
+        $requiresParam = Msg91WhatsappService::requiresUrlParam();
+        $buttonBase    = Msg91WhatsappService::buttonBase();
+        $senderLabel   = Msg91WhatsappService::senderE164();
+        $templateName  = Msg91WhatsappService::templateName();   // e.g. 33_crores
+
+        return view('admin.fcm-notification.send-whatsaap-notification', compact(
+            'users',
+            'requiresParam',
+            'buttonBase',
+            'senderLabel',
+            'templateName'
+        ));
+    }
+
+    public function whatsappSend(Request $request)
+    {
+        $validated = $request->validate([
+            'audience'    => ['required', Rule::in(['all', 'selected'])],
+            'user'        => ['nullable', 'array'],
+            'user.*'      => ['nullable', 'string'],
+            // Optional meta; NOT sent to MSG91 (for audit/preview only)
+            'title'       => ['nullable', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+        ]);
+
+        // Resolve recipients
+        if ($validated['audience'] === 'all') {
+            $rawNumbers = User::query()
+                ->whereNotNull('mobile_number')
+                ->where('mobile_number', '!=', '')
+                ->pluck('mobile_number')
+                ->all();
+        } else {
+            $rawNumbers = array_unique(array_map('trim', $validated['user'] ?? []));
+        }
+
+        // Normalize → MSISDN
+        $defaultCcDigits = $this->deriveDefaultCcDigitsFromNumber(
+            Msg91WhatsappService::integratedNumber()
+        );
+
+        $toMsisdns = [];
+        foreach ($rawNumbers as $raw) {
+            $msisdn = $this->toMsisdn($raw, $defaultCcDigits);
+            if ($msisdn !== null) {
+                $toMsisdns[] = $msisdn;
+            }
+        }
+
+        $toMsisdns = array_values(array_unique($toMsisdns));
+
+        if (!$toMsisdns) {
+            return back()
+                ->with('error', 'No valid phone numbers found to send.')
+                ->withInput();
+        }
+
+        /** @var Msg91WhatsappService $wa */
+        $wa = app(Msg91WhatsappService::class);
+
+        try {
+            // NOTE: We are still sending WITHOUT template parameters.
+            // The template itself (e.g. 33_crores) must not require variables.
+            $resp   = $wa->sendBulkTemplate($toMsisdns);
+            $status = $resp['http_status'] ?? 0;
+            $json   = $resp['json'] ?? null;
+
+            $okHttp = ($status >= 200 && $status < 300);
+            $okJson = false;
+            $reason = null;
+
+            if ($json) {
+                $statusField = strtolower((string)($json['status'] ?? $json['type'] ?? ''));
+                $okJson = in_array($statusField, ['success', 'queued', 'accepted'], true)
+                    || ($json['success'] ?? false) === true;
+
+                $reason = $json['message']
+                    ?? ($json['error']['message'] ?? null)
+                    ?? ($json['errors'][0]['message'] ?? null)
+                    ?? ($json['errors'][0] ?? null)
+                    ?? null;
+            }
+
+            if ($okHttp && (!$json || $okJson)) {
+                return back()->with(
+                    'success',
+                    'WhatsApp notifications queued to ' . count($toMsisdns) . ' recipient(s).'
+                );
+            }
+
+            Log::error('MSG91 bulk WA failed', [
+                'http_status' => $status,
+                'json'        => $json,
+                'body'        => $resp['body'] ?? null,
+            ]);
+
+            return back()->with(
+                'error',
+                'MSG91 bulk send failed: ' . ($reason ?: 'send_failed')
+            );
+        } catch (\Throwable $e) {
+            Log::error('MSG91 bulk WA exception', ['error' => $e->getMessage()]);
+
+            return back()->with(
+                'error',
+                'MSG91 bulk send error: ' . $e->getMessage()
+            );
+        }
+    }
+
+    private function deriveDefaultCcDigitsFromNumber(string $integratedNumberDigits): string
+    {
+        if (str_starts_with($integratedNumberDigits, '91')) {
+            return '91';
+        }
+
+        return substr($integratedNumberDigits, 0, 3) ?: '91';
+    }
+
+    private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
+    {
+        $raw    = (string)$raw;
+        $digits = preg_replace('/\D+/', '', $raw);
+
+        // Already in +CC######## style
+        if ($raw !== '' && $raw[0] === '+' && strlen($digits) >= 11) {
+            return $digits;
+        }
+
+        // Local 10-digit (India)
+        if (strlen($digits) === 10) {
+            return $defaultCcDigits . $digits;
+        }
+
+        // 0 + 10 digits
+        if (strlen($digits) === 11 && $digits[0] === '0') {
+            return $defaultCcDigits . substr($digits, 1);
+        }
+
+        // Already with CC (11+ digits)
+        if (strlen($digits) >= 11) {
+            return $digits;
+        }
+
+        return null;
+    }
+
+    private function sanitizeBodyValue(string $s): string
+    {
+        $s = str_replace(["\r", "\n"], ' ', $s);
+
+        return trim(preg_replace('/\s+/u', ' ', $s));
+    }
+
+
+      public function create(Request $request)
     {
         $notifications = FCMNotification::orderBy('created_at', 'desc')->get();
 
@@ -279,124 +444,5 @@ class AdminNotificationController extends Controller
     {
         FCMNotification::findOrFail($id)->delete();
         return redirect()->route('admin.notification.create')->with('success', 'Notification deleted successfully!');
-    }
-
-    public function whatsappcreate(Request $request)
-    {
-        $users = User::query()
-            ->select('id','name','email','mobile_number')
-            ->whereNotNull('mobile_number')
-            ->where('mobile_number','!=','')
-            ->orderBy('name')
-            ->limit(1000)
-            ->get();
-
-        $requiresParam = Msg91WhatsappService::requiresUrlParam(); // now false
-        $buttonBase    = Msg91WhatsappService::buttonBase();       // ''
-        $senderLabel   = Msg91WhatsappService::senderE164();
-
-        return view('admin.fcm-notification.send-whatsaap-notification', compact(
-            'users','requiresParam','buttonBase','senderLabel'
-        ));
-    }
-
-    public function whatsappSend(Request $request)
-    {
-        $validated = $request->validate([
-            'audience'    => ['required', Rule::in(['all','selected'])],
-            'user'        => ['nullable','array'],
-            'user.*'      => ['nullable','string'],
-            // Optional; not sent to MSG91 (template has 0 params)
-            'title'       => ['nullable','string','max:255'],
-            'description' => ['nullable','string'],
-        ]);
-
-        // Resolve recipients
-        if ($validated['audience'] === 'all') {
-            $rawNumbers = User::query()
-                ->whereNotNull('mobile_number')
-                ->where('mobile_number','!=','')
-                ->pluck('mobile_number')
-                ->all();
-        } else {
-            $rawNumbers = array_unique(array_map('trim', $validated['user'] ?? []));
-        }
-
-        // Normalize -> MSISDN
-        $defaultCcDigits = $this->deriveDefaultCcDigitsFromNumber(Msg91WhatsappService::integratedNumber());
-        $toMsisdns = [];
-        foreach ($rawNumbers as $raw) {
-            $msisdn = $this->toMsisdn($raw, $defaultCcDigits);
-            if ($msisdn !== null) $toMsisdns[] = $msisdn;
-        }
-        $toMsisdns = array_values(array_unique($toMsisdns));
-        if (!$toMsisdns) {
-            return back()->with('error', 'No valid phone numbers found to send.')->withInput();
-        }
-
-        /** @var Msg91WhatsappService $wa */
-        $wa = app(Msg91WhatsappService::class);
-
-        try {
-            // Send WITHOUT components (template expects 0 params)
-            $resp   = $wa->sendBulkTemplate($toMsisdns);
-            $status = $resp['http_status'] ?? 0;
-            $json   = $resp['json'] ?? null;
-
-            $okHttp = ($status >= 200 && $status < 300);
-            $okJson = false;
-            $reason = null;
-
-            if ($json) {
-                $statusField = strtolower((string)($json['status'] ?? $json['type'] ?? ''));
-                $okJson = in_array($statusField, ['success','queued','accepted'], true)
-                       || ($json['success'] ?? false) === true;
-
-                $reason = $json['message']
-                    ?? ($json['error']['message'] ?? null)
-                    ?? ($json['errors'][0]['message'] ?? null)
-                    ?? ($json['errors'][0] ?? null)
-                    ?? null;
-            }
-
-            if ($okHttp && (!$json || $okJson)) {
-                return back()->with('success', 'WhatsApp notifications queued to '.count($toMsisdns).' recipient(s).');
-            }
-
-            \Log::error('MSG91 bulk WA failed', [
-                'http_status'=>$status,
-                'json'=>$json,
-                'body'=>$resp['body'] ?? null,
-            ]);
-            return back()->with('error', 'MSG91 bulk send failed: ' . ($reason ?: 'send_failed'));
-
-        } catch (\Throwable $e) {
-            \Log::error('MSG91 bulk WA exception', ['error'=>$e->getMessage()]);
-            return back()->with('error', 'MSG91 bulk send error: '.$e->getMessage());
-        }
-    }
-
-    private function deriveDefaultCcDigitsFromNumber(string $integratedNumberDigits): string
-    {
-        if (str_starts_with($integratedNumberDigits, '91')) return '91';
-        return substr($integratedNumberDigits, 0, 3) ?: '91';
-    }
-
-    private function toMsisdn(?string $raw, string $defaultCcDigits): ?string
-    {
-        $raw    = (string) $raw;
-        $digits = preg_replace('/\D+/', '', $raw);
-
-        if ($raw !== '' && $raw[0] === '+' && strlen($digits) >= 11) return $digits;              // +CC######## -> digits
-        if (strlen($digits) === 10)                                   return $defaultCcDigits.$digits; // local 10
-        if (strlen($digits) === 11 && $digits[0] === '0')             return $defaultCcDigits.substr($digits,1);
-        if (strlen($digits) >= 11)                                    return $digits;                 // already with CC
-        return null;
-    }
-
-    private function sanitizeBodyValue(string $s): string
-    {
-        $s = str_replace(["\r", "\n"], ' ', $s);
-        return trim(preg_replace('/\s+/u', ' ', $s));
     }
 }

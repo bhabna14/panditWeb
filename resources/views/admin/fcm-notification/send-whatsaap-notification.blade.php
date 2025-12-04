@@ -32,7 +32,10 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <h3 class="mb-1 fw-bold">Send WhatsApp Notification</h3>
-                    <div class="text-muted">Send to all users or select specific phone numbers.</div>
+                    <div class="text-muted">
+                        Send to all users or select specific phone numbers using MSG91 template:
+                        <code>{{ $templateName ?? 'N/A' }}</code>.
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,9 +49,11 @@
                 </ul>
             </div>
         @endif
+
         @if (session()->has('success'))
             <div class="alert alert-success" id="Message">{{ session()->get('success') }}</div>
         @endif
+
         @if (session()->has('error'))
             <div class="alert alert-danger" id="Message">{{ session()->get('error') }}</div>
         @endif
@@ -56,20 +61,19 @@
         <div class="row">
             <div class="col-lg-6">
                 <div class="nu-card p-4 mb-4">
-                    <form action="{{ route('whatsapp-notification.send') }}" method="POST" enctype="multipart/form-data"
-                        id="waForm">
+                    <form action="{{ route('whatsapp-notification.send') }}" method="POST" id="waForm">
                         @csrf
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold d-block">Audience</label>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="audience" id="audAll" value="all"
-                                    {{ old('audience', 'all') === 'all' ? 'checked' : '' }}>
+                                       {{ old('audience', 'all') === 'all' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audAll">All users</label>
                             </div>
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="audience" id="audSelected"
-                                    value="selected" {{ old('audience') === 'selected' ? 'checked' : '' }}>
+                                <input class="form-check-input" type="radio" name="audience" id="audSelected" value="selected"
+                                       {{ old('audience') === 'selected' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audSelected">Selected users / custom numbers</label>
                             </div>
                         </div>
@@ -95,21 +99,26 @@
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Title (optional, not sent)</label>
                             <input type="text" name="title" class="form-control" maxlength="255"
-                                value="{{ old('title') }}">
+                                   value="{{ old('title') }}">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Message (optional, not sent)</label>
                             <textarea name="description" rows="5" class="form-control">{{ old('description') }}</textarea>
-                            <div class="form-text">These are for preview/audit only. The approved MSG91 template content
-                                will be sent.</div>
+                            <div class="form-text">
+                                These are for preview/audit only.
+                                The approved MSG91 template content (<code>{{ $templateName ?? 'template' }}</code>)
+                                will actually be sent.
+                            </div>
                         </div>
 
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success"><i class="fe fe-send me-1"></i> Send
-                                WhatsApp</button>
-                            <button type="button" class="btn btn-outline-secondary" id="waPreviewBtn"><i
-                                    class="fe fe-eye me-1"></i> Preview</button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fe fe-send me-1"></i> Send WhatsApp
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="waPreviewBtn">
+                                <i class="fe fe-eye me-1"></i> Preview
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -119,9 +128,15 @@
                 <div class="nu-card p-4">
                     <h5 class="fw-bold mb-3">Tips</h5>
                     <ul class="mb-0">
-                        <li>Your MSG91 sender {{ $senderLabel ?? '+91XXXXXXXXXX' }} must be approved & verified.</li>
-                        <li>Template <code>flower_wp_message</code> must have <b>no placeholders</b> and <b>no URL
-                                token</b>.</li>
+                        <li>Your MSG91 sender {{ $senderLabel ?? '+91XXXXXXXXXX' }} must be approved &amp; verified.</li>
+                        <li>
+                            Template <code>{{ $templateName ?? '33_crores' }}</code> must be approved in MSG91.
+                            If it has <b>no placeholders</b>, this page is ready to use.
+                        </li>
+                        <li>
+                            If you later add template parameters (body variables/buttons),
+                            update <code>Msg91WhatsappService::sendBulkTemplate()</code> to send components accordingly.
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -139,6 +154,7 @@
             tags: true,
             tokenSeparators: [',', ' ', ';']
         });
+
         const setAudienceState = () => {
             const mode = document.querySelector('input[name="audience"]:checked')?.value;
             const disabled = (mode !== 'selected');
@@ -147,15 +163,22 @@
                 $waUsers.val(null).trigger('change');
             }
         };
-        document.querySelectorAll('input[name="audience"]').forEach(el => el.addEventListener('change', setAudienceState));
+
+        document.querySelectorAll('input[name="audience"]').forEach(el =>
+            el.addEventListener('change', setAudienceState)
+        );
         setAudienceState();
 
         document.getElementById('waPreviewBtn').addEventListener('click', () => {
             const title = document.querySelector('[name="title"]').value || '(No title)';
-            const desc = document.querySelector('[name="description"]').value || '(No message)';
+            const desc  = document.querySelector('[name="description"]').value || '(No message)';
+
             Swal.fire({
                 title,
-                html: `<div style="text-align:left"><p><b>${title}</b></p><p>${desc.replace(/\n/g,'<br>')}</p></div>`,
+                html: `<div style="text-align:left">
+                        <p><b>${title}</b></p>
+                        <p>${desc.replace(/\n/g,'<br>')}</p>
+                       </div>`,
                 confirmButtonText: 'Looks Good'
             });
         });
