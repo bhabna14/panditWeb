@@ -14,21 +14,45 @@ use App\Models\PackageItem;
 
 class SubscriptionPackageEstimateController extends Controller
 {
-    public function index(Request $request)
+     public function index(Request $request)
     {
-        // Inputs
-        $dateStr   = $request->input('date',  Carbon::today()->toDateString());
-        $monthStr  = $request->input('month', Carbon::today()->format('Y-m'));
-        // per-day-price filter on Subscription products: "all" | "has" | <numeric exact value>
+        // ---- Inputs ---------------------------------------------------------
+        $today = Carbon::today();
+
+        $fromStr = $request->input('from_date');
+        $toStr   = $request->input('to_date');
+
+        // Default: today -> today
+        if (!$fromStr && !$toStr) {
+            $fromStr = $today->toDateString();
+            $toStr   = $today->toDateString();
+        } elseif ($fromStr && !$toStr) {
+            $toStr = $fromStr;
+        } elseif (!$fromStr && $toStr) {
+            $fromStr = $toStr;
+        }
+
+        $fromDate = Carbon::parse($fromStr)->startOfDay();
+        $toDate   = Carbon::parse($toStr)->endOfDay();
+
+        // If reversed, swap
+        if ($toDate->lt($fromDate)) {
+            [$fromDate, $toDate] = [
+                $toDate->copy()->startOfDay(),
+                $fromDate->copy()->endOfDay(),
+            ];
+        }
+
+        // Month for month summary – default to fromDate's month
+        $monthStr  = $request->input('month', $fromDate->format('Y-m'));
         $pdpFilter = $request->input('per_day_price', 'all');
 
-        $date       = Carbon::parse($dateStr)->startOfDay();
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
-        // --- Only Subscription category ---
+        // --- Only Subscription category -------------------------------------
         $subProdQ = FlowerProduct::query()
-            ->select('product_id','name','category','per_day_price','status')
+            ->select('product_id', 'name', 'category', 'per_day_price', 'status')
             ->whereRaw('LOWER(category) = ?', ['subscription']);
 
         // Dropdown options: ONLY Subscription products
@@ -41,89 +65,185 @@ class SubscriptionPackageEstimateController extends Controller
 
         // Apply chosen per_day_price filter
         $subProdFilteredQ = clone $subProdQ;
+
         if ($pdpFilter === 'has') {
             $subProdFilteredQ->whereNotNull('per_day_price');
         } elseif ($pdpFilter !== 'all' && is_numeric($pdpFilter)) {
-            $subProdFilteredQ->where('per_day_price', (float)$pdpFilter);
+            $subProdFilteredQ->where('per_day_price', (float) $pdpFilter);
         }
+
         $subProducts = $subProdFilteredQ->get();
 
         // Lookups
-        $subsByProductId = $subProducts->keyBy('product_id');
+        $subsByProductId       = $subProducts->keyBy('product_id');
         $subscriptionProductIds = $subProducts->pluck('product_id')->all();
 
-        // Day + Month estimates
-        $dayEstimate   = $this->estimateForDate($date, $subscriptionProductIds, $subsByProductId);
-        $monthEstimate = $this->estimateForRange($monthStart, $monthEnd, $subscriptionProductIds, $subsByProductId);
+        // ---- Range + Month estimates ---------------------------------------
+        $rangeEstimate = $this->estimateRangeSummary(
+            $fromDate,
+            $toDate,
+            $subscriptionProductIds,
+            $subsByProductId
+        );
+
+        $monthEstimate = $this->estimateForRange(
+            $monthStart,
+            $monthEnd,
+            $subscriptionProductIds,
+            $subsByProductId
+        );
 
         return view('admin.reports.subscription-package-estimates', [
-            'date'                => $date,
-            'monthStart'          => $monthStart,
-            'selectedDate'        => $date->toDateString(),
-            'selectedMonth'       => $monthStart->format('Y-m'),
-            'perDayPriceOptions'  => $perDayPriceOptions,
-            'selectedPdp'         => $pdpFilter,
-            'dayEstimate'         => $dayEstimate,
-            'monthEstimate'       => $monthEstimate,
+            'fromDate'           => $fromDate,
+            'toDate'             => $toDate,
+            'monthStart'         => $monthStart,
+
+            'selectedFromDate'   => $fromDate->toDateString(),
+            'selectedToDate'     => $toDate->toDateString(),
+            'selectedMonth'      => $monthStart->format('Y-m'),
+
+            'perDayPriceOptions' => $perDayPriceOptions,
+            'selectedPdp'        => $pdpFilter,
+
+            'rangeEstimate'      => $rangeEstimate,
+            'monthEstimate'      => $monthEstimate,
         ]);
-        }
+    }
 
-        protected function estimateForDate(
-            Carbon $date,
-            array $subscriptionProductIds,
-            Collection $subsByProductId
-        ): array {
-            $subs = $this->activeSubscriptionsOverlapping($date, $date, $subscriptionProductIds);
-            return $this->tallyPackageItemsForDay($subs, $subsByProductId, $date);
-        }
+    /**
+     * (Optional) keep this if you use it elsewhere
+     */
+    protected function estimateForDate(
+        Carbon $date,
+        array $subscriptionProductIds,
+        Collection $subsByProductId
+    ): array {
+        $subs = $this->activeSubscriptionsOverlapping($date, $date, $subscriptionProductIds);
+        return $this->tallyPackageItemsForDay($subs, $subsByProductId, $date);
+    }
 
-        protected function estimateForRange(
-            Carbon $start,
-            Carbon $end,
-            array $subscriptionProductIds,
-            Collection $subsByProductId
-        ): array {
-            $subs = $this->activeSubscriptionsOverlapping($start, $end, $subscriptionProductIds);
+    /**
+     * NEW: Range summary for the top "Range Summary" card
+     * Aggregates:
+     *  - lines (per item)
+     *  - by_product
+     *  - by_product_items (price list per subscription)
+     */
+    protected function estimateRangeSummary(
+        Carbon $start,
+        Carbon $end,
+        array $subscriptionProductIds,
+        Collection $subsByProductId
+    ): array {
+        $subs = $this->activeSubscriptionsOverlapping($start, $end, $subscriptionProductIds);
 
-            $perDay = [];
-            $cursor = $start->copy();
-            while ($cursor->lte($end)) {
-                $perDay[$cursor->toDateString()] = $this->tallyPackageItemsForDay($subs, $subsByProductId, $cursor);
-                $cursor->addDay();
-            }
+        $lines          = [];
+        $byProduct      = [];
+        $byProductItems = [];
+        $totalCost      = 0.0;
 
-            // Aggregate by item (per-unit math stays the same)
-            $byItem = [];
-            $totalQty = 0.0;
-            $totalCost = 0.0;
+        $cursor = $start->copy();
+        while ($cursor->lte($end)) {
+            $dayData = $this->tallyPackageItemsForDay($subs, $subsByProductId, $cursor);
 
-            foreach ($perDay as $data) {
-                foreach ($data['lines'] as $key => $line) {
-                    if (!isset($byItem[$key])) {
-                        $byItem[$key] = [
-                            'item_name'  => $line['item_name'],
-                            'unit'       => $line['unit'],
-                            'unit_price' => $line['unit_price'], // per-unit (derived)
-                            'qty'        => 0.0,
-                            'subtotal'   => 0.0,
-                        ];
-                    }
-                    $byItem[$key]['qty']      += $line['qty'];
-                    $byItem[$key]['subtotal'] += $line['subtotal'];
-
-                    $totalQty  += $line['qty'];
-                    $totalCost += $line['subtotal'];
+            // Aggregate item lines
+            foreach ($dayData['lines'] as $key => $line) {
+                if (!isset($lines[$key])) {
+                    $lines[$key] = $line;
+                } else {
+                    $lines[$key]['qty']      += $line['qty'];
+                    $lines[$key]['subtotal'] += $line['subtotal'];
                 }
             }
 
-            uasort($byItem, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
+            // Aggregate by product
+            foreach ($dayData['by_product'] ?? [] as $row) {
+                $key = $row['product_name']; // good enough for display
+                if (!isset($byProduct[$key])) {
+                    $byProduct[$key] = [
+                        'product_name'  => $row['product_name'],
+                        'subscriptions' => 0,
+                        'bundle_total'  => $row['bundle_total'], // per-sub bundle
+                        'subtotal'      => 0.0,
+                    ];
+                }
+                $byProduct[$key]['subscriptions'] += $row['subscriptions'];
+                $byProduct[$key]['subtotal']      += $row['subtotal'];
+            }
 
-            return [
-                'per_day'    => $perDay,
-                'by_item'    => $byItem,
-                'total_qty'  => $totalQty,
-                'total_cost' => round($totalCost, 2),
-            ];
+            // Price-list per subscription (doesn't vary with date, so first non-empty is ok)
+            if (empty($byProductItems) && !empty($dayData['by_product_items'] ?? [])) {
+                $byProductItems = $dayData['by_product_items'];
+            }
+
+            $totalCost += $dayData['total_cost'] ?? 0.0;
+
+            $cursor->addDay();
+        }
+
+        // Sort products nicely
+        $byProduct = array_values($byProduct);
+        usort($byProduct, fn ($a, $b) => strcasecmp($a['product_name'], $b['product_name']));
+
+        return [
+            'lines'           => $lines,
+            'by_product'      => $byProduct,
+            'by_product_items'=> $byProductItems,
+            'total_cost'      => round($totalCost, 2),
+        ];
+    }
+
+    /**
+     * Month (or arbitrary range) estimate by item – same as you already had
+     */
+    protected function estimateForRange(
+        Carbon $start,
+        Carbon $end,
+        array $subscriptionProductIds,
+        Collection $subsByProductId
+    ): array {
+        $subs = $this->activeSubscriptionsOverlapping($start, $end, $subscriptionProductIds);
+
+        $perDay = [];
+        $cursor = $start->copy();
+        while ($cursor->lte($end)) {
+            $perDay[$cursor->toDateString()] =
+                $this->tallyPackageItemsForDay($subs, $subsByProductId, $cursor);
+            $cursor->addDay();
+        }
+
+        // Aggregate by item (per-unit math stays the same)
+        $byItem    = [];
+        $totalQty  = 0.0;
+        $totalCost = 0.0;
+
+        foreach ($perDay as $data) {
+            foreach ($data['lines'] as $key => $line) {
+                if (!isset($byItem[$key])) {
+                    $byItem[$key] = [
+                        'item_name'  => $line['item_name'],
+                        'unit'       => $line['unit'],
+                        'unit_price' => $line['unit_price'], // per-unit (derived)
+                        'qty'        => 0.0,
+                        'subtotal'   => 0.0,
+                    ];
+                }
+                $byItem[$key]['qty']      += $line['qty'];
+                $byItem[$key]['subtotal'] += $line['subtotal'];
+
+                $totalQty  += $line['qty'];
+                $totalCost += $line['subtotal'];
+            }
+        }
+
+        uasort($byItem, fn ($a, $b) => strcasecmp($a['item_name'], $b['item_name']));
+
+        return [
+            'per_day'    => $perDay,
+            'by_item'    => $byItem,
+            'total_qty'  => $totalQty,
+            'total_cost' => round($totalCost, 2),
+        ];
     }
 
     protected function activeSubscriptionsOverlapping(Carbon $start, Carbon $end, array $subscriptionProductIds)

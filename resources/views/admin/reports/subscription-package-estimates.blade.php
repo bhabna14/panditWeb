@@ -1,3 +1,4 @@
+{{-- resources/views/admin/reports/subscription-package-estimates.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -390,7 +391,6 @@
                 <h4 class="page-header-title mb-1">
                     Subscription Package — Estimates
                 </h4>
-              
             </div>
             <ol class="breadcrumb page-breadcrumb mb-0">
                 <li class="breadcrumb-item"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
@@ -401,9 +401,17 @@
         {{-- Summary band --}}
         <div class="band">
             <div class="band-header">
-               
+                <div class="band-title">
+                    <span class="label-main">Subscription Package Estimates</span>
+                    <span class="band-pill">Range mode</span>
+                </div>
+
                 <div class="band-sub">
-                    Date: <strong>{{ $date->toFormattedDateString() }}</strong> · Month:
+                    Range:
+                    <strong>{{ $fromDate->toFormattedDateString() }}</strong>
+                    &rarr;
+                    <strong>{{ $toDate->toFormattedDateString() }}</strong>
+                    · Month:
                     <strong>{{ $monthStart->format('F Y') }}</strong>
                 </div>
             </div>
@@ -411,8 +419,8 @@
             <div class="band-chips">
                 <span class="band-chip day-total">
                     <span class="icon">📦</span>
-                    <span>Day Estimate</span>
-                    <span class="mono">₹ {{ number_format($dayEstimate['total_cost'] ?? 0, 2) }}</span>
+                    <span>Range Estimate</span>
+                    <span class="mono">₹ {{ number_format($rangeEstimate['total_cost'] ?? 0, 2) }}</span>
                 </span>
                 <span class="band-chip month-total">
                     <span class="icon">🗓️</span>
@@ -423,9 +431,9 @@
                     <span class="icon">🎯</span>
                     <span>Per-Day Price Filter:</span>
                     <span class="mono">
-                        @if($selectedPdp === 'all')
+                        @if ($selectedPdp === 'all')
                             All Subscription products
-                        @elseif($selectedPdp === 'has')
+                        @elseif ($selectedPdp === 'has')
                             Only with per-day price
                         @else
                             ₹ {{ number_format((float) $selectedPdp, 2) }}
@@ -439,13 +447,21 @@
         <form method="GET" action="{{ route('admin.subscriptionPackageEstimate') }}" class="toolbar-card">
             <div class="toolbar-row-main">
                 <div class="toolbar-block">
-                    <span class="toolbar-label">Day</span>
-                    <input type="date" name="date" class="toolbar-input" value="{{ $selectedDate }}" required>
+                    <span class="toolbar-label">From Date</span>
+                    <input type="date" name="from_date" class="toolbar-input"
+                           value="{{ $selectedFromDate }}" required>
                 </div>
 
                 <div class="toolbar-block">
-                    <span class="toolbar-label">Month</span>
-                    <input type="month" name="month" class="toolbar-input" value="{{ $selectedMonth }}" required>
+                    <span class="toolbar-label">To Date</span>
+                    <input type="date" name="to_date" class="toolbar-input"
+                           value="{{ $selectedToDate }}" required>
+                </div>
+
+                <div class="toolbar-block">
+                    <span class="toolbar-label">Month (for Month Summary)</span>
+                    <input type="month" name="month" class="toolbar-input"
+                           value="{{ $selectedMonth }}" required>
                 </div>
 
                 <div class="toolbar-block">
@@ -454,12 +470,11 @@
                         <option value="all" @selected($selectedPdp === 'all')>All Subscription products</option>
                         <option value="has" @selected($selectedPdp === 'has')>Only with per-day price</option>
                         @foreach ($perDayPriceOptions as $opt)
-                            <option value="{{ $opt }}" @selected((string)$selectedPdp === (string)$opt)>
+                            <option value="{{ $opt }}" @selected((string) $selectedPdp === (string) $opt)>
                                 ₹ {{ number_format((float) $opt, 2) }}
                             </option>
                         @endforeach
                     </select>
-                   
                 </div>
 
                 <div class="toolbar-block d-flex align-items-end justify-content-end">
@@ -472,113 +487,129 @@
             </div>
 
             <div class="toolbar-row-bottom">
-               
+                <div class="chip-row">
+                    <span class="chip">
+                        <span>Range:</span>
+                        <span class="mono">{{ $selectedFromDate }}</span>
+                        <span>&rarr;</span>
+                        <span class="mono">{{ $selectedToDate }}</span>
+                    </span>
+                    <span class="chip">
+                        <span>Month:</span>
+                        <span class="mono">{{ $selectedMonth }}</span>
+                    </span>
+                </div>
+
                 <a class="btn-export"
-                   href="{{ route('admin.reports.subscription_package_estimates.export', ['date'=>$selectedDate,'month'=>$selectedMonth,'per_day_price'=>$selectedPdp]) }}">
+                   href="{{ route('admin.reports.subscription_package_estimates.export', [
+                        'from_date'     => $selectedFromDate,
+                        'to_date'       => $selectedToDate,
+                        'month'         => $selectedMonth,
+                        'per_day_price' => $selectedPdp,
+                    ]) }}">
                     <i class="bi bi-filetype-csv"></i> Export CSV
                 </a>
             </div>
         </form>
 
-        {{-- Day Summary --}}
+        {{-- Range Summary (earlier "Day Summary") --}}
         <div class="card card-soft mb-4">
             <div class="card-header">
                 <div class="hstack">
-                    <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
-                  
+                    <div>
+                        <strong>Range:</strong>
+                        {{ $fromDate->toFormattedDateString() }} &rarr; {{ $toDate->toFormattedDateString() }}
+                    </div>
                 </div>
             </div>
             <div class="card-body">
-                @if (empty($dayEstimate['lines']))
+                @if (empty($rangeEstimate['lines']))
                     <div class="text-muted">
-                        No active Subscription deliveries on this day with the selected per-day price filter.
+                        No active Subscription deliveries in this range with the selected per-day price filter.
                     </div>
                 @else
-                    {{-- Subscriptions contributing today (by product) --}}
-                    @if (!empty($dayEstimate['by_product']))
-                        
+                    {{-- Subscriptions contributing in range (by product) --}}
+                    @if (!empty($rangeEstimate['by_product']))
                         <div class="table-responsive mb-3">
                             <table class="table table-sm table-bordered table-hover align-middle">
                                 <thead>
-                                    <tr>
-                                        <th style="width:36px;">#</th>
-                                        <th>Subscription Product</th>
-                                        <th class="text-end">Active Subs (today)</th>
-                                        <th class="text-end">Bundle Total / sub</th>
-                                        <th class="text-end">Subtotal</th>
-                                    </tr>
+                                <tr>
+                                    <th style="width:36px;">#</th>
+                                    <th>Subscription Product</th>
+                                    <th class="text-end">Active Subs (sum)</th>
+                                    <th class="text-end">Bundle Total / sub</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    @php $i = 1; $bpSum = 0; @endphp
-                                    @foreach ($dayEstimate['by_product'] as $row)
-                                        @php $bpSum += $row['subtotal']; @endphp
-                                        <tr>
-                                            <td>{{ $i++ }}</td>
-                                            <td>{{ $row['product_name'] }}</td>
-                                            <td class="text-end mono">{{ $row['subscriptions'] }}</td>
-                                            <td class="text-end mono">₹ {{ number_format($row['bundle_total'], 2) }}</td>
-                                            <td class="text-end mono">
-                                                <strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                @php $i = 1; $bpSum = 0; @endphp
+                                @foreach ($rangeEstimate['by_product'] as $row)
+                                    @php $bpSum += $row['subtotal']; @endphp
+                                    <tr>
+                                        <td>{{ $i++ }}</td>
+                                        <td>{{ $row['product_name'] }}</td>
+                                        <td class="text-end mono">{{ $row['subscriptions'] }}</td>
+                                        <td class="text-end mono">₹ {{ number_format($row['bundle_total'], 2) }}</td>
+                                        <td class="text-end mono">
+                                            <strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
+                                        </td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                                 <tfoot>
-                                    <tr>
-                                        <th colspan="4" class="text-end">Day Total</th>
-                                        <th class="text-end mono">
-                                            <strong>₹ {{ number_format($bpSum, 2) }}</strong>
-                                        </th>
-                                    </tr>
+                                <tr>
+                                    <th colspan="4" class="text-end">Range Total</th>
+                                    <th class="text-end mono">
+                                        <strong>₹ {{ number_format($bpSum, 2) }}</strong>
+                                    </th>
+                                </tr>
                                 </tfoot>
                             </table>
                         </div>
                     @endif
 
                     {{-- Price List per product (like your modal) --}}
-                    @if (!empty($dayEstimate['by_product_items']))
-                        @foreach ($dayEstimate['by_product_items'] as $pid => $group)
+                    @if (!empty($rangeEstimate['by_product_items']))
+                        @foreach ($rangeEstimate['by_product_items'] as $pid => $group)
                             <div class="mb-1 fw-semibold">
                                 {{ $group['product_name'] }} — Price List (per subscription)
                             </div>
                             <div class="table-responsive mb-4">
                                 <table class="table table-sm table-bordered table-hover align-middle">
                                     <thead>
-                                        <tr>
-                                            <th style="width:36px;">#</th>
-                                            <th>Item</th>
-                                            <th class="text-end">Qty</th>
-                                            <th>Unit</th>
-                                            <th class="text-end">Item Price</th>
-                                        </tr>
+                                    <tr>
+                                        <th style="width:36px;">#</th>
+                                        <th>Item</th>
+                                        <th class="text-end">Qty</th>
+                                        <th>Unit</th>
+                                        <th class="text-end">Item Price</th>
+                                    </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($group['items'] as $it)
-                                            <tr>
-                                                <td>{{ $it['idx'] }}</td>
-                                                <td>{{ $it['item_name'] }}</td>
-                                                <td class="text-end mono">{{ number_format($it['quantity'], 2) }}</td>
-                                                <td>{{ $it['unit'] }}</td>
-                                                <td class="text-end mono">
-                                                    ₹ {{ number_format($it['item_price'], 2) }}
-                                                </td>
-                                            </tr>
-                                        @endforeach
+                                    @foreach ($group['items'] as $it)
+                                        <tr>
+                                            <td>{{ $it['idx'] }}</td>
+                                            <td>{{ $it['item_name'] }}</td>
+                                            <td class="text-end mono">{{ number_format($it['quantity'], 2) }}</td>
+                                            <td>{{ $it['unit'] }}</td>
+                                            <td class="text-end mono">
+                                                ₹ {{ number_format($it['item_price'], 2) }}
+                                            </td>
+                                        </tr>
+                                    @endforeach
                                     </tbody>
                                     <tfoot>
-                                        <tr>
-                                            <th colspan="4" class="text-end">Total</th>
-                                            <th class="text-end mono">
-                                                <strong>₹ {{ number_format($group['total'], 2) }}</strong>
-                                            </th>
-                                        </tr>
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total</th>
+                                        <th class="text-end mono">
+                                            <strong>₹ {{ number_format($group['total'], 2) }}</strong>
+                                        </th>
+                                    </tr>
                                     </tfoot>
                                 </table>
                             </div>
                         @endforeach
                     @endif
-
-                    {{-- If you ever want to re-enable the per-unit item math, you already have it commented below --}}
                 @endif
             </div>
         </div>
@@ -610,43 +641,43 @@
                     <div class="table-responsive mb-3">
                         <table class="table table-sm table-bordered table-hover align-middle">
                             <thead>
-                                <tr>
-                                    <th style="width:36px;">#</th>
-                                    <th>Item</th>
-                                    <th class="text-end">Total Qty</th>
-                                    <th class="text-end">
-                                        Unit Price
-                                        <small class="text-muted">(per unit)</small>
-                                    </th>
-                                    <th class="text-end">Subtotal</th>
-                                </tr>
+                            <tr>
+                                <th style="width:36px;">#</th>
+                                <th>Item</th>
+                                <th class="text-end">Total Qty</th>
+                                <th class="text-end">
+                                    Unit Price
+                                    <small class="text-muted">(per unit)</small>
+                                </th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                @php $i = 1; $sumAmt = 0; @endphp
-                                @foreach ($monthEstimate['by_item'] as $row)
-                                    @php $sumAmt += $row['subtotal']; @endphp
-                                    <tr>
-                                        <td>{{ $i++ }}</td>
-                                        <td>{{ $row['item_name'] }}</td>
-                                        <td class="text-end mono">
-                                            {{ number_format($row['qty'], 2) }}
-                                            <span class="chip-inline">{{ $row['unit'] }}</span>
-                                        </td>
-                                        <td class="text-end mono">₹ {{ number_format($row['unit_price'], 2) }}</td>
-                                        <td class="text-end mono">
-                                            <strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                            @php $i = 1; $sumAmt = 0; @endphp
+                            @foreach ($monthEstimate['by_item'] as $row)
+                                @php $sumAmt += $row['subtotal']; @endphp
+                                <tr>
+                                    <td>{{ $i++ }}</td>
+                                    <td>{{ $row['item_name'] }}</td>
+                                    <td class="text-end mono">
+                                        {{ number_format($row['qty'], 2) }}
+                                        <span class="chip-inline">{{ $row['unit'] }}</span>
+                                    </td>
+                                    <td class="text-end mono">₹ {{ number_format($row['unit_price'], 2) }}</td>
+                                    <td class="text-end mono">
+                                        <strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
+                                    </td>
+                                </tr>
+                            @endforeach
                             </tbody>
                             <tfoot>
-                                <tr>
-                                    <th colspan="3"></th>
-                                    <th>Month Totals</th>
-                                    <th class="text-end mono">
-                                        <strong>₹ {{ number_format($sumAmt, 2) }}</strong>
-                                    </th>
-                                </tr>
+                            <tr>
+                                <th colspan="3"></th>
+                                <th>Month Totals</th>
+                                <th class="text-end mono">
+                                    <strong>₹ {{ number_format($sumAmt, 2) }}</strong>
+                                </th>
+                            </tr>
                             </tfoot>
                         </table>
                     </div>
@@ -659,22 +690,22 @@
                         <div class="table-responsive mt-2">
                             <table class="table table-sm table-bordered table-hover align-middle">
                                 <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th class="text-end">Items</th>
-                                        <th class="text-end">Est. Value</th>
-                                    </tr>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-end">Items</th>
+                                    <th class="text-end">Est. Value</th>
+                                </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($monthEstimate['per_day'] as $d => $data)
-                                        <tr>
-                                            <td>{{ \Carbon\Carbon::parse($d)->format('D, d M Y') }}</td>
-                                            <td class="text-end mono">{{ count($data['lines']) }}</td>
-                                            <td class="text-end mono">
-                                                ₹ {{ number_format($data['total_cost'], 2) }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                @foreach ($monthEstimate['per_day'] as $d => $data)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($d)->format('D, d M Y') }}</td>
+                                        <td class="text-end mono">{{ count($data['lines']) }}</td>
+                                        <td class="text-end mono">
+                                            ₹ {{ number_format($data['total_cost'], 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                             </table>
                         </div>
