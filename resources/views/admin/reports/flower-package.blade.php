@@ -433,7 +433,7 @@
 @section('content')
     <div class="container container-page py-4">
         @php
-            // Tomorrow summary (unchanged)
+            // Tomorrow summary (still computed as in original file; used by bottom disclosure if you enable it later)
             $tProducts = $tomorrowEstimate['products'] ?? [];
             $tGrand = $tomorrowEstimate['grand_total_amount'] ?? 0;
             $tTotals = $tomorrowEstimate['totals_by_item'] ?? [];
@@ -462,13 +462,12 @@
             [$vQty, $vUnit] = $fmtCat($catBase['volume'], 'volume');
             [$cQty, $cUnit] = $fmtCat($catBase['count'], 'count');
 
-            // NEW: safe defaults for range item & product data
+            // NEW: safe defaults for range item data
             $rangeItems = $rangeItems ?? [];
             $rangeItemCount = $rangeItemCount ?? count($rangeItems);
-            $rangeProductTotals = $rangeProductTotals ?? [];
         @endphp
 
-        {{-- ========= FILTER TOOLBAR ========= --}}
+        {{-- ========= FILTER TOOLBAR (report-style) ========= --}}
         <form method="GET" action="{{ route('admin.flowerPackage') }}" id="filterForm" class="toolbar">
             <div class="date-range">
                 <span>From</span>
@@ -515,15 +514,15 @@
             $hasMonthly = !empty($monthlyEstimates) && count($monthlyEstimates) > 0;
         @endphp
 
-        {{-- ========= SUMMARY BAND ========= --}}
+        {{-- ========= SUMMARY BAND (range overview) ========= --}}
         @if (($mode === 'day' && $hasDaily) || ($mode === 'month' && $hasMonthly))
             @php
-                // Day-mode metrics
+                // Day-mode metrics (provided from controller)
                 $rangeTotalSafe = $rangeTotal ?? 0;
                 $rangeAvgPerDaySafe = $rangeAvgPerDay ?? 0;
                 $rangeDaysSafe = $rangeDaysWithData ?? 0;
 
-                // Month-mode metrics
+                // Month-mode metrics (aggregate from $monthlyEstimates)
                 $monthCount = 0;
                 $monthGrand = 0;
                 if ($mode === 'month' && $hasMonthly) {
@@ -553,7 +552,7 @@
                             <span>Active Days</span>
                             {{ number_format($rangeDaysSafe) }}
                         </span>
-                        {{-- Distinct items in current filter --}}
+                        {{-- NEW: Distinct items in current filter --}}
                         <span class="chip blue">
                             <span class="icon">🌼</span>
                             <span>Distinct Items</span>
@@ -575,6 +574,7 @@
                             <span>Avg / Month</span>
                             ₹{{ number_format($monthAvg, 2) }}
                         </span>
+                        {{-- Still show distinct items across filter range --}}
                         <span class="chip blue">
                             <span class="icon">🌼</span>
                             <span>Distinct Items</span>
@@ -585,7 +585,7 @@
             </div>
         @endif
 
-
+        
         {{-- ========= DAY MODE: per-day table ========= --}}
         @if ($mode === 'day' && $hasDaily)
             <div class="workbook">
@@ -652,7 +652,7 @@
             </div>
         @endif
 
-        {{-- ========= FILTER-RANGE ITEM SUMMARY TABLE ========= --}}
+        {{-- ========= NEW: FILTER-RANGE ITEM SUMMARY TABLE ========= --}}
         @if (!empty($rangeItems))
             <div class="workbook">
                 <div class="workbook-head">
@@ -686,7 +686,9 @@
                         <tbody>
                             @php $i = 0; @endphp
                             @foreach ($rangeItems as $it)
-                                @php $i++; @endphp
+                                @php
+                                    $i++;
+                                @endphp
                                 <tr>
                                     <td class="col-index">{{ $i }}</td>
                                     <td class="col-text">
@@ -709,6 +711,7 @@
                                     Total ({{ $rangeItemCount }} item{{ $rangeItemCount == 1 ? '' : 's' }})
                                 </th>
                                 <th class="col-money">
+                                    {{-- qty total would mix units, so we keep it blank / “—” --}}
                                     —
                                 </th>
                                 <th class="col-money">
@@ -722,11 +725,11 @@
             </div>
         @endif
 
-        <div class="band mt-4">
-            <div class="chips">
-                <h4>Package Flower Details</h4>
+         <div class="band mt-4">
+                <div class="chips">
+                  <h4>Package Flower Details</h4>
+                </div>
             </div>
-        </div>
 
         {{-- ========= DETAIL FLOWER ESTIMATE (DAY / MONTH) ========= --}}
         <div class="workbook">
@@ -743,8 +746,8 @@
                         <div class="accordion" id="daysAccordion">
                             @foreach ($dailyEstimates as $date => $payload)
                                 @php
-                                    $dayId    = 'day-' . \Illuminate\Support\Str::slug($date);
-                                    $grand    = $payload['grand_total_amount'] ?? 0;
+                                    $dayId = 'day-' . \Illuminate\Support\Str::slug($date);
+                                    $grand = $payload['grand_total_amount'] ?? 0;
                                     $products = $payload['products'] ?? [];
                                     $dayTotals = $payload['totals_by_item'] ?? [];
                                 @endphp
@@ -779,12 +782,11 @@
                                                 <div class="row g-3">
                                                     @foreach ($products as $pid => $row)
                                                         @php
-                                                            $product         = $row['product'];
-                                                            $subsCount       = $row['subs_count'] ?? 0;
-                                                            $items           = $row['items'] ?? [];
-                                                            $productTotal    = $row['product_total'] ?? 0; // this day
-                                                            $bundlePerSub    = $row['bundle_total_per_sub'] ?? 0;
-                                                            $rangeProdTotal  = $rangeProductTotals[$pid] ?? $productTotal; // full filter range
+                                                            $product = $row['product'];
+                                                            $subsCount = $row['subs_count'] ?? 0;
+                                                            $items = $row['items'] ?? [];
+                                                            $productTotal = $row['product_total'] ?? 0;
+                                                            $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
                                                         @endphp
 
                                                         <div class="col-12">
@@ -837,27 +839,28 @@
                                                                             </div>
                                                                         </div>
 
-                                                                        {{-- RIGHT: Flower cost (range-wise) --}}
+                                                                        {{-- RIGHT: Flower cost (computed) --}}
                                                                         <div class="text-md-end">
                                                                             <div class="small text-muted mb-1">
-                                                                                Computed flower cost (selected date range)
+                                                                                Computed flower cost
                                                                             </div>
                                                                             <div
                                                                                 class="d-flex flex-column align-items-md-end gap-2">
                                                                                 <span
                                                                                     class="badge bg-primary-subtle text-primary fw-semibold">
                                                                                     <i class="bi bi-flower1 me-1"></i>
-                                                                                    Per subscription (per day):
+                                                                                    Per subscription:
                                                                                     <span class="money">
                                                                                         ₹{{ number_format($bundlePerSub, 2) }}
                                                                                     </span>
                                                                                 </span>
 
-                                                                                <span class="badge bg-success-subtle text-success fw-semibold">
+                                                                                <span
+                                                                                    class="badge bg-success-subtle text-success fw-semibold">
                                                                                     <i class="bi bi-wallet2 me-1"></i>
-                                                                                    Total flower cost (range):
+                                                                                    Total flower cost:
                                                                                     <span class="money">
-                                                                                        ₹{{ number_format($rangeProdTotal, 2) }}
+                                                                                        ₹{{ number_format($productTotal, 2) }}
                                                                                     </span>
                                                                                 </span>
                                                                             </div>
@@ -930,10 +933,10 @@
                         <div class="accordion" id="monthsAccordion">
                             @foreach ($monthlyEstimates as $mkey => $mblock)
                                 @php
-                                    $monthId  = 'month-' . \Illuminate\Support\Str::slug($mkey);
-                                    $grand    = $mblock['grand_total'] ?? 0;
+                                    $monthId = 'month-' . \Illuminate\Support\Str::slug($mkey);
+                                    $grand = $mblock['grand_total'] ?? 0;
                                     $products = $mblock['products'] ?? [];
-                                    $mTotals  = $mblock['totals_by_item'] ?? [];
+                                    $mTotals = $mblock['totals_by_item'] ?? [];
                                 @endphp
                                 <div class="accordion-item shadow-sm mb-3">
                                     <h2 class="accordion-header" id="{{ $monthId }}-header">
@@ -965,10 +968,10 @@
                                                 <div class="row g-3">
                                                     @foreach ($products as $pid => $prow)
                                                         @php
-                                                            $product      = $prow['product'];
-                                                            $items        = $prow['items'] ?? [];
+                                                            $product = $prow['product'];
+                                                            $items = $prow['items'] ?? [];
                                                             $productTotal = $prow['product_total'] ?? 0;
-                                                            $subsDays     = $prow['subs_days'] ?? 0;
+                                                            $subsDays = $prow['subs_days'] ?? 0;
                                                         @endphp
                                                         <div class="col-12">
                                                             <div class="card border-0 shadow-sm" style="border-radius: 1rem;">
@@ -1114,7 +1117,7 @@
 @endsection
 
 @section('scripts')
-    {{-- Bootstrap JS for accordions --}}
+    {{-- Bootstrap JS for accordions (same as your original file) --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Presets
@@ -1137,7 +1140,7 @@
             });
         });
 
-        // Keep accordion trigger state in sync
+        // Keep accordion trigger state in sync (for day/month accordions)
         document.addEventListener('shown.bs.collapse', function(e) {
             const btn = document.querySelector('[data-bs-target="#' + e.target.id + '"]');
             if (btn) {

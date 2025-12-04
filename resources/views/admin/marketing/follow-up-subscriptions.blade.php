@@ -244,9 +244,10 @@
                                         <div class="contact-btns d-flex flex-wrap gap-2">
                                             <a href="tel:{{ $order->user->mobile_number }}"
                                                 class="btn btn-sm btn-success"><i class="bi bi-telephone"></i> Call</a>
-                                            <a href="https://wa.me/{{ $order->user->mobile_number }}" target="_blank"
-                                                rel="noopener" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i>
-                                                WhatsApp</a>
+                                            <a href="{{ route('whatsapp-notification.create', ['mobile' => $order->user->mobile_number]) }}"
+                                                class="btn btn-sm btn-success" target="_blank" rel="noopener">
+                                                <i class="bi bi-whatsapp"></i> WhatsApp
+                                            </a>
                                             <a href="mailto:{{ $order->user->email }}" class="btn btn-sm btn-info"><i
                                                     class="bi bi-envelope"></i> Mail</a>
                                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal"

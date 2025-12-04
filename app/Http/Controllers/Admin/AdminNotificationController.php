@@ -16,29 +16,43 @@ use Twilio\Rest\Client;
 
 class AdminNotificationController extends Controller
 {
-    public function whatsappcreate(Request $request)
-    {
-        $users = User::query()
-            ->select('id', 'name', 'email', 'mobile_number')
-            ->whereNotNull('mobile_number')
-            ->where('mobile_number', '!=', '')
-            ->orderBy('name')
-            ->limit(1000)
-            ->get();
+   public function whatsappcreate(Request $request)
+{
+    $users = User::query()
+        ->select('id', 'name', 'email', 'mobile_number')
+        ->whereNotNull('mobile_number')
+        ->where('mobile_number', '!=', '')
+        ->orderBy('name')
+        ->limit(1000)
+        ->get();
 
-        $requiresParam = Msg91WhatsappService::requiresUrlParam();
-        $buttonBase    = Msg91WhatsappService::buttonBase();
-        $senderLabel   = Msg91WhatsappService::senderE164();
-        $templateName  = Msg91WhatsappService::templateName();   // "customer"
+    $requiresParam = Msg91WhatsappService::requiresUrlParam();
+    $buttonBase    = Msg91WhatsappService::buttonBase();
+    $senderLabel   = Msg91WhatsappService::senderE164();
+    $templateName  = Msg91WhatsappService::templateName();   // "customer"
 
-        return view('admin.fcm-notification.send-whatsaap-notification', compact(
-            'users',
-            'requiresParam',
-            'buttonBase',
-            'senderLabel',
-            'templateName'
-        ));
+    // ── Prefill single user from ?mobile= query ─────────────────────────────
+    $prefillMobiles = [];
+    $initialAudience = 'all';
+
+    if ($request->filled('mobile')) {
+        $mobile = trim($request->query('mobile'));
+        if ($mobile !== '') {
+            $prefillMobiles[] = $mobile;
+            $initialAudience = 'selected';
+        }
     }
+
+    return view('admin.fcm-notification.send-whatsaap-notification', compact(
+        'users',
+        'requiresParam',
+        'buttonBase',
+        'senderLabel',
+        'templateName',
+        'prefillMobiles',
+        'initialAudience'
+    ));
+}
 
     public function whatsappSend(Request $request)
     {

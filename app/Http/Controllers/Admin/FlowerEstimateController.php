@@ -114,7 +114,8 @@ class FlowerEstimateController extends Controller
             'rangeTotals'  => $rangeTotals,
         ]);
     }
- public function flowerPackage(Request $request)
+
+    public function flowerPackage(Request $request)
     {
         // ---- Filters ---------------------------------------------------------
         $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
@@ -160,16 +161,13 @@ class FlowerEstimateController extends Controller
         }
 
         // ---- Build daily numbers --------------------------------------------
-        $period           = CarbonPeriod::create($start->toDateString(), $end->toDateString());
-        $dailyEstimates   = [];
+        $period         = CarbonPeriod::create($start->toDateString(), $end->toDateString());
+        $dailyEstimates = [];
 
-        $excludeStats     = ['expired', 'dead'];
+        $excludeStats   = ['expired', 'dead'];
 
         // NEW: filter-range item-wise aggregation base
-        $rangeItemsBase   = [];
-
-        // NEW: filter-range product totals (for package-wise range total)
-        $rangeProductTotals = [];
+        $rangeItemsBase = [];
 
         foreach ($period as $day) {
             $subs = Subscription::with([
@@ -269,7 +267,6 @@ class FlowerEstimateController extends Controller
 
                 $grandTotalForDay += $productTotal;
 
-                // bundle_total_per_sub: sum of per-sub item prices for this product
                 $productsForDay[$productId] = [
                     'product'              => $product,
                     'subs_count'           => $subsCount,
@@ -277,12 +274,6 @@ class FlowerEstimateController extends Controller
                     'product_total'        => round($productTotal, 2),
                     'bundle_total_per_sub' => round(array_sum(array_column($items, 'item_price_per_sub')), 2),
                 ];
-
-                // --- NEW: aggregate product totals across FILTER RANGE ----------
-                if (!isset($rangeProductTotals[$productId])) {
-                    $rangeProductTotals[$productId] = 0.0;
-                }
-                $rangeProductTotals[$productId] += $productTotal;
             }
 
             $dayTotalsForDisplay = $this->formatTotalsByItem($dayTotalsByItemBase);
@@ -412,23 +403,21 @@ class FlowerEstimateController extends Controller
         }
 
         return view('admin.reports.flower-package', [
-            'start'               => $start->toDateString(),
-            'end'                 => $end->toDateString(),
-            'mode'                => $mode,
-            'preset'              => $preset,
-            'dailyEstimates'      => $dailyEstimates,
-            'monthlyEstimates'    => $monthlyEstimates,
-            'tomorrowDate'        => $tomorrow->toDateString(),
-            'tomorrowEstimate'    => $tomorrowEstimate,
+            'start'             => $start->toDateString(),
+            'end'               => $end->toDateString(),
+            'mode'              => $mode,
+            'preset'            => $preset,
+            'dailyEstimates'    => $dailyEstimates,
+            'monthlyEstimates'  => $monthlyEstimates,
+            'tomorrowDate'      => $tomorrow->toDateString(),
+            'tomorrowEstimate'  => $tomorrowEstimate,
             // range-wise summary fields for UI
-            'rangeTotal'          => round($rangeTotal, 2),
-            'rangeDaysWithData'   => $rangeDaysWithData,
-            'rangeAvgPerDay'      => $rangeAvgPerDay,
+            'rangeTotal'        => round($rangeTotal, 2),
+            'rangeDaysWithData' => $rangeDaysWithData,
+            'rangeAvgPerDay'    => $rangeAvgPerDay,
             // NEW: filter-range item summary
-            'rangeItems'          => $rangeItems,
-            'rangeItemCount'      => $rangeItemCount,
-            // NEW: product totals for the selected date range
-            'rangeProductTotals'  => $rangeProductTotals,
+            'rangeItems'        => $rangeItems,
+            'rangeItemCount'    => $rangeItemCount,
         ]);
     }
 

@@ -1,3 +1,4 @@
+{{-- resources/views/admin/fcm-notification/send-whatsaap-notification.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -7,13 +8,13 @@
             border: 1px solid #e8ecf5;
             border-radius: 14px;
             box-shadow: 0 8px 24px rgba(17, 24, 39, .06);
-            background: #fff
+            background: #fff;
         }
 
         .nu-hero {
             background: linear-gradient(135deg, #fff7ed 0%, #e0f2fe 100%);
             border: 1px solid #fde68a;
-            border-radius: 14px
+            border-radius: 14px;
         }
 
         .img-preview {
@@ -21,7 +22,7 @@
             border: 1px dashed #cbd5e1;
             border-radius: 10px;
             padding: 6px;
-            background: #f8fafc
+            background: #f8fafc;
         }
     </style>
 @endsection
@@ -58,57 +59,92 @@
             <div class="alert alert-danger" id="Message">{{ session()->get('error') }}</div>
         @endif
 
+        @php
+            // Audience default: from old() if validation failed, else from controller ($initialAudience), else 'all'
+            $audDefault = old('audience', $initialAudience ?? 'all');
+
+            // Pre-selected users: from old() if any, else from $prefillMobiles (from ?mobile=...)
+            $oldUsers = old('user', $prefillMobiles ?? []);
+            $oldUsers = is_array($oldUsers) ? $oldUsers : [$oldUsers];
+            $oldUsers = array_values(array_filter($oldUsers));
+        @endphp
+
         <div class="row">
             <div class="col-lg-6">
                 <div class="nu-card p-4 mb-4">
                     <form action="{{ route('whatsapp-notification.send') }}" method="POST" id="waForm">
                         @csrf
 
+                        {{-- Audience --}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold d-block">Audience</label>
+
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="audience" id="audAll" value="all"
-                                       {{ old('audience', 'all') === 'all' ? 'checked' : '' }}>
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="audience"
+                                       id="audAll"
+                                       value="all"
+                                       {{ $audDefault === 'all' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audAll">All users</label>
                             </div>
+
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="audience" id="audSelected" value="selected"
-                                       {{ old('audience') === 'selected' ? 'checked' : '' }}>
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="audience"
+                                       id="audSelected"
+                                       value="selected"
+                                       {{ $audDefault === 'selected' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audSelected">Selected users / custom numbers</label>
                             </div>
                         </div>
 
+                        {{-- Recipients --}}
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Recipients (phone numbers)</label>
                             <select class="form-control" name="user[]" id="waUsers" multiple>
                                 @foreach ($users as $u)
                                     <option value="{{ $u->mobile_number }}"
-                                        {{ collect(old('user', []))->contains($u->mobile_number) ? 'selected' : '' }}>
+                                        {{ in_array($u->mobile_number, $oldUsers, true) ? 'selected' : '' }}>
                                         {{ $u->name }} —
                                         {{ $u->mobile_number }}{{ $u->email ? ' (' . $u->email . ')' : '' }}
                                     </option>
                                 @endforeach
+
+                                {{-- If prefilled mobiles are not in the users list, still show them as selected --}}
+                                @if (!empty($prefillMobiles ?? []))
+                                    @foreach ($prefillMobiles as $m)
+                                        @if (!$users->contains('mobile_number', $m))
+                                            <option value="{{ $m }}" selected>{{ $m }}</option>
+                                        @endif
+                                    @endforeach
+                                @endif
                             </select>
                             <div class="form-text">
                                 When “Selected users” is chosen, you can also type and add numbers directly (press Enter).
-                                Use full E.164 (+91XXXXXXXXXX) or 10-digit local numbers; we auto-apply the sender’s country
-                                code.
+                                Use full E.164 (+91XXXXXXXXXX) or 10-digit local numbers; we auto-apply the sender’s
+                                country code.
                             </div>
                         </div>
 
+                        {{-- Title / header param --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Title (optional, not sent)</label>
-                            <input type="text" name="title" class="form-control" maxlength="255"
+                            <label class="form-label fw-semibold">Title (optional)</label>
+                            <input type="text"
+                                   name="title"
+                                   class="form-control"
+                                   maxlength="255"
                                    value="{{ old('title') }}">
                         </div>
 
+                        {{-- Description / body param --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Message (optional, not sent)</label>
+                            <label class="form-label fw-semibold">Message</label>
                             <textarea name="description" rows="5" class="form-control">{{ old('description') }}</textarea>
                             <div class="form-text">
-                                These are for preview/audit only.
-                                The approved MSG91 template content (<code>{{ $templateName ?? 'template' }}</code>)
-                                will actually be sent.
+                                This text will be used as template variables (e.g. header / body) in MSG91 template
+                                <code>{{ $templateName ?? 'template' }}</code>.
                             </div>
                         </div>
 
@@ -124,18 +160,19 @@
                 </div>
             </div>
 
+            {{-- Tips --}}
             <div class="col-lg-6">
                 <div class="nu-card p-4">
                     <h5 class="fw-bold mb-3">Tips</h5>
                     <ul class="mb-0">
                         <li>Your MSG91 sender {{ $senderLabel ?? '+91XXXXXXXXXX' }} must be approved &amp; verified.</li>
                         <li>
-                            Template <code>{{ $templateName ?? '33_crores' }}</code> must be approved in MSG91.
-                            If it has <b>no placeholders</b>, this page is ready to use.
+                            Template <code>{{ $templateName ?? 'customer' }}</code> must be approved in MSG91
+                            with matching header/body variables.
                         </li>
                         <li>
-                            If you later add template parameters (body variables/buttons),
-                            update <code>Msg91WhatsappService::sendBulkTemplate()</code> to send components accordingly.
+                            If you change template parameters (add/remove variables/buttons),
+                            update <code>Msg91WhatsappService::sendBulkTemplate()</code> accordingly.
                         </li>
                     </ul>
                 </div>
@@ -182,5 +219,11 @@
                 confirmButtonText: 'Looks Good'
             });
         });
+
+        // Optional: hide flash message after 3 seconds
+        setTimeout(() => {
+            const m = document.getElementById('Message');
+            if (m) m.style.display = 'none';
+        }, 3000);
     </script>
 @endsection
