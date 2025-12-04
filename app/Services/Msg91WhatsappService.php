@@ -53,103 +53,89 @@ class Msg91WhatsappService
      * @return array ['http_status' => int, 'json' => ?array, 'body' => string]
      * @throws \Throwable
      */
-    public function sendBulkTemplate(array $to, ?string $title = null, ?string $description = null): array
-    {
-        // Normalize: only keep digits, unique
-        $to = array_values(array_unique(array_map(
-            fn($n) => preg_replace('/\D+/', '', (string)$n),
-            $to
-        )));
+   public function sendBulkTemplate(array $to, ?string $title = null, ?string $description = null): array
+{
+    // Normalize: only keep digits, unique
+    $to = array_values(array_unique(array_map(
+        fn($n) => preg_replace('/\D+/', '', (string)$n),
+        $to
+    )));
 
-        // Build components:
-        //
-        // For MSG91, dynamic vars are sent as:
-        // "components": {
-        //   "body_1":   { "type": "text", "value": "..." },
-        //   "header_1": { "type": "text", "value": "..." }
-        // }
-        //
-        // These keys MUST match the variables in your template.
-        $components = [];
+    // Build components: ONLY header_1, because template body has 0 params
+    // Decide what to put in header_1 (title preferred, else description)
+    $headerText = $title ?: $description ?: '';
 
-        // Body param (first body variable)
-        if (!empty($description)) {
-            $components['body_1'] = [
-                'type'  => 'text',
-                'value' => $description,
-            ];
-        }
+    $components = [];
 
-        // Header param (first header variable)
-        if (!empty($title)) {
-            $components['header_1'] = [
-                'type'  => 'text',
-                'value' => $title,
-            ];
-        }
+    if ($headerText !== '') {
+        $components['header_1'] = [
+            'type'  => 'text',
+            'value' => $headerText,
+        ];
+    }
 
-        // If template has zero params (no variables), components must be {}
-        if (!$components) {
-            $components = (object)[]; // "{}" in JSON
-        }
+    if (!$components) {
+        $components = (object)[]; // "{}" in JSON
+    }
 
-        $payload = [
-            'integrated_number' => self::INTEGRATED_NUMBER,
-            'content_type'      => 'template',
-            'payload'           => [
-                'messaging_product' => 'whatsapp',
-                'type'              => 'template',
-                'template'          => [
-                    'name'      => self::TEMPLATE_NAME,
-                    'language'  => [
-                        'code'   => self::LANGUAGE_CODE,
-                        'policy' => 'deterministic',
-                    ],
-                    'namespace' => self::TEMPLATE_NAMESPACE,
-                    'to_and_components' => [
-                        [
-                            'to'         => $to,
-                            'components' => $components,
-                        ],
+    $payload = [
+        'integrated_number' => self::INTEGRATED_NUMBER,
+        'content_type'      => 'template',
+        'payload'           => [
+            'messaging_product' => 'whatsapp',
+            'type'              => 'template',
+            'template'          => [
+                'name'      => self::TEMPLATE_NAME,
+                'language'  => [
+                    'code'   => self::LANGUAGE_CODE,
+                    'policy' => 'deterministic',
+                ],
+                'namespace' => self::TEMPLATE_NAMESPACE,
+                'to_and_components' => [
+                    [
+                        'to'         => $to,
+                        'components' => $components,
                     ],
                 ],
             ],
-        ];
+        ],
+    ];
 
-        $headers = [
-            'authkey'      => self::AUTHKEY,
-            'Accept'       => 'application/json',
-            'Content-Type' => 'application/json',
-        ];
+    $headers = [
+        'authkey'      => self::AUTHKEY,
+        'Accept'       => 'application/json',
+        'Content-Type' => 'application/json',
+    ];
 
+    try {
+        $res  = $this->http->post(self::ENDPOINT_BULK, [
+            'headers' => $headers,
+            'json'    => $payload,
+        ]);
+
+        $code = $res->getStatusCode();
+        $body = (string)$res->getBody();
+
+        $json = null;
         try {
-            $res  = $this->http->post(self::ENDPOINT_BULK, [
-                'headers' => $headers,
-                'json'    => $payload,
-            ]);
-
-            $code = $res->getStatusCode();
-            $body = (string)$res->getBody();
-
-            $json = null;
-            try {
-                $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-            } catch (\Throwable $e) {
-                // If decode fails, leave $json = null.
-            }
-
-            if ($json && isset($json['errors'])) {
-                Log::warning('MSG91 logical errors', ['errors' => $json['errors']]);
-            }
-
-            return [
-                'http_status' => $code,
-                'json'        => $json,
-                'body'        => $body,
-            ];
+            $json = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (\Throwable $e) {
-            Log::error('MSG91 bulk API error', ['error' => $e->getMessage()]);
-            throw $e;
+            // ignore JSON error
         }
+
+        if ($json && isset($json['errors'])) {
+            Log::warning('MSG91 logical errors', ['errors' => $json['errors']]);
+        }
+
+        return [
+            'http_status' => $code,
+            'json'        => $json,
+            'body'        => $body,
+        ];
+    } catch (\Throwable $e) {
+        Log::error('MSG91 bulk API error', ['error' => $e->getMessage()]);
+        throw $e;
     }
+}
+
 }
