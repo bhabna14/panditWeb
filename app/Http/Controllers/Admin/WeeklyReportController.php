@@ -48,11 +48,10 @@ class WeeklyReportController extends Controller
                     'customize_income'    => 0,
                     'income_total'        => 0,
 
-                    // for modal + (previously tooltips)
-                    'subscription_income_users'   => [], // [{user_id,name,amt}]
-                    'customize_income_users'      => [], // [{user_id,name,amt}]
-                    'subscription_income_tooltip' => '',
-                    'customize_income_tooltip'    => '',
+                    // For modal
+                    // each item: ['user_id'=>..., 'name'=>..., 'amt'=>...]
+                    'subscription_income_users' => [],
+                    'customize_income_users'    => [],
 
                     'expenditure'         => 0,
                     'vendor_fund'         => 0,
@@ -75,6 +74,7 @@ class WeeklyReportController extends Controller
 
         /* ================= Finance: INCOME (Split totals) ================= */
 
+        // Subscription income: flower_payments joined with subscriptions
         $subPayments = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -93,6 +93,7 @@ class WeeklyReportController extends Controller
             }
         }
 
+        // Customize income: paid payments that are NOT linked to subscriptions
         $custPayments = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -120,6 +121,7 @@ class WeeklyReportController extends Controller
 
         /* ================= INCOME USER LIST (for modal) ================= */
 
+        // Per-day subscription users list (grouped by day + user)
         $subUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -137,6 +139,7 @@ class WeeklyReportController extends Controller
             ->orderByDesc('amt')
             ->get();
 
+        // Per-day customize users list
         $custUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -171,21 +174,6 @@ class WeeklyReportController extends Controller
                 'name'    => $r->name,
                 'amt'     => (float)$r->amt,
             ];
-        }
-
-        // (Optional/legacy) tooltips - safe to keep
-        foreach ($days as $dk => $row) {
-            $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
-                'Subscription Income',
-                $row['finance']['subscription_income_users'] ?? [],
-                (float)($row['finance']['subscription_income'] ?? 0)
-            );
-
-            $days[$dk]['finance']['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
-                'Customize Income',
-                $row['finance']['customize_income_users'] ?? [],
-                (float)($row['finance']['customize_income'] ?? 0)
-            );
         }
 
         /* ================= Finance: EXPENDITURE ================= */
@@ -402,13 +390,9 @@ class WeeklyReportController extends Controller
                 'customize_income'    => 0,
                 'income_total'        => 0,
 
-                // NEW (for modal)
+                // for modal
                 'subscription_income_users' => [],
                 'customize_income_users'    => [],
-
-                // legacy tooltip fields (safe to keep)
-                'subscription_income_tooltip' => '',
-                'customize_income_tooltip'    => '',
 
                 'expenditure'         => 0,
                 'vendor_fund'         => 0,
@@ -449,6 +433,7 @@ class WeeklyReportController extends Controller
 
                 $weekTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
+                // Aggregate subscription users across week
                 foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
                     $uid = (string)($u['user_id'] ?? '');
                     if ($uid === '') continue;
@@ -459,6 +444,7 @@ class WeeklyReportController extends Controller
                     $weekSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
                 }
 
+                // Aggregate customize users across week
                 foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
                     $uid = (string)($u['user_id'] ?? '');
                     if ($uid === '') continue;
@@ -478,23 +464,10 @@ class WeeklyReportController extends Controller
             $weekCusUsersList = array_values($weekCusUsers);
             usort($weekCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
-            // NEW (for modal)
             $weekTotals['subscription_income_users'] = $weekSubUsersList;
             $weekTotals['customize_income_users']    = $weekCusUsersList;
 
-            // legacy tooltip (safe to keep)
-            $weekTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
-                'Subscription Income (Week)',
-                $weekSubUsersList,
-                (float)$weekTotals['subscription_income']
-            );
-
-            $weekTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
-                'Customize Income (Week)',
-                $weekCusUsersList,
-                (float)$weekTotals['customize_income']
-            );
-
+            // show only vendors used in this week
             $weekVendorColumns = [];
             foreach ($vendorColumns as $v) {
                 if (($weekTotals['vendors'][$v] ?? 0) > 0) {
@@ -520,13 +493,9 @@ class WeeklyReportController extends Controller
             'customize_income'    => 0,
             'income_total'        => 0,
 
-            // NEW (for modal)
+            // for modal
             'subscription_income_users' => [],
             'customize_income_users'    => [],
-
-            // legacy tooltip fields (safe to keep)
-            'subscription_income_tooltip' => '',
-            'customize_income_tooltip'    => '',
 
             'expenditure'         => 0,
             'vendor_fund'         => 0,
@@ -595,22 +564,8 @@ class WeeklyReportController extends Controller
         $monthCusUsersList = array_values($monthCusUsers);
         usort($monthCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
-        // NEW (for modal)
         $monthTotals['subscription_income_users'] = $monthSubUsersList;
         $monthTotals['customize_income_users']    = $monthCusUsersList;
-
-        // legacy tooltip (safe to keep)
-        $monthTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
-            'Subscription Income (Month)',
-            $monthSubUsersList,
-            (float)$monthTotals['subscription_income']
-        );
-
-        $monthTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
-            'Customize Income (Month)',
-            $monthCusUsersList,
-            (float)$monthTotals['customize_income']
-        );
 
         $monthDays = $days;
         ksort($monthDays);

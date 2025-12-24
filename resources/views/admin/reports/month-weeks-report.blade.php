@@ -298,6 +298,12 @@
             justify-content: space-between;
             gap: 10px;
         }
+        .income-user-list .left {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
         .income-user-list .uname {
             font-weight: 700;
             overflow: hidden;
@@ -307,7 +313,10 @@
         .income-user-list .uid {
             font-size: .82rem;
             color: #64748b;
+        }
+        .income-user-list .amt {
             flex: 0 0 auto;
+            font-weight: 800;
         }
     </style>
 @endsection
@@ -800,9 +809,13 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <div class="text-muted small" id="incomeUsersCount">Customers: 0</div>
-                        <input type="text" class="form-control form-control-sm" style="max-width: 220px"
+                    <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
+                        <div class="text-muted small">
+                            <div id="incomeUsersCount">Customers: 0</div>
+                            <div id="incomeUsersTotal">Total: ₹0</div>
+                        </div>
+
+                        <input type="text" class="form-control form-control-sm" style="max-width: 240px"
                                id="incomeUsersSearch" placeholder="Search name...">
                     </div>
 
@@ -820,10 +833,6 @@
         </div>
     </div>
 @endsection
-
-@push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-@endpush
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -867,12 +876,18 @@
         const listEl = document.getElementById('incomeUsersList');
         const emptyEl = document.getElementById('incomeUsersEmpty');
         const countEl = document.getElementById('incomeUsersCount');
+        const totalEl = document.getElementById('incomeUsersTotal');
         const searchEl = document.getElementById('incomeUsersSearch');
 
         let currentUsers = [];
 
         function safeJsonParse(str, fallback) {
             try { return JSON.parse(str); } catch (e) { return fallback; }
+        }
+
+        function formatINR(n) {
+            const num = Number(n || 0);
+            return '₹' + num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
         }
 
         function renderUsers(users, q = '') {
@@ -883,7 +898,10 @@
 
             listEl.innerHTML = '';
 
+            const total = filtered.reduce((sum, u) => sum + Number(u.amt || 0), 0);
+
             countEl.textContent = 'Customers: ' + filtered.length;
+            totalEl.textContent = 'Total: ' + formatINR(total);
 
             if (!filtered.length) {
                 emptyEl.classList.remove('d-none');
@@ -895,6 +913,9 @@
                 const li = document.createElement('li');
                 li.className = 'list-group-item';
 
+                const left = document.createElement('div');
+                left.className = 'left';
+
                 const name = document.createElement('div');
                 name.className = 'uname';
                 name.textContent = (u.name ?? 'Unknown');
@@ -903,8 +924,16 @@
                 uid.className = 'uid';
                 uid.textContent = u.user_id ? ('#' + u.user_id) : '';
 
-                li.appendChild(name);
-                li.appendChild(uid);
+                left.appendChild(name);
+                left.appendChild(uid);
+
+                const amt = document.createElement('div');
+                amt.className = 'amt';
+                amt.textContent = formatINR(u.amt || 0);
+
+                li.appendChild(left);
+                li.appendChild(amt);
+
                 listEl.appendChild(li);
             });
         }
@@ -937,6 +966,7 @@
             listEl.innerHTML = '';
             emptyEl.classList.add('d-none');
             countEl.textContent = 'Customers: 0';
+            totalEl.textContent = 'Total: ₹0';
             currentUsers = [];
         });
     </script>
