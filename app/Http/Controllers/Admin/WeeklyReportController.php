@@ -48,9 +48,9 @@ class WeeklyReportController extends Controller
                     'customize_income'    => 0,
                     'income_total'        => 0,
 
-                    // NEW: for tooltips
-                    'subscription_income_users' => [], // [{user_id,name,amt}]
-                    'customize_income_users'    => [], // [{user_id,name,amt}]
+                    // for tooltips
+                    'subscription_income_users'   => [], // [{user_id,name,amt}]
+                    'customize_income_users'      => [], // [{user_id,name,amt}]
                     'subscription_income_tooltip' => '',
                     'customize_income_tooltip'    => '',
 
@@ -118,19 +118,19 @@ class WeeklyReportController extends Controller
             $days[$k]['finance']['income_total'] = $sub + $cus;
         }
 
-        /* ================= NEW: INCOME USER LIST (for tooltips) =================
-           Subscription income users: fp JOIN subscriptions JOIN users
-           Customize income users: fp LEFT JOIN subscriptions (NULL) JOIN users
+        /* ================= INCOME USER LIST (for tooltips) =================
+           Subscription income users: fp JOIN subscriptions LEFT JOIN users
+           Customize income users: fp LEFT JOIN subscriptions (NULL) LEFT JOIN users
         */
 
         $subUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-            ->join('users as u', 'u.userid', '=', 'fp.user_id')
+            ->leftJoin('users as u', 'u.userid', '=', 'fp.user_id')
             ->select([
                 DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
                 'fp.user_id as user_id',
-                'u.name as name',
+                DB::raw("COALESCE(u.name, 'Unknown') as name"),
                 DB::raw("SUM(fp.paid_amount) as amt"),
             ])
             ->where('fp.payment_status', 'paid')
@@ -143,11 +143,11 @@ class WeeklyReportController extends Controller
         $custUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-            ->join('users as u', 'u.userid', '=', 'fp.user_id')
+            ->leftJoin('users as u', 'u.userid', '=', 'fp.user_id')
             ->select([
                 DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
                 'fp.user_id as user_id',
-                'u.name as name',
+                DB::raw("COALESCE(u.name, 'Unknown') as name"),
                 DB::raw("SUM(fp.paid_amount) as amt"),
             ])
             ->whereNull('s.order_id')
@@ -158,7 +158,6 @@ class WeeklyReportController extends Controller
             ->orderByDesc('amt')
             ->get();
 
-        // Attach user lists to $days
         foreach ($subUsersRows as $r) {
             if (!isset($days[$r->d])) continue;
             $days[$r->d]['finance']['subscription_income_users'][] = [
@@ -177,7 +176,6 @@ class WeeklyReportController extends Controller
             ];
         }
 
-        // Build tooltip HTML per day (escaped names; safe to render as HTML in popover)
         foreach ($days as $dk => $row) {
             $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
                 'Subscription Income',
@@ -406,7 +404,6 @@ class WeeklyReportController extends Controller
                 'customize_income'    => 0,
                 'income_total'        => 0,
 
-                // NEW: aggregated tooltip for week totals
                 'subscription_income_tooltip' => '',
                 'customize_income_tooltip'    => '',
 
@@ -424,8 +421,7 @@ class WeeklyReportController extends Controller
                 'total_delivery'      => 0,
             ];
 
-            // NEW: aggregate user lists week-wise
-            $weekSubUsers = [];  // user_id => ['user_id','name','amt']
+            $weekSubUsers = [];
             $weekCusUsers = [];
 
             foreach ($weekDays as $row) {
@@ -450,7 +446,6 @@ class WeeklyReportController extends Controller
 
                 $weekTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
-                // merge subscription users
                 foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
                     $uid = $u['user_id'];
                     if (!isset($weekSubUsers[$uid])) {
@@ -459,7 +454,6 @@ class WeeklyReportController extends Controller
                     $weekSubUsers[$uid]['amt'] += (float)$u['amt'];
                 }
 
-                // merge customize users
                 foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
                     $uid = $u['user_id'];
                     if (!isset($weekCusUsers[$uid])) {
@@ -471,7 +465,6 @@ class WeeklyReportController extends Controller
 
             $weekTotals['available_balance'] = $weekTotals['vendor_fund'] - $weekTotals['expenditure'];
 
-            // sort users desc by amount for tooltip
             $weekSubUsersList = array_values($weekSubUsers);
             usort($weekSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
@@ -515,7 +508,6 @@ class WeeklyReportController extends Controller
             'customize_income'    => 0,
             'income_total'        => 0,
 
-            // NEW
             'subscription_income_tooltip' => '',
             'customize_income_tooltip'    => '',
 
@@ -622,7 +614,7 @@ class WeeklyReportController extends Controller
         $safeTitle = e($title);
         $totalUsers = count($users);
 
-        // keep tooltip compact: show top 20 users
+        // show top 20 users
         $usersTop = array_slice($users, 0, 20);
 
         $html  = "<div class='pop-head'>{$safeTitle}</div>";

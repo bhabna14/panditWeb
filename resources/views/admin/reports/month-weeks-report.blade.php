@@ -375,9 +375,22 @@
                 <div class="kpi">
                     <div class="label">Total Income (Month)</div>
                     <div class="h4 value">₹{{ number_format($monthTotals['income_total'] ?? 0) }}</div>
-                    <div class="small text-muted mt-1">
-                        Sub ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
-                        · Cust ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
+
+                    {{-- KPI hover tooltips for Sub + Cust --}}
+                    <div class="small text-muted mt-1 d-flex flex-wrap gap-2 align-items-center">
+                        <span class="income-pop"
+                              data-income-popover="1"
+                              data-popover-content='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                            Sub ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
+                            <span class="info-pill">i</span>
+                        </span>
+
+                        <span class="income-pop cust"
+                              data-income-popover="1"
+                              data-popover-content='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                            Cust ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
+                            <span class="info-pill">i</span>
+                        </span>
                     </div>
                 </div>
 
@@ -797,6 +810,7 @@
 @endpush
 
 @push('scripts')
+    {{-- IMPORTANT: Bootstrap 5 bundle includes Popper (required for Popover) --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -831,23 +845,50 @@
         });
 
         // ===== Income popovers (hover) =====
-        // data-popover-content contains a JSON string => JSON.parse gives real HTML
-        function initIncomePopovers() {
-            document.querySelectorAll('[data-income-popover="1"]').forEach(el => {
-                const raw = el.getAttribute('data-popover-content') || '""';
-                let html = '';
-                try { html = JSON.parse(raw); } catch (e) { html = ''; }
+        // data-popover-content contains JSON string (quoted) -> JSON.parse => real HTML string.
+        function safeJsonParse(str) {
+            try { return JSON.parse(str); } catch (e) { return ''; }
+        }
 
-                new bootstrap.Popover(el, {
-                    container: 'body',
-                    html: true,
-                    trigger: 'hover focus',
-                    placement: 'auto',
-                    sanitize: false,
-                    content: html
-                });
+        function mountPopover(el) {
+            const raw = el.getAttribute('data-popover-content') || '""';
+            let html = safeJsonParse(raw);
+
+            if (!html || typeof html !== 'string' || html.trim() === '') {
+                html = "<div class='pop-empty'>No paid payments found.</div>";
+            }
+
+            // Prevent duplicate instances (important when re-initializing on tab/collapse)
+            const existing = bootstrap.Popover.getInstance(el);
+            if (existing) existing.dispose();
+
+            new bootstrap.Popover(el, {
+                container: 'body',
+                html: true,
+                trigger: 'hover focus',
+                placement: 'auto',
+                sanitize: false,
+                content: html
             });
         }
+
+        function initIncomePopovers(root = document) {
+            root.querySelectorAll('[data-income-popover="1"]').forEach(mountPopover);
+        }
+
+        // Init once on page load
         initIncomePopovers();
+
+        // Re-init when collapses/tabs become visible (fixes "hover not working" in many admin layouts)
+        document.addEventListener('shown.bs.collapse', function (e) {
+            initIncomePopovers(e.target);
+        });
+
+        document.addEventListener('shown.bs.tab', function (e) {
+            const target = e.target?.getAttribute('data-bs-target');
+            if (!target) return;
+            const pane = document.querySelector(target);
+            if (pane) initIncomePopovers(pane);
+        });
     </script>
 @endpush
