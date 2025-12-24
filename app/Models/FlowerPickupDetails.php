@@ -18,6 +18,8 @@ class FlowerPickupDetails extends Model
         'pickup_date',
         'delivery_date',
         'total_price',
+        'discount',
+        'grand_total_price',
         'payment_method',
         'paid_by',
         'payment_status',

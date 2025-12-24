@@ -80,200 +80,255 @@ class VendorPickupController extends Controller
         }
     }
 
-    public function updateFlowerPrices(Request $request, $pickupId)
-    {
-        $vendor = Auth::guard('vendor-api')->user();
-        if (!$vendor) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Unauthorized. Vendor not logged in.',
-            ], 401);
-        }
-
-        // Strict mode by query: ?strict=1  (keeps old 422 behavior on mismatch)
-        $strict = (bool) $request->boolean('strict', false);
-
-        // --- Helpers for money (store as paise internally) ---
-        $toPaise  = fn($x) => (int) round(((float)$x) * 100);
-        $toRupees = fn($p) => round(((int)$p) / 100, 2);
-
-        // ✅ Validate
-        $validated = $request->validate([
-            'total_price' => ['nullable','numeric','min:0'],
-            'status'      => ['nullable', Rule::in(['PickupCompleted','Pending','Cancelled','InProgress'])],
-
-            'flower_pickup_items'                     => ['nullable','array','min:1'],
-            'flower_pickup_items.*.id'                => ['nullable','integer'],
-            'flower_pickup_items.*.flower_id'         => ['nullable','string'],
-            'flower_pickup_items.*.price'             => ['nullable','numeric','min:0'],
-            'flower_pickup_items.*.quantity'          => ['nullable','numeric','min:0'],    // optional
-            'flower_pickup_items.*.item_total_price'  => ['nullable','numeric','min:0'],    // optional; we can compute
-        ]);
-
-        try {
-            $json = DB::transaction(function () use ($vendor, $pickupId, $validated, $strict, $toPaise, $toRupees) {
-
-                // 1) Lock pickup and ensure vendor owns it
-                $pickup = \App\Models\FlowerPickupDetails::where('pick_up_id', $pickupId)
-                    ->where('vendor_id', $vendor->vendor_id)
-                    ->lockForUpdate()
-                    ->first();
-
-                if (!$pickup) {
-                    return response()->json([
-                        'status'  => 404,
-                        'message' => 'Pickup not found or not assigned to this vendor.',
-                    ], 404);
-                }
-
-                $updatedItems   = [];
-                $sumItemPaise   = 0;
-                $hadItemsInBody = isset($validated['flower_pickup_items']) && is_array($validated['flower_pickup_items']);
-
-                // 2) If items provided, load and update them
-                if ($hadItemsInBody) {
-                    $itemIds = collect($validated['flower_pickup_items'])
-                        ->pluck('id')->filter()->unique()->values();
-
-                    // Fetch only provided ids (if ids missing, we will error below)
-                    $existing = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
-                        ->whereIn('id', $itemIds)
-                        ->get()->keyBy('id');
-
-                    // Ensure all IDs exist and belong to this pickup
-                    $missing = $itemIds->diff($existing->keys());
-                    if ($missing->isNotEmpty()) {
-                        return response()->json([
-                            'status'  => 422,
-                            'message' => 'Some items do not belong to this pickup or do not exist.',
-                            'errors'  => ['missing_item_ids' => $missing->values()],
-                        ], 422);
-                    }
-
-                    foreach ($validated['flower_pickup_items'] as $row) {
-                        if (!isset($row['id'])) {
-                            return response()->json([
-                                'status'  => 422,
-                                'message' => 'Each item must include an id.',
-                            ], 422);
-                        }
-
-                        $it = $existing[$row['id']];
-
-                        // flower_id integrity if provided
-                        if (isset($row['flower_id']) && (string)$it->flower_id !== (string)$row['flower_id']) {
-                            return response()->json([
-                                'status'  => 422,
-                                'message' => 'flower_id mismatch for item id '.$row['id'],
-                            ], 422);
-                        }
-
-                        // Price (₹) -> paise
-                        $pricePaise = isset($row['price']) ? $toPaise($row['price']) : $toPaise($it->price ?? 0);
-                        $qty        = isset($row['quantity']) ? (float)$row['quantity'] : (float)($it->quantity ?? 1);
-
-                        // Determine item_total_price (₹) if not provided: price * qty
-                        if (isset($row['item_total_price'])) {
-                            $itemTotalPaise = $toPaise($row['item_total_price']);
-                        } else {
-                            $itemTotalPaise = (int) round($pricePaise * $qty);
-                        }
-
-                        // Save back to DB in rupees format
-                        $it->price            = $toRupees($pricePaise);
-                        // Persist quantity if your schema has it
-                        if (property_exists($it, 'quantity')) {
-                            $it->quantity = $qty;
-                        }
-                        $it->item_total_price = $toRupees($itemTotalPaise);
-                        $it->save();
-
-                        $sumItemPaise += $itemTotalPaise;
-
-                        $updatedItems[] = [
-                            'id'               => $it->id,
-                            'flower_id'        => $it->flower_id,
-                            'price'            => (float) $it->price,
-                            'quantity'         => isset($it->quantity) ? (float)$it->quantity : $qty,
-                            'item_total_price' => (float) $it->item_total_price,
-                        ];
-                    }
-                } else {
-                    // If no items provided, compute current sum from DB
-                    $sumItemPaise = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
-                        ->get()
-                        ->reduce(function ($carry, $it) use ($toPaise) {
-                            return $carry + $toPaise($it->item_total_price ?? 0);
-                        }, 0);
-                }
-
-                // 3) Decide total
-                $providedTotalPaise = isset($validated['total_price']) ? $toPaise($validated['total_price']) : null;
-
-                $totalPriceAdjusted = false;
-                $finalTotalPaise    = $sumItemPaise;
-
-                if ($providedTotalPaise !== null) {
-                    if ($strict && $providedTotalPaise !== $sumItemPaise) {
-                        // Strict mode => keep old behavior (422)
-                        return response()->json([
-                            'status'  => 422,
-                            'message' => 'Provided total_price does not match the sum of item_total_price.',
-                            'data'    => [
-                                'provided_total_price' => $toRupees($providedTotalPaise),
-                                'sum_item_total_price' => $toRupees($sumItemPaise),
-                                'difference'           => $toRupees($sumItemPaise - $providedTotalPaise),
-                            ],
-                        ], 422);
-                    }
-
-                    // Non-strict: we auto-snap to computed sum and flag it
-                    if ($providedTotalPaise !== $sumItemPaise) {
-                        $totalPriceAdjusted = true;
-                    }
-                }
-
-                // 4) Save pickup total + status + audit
-                $pickup->total_price = $toRupees($finalTotalPaise);
-                if (isset($validated['status'])) {
-                    $pickup->status = $validated['status'];
-                } else {
-                    // Default to PickupCompleted if caller intended to close
-                    $pickup->status = $pickup->status ?? 'PickupCompleted';
-                }
-                $pickup->updated_by = $vendor->vendor_name;
-                $pickup->save();
-
-                return response()->json([
-                    'status'  => 200,
-                    'message' => 'Prices updated successfully by '.$vendor->vendor_name,
-                    'data'    => [
-                        'pickup' => [
-                            'pick_up_id'           => $pickup->pick_up_id,
-                            'total_price'          => (float) $pickup->total_price,
-                            'status'               => $pickup->status,
-                            'updated_by'           => $pickup->updated_by,
-                            'updated_at'           => optional($pickup->updated_at)->toDateTimeString(),
-                            'total_price_adjusted' => $totalPriceAdjusted,
-                            'provided_total_price' => $providedTotalPaise !== null ? $toRupees($providedTotalPaise) : null,
-                            'sum_item_total_price' => $toRupees($sumItemPaise),
-                        ],
-                        'items_updated' => count($updatedItems),
-                        'items'         => $updatedItems,
-                    ],
-                ], 200);
-            });
-
-            return $json;
-
-        } catch (\Throwable $e) {
-            return response()->json([
-                'status'  => 500,
-                'message' => 'An error occurred while updating prices.',
-                'error'   => app()->environment('production') ? 'server_error' : $e->getMessage(),
-            ], 500);
-        }
+   public function updateFlowerPrices(Request $request, $pickupId)
+{
+    $vendor = Auth::guard('vendor-api')->user();
+    if (!$vendor) {
+        return response()->json([
+            'status'  => 401,
+            'message' => 'Unauthorized. Vendor not logged in.',
+        ], 401);
     }
+
+    // Strict mode by query: ?strict=1  (keeps 422 behavior on mismatch)
+    $strict = (bool) $request->boolean('strict', false);
+
+    // --- Helpers for money (store as paise internally) ---
+    $toPaise  = fn($x) => (int) round(((float)$x) * 100);
+    $toRupees = fn($p) => round(((int)$p) / 100, 2);
+
+    // ✅ Validate
+    $validated = $request->validate([
+        'total_price'        => ['nullable', 'numeric', 'min:0'],
+        'discount'           => ['nullable', 'numeric', 'min:0'],
+        'grand_total_price'  => ['nullable', 'numeric', 'min:0'],
+        'status'             => ['nullable', Rule::in(['PickupCompleted', 'Pending', 'Cancelled', 'InProgress'])],
+
+        'flower_pickup_items'                     => ['nullable', 'array', 'min:1'],
+        'flower_pickup_items.*.id'                => ['nullable', 'integer'],
+        'flower_pickup_items.*.flower_id'         => ['nullable', 'string'],
+        'flower_pickup_items.*.price'             => ['nullable', 'numeric', 'min:0'],
+        'flower_pickup_items.*.quantity'          => ['nullable', 'numeric', 'min:0'],
+        'flower_pickup_items.*.item_total_price'  => ['nullable', 'numeric', 'min:0'],
+    ]);
+
+    try {
+        $json = DB::transaction(function () use ($vendor, $pickupId, $validated, $strict, $toPaise, $toRupees) {
+
+            // 1) Lock pickup and ensure vendor owns it
+            $pickup = \App\Models\FlowerPickupDetails::where('pick_up_id', $pickupId)
+                ->where('vendor_id', $vendor->vendor_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$pickup) {
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Pickup not found or not assigned to this vendor.',
+                ], 404);
+            }
+
+            $updatedItems   = [];
+            $sumItemPaise   = 0;
+            $hadItemsInBody = isset($validated['flower_pickup_items']) && is_array($validated['flower_pickup_items']);
+
+            // 2) If items provided, load and update them
+            if ($hadItemsInBody) {
+                $itemIds = collect($validated['flower_pickup_items'])
+                    ->pluck('id')->filter()->unique()->values();
+
+                $existing = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
+                    ->whereIn('id', $itemIds)
+                    ->get()->keyBy('id');
+
+                $missing = $itemIds->diff($existing->keys());
+                if ($missing->isNotEmpty()) {
+                    return response()->json([
+                        'status'  => 422,
+                        'message' => 'Some items do not belong to this pickup or do not exist.',
+                        'errors'  => ['missing_item_ids' => $missing->values()],
+                    ], 422);
+                }
+
+                foreach ($validated['flower_pickup_items'] as $row) {
+                    if (!isset($row['id'])) {
+                        return response()->json([
+                            'status'  => 422,
+                            'message' => 'Each item must include an id.',
+                        ], 422);
+                    }
+
+                    $it = $existing[$row['id']];
+
+                    // flower_id integrity if provided
+                    if (isset($row['flower_id']) && (string)$it->flower_id !== (string)$row['flower_id']) {
+                        return response()->json([
+                            'status'  => 422,
+                            'message' => 'flower_id mismatch for item id ' . $row['id'],
+                        ], 422);
+                    }
+
+                    // Price (₹) -> paise
+                    $pricePaise = isset($row['price']) ? $toPaise($row['price']) : $toPaise($it->price ?? 0);
+                    $qty        = isset($row['quantity']) ? (float)$row['quantity'] : (float)($it->quantity ?? 1);
+
+                    // Determine item_total_price (₹) if not provided: price * qty
+                    if (isset($row['item_total_price'])) {
+                        $itemTotalPaise = $toPaise($row['item_total_price']);
+                    } else {
+                        $itemTotalPaise = (int) round($pricePaise * $qty);
+                    }
+
+                    // Save back to DB in rupees format
+                    $it->price = $toRupees($pricePaise);
+                    if (property_exists($it, 'quantity')) {
+                        $it->quantity = $qty;
+                    }
+                    $it->item_total_price = $toRupees($itemTotalPaise);
+                    $it->save();
+
+                    $sumItemPaise += $itemTotalPaise;
+
+                    $updatedItems[] = [
+                        'id'               => $it->id,
+                        'flower_id'        => $it->flower_id,
+                        'price'            => (float) $it->price,
+                        'quantity'         => isset($it->quantity) ? (float)$it->quantity : $qty,
+                        'item_total_price' => (float) $it->item_total_price,
+                    ];
+                }
+            } else {
+                // If no items provided, compute current sum from DB
+                $sumItemPaise = \App\Models\FlowerPickupItems::where('pick_up_id', $pickupId)
+                    ->get()
+                    ->reduce(function ($carry, $it) use ($toPaise) {
+                        return $carry + $toPaise($it->item_total_price ?? 0);
+                    }, 0);
+            }
+
+            // 3) Decide total (total_price is sum of item totals)
+            $providedTotalPaise = isset($validated['total_price']) ? $toPaise($validated['total_price']) : null;
+
+            $totalPriceAdjusted = false;
+            $finalTotalPaise    = $sumItemPaise;
+
+            if ($providedTotalPaise !== null) {
+                if ($strict && $providedTotalPaise !== $sumItemPaise) {
+                    return response()->json([
+                        'status'  => 422,
+                        'message' => 'Provided total_price does not match the sum of item_total_price.',
+                        'data'    => [
+                            'provided_total_price' => $toRupees($providedTotalPaise),
+                            'sum_item_total_price' => $toRupees($sumItemPaise),
+                            'difference'           => $toRupees($sumItemPaise - $providedTotalPaise),
+                        ],
+                    ], 422);
+                }
+
+                // Non-strict: auto-snap to computed sum and flag it
+                if ($providedTotalPaise !== $sumItemPaise) {
+                    $totalPriceAdjusted = true;
+                }
+            }
+
+            // 4) Discount + Grand Total handling
+            $providedDiscountPaise = isset($validated['discount'])
+                ? $toPaise($validated['discount'])
+                : $toPaise($pickup->discount ?? 0);
+
+            // Ensure discount does not exceed total (optional safety)
+            if ($providedDiscountPaise > $finalTotalPaise) {
+                if ($strict) {
+                    return response()->json([
+                        'status'  => 422,
+                        'message' => 'discount cannot be greater than total_price.',
+                        'data'    => [
+                            'total_price' => $toRupees($finalTotalPaise),
+                            'discount'    => $toRupees($providedDiscountPaise),
+                        ],
+                    ], 422);
+                }
+                // Non-strict: clamp discount to total
+                $providedDiscountPaise = $finalTotalPaise;
+            }
+
+            $computedGrandTotalPaise = max(0, $finalTotalPaise - $providedDiscountPaise);
+
+            $providedGrandTotalPaise = isset($validated['grand_total_price'])
+                ? $toPaise($validated['grand_total_price'])
+                : null;
+
+            $grandTotalAdjusted = false;
+
+            if ($providedGrandTotalPaise !== null) {
+                if ($strict && $providedGrandTotalPaise !== $computedGrandTotalPaise) {
+                    return response()->json([
+                        'status'  => 422,
+                        'message' => 'Provided grand_total_price does not match computed (total_price - discount).',
+                        'data'    => [
+                            'provided_grand_total_price' => $toRupees($providedGrandTotalPaise),
+                            'computed_grand_total_price' => $toRupees($computedGrandTotalPaise),
+                            'difference'                 => $toRupees($computedGrandTotalPaise - $providedGrandTotalPaise),
+                        ],
+                    ], 422);
+                }
+
+                if ($providedGrandTotalPaise !== $computedGrandTotalPaise) {
+                    $grandTotalAdjusted = true;
+                }
+            }
+
+            // 5) Save pickup total + discount + grand_total + status + audit
+            $pickup->total_price        = $toRupees($finalTotalPaise);
+            $pickup->discount           = $toRupees($providedDiscountPaise);
+            $pickup->grand_total_price  = $toRupees($computedGrandTotalPaise);
+
+            if (isset($validated['status'])) {
+                $pickup->status = $validated['status'];
+            } else {
+                $pickup->status = $pickup->status ?? 'PickupCompleted';
+            }
+
+            $pickup->updated_by = $vendor->vendor_name;
+            $pickup->save();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Prices updated successfully by ' . $vendor->vendor_name,
+                'data'    => [
+                    'pickup' => [
+                        'pick_up_id'                => $pickup->pick_up_id,
+                        'total_price'               => (float) $pickup->total_price,
+                        'discount'                  => (float) $pickup->discount,
+                        'grand_total_price'         => (float) $pickup->grand_total_price,
+                        'status'                    => $pickup->status,
+                        'updated_by'                => $pickup->updated_by,
+                        'updated_at'                => optional($pickup->updated_at)->toDateTimeString(),
+
+                        'total_price_adjusted'      => $totalPriceAdjusted,
+                        'provided_total_price'      => $providedTotalPaise !== null ? $toRupees($providedTotalPaise) : null,
+                        'sum_item_total_price'      => $toRupees($sumItemPaise),
+
+                        'grand_total_price_adjusted'=> $grandTotalAdjusted,
+                        'provided_grand_total_price'=> $providedGrandTotalPaise !== null ? $toRupees($providedGrandTotalPaise) : null,
+                        'computed_grand_total_price'=> $toRupees($computedGrandTotalPaise),
+                    ],
+                    'items_updated' => count($updatedItems),
+                    'items'         => $updatedItems,
+                ],
+            ], 200);
+        });
+
+        return $json;
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status'  => 500,
+            'message' => 'An error occurred while updating prices.',
+            'error'   => app()->environment('production') ? 'server_error' : $e->getMessage(),
+        ], 500);
+    }
+}
 
     public function getAllPickups()
     {
