@@ -110,7 +110,7 @@
             </div>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-3">
             <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Subscriptions Taken</div>
@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-3">
             <a href="{{ route('admin.orders.index', ['filter' => 'discontinued']) }}" target="_blank">
                 <div class="stats-card d-flex justify-content-between align-items-center border">
                     <div>
@@ -136,7 +136,7 @@
             </a>
         </div>
 
-        <div class="col-md-2">
+        <div class="col-md-3">
             <a href="{{ route('payment.collection.index') }}" target="_blank">
                 <div class="stats-card d-flex justify-content-between align-items-center border">
                     <div>
