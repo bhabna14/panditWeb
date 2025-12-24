@@ -62,12 +62,14 @@ class FlowerPickupController extends Controller
 
         return redirect()->back()->with('error', 'Pickup request not found.');
     }
-    
+
     public function manageflowerpickupdetails(Request $request)
     {
-        // Use your real table name via the model (double underscore is fine)
+        // ✅ Show today's total as GRAND TOTAL (after discount)
+        // Fallback: if grand_total_price is null, use total_price
         $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
-            ->sum('total_price');
+            ->selectRaw('SUM(COALESCE(grand_total_price, total_price, 0)) as total')
+            ->value('total');
 
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
     }
@@ -90,32 +92,31 @@ class FlowerPickupController extends Controller
 
             switch ($filter) {
                 case 'todayexpenses':
-                    $base->whereDate('pickup_date', \Carbon\Carbon::today());
+                    $base->whereDate('pickup_date', Carbon::today());
                     break;
                 case 'todaypaidpickup':
-                    $base->whereDate('pickup_date', \Carbon\Carbon::today())
+                    $base->whereDate('pickup_date', Carbon::today())
                         ->where('payment_status', 'Paid');
                     break;
                 case 'todaypendingpickup':
-                    $base->whereDate('pickup_date', \Carbon\Carbon::today())
+                    $base->whereDate('pickup_date', Carbon::today())
                         ->where('payment_status', 'pending');
                     break;
                 case 'monthlyexpenses':
-                    $base->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
-                        ->whereYear('pickup_date', \Carbon\Carbon::now()->year);
+                    $base->whereMonth('pickup_date', Carbon::now()->month)
+                        ->whereYear('pickup_date', Carbon::now()->year);
                     break;
                 case 'monthlypaidpickup':
-                    $base->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
-                        ->whereYear('pickup_date', \Carbon\Carbon::now()->year)
+                    $base->whereMonth('pickup_date', Carbon::now()->month)
+                        ->whereYear('pickup_date', Carbon::now()->year)
                         ->where('payment_status', 'Paid');
                     break;
                 case 'monthlypendingpickup':
-                    $base->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
-                        ->whereYear('pickup_date', \Carbon\Carbon::now()->year)
+                    $base->whereMonth('pickup_date', Carbon::now()->month)
+                        ->whereYear('pickup_date', Carbon::now()->year)
                         ->where('payment_status', 'pending');
                     break;
                 default:
-                    // no-op
                     break;
             }
 
@@ -125,25 +126,27 @@ class FlowerPickupController extends Controller
                 $like = '%' . strtr($search, ['%' => '\%', '_' => '\_']) . '%';
                 $base->where(function ($q) use ($like) {
                     $q->where('pick_up_id', 'like', $like)
-                    ->orWhere('payment_status', 'like', $like)
-                    ->orWhere('status', 'like', $like)
-                    ->orWhereHas('vendor', fn($vq) => $vq->where('vendor_name', 'like', $like))
-                    ->orWhereHas('rider', fn($rq) => $rq->where('rider_name', 'like', $like));
+                        ->orWhere('payment_status', 'like', $like)
+                        ->orWhere('status', 'like', $like)
+                        ->orWhereHas('vendor', fn($vq) => $vq->where('vendor_name', 'like', $like))
+                        ->orWhereHas('rider', fn($rq) => $rq->where('rider_name', 'like', $like));
                 });
             }
 
             $recordsFiltered = (clone $base)->count('id');
 
-            // ✅ Updated safe order map to match your header indexes:
+            // ✅ New header indexes:
             // 0:# 1:Pickup Id 2:Vendor 3:Rider 4:Flower Details 5:PickUp Date 6:Delivery Date
-            // 7:Total Price 8:Payment Status 9:Status 10:Actions
+            // 7:Total Price 8:Discount 9:Grand Total 10:Payment Status 11:Status 12:Actions
             $safeOrderMap = [
-                1 => 'pick_up_id',
-                5 => 'pickup_date',
-                6 => 'delivery_date',   // ✅ new
-                7 => 'total_price',
-                8 => 'payment_status',
-                9 => 'status',
+                1  => 'pick_up_id',
+                5  => 'pickup_date',
+                6  => 'delivery_date',
+                7  => 'total_price',
+                8  => 'discount',           // ✅ new
+                9  => 'grand_total_price',  // ✅ new
+                10 => 'payment_status',
+                11 => 'status',
             ];
 
             $orderBy = 'id';
@@ -168,25 +171,42 @@ class FlowerPickupController extends Controller
                     'vendor_id',
                     'rider_id',
                     'pickup_date',
-                    'delivery_date',   // ✅ select it
+                    'delivery_date',
                     'total_price',
+                    'discount',           // ✅ select it
+                    'grand_total_price',  // ✅ select it
                     'payment_status',
                     'status',
                 ]);
 
             $data = $rows->map(function ($r, $i) use ($start) {
                 $idx   = $start + $i + 1;
+
                 $pDate = $r->pickup_date
-                    ? \Carbon\Carbon::parse($r->pickup_date)->format('d-m-Y')
+                    ? Carbon::parse($r->pickup_date)->format('d-m-Y')
                     : 'N/A';
 
                 $dDate = $r->delivery_date
-                    ? \Carbon\Carbon::parse($r->delivery_date)->format('d-m-Y')
+                    ? Carbon::parse($r->delivery_date)->format('d-m-Y')
                     : '<span class="text-warning">Pending</span>';
 
                 $price = ($r->total_price !== null && $r->total_price !== '')
                     ? '₹' . number_format((float) $r->total_price, 2)
                     : '<span class="text-warning">Pending</span>';
+
+                // ✅ Discount display
+                $discount = ($r->discount !== null && $r->discount !== '')
+                    ? '₹' . number_format((float) $r->discount, 2)
+                    : '₹0.00';
+
+                // ✅ Grand total display (fallback to total_price - discount if needed)
+                $grand = $r->grand_total_price;
+                if ($grand === null || $grand === '') {
+                    $tp = (float) ($r->total_price ?? 0);
+                    $ds = (float) ($r->discount ?? 0);
+                    $grand = max(0, $tp - $ds);
+                }
+                $grandTotal = '₹' . number_format((float) $grand, 2);
 
                 $payBadge = ($r->payment_status === 'Paid')
                     ? '<span class="badge bg-success" style="font-size:12px;width:70px;padding:10px">Paid</span>'
@@ -217,19 +237,20 @@ class FlowerPickupController extends Controller
                         <i class="fas fa-credit-card me-1"></i>
                     </button>';
 
-                // ✅ Return array aligned with your table columns (indexes 0..10):
                 return [
-                    $idx,                                   // 0: #
-                    e($r->pick_up_id ?? 'N/A'),            // 1: Pickup Id
+                    $idx,                                        // 0: #
+                    e($r->pick_up_id ?? 'N/A'),                 // 1: Pickup Id
                     e(optional($r->vendor)->vendor_name ?? 'N/A'), // 2: Vendor
                     e(optional($r->rider)->rider_name ?? 'N/A'),   // 3: Rider
-                    $viewBtn,                              // 4: Flower Details
-                    $pDate,                                // 5: PickUp Date
-                    $dDate,                                // 6: Delivery Date  ✅ new slot
-                    $price,                                // 7: Total Price    (shifted)
-                    $payBadge,                             // 8: Payment Status (shifted)
-                    $statusBadge,                          // 9: Status         (shifted)
-                    '<div class="d-flex align-items-center gap-2">'.$actions.'</div>', // 10: Actions
+                    $viewBtn,                                   // 4: Flower Details
+                    $pDate,                                     // 5: PickUp Date
+                    $dDate,                                     // 6: Delivery Date
+                    $price,                                     // 7: Total Price
+                    $discount,                                  // 8: Discount ✅
+                    $grandTotal,                                // 9: Grand Total ✅
+                    $payBadge,                                  // 10: Payment Status
+                    $statusBadge,                               // 11: Status
+                    '<div class="d-flex align-items-center gap-2">'.$actions.'</div>', // 12: Actions
                 ];
             })->values()->toArray();
 
@@ -241,7 +262,7 @@ class FlowerPickupController extends Controller
             ], 200, ['Content-Type' => 'application/json']);
 
         } catch (\Throwable $e) {
-            \Log::error('DT ajaxFlowerPickupDetails failed', [
+            Log::error('DT ajaxFlowerPickupDetails failed', [
                 'msg'  => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
