@@ -530,85 +530,104 @@ class AdminController extends Controller
         return view('admin/add-career');
     }
 
-    public function manageuser()
-    {
-        // Subqueries to fetch latest authorized device data per user (business key = users.userid)
-        $lastLoginSub = UserDevice::authorized()
-            ->select('last_login_time')
-            ->whereColumn('user_devices.user_id', 'users.userid')
-            ->orderByDesc('last_login_time')
-            ->limit(1);
+public function manageuser(Request $request)
+{
+    $filter = $request->get('filter'); // e.g. non_subscriber
 
-        $lastDeviceModelSub = UserDevice::authorized()
-            ->select('device_model')
-            ->whereColumn('user_devices.user_id', 'users.userid')
-            ->orderByDesc('last_login_time')
-            ->limit(1);
+    // Subqueries to fetch latest authorized device data per user (business key = users.userid)
+    $lastLoginSub = UserDevice::authorized()
+        ->select('last_login_time')
+        ->whereColumn('user_devices.user_id', 'users.userid')
+        ->orderByDesc('last_login_time')
+        ->limit(1);
 
-        // Eager-load subscriptions + add latest device fields; newest users first
-        $users = User::with(['subscriptions'])
+    $lastDeviceModelSub = UserDevice::authorized()
+        ->select('device_model')
+        ->whereColumn('user_devices.user_id', 'users.userid')
+        ->orderByDesc('last_login_time')
+        ->limit(1);
+
+    // Users query: eager-load subscriptions + add latest device fields; newest users first
+    $usersQuery = User::with(['subscriptions'])
         ->addSelect([
+            'users.*',
             'last_login_time'   => $lastLoginSub,
             'last_device_model' => $lastDeviceModelSub,
         ])
-        ->get();
-        // ---- Total Customers ----
-        $totalCustomer = User::count();
+        ->orderByDesc('users.id');
 
-        // ---- Subscriptions Taken (Active or Paused etc.) ----
-        $totalSubscriptionTaken = Subscription::query()
-            ->whereIn('status', ['active', 'paused', 'expired', 'dead'])
-            ->distinct('user_id')
-            ->count('user_id');
+    // Filter: Non subscriber users (no record in subscriptions table)
+    if ($filter === 'non_subscriber') {
+        $usersQuery->whereDoesntHave('subscriptions');
+    }
 
-        $twoMonthsAgo = Carbon::now()->subMonths(2);
-        $liveStatuses = ['active', 'paused', 'resume'];
+    $users = $usersQuery->get();
 
-        $discontinuedCustomer = Subscription::query()
-            ->where('status', 'expired')
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
+    // ---- Total Customers ----
+    $totalCustomer = User::count();
+
+    // ---- Subscriptions Taken (Active or Paused etc.) ----
+    $totalSubscriptionTaken = Subscription::query()
+        ->whereIn('status', ['active', 'paused', 'expired', 'dead'])
+        ->distinct('user_id')
+        ->count('user_id');
+
+    // ---- Non Subscriber Users (no subscription record) ----
+    $nonSubscriberCustomer = User::query()
+        ->whereDoesntHave('subscriptions')
+        ->count();
+
+    $twoMonthsAgo = Carbon::now()->subMonths(2);
+    $liveStatuses = ['active', 'paused', 'resume'];
+
+    $discontinuedCustomer = Subscription::query()
+        ->where('status', 'expired')
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
                 ->from('subscriptions as s2')
                 ->whereColumn('s2.user_id', 'subscriptions.user_id')
                 ->whereIn('s2.status', $liveStatuses);
-            })
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
+        })
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
                 ->from('subscriptions as s3')
                 ->whereColumn('s3.order_id', 'subscriptions.order_id')
                 ->whereIn('s3.status', $liveStatuses);
-            })
-            ->where(function ($q) use ($twoMonthsAgo) {
-                $q->whereNull('end_date')
-                ->orWhere('end_date', '<', $twoMonthsAgo);
-            })
-            ->whereIn('id', function ($sub) {
-                $sub->select(DB::raw('MAX(id)'))
-                    ->from('subscriptions')
-                    ->groupBy('user_id');
-            })
-            ->distinct('user_id')
-            ->count('user_id');
+        })
+        ->where(function ($q) use ($twoMonthsAgo) {
+            $q->whereNull('end_date')
+              ->orWhere('end_date', '<', $twoMonthsAgo);
+        })
+        ->whereIn('id', function ($sub) {
+            $sub->select(DB::raw('MAX(id)'))
+                ->from('subscriptions')
+                ->groupBy('user_id');
+        })
+        ->distinct('user_id')
+        ->count('user_id');
 
-        // ---- Payment Pending (distinct users) ----
-        $paymentPending = FlowerPayment::query()
-            ->where('payment_status', 'pending')
-            ->whereExists(function ($q) {
-                $q->select(DB::raw(1))
+    // ---- Payment Pending (distinct users) ----
+    $paymentPending = FlowerPayment::query()
+        ->where('payment_status', 'pending')
+        ->whereExists(function ($q) {
+            $q->select(DB::raw(1))
                 ->from('subscriptions as s')
                 ->whereColumn('s.user_id', 'flower_payments.user_id');
-            })
-            ->distinct('user_id')
-            ->count('user_id');
+        })
+        ->distinct('user_id')
+        ->count('user_id');
 
-        return view('admin.manageuser', compact(
-            'users',
-            'totalCustomer',
-            'totalSubscriptionTaken',
-            'discontinuedCustomer',
-            'paymentPending'
-        ));
-    }
+    return view('admin.manageuser', compact(
+        'users',
+        'filter',
+        'totalCustomer',
+        'totalSubscriptionTaken',
+        'nonSubscriberCustomer',
+        'discontinuedCustomer',
+        'paymentPending'
+    ));
+}
+
 
     public function updateUserData(Request $request, User $user)
     {
@@ -710,10 +729,6 @@ class AdminController extends Controller
         ]);
     }
 
-    /**
-     * Build a single formatted address string for an Order.
-     * Priority: Order.address -> User.addressDetails -> fallback (minimal)
-     */
     private function formatAddressForOrder($order): string
     {
         // 1) Address stored on the order

@@ -42,21 +42,13 @@
         }
 
         /* Different icon colors */
-        .bg-users {
-            background: #7366ff;
-        }
+        .bg-users { background: #7366ff; }
+        .bg-subscription { background: #28a745; }
+        .bg-paused { background: #ffc107; }
+        .bg-pending { background: #dc3545; }
 
-        .bg-subscription {
-            background: #28a745;
-        }
-
-        .bg-paused {
-            background: #ffc107;
-        }
-
-        .bg-pending {
-            background: #dc3545;
-        }
+        /* NEW: Non subscriber */
+        .bg-nonsub { background: #17a2b8; }
 
         /* ===== Users Table ===== */
         .custom-card {
@@ -93,17 +85,9 @@
             transition: all 0.2s;
         }
 
-        .action-icons a.view {
-            color: #0d6efd;
-        }
-
-        .action-icons a.edit {
-            color: #ffc107;
-        }
-
-        .action-icons a.delete {
-            color: #dc3545;
-        }
+        .action-icons a.view { color: #0d6efd; }
+        .action-icons a.edit { color: #ffc107; }
+        .action-icons a.delete { color: #dc3545; }
 
         .action-icons a:hover {
             transform: scale(1.2);
@@ -125,6 +109,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-3">
             <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
@@ -136,6 +121,7 @@
                 </div>
             </div>
         </div>
+
         <div class="col-md-3">
             <a href="{{ route('admin.orders.index', ['filter' => 'discontinued']) }}" target="_blank">
                 <div class="stats-card d-flex justify-content-between align-items-center border">
@@ -149,9 +135,9 @@
                 </div>
             </a>
         </div>
+
         <div class="col-md-3">
             <a href="{{ route('payment.collection.index') }}" target="_blank">
-
                 <div class="stats-card d-flex justify-content-between align-items-center border">
                     <div>
                         <div class="stats-title">Payment Pending</div>
@@ -163,12 +149,39 @@
                 </div>
             </a>
         </div>
+
+        {{-- NEW: Non Subscriber Users (click to load filtered users in table) --}}
+        <div class="col-md-3">
+            <a href="{{ request()->fullUrlWithQuery(['filter' => 'non_subscriber']) }}">
+                <div class="stats-card d-flex justify-content-between align-items-center border">
+                    <div>
+                        <div class="stats-title">Non Subscriber Users</div>
+                        <div class="stats-value">{{ $nonSubscriberCustomer }}</div>
+                    </div>
+                    <div class="stats-icon bg-nonsub">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                </div>
+            </a>
+        </div>
     </div>
 
     <!-- Users Table -->
     <div class="card custom-card mt-4">
-
         <div class="card-body">
+
+            {{-- NEW: filter info (when clicked Non Subscriber Users) --}}
+            @if(($filter ?? null) === 'non_subscriber')
+                <div class="alert alert-info d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Showing:</strong> Non Subscriber Users
+                    </div>
+                    <a href="{{ url()->current() }}" class="btn btn-sm btn-outline-secondary">
+                        Show All Users
+                    </a>
+                </div>
+            @endif
+
             <div class="table-responsive export-table">
                 <table id="file-datatable" class="table table-hover align-middle">
                     <thead>
@@ -177,8 +190,8 @@
                             <th>User</th>
                             <th>Phone</th>
                             <th>Registered</th>
-                            <th>Last Login</th> {{-- NEW --}}
-                            <th>Device</th> {{-- NEW --}}
+                            <th>Last Login</th>
+                            <th>Device</th>
                             <th>Subscription</th>
                             <th class="text-center">Action</th>
                         </tr>
@@ -194,17 +207,19 @@
                                             alt="user">
                                         <div class="ms-2">
                                             <div class="user-name">
-                                                <a
-                                                    href="{{ url('admin/user-profile/' . $user->id) }}">{{ $user->name ?? 'N/A' }}</a>
+                                                <a href="{{ url('admin/user-profile/' . $user->id) }}">
+                                                    {{ $user->name ?? 'N/A' }}
+                                                </a>
                                             </div>
                                             <div class="user-email">{{ $user->email ?? 'N/A' }}</div>
                                         </div>
                                     </div>
                                 </td>
+
                                 <td>{{ $user->mobile_number }}</td>
                                 <td>{{ optional($user->created_at)->format('d M, Y') }}</td>
 
-                                {{-- NEW: Last Login --}}
+                                {{-- Last Login --}}
                                 <td>
                                     @php
                                         $tz = config('app.timezone', 'Asia/Kolkata');
@@ -215,7 +230,7 @@
                                     {{ $ll ? $ll->format('d M, Y h:i A') : '—' }}
                                 </td>
 
-                                {{-- NEW: Device Model --}}
+                                {{-- Device Model --}}
                                 <td>{{ $user->last_device_model ?: '—' }}</td>
 
                                 <td>
@@ -229,7 +244,7 @@
                                 <td class="text-center action-icons">
                                     <a class="btn btn-warning btn-sm text-center"
                                         href="{{ route('showCustomerDetails', $user->userid) }}">
-                                        View 
+                                        View
                                     </a>
 
                                     <button type="button" class="btn btn-sm btn-primary text-center editUserBtn" title="Edit"
@@ -238,7 +253,7 @@
                                         data-email="{{ $user->email }}" data-phone="{{ $user->mobile_number }}"
                                         data-user_type="{{ $user->user_type }}"
                                         data-userphoto="{{ $user->userphoto ? asset('storage/' . $user->userphoto) : asset('front-assets/img/images.jfif') }}">
-                                        <i class="fas fa-edit me-1"></i> 
+                                        <i class="fas fa-edit me-1"></i>
                                     </button>
                                 </td>
                             </tr>
