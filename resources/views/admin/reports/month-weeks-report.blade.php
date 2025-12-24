@@ -290,7 +290,6 @@
             color: #0f172a !important;
         }
 
-        /* Split income headers */
         .colorful-metrics-table thead th.income-sub-head {
             background: #16a34a !important;
             color: #f9fafb !important;
@@ -345,12 +344,6 @@
             padding-top: 6px;
         }
 
-        /* column-wise rules:
-               1 Date, 2 Day,
-               3 Sub Income, 4 Cust Income, 5 Purch, 6 VendF,
-               7-10 Customer (Renew/New/Pause/Customize),
-               vendors start from 11 onward
-            */
         .colorful-metrics-table tbody td:nth-child(1) {
             font-weight: 600;
             color: #7987A1;
@@ -655,17 +648,12 @@
                                                 </small>
                                             </span>
 
-                                            <span class="chip exp">
-                                                Expense ₹{{ number_format($w['totals']['expenditure'] ?? 0) }}
-                                            </span>
-
-                                            <span class="chip vendor-fund">
-                                                Vendor Fund ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}
-                                            </span>
-
-                                            <span class="chip balance">
-                                                Avail Bal ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}
-                                            </span>
+                                            <span class="chip exp">Expense
+                                                ₹{{ number_format($w['totals']['expenditure'] ?? 0) }}</span>
+                                            <span class="chip vendor-fund">Vendor Fund
+                                                ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}</span>
+                                            <span class="chip balance">Avail Bal
+                                                ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}</span>
                                         </div>
                                     </button>
                                 </h2>
@@ -693,7 +681,6 @@
                                                     <tr>
                                                         <th class="col-finance income-sub-head">SubIncm</th>
                                                         <th class="col-finance income-cust-head">CusIncm</th>
-
                                                         <th class="col-finance purchase-head">Purch</th>
                                                         <th class="col-finance vendorfund-head">VendF</th>
 
@@ -734,7 +721,9 @@
                                                             {{-- Sub Income (popover) --}}
                                                             <td class="money col-finance">
                                                                 <span class="income-pop" data-income-popover="1"
-                                                                    data-popover-content='@json($d['finance']['subscription_income_tooltip'] ?? '')'>
+                                                                    data-popover-content='@json(
+                                                                        $d['finance']['subscription_income_tooltip'] ?? '',
+                                                                        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                     ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                                     <span class="info-pill">i</span>
                                                                 </span>
@@ -743,7 +732,9 @@
                                                             {{-- Customize Income (popover) --}}
                                                             <td class="money col-finance">
                                                                 <span class="income-pop cust" data-income-popover="1"
-                                                                    data-popover-content='@json($d['finance']['customize_income_tooltip'] ?? '')'>
+                                                                    data-popover-content='@json(
+                                                                        $d['finance']['customize_income_tooltip'] ?? '',
+                                                                        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                     ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                                     <span class="info-pill">i</span>
                                                                 </span>
@@ -794,7 +785,9 @@
 
                                                         <td class="money col-finance">
                                                             <span class="income-pop" data-income-popover="1"
-                                                                data-popover-content='@json($w['totals']['subscription_income_tooltip'] ?? '')'>
+                                                                data-popover-content='@json(
+                                                                    $w['totals']['subscription_income_tooltip'] ?? '',
+                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -802,7 +795,9 @@
 
                                                         <td class="money col-finance">
                                                             <span class="income-pop cust" data-income-popover="1"
-                                                                data-popover-content='@json($w['totals']['customize_income_tooltip'] ?? '')'>
+                                                                data-popover-content='@json(
+                                                                    $w['totals']['customize_income_tooltip'] ?? '',
+                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -899,7 +894,6 @@
                                                 <tr>
                                                     <th class="col-finance income-sub-head">SubIncm</th>
                                                     <th class="col-finance income-cust-head">CusIncm</th>
-
                                                     <th class="col-finance purchase-head">Purch</th>
                                                     <th class="col-finance vendorfund-head">VendF</th>
 
@@ -938,7 +932,9 @@
 
                                                         <td class="money col-finance">
                                                             <span class="income-pop" data-income-popover="1"
-                                                                data-popover-content='@json($d['finance']['subscription_income_tooltip'] ?? '')'>
+                                                                data-popover-content='@json(
+                                                                    $d['finance']['subscription_income_tooltip'] ?? '',
+                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -946,7 +942,9 @@
 
                                                         <td class="money col-finance">
                                                             <span class="income-pop cust" data-income-popover="1"
-                                                                data-popover-content='@json($d['finance']['customize_income_tooltip'] ?? '')'>
+                                                                data-popover-content='@json(
+                                                                    $d['finance']['customize_income_tooltip'] ?? '',
+                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -990,7 +988,9 @@
 
                                                     <td class="money col-finance">
                                                         <span class="income-pop" data-income-popover="1"
-                                                            data-popover-content='@json($monthTotals['subscription_income_tooltip'] ?? '')'>
+                                                            data-popover-content='@json(
+                                                                $monthTotals['subscription_income_tooltip'] ?? '',
+                                                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -998,7 +998,9 @@
 
                                                     <td class="money col-finance">
                                                         <span class="income-pop cust" data-income-popover="1"
-                                                            data-popover-content='@json($monthTotals['customize_income_tooltip'] ?? '')'>
+                                                            data-popover-content='@json(
+                                                                $monthTotals['customize_income_tooltip'] ?? '',
+                                                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -1037,7 +1039,7 @@
                     </div>
                 </div>
 
-            </div> {{-- tab-content --}}
+            </div>
         </div>
     </div>
 @endsection
@@ -1065,19 +1067,6 @@
         if (expandAllBtn) expandAllBtn.addEventListener('click', () => setAll(true));
         if (collapseAllBtn) collapseAllBtn.addEventListener('click', () => setAll(false));
 
-        // Sticky header shadow when open
-        const headEls = document.querySelectorAll('.week-header');
-        const onScroll = () => {
-            headEls.forEach(el => {
-                const scrolled = el.getBoundingClientRect().top <= 58 && el.nextElementSibling?.classList
-                    .contains('show');
-                el.style.boxShadow = scrolled ? '0 6px 14px rgba(0,0,0,.05)' : 'none';
-            });
-        };
-        document.addEventListener('scroll', onScroll, {
-            passive: true
-        });
-
         // Hash tabs
         const hash = window.location.hash;
         if (hash === '#month') {
@@ -1096,7 +1085,7 @@
         });
 
         // ===== Income popovers (hover) =====
-        // We store HTML safely via @json(...) in data-popover-content, then JSON.parse it here.
+        // data-popover-content contains a JSON string => JSON.parse gives real HTML
         function initIncomePopovers() {
             document.querySelectorAll('[data-income-popover="1"]').forEach(el => {
                 const raw = el.getAttribute('data-popover-content') || '""';
