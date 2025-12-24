@@ -31,10 +31,7 @@
             --chip: #eff6ff;
         }
 
-        body,
-        .container-fluid,
-        .table,
-        .btn {
+        body, .container-fluid, .table, .btn {
             font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif
         }
 
@@ -96,7 +93,6 @@
             align-items: center;
             gap: 10px;
         }
-
         .nav-pills.nu .nav-link .badge { font-weight: 700 }
         .nav-pills.nu .nav-link:hover { transform: translateY(-1px) }
 
@@ -104,20 +100,16 @@
             color: #fff;
             box-shadow: 0 8px 22px rgba(2, 8, 20, .12)
         }
-
         .nav-pills.nu .nav-link[data-color="violet"].active {
             background: linear-gradient(90deg, var(--tab1), #8b5cf6)
         }
-
         .nav-pills.nu .nav-link[data-color="cyan"].active {
             background: linear-gradient(90deg, var(--tab2), #3b82f6)
         }
-
         .nav-pills.nu .nav-link[data-color="violet"] {
             border: 1px solid #e9e7ff;
             background: #f7f7ff
         }
-
         .nav-pills.nu .nav-link[data-color="cyan"] {
             border: 1px solid #e1f6ff;
             background: #f0fbff
@@ -139,7 +131,6 @@
             margin-bottom: 0;
             border-bottom: 1px solid var(--border);
         }
-
         .accordion-button:not(.collapsed) {
             background: linear-gradient(180deg, #f6faff, #f2f6ff);
             color: var(--ink);
@@ -154,13 +145,7 @@
         }
 
         .table-card { border-radius: 0 0 14px 14px; overflow: clip }
-
-        .table th,
-        .table td {
-            text-align: center !important;
-            vertical-align: middle
-        }
-
+        .table th, .table td { text-align: center !important; vertical-align: middle }
         .money { font-variant-numeric: tabular-nums }
 
         .totals-row {
@@ -182,7 +167,6 @@
             color: #1e40af;
             border: 1px solid #dbe9ff
         }
-
         .chip.income { background: #eafff3; color: #0d5f3c; border-color: #d9f7e7 }
         .chip.exp { background: #fff3ea; color: #8a3a0c; border-color: #ffe1cc }
         .chip.vendor-fund { background: #ecfeff; color: #0369a1; border-color: #bae6fd; }
@@ -203,7 +187,6 @@
             box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
             margin-bottom: 0.75rem;
         }
-
         .colorful-metrics-table thead th {
             background: linear-gradient(90deg, var(--tbl-head-from), var(--tbl-head-to)) !important;
             color: var(--tbl-head-text) !important;
@@ -216,16 +199,13 @@
             padding-top: 9px;
             padding-bottom: 9px;
         }
-
         .colorful-metrics-table thead:first-child tr:first-child th:first-child {
             border-top-left-radius: 18px;
             padding-top: 65px;
         }
-
         .colorful-metrics-table thead:first-child tr:first-child th:last-child {
             border-top-right-radius: 18px;
         }
-
         .colorful-metrics-table thead th.col-date,
         .colorful-metrics-table thead th.col-dow {
             background: rgba(56, 189, 248, 0.5) !important;
@@ -242,7 +222,6 @@
             background: linear-gradient(90deg, rgba(236, 72, 153, 0.95), rgba(244, 114, 182, 0.95)) !important;
             color: #f9fafb !important;
         }
-
         .colorful-metrics-table thead tr:nth-child(2) th.col-rider {
             background: rgba(129, 140, 248, 0.95) !important;
             color: #f9fafb !important;
@@ -252,18 +231,15 @@
         .colorful-metrics-table.table-striped>tbody>tr:nth-of-type(even)>* {
             background-color: var(--tbl-row-bg) !important;
         }
-
         .colorful-metrics-table tbody tr {
             background: var(--tbl-row-bg) !important;
             transition: background .18s ease, transform .1s ease, box-shadow .1s ease;
         }
-
         .colorful-metrics-table tbody tr:hover {
             background: var(--tbl-row-hover) !important;
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);
         }
-
         .colorful-metrics-table tbody td {
             border-top: 1px solid rgba(148, 163, 184, 0.30) !important;
             font-size: 13px;
@@ -271,6 +247,26 @@
             padding-top: 6px;
         }
 
+        .colorful-metrics-table tbody td:nth-child(1) { font-weight: 600; color:#7987A1; }
+        .colorful-metrics-table tbody td:nth-child(2) { font-weight: 500; color: var(--col-date); }
+        .colorful-metrics-table tbody td:nth-child(3) { font-weight: 800; color: #16a34a; }
+        .colorful-metrics-table tbody td:nth-child(4) { font-weight: 800; color: #15803d; }
+        .colorful-metrics-table tbody td:nth-child(5) { font-weight: 700; color: #16a34a; }
+        .colorful-metrics-table tbody td:nth-child(6) { font-weight: 700; color: #0369a1; }
+
+        .colorful-metrics-table tbody td:nth-child(7),
+        .colorful-metrics-table tbody td:nth-child(8),
+        .colorful-metrics-table tbody td:nth-child(9),
+        .colorful-metrics-table tbody td:nth-child(10) {
+            text-align: center;
+            font-weight: 600;
+        }
+        .colorful-metrics-table tbody td:nth-child(7) { background: rgba(34, 197, 94, 0.16) !important; color: #15803d; }
+        .colorful-metrics-table tbody td:nth-child(8) { background: rgba(56, 189, 248, 0.16) !important; color: #0369a1; }
+        .colorful-metrics-table tbody td:nth-child(9) { background: rgba(245, 158, 11, 0.18) !important; color: #b45309; }
+        .colorful-metrics-table tbody td:nth-child(10) { background: rgba(244, 114, 182, 0.18) !important; color: #be185d; }
+
+        .colorful-metrics-table tbody td:nth-child(n+11) { font-weight: 600; color: #045e06; }
         .colorful-metrics-table tbody td.col-vendor.vendor-odd { background: rgba(129, 140, 248, 0.10) !important; }
         .colorful-metrics-table tbody td.col-vendor.vendor-even { background: rgba(244, 114, 182, 0.10) !important; }
 
@@ -286,21 +282,16 @@
             background: rgba(22, 163, 74, 0.05);
             transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
             user-select: none;
-            position: relative;
-            z-index: 2; /* ensures hover target is above table cell visuals */
         }
-
         .income-pop:hover {
             transform: translateY(-1px);
             background: rgba(22, 163, 74, 0.10);
             box-shadow: 0 8px 16px rgba(2, 8, 20, 0.08);
         }
-
         .income-pop.cust {
             border-color: rgba(21, 128, 61, 0.35);
             background: rgba(21, 128, 61, 0.05);
         }
-
         .income-pop.cust:hover { background: rgba(21, 128, 61, 0.10); }
 
         .income-pop .info-pill {
@@ -524,10 +515,8 @@
                                                         {{-- Sub Income (popover) --}}
                                                         <td class="money col-finance">
                                                             <span class="income-pop"
-                                                                  role="button"
-                                                                  tabindex="0"
                                                                   data-income-popover="1"
-                                                                  data-popover-b64="{{ base64_encode($d['finance']['subscription_income_tooltip'] ?? '') }}">
+                                                                  data-popover-content='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -536,10 +525,8 @@
                                                         {{-- Customize Income (popover) --}}
                                                         <td class="money col-finance">
                                                             <span class="income-pop cust"
-                                                                  role="button"
-                                                                  tabindex="0"
                                                                   data-income-popover="1"
-                                                                  data-popover-b64="{{ base64_encode($d['finance']['customize_income_tooltip'] ?? '') }}">
+                                                                  data-popover-content='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -577,10 +564,8 @@
 
                                                     <td class="money col-finance">
                                                         <span class="income-pop"
-                                                              role="button"
-                                                              tabindex="0"
                                                               data-income-popover="1"
-                                                              data-popover-b64="{{ base64_encode($w['totals']['subscription_income_tooltip'] ?? '') }}">
+                                                              data-popover-content='@json($w["totals"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -588,10 +573,8 @@
 
                                                     <td class="money col-finance">
                                                         <span class="income-pop cust"
-                                                              role="button"
-                                                              tabindex="0"
                                                               data-income-popover="1"
-                                                              data-popover-b64="{{ base64_encode($w['totals']['customize_income_tooltip'] ?? '') }}">
+                                                              data-popover-content='@json($w["totals"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -714,10 +697,8 @@
 
                                                     <td class="money col-finance">
                                                         <span class="income-pop"
-                                                              role="button"
-                                                              tabindex="0"
                                                               data-income-popover="1"
-                                                              data-popover-b64="{{ base64_encode($d['finance']['subscription_income_tooltip'] ?? '') }}">
+                                                              data-popover-content='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -725,10 +706,8 @@
 
                                                     <td class="money col-finance">
                                                         <span class="income-pop cust"
-                                                              role="button"
-                                                              tabindex="0"
                                                               data-income-popover="1"
-                                                              data-popover-b64="{{ base64_encode($d['finance']['customize_income_tooltip'] ?? '') }}">
+                                                              data-popover-content='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -762,10 +741,8 @@
 
                                                 <td class="money col-finance">
                                                     <span class="income-pop"
-                                                          role="button"
-                                                          tabindex="0"
                                                           data-income-popover="1"
-                                                          data-popover-b64="{{ base64_encode($monthTotals['subscription_income_tooltip'] ?? '') }}">
+                                                          data-popover-content='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                         ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
                                                         <span class="info-pill">i</span>
                                                     </span>
@@ -773,10 +750,8 @@
 
                                                 <td class="money col-finance">
                                                     <span class="income-pop cust"
-                                                          role="button"
-                                                          tabindex="0"
                                                           data-income-popover="1"
-                                                          data-popover-b64="{{ base64_encode($monthTotals['customize_income_tooltip'] ?? '') }}">
+                                                          data-popover-content='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                         ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
                                                         <span class="info-pill">i</span>
                                                     </span>
@@ -812,7 +787,7 @@
                     </div>
                 </div>
 
-            </div> {{-- tab-content --}}
+            </div>
         </div>
     </div>
 @endsection
@@ -839,50 +814,31 @@
         if (collapseAllBtn) collapseAllBtn.addEventListener('click', () => setAll(false));
 
         // Hash tabs
-        function syncTabsWithHash() {
-            const hash = window.location.hash;
-            if (hash === '#month') {
-                const tabMonth = document.querySelector('#tab-month');
-                if (tabMonth) new bootstrap.Tab(tabMonth).show();
-            } else {
-                const tabWeeks = document.querySelector('#tab-weeks');
-                if (tabWeeks) new bootstrap.Tab(tabWeeks).show();
-            }
+        const hash = window.location.hash;
+        if (hash === '#month') {
+            const tabMonth = document.querySelector('#tab-month');
+            if (tabMonth) new bootstrap.Tab(tabMonth).show();
+        } else {
+            const tabWeeks = document.querySelector('#tab-weeks');
+            if (tabWeeks) new bootstrap.Tab(tabWeeks).show();
         }
-
-        function b64ToUtf8(b64) {
-            if (!b64) return '';
-            try {
-                const bin = atob(b64);
-                // UTF-8 safe decode
-                const bytes = new Uint8Array(bin.length);
-                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-
-                if (window.TextDecoder) {
-                    return new TextDecoder('utf-8').decode(bytes);
-                }
-
-                // fallback (older browsers)
-                let s = '';
-                for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-                return decodeURIComponent(escape(s));
-            } catch (e) {
-                return '';
-            }
-        }
+        document.querySelectorAll('#reportTabs .nav-link').forEach(btn => {
+            btn.addEventListener('shown.bs.tab', (e) => {
+                const id = e.target.getAttribute('data-bs-target');
+                if (id === '#pane-weeks') history.replaceState(null, '', '#weeks');
+                if (id === '#pane-month') history.replaceState(null, '', '#month');
+            });
+        });
 
         // ===== Income popovers (hover) =====
-        function initIncomePopovers(root = document) {
-            root.querySelectorAll('[data-income-popover="1"]').forEach(el => {
-                // prevent double init
-                if (el.__incomePopoverInited) return;
+        // data-popover-content contains a JSON string => JSON.parse gives real HTML
+        function initIncomePopovers() {
+            document.querySelectorAll('[data-income-popover="1"]').forEach(el => {
+                const raw = el.getAttribute('data-popover-content') || '""';
+                let html = '';
+                try { html = JSON.parse(raw); } catch (e) { html = ''; }
 
-                const b64 = el.getAttribute('data-popover-b64') || '';
-                const html = b64ToUtf8(b64);
-
-                if (!html || html.trim().length === 0) return;
-
-                bootstrap.Popover.getOrCreateInstance(el, {
+                new bootstrap.Popover(el, {
                     container: 'body',
                     html: true,
                     trigger: 'hover focus',
@@ -890,32 +846,8 @@
                     sanitize: false,
                     content: html
                 });
-
-                el.__incomePopoverInited = true;
             });
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            syncTabsWithHash();
-            initIncomePopovers(document);
-
-            // re-init when switching tabs (helps placement/initialization)
-            document.querySelectorAll('#reportTabs .nav-link').forEach(btn => {
-                btn.addEventListener('shown.bs.tab', (e) => {
-                    const id = e.target.getAttribute('data-bs-target');
-                    if (id === '#pane-weeks') history.replaceState(null, '', '#weeks');
-                    if (id === '#pane-month') history.replaceState(null, '', '#month');
-
-                    initIncomePopovers(document.querySelector(id));
-                });
-            });
-
-            // re-init when accordion opens (safe and consistent)
-            document.querySelectorAll('.accordion-collapse').forEach(acc => {
-                acc.addEventListener('shown.bs.collapse', (e) => {
-                    initIncomePopovers(e.target);
-                });
-            });
-        });
+        initIncomePopovers();
     </script>
 @endpush
