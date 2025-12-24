@@ -344,77 +344,6 @@
             padding-top: 6px;
         }
 
-        .colorful-metrics-table tbody td:nth-child(1) {
-            font-weight: 600;
-            color: #7987A1;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(2) {
-            font-weight: 500;
-            color: var(--col-date);
-        }
-
-        .colorful-metrics-table tbody td:nth-child(3) {
-            font-weight: 800;
-            color: #16a34a;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(4) {
-            font-weight: 800;
-            color: #15803d;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(5) {
-            font-weight: 700;
-            color: #16a34a;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(6) {
-            font-weight: 700;
-            color: #0369a1;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(7),
-        .colorful-metrics-table tbody td:nth-child(8),
-        .colorful-metrics-table tbody td:nth-child(9),
-        .colorful-metrics-table tbody td:nth-child(10) {
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(7) {
-            background: rgba(34, 197, 94, 0.16) !important;
-            color: #15803d;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(8) {
-            background: rgba(56, 189, 248, 0.16) !important;
-            color: #0369a1;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(9) {
-            background: rgba(245, 158, 11, 0.18) !important;
-            color: #b45309;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(10) {
-            background: rgba(244, 114, 182, 0.18) !important;
-            color: #be185d;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(n+11) {
-            font-weight: 600;
-            color: #045e06;
-        }
-
-        .colorful-metrics-table tbody td.col-vendor.vendor-odd {
-            background: rgba(129, 140, 248, 0.10) !important;
-        }
-
-        .colorful-metrics-table tbody td.col-vendor.vendor-even {
-            background: rgba(244, 114, 182, 0.10) !important;
-        }
-
         /* ===== Hover / Tooltip (Popover) ===== */
         .income-pop {
             display: inline-flex;
@@ -720,10 +649,9 @@
 
                                                             {{-- Sub Income (popover) --}}
                                                             <td class="money col-finance">
-                                                                <span class="income-pop" data-income-popover="1"
-                                                                    data-popover-content='@json(
-                                                                        $d['finance']['subscription_income_tooltip'] ?? '',
-                                                                        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                                <span class="income-pop" role="button" tabindex="0"
+                                                                    data-income-popover="1"
+                                                                    data-popover-b64="{{ base64_encode($d['finance']['subscription_income_tooltip'] ?? '') }}">
                                                                     ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                                     <span class="info-pill">i</span>
                                                                 </span>
@@ -731,10 +659,9 @@
 
                                                             {{-- Customize Income (popover) --}}
                                                             <td class="money col-finance">
-                                                                <span class="income-pop cust" data-income-popover="1"
-                                                                    data-popover-content='@json(
-                                                                        $d['finance']['customize_income_tooltip'] ?? '',
-                                                                        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                                <span class="income-pop cust" role="button"
+                                                                    tabindex="0" data-income-popover="1"
+                                                                    data-popover-b64="{{ base64_encode($d['finance']['customize_income_tooltip'] ?? '') }}">
                                                                     ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                                     <span class="info-pill">i</span>
                                                                 </span>
@@ -784,20 +711,18 @@
                                                         <td colspan="2" class="col-date">Week Total</td>
 
                                                         <td class="money col-finance">
-                                                            <span class="income-pop" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $w['totals']['subscription_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <span class="income-pop" role="button" tabindex="0"
+                                                                data-income-popover="1"
+                                                                data-popover-b64="{{ base64_encode($w['totals']['subscription_income_tooltip'] ?? '') }}">
                                                                 ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
                                                         </td>
 
                                                         <td class="money col-finance">
-                                                            <span class="income-pop cust" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $w['totals']['customize_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <span class="income-pop cust" role="button" tabindex="0"
+                                                                data-income-popover="1"
+                                                                data-popover-b64="{{ base64_encode($w['totals']['customize_income_tooltip'] ?? '') }}">
                                                                 ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -931,20 +856,18 @@
                                                         <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
                                                         <td class="money col-finance">
-                                                            <span class="income-pop" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $d['finance']['subscription_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <span class="income-pop" role="button" tabindex="0"
+                                                                data-income-popover="1"
+                                                                data-popover-b64="{{ base64_encode($d['finance']['subscription_income_tooltip'] ?? '') }}">
                                                                 ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
                                                         </td>
 
                                                         <td class="money col-finance">
-                                                            <span class="income-pop cust" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $d['finance']['customize_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <span class="income-pop cust" role="button" tabindex="0"
+                                                                data-income-popover="1"
+                                                                data-popover-b64="{{ base64_encode($d['finance']['customize_income_tooltip'] ?? '') }}">
                                                                 ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
@@ -987,20 +910,18 @@
                                                     <td colspan="2" class="col-date">Month Total</td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop" data-income-popover="1"
-                                                            data-popover-content='@json(
-                                                                $monthTotals['subscription_income_tooltip'] ?? '',
-                                                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <span class="income-pop" role="button" tabindex="0"
+                                                            data-income-popover="1"
+                                                            data-popover-b64="{{ base64_encode($monthTotals['subscription_income_tooltip'] ?? '') }}">
                                                             ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
                                                     </td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop cust" data-income-popover="1"
-                                                            data-popover-content='@json(
-                                                                $monthTotals['customize_income_tooltip'] ?? '',
-                                                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <span class="income-pop cust" role="button" tabindex="0"
+                                                            data-income-popover="1"
+                                                            data-popover-b64="{{ base64_encode($monthTotals['customize_income_tooltip'] ?? '') }}">
                                                             ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
@@ -1039,14 +960,10 @@
                     </div>
                 </div>
 
-            </div>
+            </div> {{-- tab-content --}}
         </div>
     </div>
 @endsection
-
-@push('styles')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-@endpush
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -1085,16 +1002,18 @@
         });
 
         // ===== Income popovers (hover) =====
-        // data-popover-content contains a JSON string => JSON.parse gives real HTML
         function initIncomePopovers() {
             document.querySelectorAll('[data-income-popover="1"]').forEach(el => {
-                const raw = el.getAttribute('data-popover-content') || '""';
+                const b64 = el.getAttribute('data-popover-b64') || '';
                 let html = '';
+
                 try {
-                    html = JSON.parse(raw);
+                    html = b64 ? atob(b64) : '';
                 } catch (e) {
                     html = '';
                 }
+
+                if (!html || html.trim().length === 0) return;
 
                 new bootstrap.Popover(el, {
                     container: 'body',
