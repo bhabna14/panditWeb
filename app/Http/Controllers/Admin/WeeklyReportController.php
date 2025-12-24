@@ -48,7 +48,7 @@ class WeeklyReportController extends Controller
                     'customize_income'    => 0,
                     'income_total'        => 0,
 
-                    // for tooltips
+                    // for modal + (previously tooltips)
                     'subscription_income_users'   => [], // [{user_id,name,amt}]
                     'customize_income_users'      => [], // [{user_id,name,amt}]
                     'subscription_income_tooltip' => '',
@@ -89,7 +89,7 @@ class WeeklyReportController extends Controller
 
         foreach ($subPayments as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['subscription_income'] = (float) $row->amt;
+                $days[$row->d]['finance']['subscription_income'] = (float)$row->amt;
             }
         }
 
@@ -108,7 +108,7 @@ class WeeklyReportController extends Controller
 
         foreach ($custPayments as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['customize_income'] = (float) $row->amt;
+                $days[$row->d]['finance']['customize_income'] = (float)$row->amt;
             }
         }
 
@@ -118,10 +118,7 @@ class WeeklyReportController extends Controller
             $days[$k]['finance']['income_total'] = $sub + $cus;
         }
 
-        /* ================= INCOME USER LIST (for tooltips) =================
-           Subscription income users: fp JOIN subscriptions LEFT JOIN users
-           Customize income users: fp LEFT JOIN subscriptions (NULL) LEFT JOIN users
-        */
+        /* ================= INCOME USER LIST (for modal) ================= */
 
         $subUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
@@ -176,6 +173,7 @@ class WeeklyReportController extends Controller
             ];
         }
 
+        // (Optional/legacy) tooltips - safe to keep
         foreach ($days as $dk => $row) {
             $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
                 'Subscription Income',
@@ -203,7 +201,7 @@ class WeeklyReportController extends Controller
 
         foreach ($expend as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['expenditure'] = (float) $row->amt;
+                $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
             }
         }
 
@@ -222,7 +220,7 @@ class WeeklyReportController extends Controller
 
         foreach ($vendorFund as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['vendor_fund'] = (float) $row->amt;
+                $days[$row->d]['finance']['vendor_fund'] = (float)$row->amt;
             }
         }
 
@@ -251,7 +249,7 @@ class WeeklyReportController extends Controller
 
         foreach ($newPerDay as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['customer']['new'] = (int) $row->c;
+                $days[$row->d]['customer']['new'] = (int)$row->c;
             }
         }
 
@@ -272,7 +270,7 @@ class WeeklyReportController extends Controller
 
         foreach ($renewPerDay as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['customer']['renew'] = (int) $row->c;
+                $days[$row->d]['customer']['renew'] = (int)$row->c;
             }
         }
 
@@ -291,7 +289,7 @@ class WeeklyReportController extends Controller
 
             foreach ($pauses as $row) {
                 if (isset($days[$row->d])) {
-                    $days[$row->d]['customer']['pause'] = (int) $row->c;
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
                 }
             }
         } else {
@@ -307,7 +305,7 @@ class WeeklyReportController extends Controller
 
             foreach ($pauses as $row) {
                 if (isset($days[$row->d])) {
-                    $days[$row->d]['customer']['pause'] = (int) $row->c;
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
                 }
             }
         }
@@ -325,7 +323,7 @@ class WeeklyReportController extends Controller
 
         foreach ($customs as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['customer']['customize'] = (int) $row->c;
+                $days[$row->d]['customer']['customize'] = (int)$row->c;
             }
         }
 
@@ -346,7 +344,7 @@ class WeeklyReportController extends Controller
             $name = $vendorMap[$row->vendor_id] ?? $row->vendor_id;
             $vendorColumnsSet[$name] = true;
             if (isset($days[$row->d])) {
-                $days[$row->d]['vendors'][$name] = (float) $row->amt;
+                $days[$row->d]['vendors'][$name] = (float)$row->amt;
             }
         }
 
@@ -372,15 +370,15 @@ class WeeklyReportController extends Controller
             $deliveryColsSet[$name] = true;
 
             if (isset($days[$row->d])) {
-                $days[$row->d]['riders'][$name] = (int) $row->c;
-                $days[$row->d]['total_delivery'] += (int) $row->c;
+                $days[$row->d]['riders'][$name] = (int)$row->c;
+                $days[$row->d]['total_delivery'] += (int)$row->c;
             }
         }
 
         $deliveryCols = array_keys($deliveryColsSet);
         sort($deliveryCols);
 
-        /* ================= Split into weeks + add week tooltips ================= */
+        /* ================= Split into weeks + week totals ================= */
 
         $weeks = [];
         $cursor    = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
@@ -404,6 +402,11 @@ class WeeklyReportController extends Controller
                 'customize_income'    => 0,
                 'income_total'        => 0,
 
+                // NEW (for modal)
+                'subscription_income_users' => [],
+                'customize_income_users'    => [],
+
+                // legacy tooltip fields (safe to keep)
                 'subscription_income_tooltip' => '',
                 'customize_income_tooltip'    => '',
 
@@ -447,19 +450,23 @@ class WeeklyReportController extends Controller
                 $weekTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
                 foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
-                    $uid = $u['user_id'];
+                    $uid = (string)($u['user_id'] ?? '');
+                    if ($uid === '') continue;
+
                     if (!isset($weekSubUsers[$uid])) {
-                        $weekSubUsers[$uid] = ['user_id' => $uid, 'name' => $u['name'], 'amt' => 0.0];
+                        $weekSubUsers[$uid] = ['user_id' => $u['user_id'], 'name' => $u['name'], 'amt' => 0.0];
                     }
-                    $weekSubUsers[$uid]['amt'] += (float)$u['amt'];
+                    $weekSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
                 }
 
                 foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
-                    $uid = $u['user_id'];
+                    $uid = (string)($u['user_id'] ?? '');
+                    if ($uid === '') continue;
+
                     if (!isset($weekCusUsers[$uid])) {
-                        $weekCusUsers[$uid] = ['user_id' => $uid, 'name' => $u['name'], 'amt' => 0.0];
+                        $weekCusUsers[$uid] = ['user_id' => $u['user_id'], 'name' => $u['name'], 'amt' => 0.0];
                     }
-                    $weekCusUsers[$uid]['amt'] += (float)$u['amt'];
+                    $weekCusUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
                 }
             }
 
@@ -471,6 +478,11 @@ class WeeklyReportController extends Controller
             $weekCusUsersList = array_values($weekCusUsers);
             usort($weekCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
+            // NEW (for modal)
+            $weekTotals['subscription_income_users'] = $weekSubUsersList;
+            $weekTotals['customize_income_users']    = $weekCusUsersList;
+
+            // legacy tooltip (safe to keep)
             $weekTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
                 'Subscription Income (Week)',
                 $weekSubUsersList,
@@ -501,13 +513,18 @@ class WeeklyReportController extends Controller
             $cursor->addWeek();
         }
 
-        /* ================= Month totals + tooltips ================= */
+        /* ================= Month totals ================= */
 
         $monthTotals = [
             'subscription_income' => 0,
             'customize_income'    => 0,
             'income_total'        => 0,
 
+            // NEW (for modal)
+            'subscription_income_users' => [],
+            'customize_income_users'    => [],
+
+            // legacy tooltip fields (safe to keep)
             'subscription_income_tooltip' => '',
             'customize_income_tooltip'    => '',
 
@@ -550,19 +567,23 @@ class WeeklyReportController extends Controller
             $monthTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
             foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
-                $uid = $u['user_id'];
+                $uid = (string)($u['user_id'] ?? '');
+                if ($uid === '') continue;
+
                 if (!isset($monthSubUsers[$uid])) {
-                    $monthSubUsers[$uid] = ['user_id' => $uid, 'name' => $u['name'], 'amt' => 0.0];
+                    $monthSubUsers[$uid] = ['user_id' => $u['user_id'], 'name' => $u['name'], 'amt' => 0.0];
                 }
-                $monthSubUsers[$uid]['amt'] += (float)$u['amt'];
+                $monthSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
             }
 
             foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
-                $uid = $u['user_id'];
+                $uid = (string)($u['user_id'] ?? '');
+                if ($uid === '') continue;
+
                 if (!isset($monthCusUsers[$uid])) {
-                    $monthCusUsers[$uid] = ['user_id' => $uid, 'name' => $u['name'], 'amt' => 0.0];
+                    $monthCusUsers[$uid] = ['user_id' => $u['user_id'], 'name' => $u['name'], 'amt' => 0.0];
                 }
-                $monthCusUsers[$uid]['amt'] += (float)$u['amt'];
+                $monthCusUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
             }
         }
 
@@ -574,6 +595,11 @@ class WeeklyReportController extends Controller
         $monthCusUsersList = array_values($monthCusUsers);
         usort($monthCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
+        // NEW (for modal)
+        $monthTotals['subscription_income_users'] = $monthSubUsersList;
+        $monthTotals['customize_income_users']    = $monthCusUsersList;
+
+        // legacy tooltip (safe to keep)
         $monthTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
             'Subscription Income (Month)',
             $monthSubUsersList,
@@ -605,45 +631,44 @@ class WeeklyReportController extends Controller
         ]);
     }
 
-   /**
- * Builds HTML tooltip for income (names only).
- * $users = [['user_id' => .., 'name' => .., 'amt' => ..], ...]
- */
-private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
-{
-    $safeTitle = e($title);
-    $totalUsers = count($users);
+    /**
+     * Builds HTML tooltip for income (names only).
+     * Kept for compatibility; modal uses *_income_users arrays.
+     * $users = [['user_id' => .., 'name' => .., 'amt' => ..], ...]
+     */
+    private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
+    {
+        $safeTitle = e($title);
+        $totalUsers = count($users);
 
-    // show max 25 names
-    $usersTop = array_slice($users, 0, 25);
+        $usersTop = array_slice($users, 0, 25);
 
-    $html  = "<div class='tt-head'>{$safeTitle}</div>";
-    $html .= "<div class='tt-meta'>Customers: <b>{$totalUsers}</b></div>";
+        $html  = "<div class='tt-head'>{$safeTitle}</div>";
+        $html .= "<div class='tt-meta'>Customers: <b>{$totalUsers}</b></div>";
 
-    if ($totalUsers === 0) {
-        $html .= "<div class='tt-empty'>No paid payments found.</div>";
+        if ($totalUsers === 0) {
+            $html .= "<div class='tt-empty'>No paid payments found.</div>";
+            return $html;
+        }
+
+        $html .= "<div class='tt-scroll'>";
+        foreach ($usersTop as $u) {
+            $name = e($u['name'] ?? '-');
+            $uid  = e((string)($u['user_id'] ?? ''));
+
+            $html .= "
+                <div class='tt-row'>
+                    <div class='tt-name'>{$name}</div>
+                    <div class='tt-id'>#{$uid}</div>
+                </div>
+            ";
+        }
+
+        if ($totalUsers > 25) {
+            $html .= "<div class='tt-more'>Showing top 25 customers.</div>";
+        }
+
+        $html .= "</div>";
         return $html;
     }
-
-    $html .= "<div class='tt-scroll'>";
-    foreach ($usersTop as $u) {
-        $name = e($u['name'] ?? '-');
-        $uid  = e((string)($u['user_id'] ?? ''));
-
-        $html .= "
-            <div class='tt-row'>
-                <div class='tt-name'>{$name}</div>
-                <div class='tt-id'>#{$uid}</div>
-            </div>
-        ";
-    }
-
-    if ($totalUsers > 25) {
-        $html .= "<div class='tt-more'>Showing top 25 customers.</div>";
-    }
-
-    $html .= "</div>";
-    return $html;
-}
-
 }

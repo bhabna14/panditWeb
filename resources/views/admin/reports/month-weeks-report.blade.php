@@ -270,128 +270,44 @@
         .colorful-metrics-table tbody td.col-vendor.vendor-odd { background: rgba(129, 140, 248, 0.10) !important; }
         .colorful-metrics-table tbody td.col-vendor.vendor-even { background: rgba(244, 114, 182, 0.10) !important; }
 
-        /* ===== New Hover (custom tooltip) ===== */
-        .income-hover {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            padding: .14rem .55rem;
-            border-radius: 12px;
+        /* ===== CLICKABLE INCOME (NO HOVER TOOLTIP) ===== */
+        .income-click {
+            appearance: none;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            margin: 0;
             cursor: pointer;
-            user-select: none;
-
-            border: 1px solid rgba(15, 23, 42, 0.15);
-            background: rgba(241, 245, 249, 0.75);
-
             font-weight: 800;
             font-variant-numeric: tabular-nums;
-
-            transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+            text-decoration: none;
+        }
+        .income-click:focus {
+            outline: none;
+            box-shadow: 0 0 0 .25rem rgba(59, 130, 246, 0.20);
+            border-radius: 6px;
         }
 
-        .income-hover:hover {
-            transform: translateY(-1px);
-            background: rgba(219, 234, 254, 0.70);
-            border-color: rgba(37, 99, 235, 0.35);
-            box-shadow: 0 10px 22px rgba(2, 8, 20, 0.10);
-        }
+        .income-click.sub { color: #166534; }
+        .income-click.cust { color: #14532d; }
 
-        .income-hover.sub {
-            color: #166534;
-            background: rgba(220, 252, 231, 0.65);
-            border-color: rgba(22, 101, 52, 0.20);
+        /* Modal list */
+        .income-user-list .list-group-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
-        .income-hover.sub:hover {
-            background: rgba(187, 247, 208, 0.75);
-            border-color: rgba(22, 101, 52, 0.35);
-        }
-
-        .income-hover.cust {
-            color: #14532d;
-            background: rgba(209, 250, 229, 0.55);
-            border-color: rgba(20, 83, 45, 0.20);
-        }
-        .income-hover.cust:hover {
-            background: rgba(167, 243, 208, 0.70);
-            border-color: rgba(20, 83, 45, 0.35);
-        }
-
-        .income-hover .hint {
-            font-weight: 900;
-            font-size: .72rem;
-            opacity: .75;
-            border: 1px solid rgba(100, 116, 139, 0.30);
-            background: rgba(255, 255, 255, 0.7);
-            padding: 0 .35rem;
-            border-radius: 999px;
-            line-height: 1.2rem;
-        }
-
-        /* Global tooltip container */
-        #incomeTooltip {
-            position: fixed;
-            z-index: 99999;
-            max-width: 380px;
-            pointer-events: none;
-
-            background: #0f172a;
-            color: #f8fafc;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 14px;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.30);
-
-            padding: 12px 12px;
-            opacity: 0;
-            transform: translateY(6px);
-            transition: opacity .12s ease, transform .12s ease;
-        }
-
-        #incomeTooltip.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        #incomeTooltip .tt-head {
-            font-weight: 900;
-            font-size: .95rem;
-            margin-bottom: 2px;
-        }
-        #incomeTooltip .tt-meta {
-            font-size: .82rem;
-            opacity: .85;
-            margin-bottom: 8px;
-        }
-        #incomeTooltip .tt-empty {
-            font-size: .85rem;
-            opacity: .85;
-        }
-
-        #incomeTooltip .tt-scroll {
-            max-height: 260px;
-            overflow: auto;
-            padding-right: 4px;
-        }
-
-        #incomeTooltip .tt-row {
-            padding: 8px 6px;
-            border-top: 1px solid rgba(148, 163, 184, 0.18);
-        }
-        #incomeTooltip .tt-row:first-child { border-top: 0; }
-
-        #incomeTooltip .tt-name {
-            font-weight: 800;
-            white-space: nowrap;
+        .income-user-list .uname {
+            font-weight: 700;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        #incomeTooltip .tt-id {
-            font-size: .78rem;
-            opacity: .75;
-        }
-        #incomeTooltip .tt-more {
-            margin-top: 8px;
-            font-size: .78rem;
-            opacity: .75;
+        .income-user-list .uid {
+            font-size: .82rem;
+            color: #64748b;
+            flex: 0 0 auto;
         }
     </style>
 @endsection
@@ -408,6 +324,7 @@
                         @endforeach
                     </select>
                 </div>
+
                 <div class="col-md-3">
                     <label class="form-label mb-1">Month</label>
                     <select class="form-select" name="month">
@@ -436,21 +353,23 @@
                     <div class="label">Total Income (Month)</div>
                     <div class="h4 value">₹{{ number_format($monthTotals['income_total'] ?? 0) }}</div>
 
-                    {{-- KPI hover tooltips for Sub + Cust --}}
+                    {{-- KPI (click to modal) --}}
                     <div class="small text-muted mt-1 d-flex flex-wrap gap-2 align-items-center">
-                        <span class="income-hover sub"
-                              data-income-tooltip="1"
-                              data-tooltip-html='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                        <button type="button"
+                                class="income-click sub"
+                                data-income-modal="1"
+                                data-title="Subscription Income (Month)"
+                                data-users='@json($monthTotals["subscription_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                             Sub ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
-                            <span class="hint">hover</span>
-                        </span>
+                        </button>
 
-                        <span class="income-hover cust"
-                              data-income-tooltip="1"
-                              data-tooltip-html='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                        <button type="button"
+                                class="income-click cust"
+                                data-income-modal="1"
+                                data-title="Customize Income (Month)"
+                                data-users='@json($monthTotals["customize_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                             Cust ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
-                            <span class="hint">hover</span>
-                        </span>
+                        </button>
                     </div>
                 </div>
 
@@ -493,7 +412,6 @@
             </ul>
 
             <div class="tab-content" id="reportTabsContent">
-
                 {{-- ======================= WEEKS TAB ======================= --}}
                 <div class="tab-pane fade show active" id="pane-weeks" role="tabpanel" aria-labelledby="tab-weeks" tabindex="0">
                     <div class="accordion" id="weeksAccordion">
@@ -585,24 +503,26 @@
                                                         <td class="col-date">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
                                                         <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
-                                                        {{-- Sub Income (custom tooltip) --}}
+                                                        {{-- Sub Income (click → modal) --}}
                                                         <td class="money col-finance">
-                                                            <span class="income-hover sub"
-                                                                  data-income-tooltip="1"
-                                                                  data-tooltip-html='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <button type="button"
+                                                                    class="income-click sub"
+                                                                    data-income-modal="1"
+                                                                    data-title="Subscription Income ({{ \Carbon\Carbon::parse($d['date'])->format('d M Y') }})"
+                                                                    data-users='@json($d["finance"]["subscription_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
-                                                                <span class="hint">hover</span>
-                                                            </span>
+                                                            </button>
                                                         </td>
 
-                                                        {{-- Customize Income (custom tooltip) --}}
+                                                        {{-- Customize Income (click → modal) --}}
                                                         <td class="money col-finance">
-                                                            <span class="income-hover cust"
-                                                                  data-income-tooltip="1"
-                                                                  data-tooltip-html='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <button type="button"
+                                                                    class="income-click cust"
+                                                                    data-income-modal="1"
+                                                                    data-title="Customize Income ({{ \Carbon\Carbon::parse($d['date'])->format('d M Y') }})"
+                                                                    data-users='@json($d["finance"]["customize_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
-                                                                <span class="hint">hover</span>
-                                                            </span>
+                                                            </button>
                                                         </td>
 
                                                         <td class="money col-finance">₹{{ number_format($d['finance']['expenditure'] ?? 0) }}</td>
@@ -636,21 +556,23 @@
                                                     <td colspan="2" class="col-date">Week Total</td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-hover sub"
-                                                              data-income-tooltip="1"
-                                                              data-tooltip-html='@json($w["totals"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <button type="button"
+                                                                class="income-click sub"
+                                                                data-income-modal="1"
+                                                                data-title="Subscription Income (Week {{ $i + 1 }}: {{ $title }})"
+                                                                data-users='@json($w["totals"]["subscription_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
-                                                            <span class="hint">hover</span>
-                                                        </span>
+                                                        </button>
                                                     </td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-hover cust"
-                                                              data-income-tooltip="1"
-                                                              data-tooltip-html='@json($w["totals"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <button type="button"
+                                                                class="income-click cust"
+                                                                data-income-modal="1"
+                                                                data-title="Customize Income (Week {{ $i + 1 }}: {{ $title }})"
+                                                                data-users='@json($w["totals"]["customize_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
-                                                            <span class="hint">hover</span>
-                                                        </span>
+                                                        </button>
                                                     </td>
 
                                                     <td class="money col-finance">₹{{ number_format($w['totals']['expenditure'] ?? 0) }}</td>
@@ -769,21 +691,23 @@
                                                     <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-hover sub"
-                                                              data-income-tooltip="1"
-                                                              data-tooltip-html='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <button type="button"
+                                                                class="income-click sub"
+                                                                data-income-modal="1"
+                                                                data-title="Subscription Income ({{ \Carbon\Carbon::parse($d['date'])->format('d M Y') }})"
+                                                                data-users='@json($d["finance"]["subscription_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
-                                                            <span class="hint">hover</span>
-                                                        </span>
+                                                        </button>
                                                     </td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-hover cust"
-                                                              data-income-tooltip="1"
-                                                              data-tooltip-html='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <button type="button"
+                                                                class="income-click cust"
+                                                                data-income-modal="1"
+                                                                data-title="Customize Income ({{ \Carbon\Carbon::parse($d['date'])->format('d M Y') }})"
+                                                                data-users='@json($d["finance"]["customize_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
-                                                            <span class="hint">hover</span>
-                                                        </span>
+                                                        </button>
                                                     </td>
 
                                                     <td class="money col-finance">₹{{ number_format($d['finance']['expenditure'] ?? 0) }}</td>
@@ -813,21 +737,23 @@
                                                 <td colspan="2" class="col-date">Month Total</td>
 
                                                 <td class="money col-finance">
-                                                    <span class="income-hover sub"
-                                                          data-income-tooltip="1"
-                                                          data-tooltip-html='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                    <button type="button"
+                                                            class="income-click sub"
+                                                            data-income-modal="1"
+                                                            data-title="Subscription Income (Month Total)"
+                                                            data-users='@json($monthTotals["subscription_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                         ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
-                                                        <span class="hint">hover</span>
-                                                    </span>
+                                                    </button>
                                                 </td>
 
                                                 <td class="money col-finance">
-                                                    <span class="income-hover cust"
-                                                          data-income-tooltip="1"
-                                                          data-tooltip-html='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                    <button type="button"
+                                                            class="income-click cust"
+                                                            data-income-modal="1"
+                                                            data-title="Customize Income (Month Total)"
+                                                            data-users='@json($monthTotals["customize_income_users"] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                         ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
-                                                        <span class="hint">hover</span>
-                                                    </span>
+                                                    </button>
                                                 </td>
 
                                                 <td class="money col-finance">₹{{ number_format($monthTotals['expenditure'] ?? 0) }}</td>
@@ -863,6 +789,36 @@
             </div>
         </div>
     </div>
+
+    {{-- ========= MODAL: Income Users List ========= --}}
+    <div class="modal fade" id="incomeUsersModal" tabindex="-1" aria-labelledby="incomeUsersModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="incomeUsersModalLabel">Users</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="text-muted small" id="incomeUsersCount">Customers: 0</div>
+                        <input type="text" class="form-control form-control-sm" style="max-width: 220px"
+                               id="incomeUsersSearch" placeholder="Search name...">
+                    </div>
+
+                    <div id="incomeUsersEmpty" class="alert alert-info d-none mb-0">
+                        No paid customers found.
+                    </div>
+
+                    <ul class="list-group income-user-list" id="incomeUsersList"></ul>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('styles')
@@ -870,7 +826,6 @@
 @endpush
 
 @push('scripts')
-    {{-- Bootstrap needed for tabs/collapse (tooltips are custom JS now) --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -904,81 +859,85 @@
             });
         });
 
-        // ===== New Tooltip (no Bootstrap popover) =====
-        function safeJsonParse(str) {
-            try { return JSON.parse(str); } catch (e) { return ''; }
+        // ===== Modal: click to show user list =====
+        const modalEl = document.getElementById('incomeUsersModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+
+        const modalTitle = document.getElementById('incomeUsersModalLabel');
+        const listEl = document.getElementById('incomeUsersList');
+        const emptyEl = document.getElementById('incomeUsersEmpty');
+        const countEl = document.getElementById('incomeUsersCount');
+        const searchEl = document.getElementById('incomeUsersSearch');
+
+        let currentUsers = [];
+
+        function safeJsonParse(str, fallback) {
+            try { return JSON.parse(str); } catch (e) { return fallback; }
         }
 
-        // Create one tooltip for whole page (only once)
-        const tt = document.createElement('div');
-        tt.id = 'incomeTooltip';
-        document.body.appendChild(tt);
+        function renderUsers(users, q = '') {
+            const query = (q || '').trim().toLowerCase();
+            const filtered = query
+                ? users.filter(u => String(u.name || '').toLowerCase().includes(query))
+                : users;
 
-        let activeEl = null;
+            listEl.innerHTML = '';
 
-        function showTooltip(el) {
-            const raw = el.getAttribute('data-tooltip-html') || '""';
-            const html = safeJsonParse(raw) || "<div class='tt-empty'>No paid payments found.</div>";
-            tt.innerHTML = html;
-            tt.classList.add('show');
-            activeEl = el;
-        }
+            countEl.textContent = 'Customers: ' + filtered.length;
 
-        function hideTooltip() {
-            tt.classList.remove('show');
-            activeEl = null;
-        }
-
-        function moveTooltip(e) {
-            if (!activeEl) return;
-
-            const pad = 14;
-            const rect = tt.getBoundingClientRect();
-
-            let x = e.clientX + pad;
-            let y = e.clientY + pad;
-
-            const vw = window.innerWidth;
-            const vh = window.innerHeight;
-
-            if (x + rect.width + 10 > vw) x = e.clientX - rect.width - pad;
-            if (y + rect.height + 10 > vh) y = e.clientY - rect.height - pad;
-
-            tt.style.left = x + 'px';
-            tt.style.top  = y + 'px';
-        }
-
-        // Event delegation (works even inside collapsed accordion / tabs)
-        document.addEventListener('mouseover', (e) => {
-            const el = e.target.closest('[data-income-tooltip="1"]');
-            if (!el) return;
-            showTooltip(el);
-        });
-
-        document.addEventListener('mousemove', (e) => moveTooltip(e));
-
-        document.addEventListener('mouseout', (e) => {
-            const el = e.target.closest('[data-income-tooltip="1"]');
-            if (!el) return;
-
-            // hide only if leaving the hovered element
-            if (activeEl && !el.contains(e.relatedTarget)) {
-                hideTooltip();
+            if (!filtered.length) {
+                emptyEl.classList.remove('d-none');
+                return;
             }
-        });
+            emptyEl.classList.add('d-none');
 
-        // Touch support: tap to toggle
+            filtered.forEach(u => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+
+                const name = document.createElement('div');
+                name.className = 'uname';
+                name.textContent = (u.name ?? 'Unknown');
+
+                const uid = document.createElement('div');
+                uid.className = 'uid';
+                uid.textContent = u.user_id ? ('#' + u.user_id) : '';
+
+                li.appendChild(name);
+                li.appendChild(uid);
+                listEl.appendChild(li);
+            });
+        }
+
+        // Click handler (event delegation)
         document.addEventListener('click', (e) => {
-            const el = e.target.closest('[data-income-tooltip="1"]');
-            if (!el) { hideTooltip(); return; }
+            const el = e.target.closest('[data-income-modal="1"]');
+            if (!el) return;
 
-            if (activeEl === el) hideTooltip();
-            else showTooltip(el);
+            const title = el.getAttribute('data-title') || 'Users';
+            const rawUsers = el.getAttribute('data-users') || '[]';
 
-            moveTooltip(e);
+            currentUsers = safeJsonParse(rawUsers, []);
+
+            modalTitle.textContent = title;
+            searchEl.value = '';
+            renderUsers(currentUsers);
+
+            modal.show();
         });
 
-        window.addEventListener('scroll', () => hideTooltip(), { passive: true });
-        window.addEventListener('resize', () => hideTooltip(), { passive: true });
+        // Search inside modal
+        searchEl.addEventListener('input', (e) => {
+            renderUsers(currentUsers, e.target.value);
+        });
+
+        // Reset on close
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            searchEl.value = '';
+            listEl.innerHTML = '';
+            emptyEl.classList.add('d-none');
+            countEl.textContent = 'Customers: 0';
+            currentUsers = [];
+        });
     </script>
 @endpush
