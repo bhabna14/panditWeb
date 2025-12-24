@@ -38,9 +38,7 @@
             font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif
         }
 
-        .page-wrap {
-            padding: 8px
-        }
+        .page-wrap { padding: 8px }
 
         .hero {
             background: linear-gradient(180deg, var(--brand-bg), #f1f2f3);
@@ -79,11 +77,7 @@
             gap: 12px
         }
 
-        @media(max-width:992px) {
-            .grid-3 {
-                grid-template-columns: 1fr
-            }
-        }
+        @media(max-width:992px) { .grid-3 { grid-template-columns: 1fr } }
 
         .nu-tabs {
             border: 1px solid var(--border);
@@ -103,13 +97,8 @@
             gap: 10px;
         }
 
-        .nav-pills.nu .nav-link .badge {
-            font-weight: 700
-        }
-
-        .nav-pills.nu .nav-link:hover {
-            transform: translateY(-1px)
-        }
+        .nav-pills.nu .nav-link .badge { font-weight: 700 }
+        .nav-pills.nu .nav-link:hover { transform: translateY(-1px) }
 
         .nav-pills.nu .nav-link.active {
             color: #fff;
@@ -134,9 +123,7 @@
             background: #f0fbff
         }
 
-        .tab-pane {
-            padding: 16px
-        }
+        .tab-pane { padding: 16px }
 
         .accordion-item {
             border: 1px solid var(--border) !important;
@@ -166,10 +153,7 @@
             border-bottom: 1px solid var(--border)
         }
 
-        .table-card {
-            border-radius: 0 0 14px 14px;
-            overflow: clip
-        }
+        .table-card { border-radius: 0 0 14px 14px; overflow: clip }
 
         .table th,
         .table td {
@@ -177,9 +161,7 @@
             vertical-align: middle
         }
 
-        .money {
-            font-variant-numeric: tabular-nums
-        }
+        .money { font-variant-numeric: tabular-nums }
 
         .totals-row {
             font-weight: 800;
@@ -201,55 +183,15 @@
             border: 1px solid #dbe9ff
         }
 
-        .chip.income {
-            background: #eafff3;
-            color: #0d5f3c;
-            border-color: #d9f7e7
-        }
+        .chip.income { background: #eafff3; color: #0d5f3c; border-color: #d9f7e7 }
+        .chip.exp { background: #fff3ea; color: #8a3a0c; border-color: #ffe1cc }
+        .chip.vendor-fund { background: #ecfeff; color: #0369a1; border-color: #bae6fd; }
+        .chip.balance { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
 
-        .chip.exp {
-            background: #fff3ea;
-            color: #8a3a0c;
-            border-color: #ffe1cc
-        }
-
-        .chip.vendor-fund {
-            background: #ecfeff;
-            color: #0369a1;
-            border-color: #bae6fd;
-        }
-
-        .chip.balance {
-            background: #eef2ff;
-            color: #4338ca;
-            border-color: #c7d2fe;
-        }
-
-        th.col-date,
-        td.col-date,
-        th.col-dow,
-        td.col-dow {
-            color: var(--col-date);
-            font-weight: 600;
-        }
-
-        th.col-finance,
-        td.col-finance {
-            color: var(--col-finance);
-            font-weight: 600;
-        }
-
-        th.col-vendor,
-        td.col-vendor {
-            color: var(--col-vendor);
-            font-weight: 600;
-        }
-
-        th.col-rider,
-        td.col-rider {
-            color: var(--col-rider);
-            font-weight: 600;
-        }
+        th.col-date, td.col-date, th.col-dow, td.col-dow { color: var(--col-date); font-weight: 600; }
+        th.col-finance, td.col-finance { color: var(--col-finance); font-weight: 600; }
+        th.col-vendor, td.col-vendor { color: var(--col-vendor); font-weight: 600; }
+        th.col-rider, td.col-rider { color: var(--col-rider); font-weight: 600; }
 
         .colorful-metrics-table {
             border-collapse: separate !important;
@@ -290,25 +232,10 @@
             color: #0f172a !important;
         }
 
-        .colorful-metrics-table thead th.income-sub-head {
-            background: #16a34a !important;
-            color: #f9fafb !important;
-        }
-
-        .colorful-metrics-table thead th.income-cust-head {
-            background: #22c55e !important;
-            color: #f9fafb !important;
-        }
-
-        .colorful-metrics-table thead th.purchase-head {
-            background: #16a34a !important;
-            color: #f9fafb !important;
-        }
-
-        .colorful-metrics-table thead th.vendorfund-head {
-            background: #0284c7 !important;
-            color: #f9fafb !important;
-        }
+        .colorful-metrics-table thead th.income-sub-head { background: #16a34a !important; color: #f9fafb !important; }
+        .colorful-metrics-table thead th.income-cust-head { background: #22c55e !important; color: #f9fafb !important; }
+        .colorful-metrics-table thead th.purchase-head { background: #16a34a !important; color: #f9fafb !important; }
+        .colorful-metrics-table thead th.vendorfund-head { background: #0284c7 !important; color: #f9fafb !important; }
 
         .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-odd,
         .colorful-metrics-table thead tr:nth-child(2) th.col-vendor.vendor-even {
@@ -344,76 +271,8 @@
             padding-top: 6px;
         }
 
-        .colorful-metrics-table tbody td:nth-child(1) {
-            font-weight: 600;
-            color: #7987A1;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(2) {
-            font-weight: 500;
-            color: var(--col-date);
-        }
-
-        .colorful-metrics-table tbody td:nth-child(3) {
-            font-weight: 800;
-            color: #16a34a;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(4) {
-            font-weight: 800;
-            color: #15803d;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(5) {
-            font-weight: 700;
-            color: #16a34a;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(6) {
-            font-weight: 700;
-            color: #0369a1;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(7),
-        .colorful-metrics-table tbody td:nth-child(8),
-        .colorful-metrics-table tbody td:nth-child(9),
-        .colorful-metrics-table tbody td:nth-child(10) {
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(7) {
-            background: rgba(34, 197, 94, 0.16) !important;
-            color: #15803d;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(8) {
-            background: rgba(56, 189, 248, 0.16) !important;
-            color: #0369a1;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(9) {
-            background: rgba(245, 158, 11, 0.18) !important;
-            color: #b45309;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(10) {
-            background: rgba(244, 114, 182, 0.18) !important;
-            color: #be185d;
-        }
-
-        .colorful-metrics-table tbody td:nth-child(n+11) {
-            font-weight: 600;
-            color: #045e06;
-        }
-
-        .colorful-metrics-table tbody td.col-vendor.vendor-odd {
-            background: rgba(129, 140, 248, 0.10) !important;
-        }
-
-        .colorful-metrics-table tbody td.col-vendor.vendor-even {
-            background: rgba(244, 114, 182, 0.10) !important;
-        }
+        .colorful-metrics-table tbody td.col-vendor.vendor-odd { background: rgba(129, 140, 248, 0.10) !important; }
+        .colorful-metrics-table tbody td.col-vendor.vendor-even { background: rgba(244, 114, 182, 0.10) !important; }
 
         /* ===== Hover / Tooltip (Popover) ===== */
         .income-pop {
@@ -427,6 +286,8 @@
             background: rgba(22, 163, 74, 0.05);
             transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
             user-select: none;
+            position: relative;
+            z-index: 2; /* ensures hover target is above table cell visuals */
         }
 
         .income-pop:hover {
@@ -440,9 +301,7 @@
             background: rgba(21, 128, 61, 0.05);
         }
 
-        .income-pop.cust:hover {
-            background: rgba(21, 128, 61, 0.10);
-        }
+        .income-pop.cust:hover { background: rgba(21, 128, 61, 0.10); }
 
         .income-pop .info-pill {
             font-weight: 900;
@@ -455,38 +314,13 @@
             line-height: 1.25rem;
         }
 
-        .popover {
-            max-width: 420px;
-        }
+        .popover { max-width: 420px; }
+        .popover-body { padding: 0.85rem; }
 
-        .popover-body {
-            padding: 0.85rem;
-        }
-
-        .pop-head {
-            font-weight: 800;
-            font-size: 0.95rem;
-            margin-bottom: .25rem;
-            color: #0f172a;
-        }
-
-        .pop-meta {
-            font-size: .82rem;
-            color: #475569;
-            margin-bottom: .6rem;
-        }
-
-        .pop-empty {
-            font-size: .85rem;
-            color: #64748b;
-            padding: .35rem 0;
-        }
-
-        .pop-scroll {
-            max-height: 260px;
-            overflow: auto;
-            padding-right: .25rem;
-        }
+        .pop-head { font-weight: 800; font-size: 0.95rem; margin-bottom: .25rem; color: #0f172a; }
+        .pop-meta { font-size: .82rem; color: #475569; margin-bottom: .6rem; }
+        .pop-empty { font-size: .85rem; color: #64748b; padding: .35rem 0; }
+        .pop-scroll { max-height: 260px; overflow: auto; padding-right: .25rem; }
 
         .pop-row {
             display: flex;
@@ -495,15 +329,8 @@
             padding: .45rem .15rem;
             border-top: 1px solid rgba(148, 163, 184, 0.35);
         }
-
-        .pop-row:first-child {
-            border-top: none;
-        }
-
-        .pop-user {
-            min-width: 0;
-        }
-
+        .pop-row:first-child { border-top: none; }
+        .pop-user { min-width: 0; }
         .pop-name {
             font-weight: 700;
             color: #0f172a;
@@ -512,23 +339,9 @@
             text-overflow: ellipsis;
             max-width: 260px;
         }
-
-        .pop-id {
-            font-size: .78rem;
-            color: #64748b;
-        }
-
-        .pop-amt {
-            font-weight: 800;
-            color: #16a34a;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .pop-more {
-            margin-top: .5rem;
-            font-size: .78rem;
-            color: #64748b;
-        }
+        .pop-id { font-size: .78rem; color: #64748b; }
+        .pop-amt { font-weight: 800; color: #16a34a; font-variant-numeric: tabular-nums; }
+        .pop-more { margin-top: .5rem; font-size: .78rem; color: #64748b; }
     </style>
 @endsection
 
@@ -597,16 +410,16 @@
             <ul class="nav nav-pills nu mb-3 row g-2" id="reportTabs" role="tablist">
                 <li class="nav-item col-12 col-lg-6" role="presentation">
                     <button class="nav-link active w-100 d-flex justify-content-center align-items-center gap-2 text-center"
-                        id="tab-weeks" data-bs-toggle="pill" data-bs-target="#pane-weeks" type="button" role="tab"
-                        aria-controls="pane-weeks" aria-selected="true" data-color="cyan">
+                            id="tab-weeks" data-bs-toggle="pill" data-bs-target="#pane-weeks" type="button" role="tab"
+                            aria-controls="pane-weeks" aria-selected="true" data-color="cyan">
                         Weekly Report
                         <span class="badge bg-light text-dark ms-1">{{ count($weeks) }} Weeks</span>
                     </button>
                 </li>
                 <li class="nav-item col-12 col-lg-6" role="presentation">
                     <button class="nav-link w-100 d-flex justify-content-center align-items-center gap-2 text-center"
-                        id="tab-month" data-bs-toggle="pill" data-bs-target="#pane-month" type="button" role="tab"
-                        aria-controls="pane-month" aria-selected="false" data-color="violet">
+                            id="tab-month" data-bs-toggle="pill" data-bs-target="#pane-month" type="button" role="tab"
+                            aria-controls="pane-month" aria-selected="false" data-color="violet">
                         Month Report
                         <span class="badge bg-light text-dark ms-1">
                             {{ \Carbon\Carbon::createFromDate($year, $month, 1)->format('M Y') }}
@@ -618,8 +431,7 @@
             <div class="tab-content" id="reportTabsContent">
 
                 {{-- ======================= WEEKS TAB ======================= --}}
-                <div class="tab-pane fade show active" id="pane-weeks" role="tabpanel" aria-labelledby="tab-weeks"
-                    tabindex="0">
+                <div class="tab-pane fade show active" id="pane-weeks" role="tabpanel" aria-labelledby="tab-weeks" tabindex="0">
                     <div class="accordion" id="weeksAccordion">
                         @foreach ($weeks as $i => $w)
                             @php
@@ -632,8 +444,8 @@
                             <div class="accordion-item mb-3">
                                 <h2 class="accordion-header week-header" id="heading-{{ $weekId }}">
                                     <button class="accordion-button collapsed d-flex justify-content-between" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#collapse-{{ $weekId }}"
-                                        aria-expanded="false" aria-controls="collapse-{{ $weekId }}">
+                                            data-bs-toggle="collapse" data-bs-target="#collapse-{{ $weekId }}"
+                                            aria-expanded="false" aria-controls="collapse-{{ $weekId }}">
                                         <div class="d-flex flex-wrap align-items-center gap-2">
                                             <span class="me-1">
                                                 Week {{ $i + 1 }}
@@ -648,189 +460,167 @@
                                                 </small>
                                             </span>
 
-                                            <span class="chip exp">Expense
-                                                ₹{{ number_format($w['totals']['expenditure'] ?? 0) }}</span>
-                                            <span class="chip vendor-fund">Vendor Fund
-                                                ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}</span>
-                                            <span class="chip balance">Avail Bal
-                                                ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}</span>
+                                            <span class="chip exp">Expense ₹{{ number_format($w['totals']['expenditure'] ?? 0) }}</span>
+                                            <span class="chip vendor-fund">Vendor Fund ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}</span>
+                                            <span class="chip balance">Avail Bal ₹{{ number_format($w['totals']['available_balance'] ?? 0) }}</span>
                                         </div>
                                     </button>
                                 </h2>
 
                                 <div id="collapse-{{ $weekId }}" class="accordion-collapse collapse"
-                                    aria-labelledby="heading-{{ $weekId }}" data-bs-parent="#weeksAccordion">
+                                     aria-labelledby="heading-{{ $weekId }}" data-bs-parent="#weeksAccordion">
                                     <div class="accordion-body p-0">
                                         <div class="table-responsive table-card">
-                                            <table
-                                                class="table table-sm table-striped table-hover align-middle mb-2 colorful-metrics-table">
+                                            <table class="table table-sm table-striped table-hover align-middle mb-2 colorful-metrics-table">
                                                 <thead>
-                                                    <tr>
-                                                        <th rowspan="2" class="col-date">Date</th>
-                                                        <th rowspan="2" class="col-dow">Day</th>
+                                                <tr>
+                                                    <th rowspan="2" class="col-date">Date</th>
+                                                    <th rowspan="2" class="col-dow">Day</th>
 
-                                                        <th colspan="4" class="col-finance">Finance</th>
-                                                        <th colspan="4">Customer</th>
+                                                    <th colspan="4" class="col-finance">Finance</th>
+                                                    <th colspan="4">Customer</th>
 
-                                                        <th colspan="{{ $weekVendorCount }}" class="col-vendor">Vendor
-                                                            Report</th>
-                                                        <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
-                                                            class="col-rider">Rider Deliveries</th>
-                                                    </tr>
+                                                    <th colspan="{{ $weekVendorCount }}" class="col-vendor">Vendor Report</th>
+                                                    <th colspan="{{ 1 + max(count($deliveryCols), 1) }}" class="col-rider">Rider Deliveries</th>
+                                                </tr>
 
-                                                    <tr>
-                                                        <th class="col-finance income-sub-head">SubIncm</th>
-                                                        <th class="col-finance income-cust-head">CusIncm</th>
-                                                        <th class="col-finance purchase-head">Purch</th>
-                                                        <th class="col-finance vendorfund-head">VendF</th>
+                                                <tr>
+                                                    <th class="col-finance income-sub-head">SubIncm</th>
+                                                    <th class="col-finance income-cust-head">CusIncm</th>
+                                                    <th class="col-finance purchase-head">Purch</th>
+                                                    <th class="col-finance vendorfund-head">VendF</th>
 
-                                                        <th>Renew</th>
-                                                        <th>New</th>
-                                                        <th>Pause</th>
-                                                        <th>Customize</th>
+                                                    <th>Renew</th>
+                                                    <th>New</th>
+                                                    <th>Pause</th>
+                                                    <th>Customize</th>
 
-                                                        @forelse($weekVendorColumns as $v)
-                                                            @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
-                                                            <th class="col-vendor {{ $vendorColClass }}"
-                                                                title="{{ $v }}">
-                                                                {{ \Illuminate\Support\Str::substr($v, 0, 5) }}
-                                                            </th>
-                                                        @empty
-                                                            <th>—</th>
-                                                        @endforelse
+                                                    @forelse($weekVendorColumns as $v)
+                                                        @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
+                                                        <th class="col-vendor {{ $vendorColClass }}" title="{{ $v }}">
+                                                            {{ \Illuminate\Support\Str::substr($v, 0, 5) }}
+                                                        </th>
+                                                    @empty
+                                                        <th>—</th>
+                                                    @endforelse
 
-                                                        <th class="col-rider">Dlvy</th>
-                                                        @forelse($deliveryCols as $r)
-                                                            <th title="{{ $r }}" class="col-rider">
-                                                                {{ \Illuminate\Support\Str::substr($r, 0, 4) }}
-                                                            </th>
-                                                        @empty
-                                                            <th>—</th>
-                                                        @endforelse
-                                                    </tr>
+                                                    <th class="col-rider">Dlvy</th>
+                                                    @forelse($deliveryCols as $r)
+                                                        <th title="{{ $r }}" class="col-rider">
+                                                            {{ \Illuminate\Support\Str::substr($r, 0, 4) }}
+                                                        </th>
+                                                    @empty
+                                                        <th>—</th>
+                                                    @endforelse
+                                                </tr>
                                                 </thead>
 
                                                 <tbody>
-                                                    @foreach ($w['days'] as $d)
-                                                        <tr>
-                                                            <td class="col-date">
-                                                                {{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}
-                                                            </td>
-                                                            <td class="text-muted col-dow">{{ $d['dow'] }}</td>
+                                                @foreach ($w['days'] as $d)
+                                                    <tr>
+                                                        <td class="col-date">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
+                                                        <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
-                                                            {{-- Sub Income (popover) --}}
-                                                            <td class="money col-finance">
-                                                                <span class="income-pop" data-income-popover="1"
-                                                                    data-popover-content='@json(
-                                                                        $d['finance']['subscription_income_tooltip'] ?? '',
-                                                                        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                                    ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
-                                                                    <span class="info-pill">i</span>
-                                                                </span>
-                                                            </td>
-
-                                                            {{-- Customize Income (popover) --}}
-                                                            <td class="money col-finance">
-                                                                <span class="income-pop cust" data-income-popover="1"
-                                                                    data-popover-content='@json(
-                                                                        $d['finance']['customize_income_tooltip'] ?? '',
-                                                                        JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                                    ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
-                                                                    <span class="info-pill">i</span>
-                                                                </span>
-                                                            </td>
-
-                                                            <td class="money col-finance">
-                                                                ₹{{ number_format($d['finance']['expenditure'] ?? 0) }}
-                                                            </td>
-                                                            <td class="money col-finance">
-                                                                ₹{{ number_format($d['finance']['vendor_fund'] ?? 0) }}
-                                                            </td>
-
-                                                            <td><span
-                                                                    class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
-                                                            </td>
-                                                            <td><span
-                                                                    class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span>
-                                                            </td>
-                                                            <td><span
-                                                                    class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span>
-                                                            </td>
-                                                            <td><span
-                                                                    class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span>
-                                                            </td>
-
-                                                            @if (count($weekVendorColumns))
-                                                                @foreach ($weekVendorColumns as $v)
-                                                                    @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
-                                                                    <td class="money col-vendor {{ $vendorColClass }}">
-                                                                        ₹{{ number_format($d['vendors'][$v] ?? 0) }}
-                                                                    </td>
-                                                                @endforeach
-                                                            @else
-                                                                <td class="text-muted">—</td>
-                                                            @endif
-
-                                                            <td class="fw-semibold col-rider">{{ $d['total_delivery'] }}
-                                                            </td>
-                                                            @foreach ($deliveryCols as $r)
-                                                                <td class="col-rider">{{ $d['riders'][$r] ?? 0 }}</td>
-                                                            @endforeach
-                                                        </tr>
-                                                    @endforeach
-
-                                                    {{-- Week Totals --}}
-                                                    <tr class="totals-row">
-                                                        <td colspan="2" class="col-date">Week Total</td>
-
+                                                        {{-- Sub Income (popover) --}}
                                                         <td class="money col-finance">
-                                                            <span class="income-pop" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $w['totals']['subscription_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                                ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
+                                                            <span class="income-pop"
+                                                                  role="button"
+                                                                  tabindex="0"
+                                                                  data-income-popover="1"
+                                                                  data-popover-b64="{{ base64_encode($d['finance']['subscription_income_tooltip'] ?? '') }}">
+                                                                ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
                                                         </td>
 
+                                                        {{-- Customize Income (popover) --}}
                                                         <td class="money col-finance">
-                                                            <span class="income-pop cust" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $w['totals']['customize_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                                ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
+                                                            <span class="income-pop cust"
+                                                                  role="button"
+                                                                  tabindex="0"
+                                                                  data-income-popover="1"
+                                                                  data-popover-b64="{{ base64_encode($d['finance']['customize_income_tooltip'] ?? '') }}">
+                                                                ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                                 <span class="info-pill">i</span>
                                                             </span>
                                                         </td>
 
-                                                        <td class="money col-finance">
-                                                            ₹{{ number_format($w['totals']['expenditure'] ?? 0) }}</td>
-                                                        <td class="money col-finance">
-                                                            ₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}</td>
+                                                        <td class="money col-finance">₹{{ number_format($d['finance']['expenditure'] ?? 0) }}</td>
+                                                        <td class="money col-finance">₹{{ number_format($d['finance']['vendor_fund'] ?? 0) }}</td>
 
-                                                        <td>{{ $w['totals']['renew'] ?? 0 }}</td>
-                                                        <td>{{ $w['totals']['new'] ?? 0 }}</td>
-                                                        <td>{{ $w['totals']['pause'] ?? 0 }}</td>
-                                                        <td>{{ $w['totals']['customize'] ?? 0 }}</td>
+                                                        <td><span class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span></td>
+                                                        <td><span class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span></td>
+                                                        <td><span class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span></td>
+                                                        <td><span class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span></td>
 
                                                         @if (count($weekVendorColumns))
                                                             @foreach ($weekVendorColumns as $v)
                                                                 @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
                                                                 <td class="money col-vendor {{ $vendorColClass }}">
-                                                                    ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}
+                                                                    ₹{{ number_format($d['vendors'][$v] ?? 0) }}
                                                                 </td>
                                                             @endforeach
                                                         @else
                                                             <td class="text-muted">—</td>
                                                         @endif
 
-                                                        <td class="fw-semibold col-rider">
-                                                            {{ $w['totals']['total_delivery'] ?? 0 }}</td>
+                                                        <td class="fw-semibold col-rider">{{ $d['total_delivery'] }}</td>
                                                         @foreach ($deliveryCols as $r)
-                                                            <td class="col-rider">{{ $w['totals']['riders'][$r] ?? 0 }}
-                                                            </td>
+                                                            <td class="col-rider">{{ $d['riders'][$r] ?? 0 }}</td>
                                                         @endforeach
                                                     </tr>
+                                                @endforeach
+
+                                                {{-- Week Totals --}}
+                                                <tr class="totals-row">
+                                                    <td colspan="2" class="col-date">Week Total</td>
+
+                                                    <td class="money col-finance">
+                                                        <span class="income-pop"
+                                                              role="button"
+                                                              tabindex="0"
+                                                              data-income-popover="1"
+                                                              data-popover-b64="{{ base64_encode($w['totals']['subscription_income_tooltip'] ?? '') }}">
+                                                            ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
+                                                            <span class="info-pill">i</span>
+                                                        </span>
+                                                    </td>
+
+                                                    <td class="money col-finance">
+                                                        <span class="income-pop cust"
+                                                              role="button"
+                                                              tabindex="0"
+                                                              data-income-popover="1"
+                                                              data-popover-b64="{{ base64_encode($w['totals']['customize_income_tooltip'] ?? '') }}">
+                                                            ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
+                                                            <span class="info-pill">i</span>
+                                                        </span>
+                                                    </td>
+
+                                                    <td class="money col-finance">₹{{ number_format($w['totals']['expenditure'] ?? 0) }}</td>
+                                                    <td class="money col-finance">₹{{ number_format($w['totals']['vendor_fund'] ?? 0) }}</td>
+
+                                                    <td>{{ $w['totals']['renew'] ?? 0 }}</td>
+                                                    <td>{{ $w['totals']['new'] ?? 0 }}</td>
+                                                    <td>{{ $w['totals']['pause'] ?? 0 }}</td>
+                                                    <td>{{ $w['totals']['customize'] ?? 0 }}</td>
+
+                                                    @if (count($weekVendorColumns))
+                                                        @foreach ($weekVendorColumns as $v)
+                                                            @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
+                                                            <td class="money col-vendor {{ $vendorColClass }}">
+                                                                ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}
+                                                            </td>
+                                                        @endforeach
+                                                    @else
+                                                        <td class="text-muted">—</td>
+                                                    @endif
+
+                                                    <td class="fw-semibold col-rider">{{ $w['totals']['total_delivery'] ?? 0 }}</td>
+                                                    @foreach ($deliveryCols as $r)
+                                                        <td class="col-rider">{{ $w['totals']['riders'][$r] ?? 0 }}</td>
+                                                    @endforeach
+                                                </tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -849,8 +639,8 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="heading-{{ $monthAllId }}">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapse-{{ $monthAllId }}" aria-expanded="false"
-                                    aria-controls="collapse-{{ $monthAllId }}">
+                                        data-bs-target="#collapse-{{ $monthAllId }}" aria-expanded="false"
+                                        aria-controls="collapse-{{ $monthAllId }}">
                                     <div class="d-flex flex-wrap align-items-center gap-2">
                                         <span>Month (All Days)</span>
                                         <span class="chip income">
@@ -860,175 +650,158 @@
                                                 · C {{ number_format($monthTotals['customize_income'] ?? 0) }})
                                             </small>
                                         </span>
-                                        <span class="chip exp">Expense
-                                            ₹{{ number_format($monthTotals['expenditure'] ?? 0) }}</span>
-                                        <span class="chip vendor-fund">Vendor Fund
-                                            ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</span>
-                                        <span class="chip balance">Avail Bal
-                                            ₹{{ number_format($monthTotals['available_balance'] ?? 0) }}</span>
+                                        <span class="chip exp">Expense ₹{{ number_format($monthTotals['expenditure'] ?? 0) }}</span>
+                                        <span class="chip vendor-fund">Vendor Fund ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</span>
+                                        <span class="chip balance">Avail Bal ₹{{ number_format($monthTotals['available_balance'] ?? 0) }}</span>
                                         <span class="chip">Deliveries {{ $monthTotals['total_delivery'] ?? 0 }}</span>
                                     </div>
                                 </button>
                             </h2>
 
                             <div id="collapse-{{ $monthAllId }}" class="accordion-collapse collapse"
-                                aria-labelledby="heading-{{ $monthAllId }}" data-bs-parent="#monthAllAccordion">
+                                 aria-labelledby="heading-{{ $monthAllId }}" data-bs-parent="#monthAllAccordion">
                                 <div class="accordion-body p-0">
                                     <div class="table-responsive table-card">
-                                        <table
-                                            class="table table-sm table-striped table-hover align-middle mb-0 colorful-metrics-table">
+                                        <table class="table table-sm table-striped table-hover align-middle mb-0 colorful-metrics-table">
                                             <thead>
-                                                <tr>
-                                                    <th rowspan="2" class="col-date">Date</th>
-                                                    <th rowspan="2" class="col-dow">Day</th>
+                                            <tr>
+                                                <th rowspan="2" class="col-date">Date</th>
+                                                <th rowspan="2" class="col-dow">Day</th>
 
-                                                    <th colspan="4" class="col-finance">Finance</th>
-                                                    <th colspan="4">Customer</th>
+                                                <th colspan="4" class="col-finance">Finance</th>
+                                                <th colspan="4">Customer</th>
 
-                                                    <th colspan="{{ max(count($vendorColumns), 1) }}" class="col-vendor">
-                                                        Vendor Report</th>
-                                                    <th colspan="{{ 1 + max(count($deliveryCols), 1) }}"
-                                                        class="col-rider">Rider Deliveries</th>
-                                                </tr>
+                                                <th colspan="{{ max(count($vendorColumns), 1) }}" class="col-vendor">Vendor Report</th>
+                                                <th colspan="{{ 1 + max(count($deliveryCols), 1) }}" class="col-rider">Rider Deliveries</th>
+                                            </tr>
 
-                                                <tr>
-                                                    <th class="col-finance income-sub-head">SubIncm</th>
-                                                    <th class="col-finance income-cust-head">CusIncm</th>
-                                                    <th class="col-finance purchase-head">Purch</th>
-                                                    <th class="col-finance vendorfund-head">VendF</th>
+                                            <tr>
+                                                <th class="col-finance income-sub-head">SubIncm</th>
+                                                <th class="col-finance income-cust-head">CusIncm</th>
+                                                <th class="col-finance purchase-head">Purch</th>
+                                                <th class="col-finance vendorfund-head">VendF</th>
 
-                                                    <th>Renew</th>
-                                                    <th>New</th>
-                                                    <th>Pause</th>
-                                                    <th>Customize</th>
+                                                <th>Renew</th>
+                                                <th>New</th>
+                                                <th>Pause</th>
+                                                <th>Customize</th>
 
-                                                    @forelse($vendorColumns as $v)
-                                                        @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
-                                                        <th class="col-vendor {{ $vendorColClass }}"
-                                                            title="{{ $v }}">
-                                                            {{ \Illuminate\Support\Str::substr($v, 0, 5) }}
-                                                        </th>
-                                                    @empty
-                                                        <th>—</th>
-                                                    @endforelse
+                                                @forelse($vendorColumns as $v)
+                                                    @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
+                                                    <th class="col-vendor {{ $vendorColClass }}" title="{{ $v }}">
+                                                        {{ \Illuminate\Support\Str::substr($v, 0, 5) }}
+                                                    </th>
+                                                @empty
+                                                    <th>—</th>
+                                                @endforelse
 
-                                                    <th class="col-rider">Dlvy</th>
-                                                    @forelse($deliveryCols as $r)
-                                                        <th title="{{ $r }}" class="col-rider">
-                                                            {{ \Illuminate\Support\Str::substr($r, 0, 4) }}
-                                                        </th>
-                                                    @empty
-                                                        <th>—</th>
-                                                    @endforelse
-                                                </tr>
+                                                <th class="col-rider">Dlvy</th>
+                                                @forelse($deliveryCols as $r)
+                                                    <th title="{{ $r }}" class="col-rider">
+                                                        {{ \Illuminate\Support\Str::substr($r, 0, 4) }}
+                                                    </th>
+                                                @empty
+                                                    <th>—</th>
+                                                @endforelse
+                                            </tr>
                                             </thead>
 
                                             <tbody>
-                                                @foreach ($monthDays as $d)
-                                                    <tr>
-                                                        <td class="col-date">
-                                                            {{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
-                                                        <td class="text-muted col-dow">{{ $d['dow'] }}</td>
-
-                                                        <td class="money col-finance">
-                                                            <span class="income-pop" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $d['finance']['subscription_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                                ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
-                                                                <span class="info-pill">i</span>
-                                                            </span>
-                                                        </td>
-
-                                                        <td class="money col-finance">
-                                                            <span class="income-pop cust" data-income-popover="1"
-                                                                data-popover-content='@json(
-                                                                    $d['finance']['customize_income_tooltip'] ?? '',
-                                                                    JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                                ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
-                                                                <span class="info-pill">i</span>
-                                                            </span>
-                                                        </td>
-
-                                                        <td class="money col-finance">
-                                                            ₹{{ number_format($d['finance']['expenditure'] ?? 0) }}</td>
-                                                        <td class="money col-finance">
-                                                            ₹{{ number_format($d['finance']['vendor_fund'] ?? 0) }}</td>
-
-                                                        <td><span
-                                                                class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
-                                                        </td>
-                                                        <td><span
-                                                                class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span>
-                                                        </td>
-                                                        <td><span
-                                                                class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span>
-                                                        </td>
-                                                        <td><span
-                                                                class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span>
-                                                        </td>
-
-                                                        @foreach ($vendorColumns as $v)
-                                                            @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
-                                                            <td class="money col-vendor {{ $vendorColClass }}">
-                                                                ₹{{ number_format($d['vendors'][$v] ?? 0) }}
-                                                            </td>
-                                                        @endforeach
-
-                                                        <td class="fw-semibold col-rider">{{ $d['total_delivery'] }}</td>
-                                                        @foreach ($deliveryCols as $r)
-                                                            <td class="col-rider">{{ $d['riders'][$r] ?? 0 }}</td>
-                                                        @endforeach
-                                                    </tr>
-                                                @endforeach
-
-                                                {{-- Month Totals --}}
-                                                <tr class="totals-row">
-                                                    <td colspan="2" class="col-date">Month Total</td>
+                                            @foreach ($monthDays as $d)
+                                                <tr>
+                                                    <td class="col-date">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
+                                                    <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop" data-income-popover="1"
-                                                            data-popover-content='@json(
-                                                                $monthTotals['subscription_income_tooltip'] ?? '',
-                                                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                            ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
+                                                        <span class="income-pop"
+                                                              role="button"
+                                                              tabindex="0"
+                                                              data-income-popover="1"
+                                                              data-popover-b64="{{ base64_encode($d['finance']['subscription_income_tooltip'] ?? '') }}">
+                                                            ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
                                                     </td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop cust" data-income-popover="1"
-                                                            data-popover-content='@json(
-                                                                $monthTotals['customize_income_tooltip'] ?? '',
-                                                                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
-                                                            ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
+                                                        <span class="income-pop cust"
+                                                              role="button"
+                                                              tabindex="0"
+                                                              data-income-popover="1"
+                                                              data-popover-b64="{{ base64_encode($d['finance']['customize_income_tooltip'] ?? '') }}">
+                                                            ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
                                                             <span class="info-pill">i</span>
                                                         </span>
                                                     </td>
 
-                                                    <td class="money col-finance">
-                                                        ₹{{ number_format($monthTotals['expenditure'] ?? 0) }}</td>
-                                                    <td class="money col-finance">
-                                                        ₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</td>
+                                                    <td class="money col-finance">₹{{ number_format($d['finance']['expenditure'] ?? 0) }}</td>
+                                                    <td class="money col-finance">₹{{ number_format($d['finance']['vendor_fund'] ?? 0) }}</td>
 
-                                                    <td>{{ $monthTotals['renew'] ?? 0 }}</td>
-                                                    <td>{{ $monthTotals['new'] ?? 0 }}</td>
-                                                    <td>{{ $monthTotals['pause'] ?? 0 }}</td>
-                                                    <td>{{ $monthTotals['customize'] ?? 0 }}</td>
+                                                    <td><span class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span></td>
+                                                    <td><span class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span></td>
+                                                    <td><span class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span></td>
+                                                    <td><span class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span></td>
 
                                                     @foreach ($vendorColumns as $v)
                                                         @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
                                                         <td class="money col-vendor {{ $vendorColClass }}">
-                                                            ₹{{ number_format($monthTotals['vendors'][$v] ?? 0) }}
+                                                            ₹{{ number_format($d['vendors'][$v] ?? 0) }}
                                                         </td>
                                                     @endforeach
 
-                                                    <td class="fw-semibold col-rider">
-                                                        {{ $monthTotals['total_delivery'] ?? 0 }}</td>
+                                                    <td class="fw-semibold col-rider">{{ $d['total_delivery'] }}</td>
                                                     @foreach ($deliveryCols as $r)
-                                                        <td class="col-rider">{{ $monthTotals['riders'][$r] ?? 0 }}</td>
+                                                        <td class="col-rider">{{ $d['riders'][$r] ?? 0 }}</td>
                                                     @endforeach
                                                 </tr>
+                                            @endforeach
+
+                                            {{-- Month Totals --}}
+                                            <tr class="totals-row">
+                                                <td colspan="2" class="col-date">Month Total</td>
+
+                                                <td class="money col-finance">
+                                                    <span class="income-pop"
+                                                          role="button"
+                                                          tabindex="0"
+                                                          data-income-popover="1"
+                                                          data-popover-b64="{{ base64_encode($monthTotals['subscription_income_tooltip'] ?? '') }}">
+                                                        ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
+                                                        <span class="info-pill">i</span>
+                                                    </span>
+                                                </td>
+
+                                                <td class="money col-finance">
+                                                    <span class="income-pop cust"
+                                                          role="button"
+                                                          tabindex="0"
+                                                          data-income-popover="1"
+                                                          data-popover-b64="{{ base64_encode($monthTotals['customize_income_tooltip'] ?? '') }}">
+                                                        ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
+                                                        <span class="info-pill">i</span>
+                                                    </span>
+                                                </td>
+
+                                                <td class="money col-finance">₹{{ number_format($monthTotals['expenditure'] ?? 0) }}</td>
+                                                <td class="money col-finance">₹{{ number_format($monthTotals['vendor_fund'] ?? 0) }}</td>
+
+                                                <td>{{ $monthTotals['renew'] ?? 0 }}</td>
+                                                <td>{{ $monthTotals['new'] ?? 0 }}</td>
+                                                <td>{{ $monthTotals['pause'] ?? 0 }}</td>
+                                                <td>{{ $monthTotals['customize'] ?? 0 }}</td>
+
+                                                @foreach ($vendorColumns as $v)
+                                                    @php $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even'; @endphp
+                                                    <td class="money col-vendor {{ $vendorColClass }}">
+                                                        ₹{{ number_format($monthTotals['vendors'][$v] ?? 0) }}
+                                                    </td>
+                                                @endforeach
+
+                                                <td class="fw-semibold col-rider">{{ $monthTotals['total_delivery'] ?? 0 }}</td>
+                                                @foreach ($deliveryCols as $r)
+                                                    <td class="col-rider">{{ $monthTotals['riders'][$r] ?? 0 }}</td>
+                                                @endforeach
+                                            </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -1039,7 +812,7 @@
                     </div>
                 </div>
 
-            </div>
+            </div> {{-- tab-content --}}
         </div>
     </div>
 @endsection
@@ -1058,9 +831,7 @@
 
         function setAll(open) {
             document.querySelectorAll('#pane-weeks #weeksAccordion .accordion-collapse').forEach(el => {
-                const bs = bootstrap.Collapse.getOrCreateInstance(el, {
-                    toggle: false
-                });
+                const bs = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
                 open ? bs.show() : bs.hide();
             });
         }
@@ -1068,35 +839,50 @@
         if (collapseAllBtn) collapseAllBtn.addEventListener('click', () => setAll(false));
 
         // Hash tabs
-        const hash = window.location.hash;
-        if (hash === '#month') {
-            const tabMonth = document.querySelector('#tab-month');
-            if (tabMonth) new bootstrap.Tab(tabMonth).show();
-        } else {
-            const tabWeeks = document.querySelector('#tab-weeks');
-            if (tabWeeks) new bootstrap.Tab(tabWeeks).show();
+        function syncTabsWithHash() {
+            const hash = window.location.hash;
+            if (hash === '#month') {
+                const tabMonth = document.querySelector('#tab-month');
+                if (tabMonth) new bootstrap.Tab(tabMonth).show();
+            } else {
+                const tabWeeks = document.querySelector('#tab-weeks');
+                if (tabWeeks) new bootstrap.Tab(tabWeeks).show();
+            }
         }
-        document.querySelectorAll('#reportTabs .nav-link').forEach(btn => {
-            btn.addEventListener('shown.bs.tab', (e) => {
-                const id = e.target.getAttribute('data-bs-target');
-                if (id === '#pane-weeks') history.replaceState(null, '', '#weeks');
-                if (id === '#pane-month') history.replaceState(null, '', '#month');
-            });
-        });
 
-        // ===== Income popovers (hover) =====
-        // data-popover-content contains a JSON string => JSON.parse gives real HTML
-        function initIncomePopovers() {
-            document.querySelectorAll('[data-income-popover="1"]').forEach(el => {
-                const raw = el.getAttribute('data-popover-content') || '""';
-                let html = '';
-                try {
-                    html = JSON.parse(raw);
-                } catch (e) {
-                    html = '';
+        function b64ToUtf8(b64) {
+            if (!b64) return '';
+            try {
+                const bin = atob(b64);
+                // UTF-8 safe decode
+                const bytes = new Uint8Array(bin.length);
+                for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+
+                if (window.TextDecoder) {
+                    return new TextDecoder('utf-8').decode(bytes);
                 }
 
-                new bootstrap.Popover(el, {
+                // fallback (older browsers)
+                let s = '';
+                for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+                return decodeURIComponent(escape(s));
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // ===== Income popovers (hover) =====
+        function initIncomePopovers(root = document) {
+            root.querySelectorAll('[data-income-popover="1"]').forEach(el => {
+                // prevent double init
+                if (el.__incomePopoverInited) return;
+
+                const b64 = el.getAttribute('data-popover-b64') || '';
+                const html = b64ToUtf8(b64);
+
+                if (!html || html.trim().length === 0) return;
+
+                bootstrap.Popover.getOrCreateInstance(el, {
                     container: 'body',
                     html: true,
                     trigger: 'hover focus',
@@ -1104,8 +890,32 @@
                     sanitize: false,
                     content: html
                 });
+
+                el.__incomePopoverInited = true;
             });
         }
-        initIncomePopovers();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            syncTabsWithHash();
+            initIncomePopovers(document);
+
+            // re-init when switching tabs (helps placement/initialization)
+            document.querySelectorAll('#reportTabs .nav-link').forEach(btn => {
+                btn.addEventListener('shown.bs.tab', (e) => {
+                    const id = e.target.getAttribute('data-bs-target');
+                    if (id === '#pane-weeks') history.replaceState(null, '', '#weeks');
+                    if (id === '#pane-month') history.replaceState(null, '', '#month');
+
+                    initIncomePopovers(document.querySelector(id));
+                });
+            });
+
+            // re-init when accordion opens (safe and consistent)
+            document.querySelectorAll('.accordion-collapse').forEach(acc => {
+                acc.addEventListener('shown.bs.collapse', (e) => {
+                    initIncomePopovers(e.target);
+                });
+            });
+        });
     </script>
 @endpush
