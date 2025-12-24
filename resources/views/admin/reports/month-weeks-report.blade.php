@@ -270,69 +270,129 @@
         .colorful-metrics-table tbody td.col-vendor.vendor-odd { background: rgba(129, 140, 248, 0.10) !important; }
         .colorful-metrics-table tbody td.col-vendor.vendor-even { background: rgba(244, 114, 182, 0.10) !important; }
 
-        /* ===== Hover / Tooltip (Popover) ===== */
-        .income-pop {
+        /* ===== New Hover (custom tooltip) ===== */
+        .income-hover {
             display: inline-flex;
             align-items: center;
             gap: .35rem;
-            padding: .12rem .45rem;
-            border-radius: 10px;
+            padding: .14rem .55rem;
+            border-radius: 12px;
             cursor: pointer;
-            border: 1px dashed rgba(22, 163, 74, 0.35);
-            background: rgba(22, 163, 74, 0.05);
-            transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
             user-select: none;
-        }
-        .income-pop:hover {
-            transform: translateY(-1px);
-            background: rgba(22, 163, 74, 0.10);
-            box-shadow: 0 8px 16px rgba(2, 8, 20, 0.08);
-        }
-        .income-pop.cust {
-            border-color: rgba(21, 128, 61, 0.35);
-            background: rgba(21, 128, 61, 0.05);
-        }
-        .income-pop.cust:hover { background: rgba(21, 128, 61, 0.10); }
 
-        .income-pop .info-pill {
+            border: 1px solid rgba(15, 23, 42, 0.15);
+            background: rgba(241, 245, 249, 0.75);
+
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+
+            transition: transform .12s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+        }
+
+        .income-hover:hover {
+            transform: translateY(-1px);
+            background: rgba(219, 234, 254, 0.70);
+            border-color: rgba(37, 99, 235, 0.35);
+            box-shadow: 0 10px 22px rgba(2, 8, 20, 0.10);
+        }
+
+        .income-hover.sub {
+            color: #166534;
+            background: rgba(220, 252, 231, 0.65);
+            border-color: rgba(22, 101, 52, 0.20);
+        }
+        .income-hover.sub:hover {
+            background: rgba(187, 247, 208, 0.75);
+            border-color: rgba(22, 101, 52, 0.35);
+        }
+
+        .income-hover.cust {
+            color: #14532d;
+            background: rgba(209, 250, 229, 0.55);
+            border-color: rgba(20, 83, 45, 0.20);
+        }
+        .income-hover.cust:hover {
+            background: rgba(167, 243, 208, 0.70);
+            border-color: rgba(20, 83, 45, 0.35);
+        }
+
+        .income-hover .hint {
             font-weight: 900;
-            font-size: 0.75rem;
+            font-size: .72rem;
             opacity: .75;
-            border: 1px solid rgba(100, 116, 139, 0.35);
-            background: rgba(241, 245, 249, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.30);
+            background: rgba(255, 255, 255, 0.7);
             padding: 0 .35rem;
             border-radius: 999px;
-            line-height: 1.25rem;
+            line-height: 1.2rem;
         }
 
-        .popover { max-width: 420px; }
-        .popover-body { padding: 0.85rem; }
+        /* Global tooltip container */
+        #incomeTooltip {
+            position: fixed;
+            z-index: 99999;
+            max-width: 380px;
+            pointer-events: none;
 
-        .pop-head { font-weight: 800; font-size: 0.95rem; margin-bottom: .25rem; color: #0f172a; }
-        .pop-meta { font-size: .82rem; color: #475569; margin-bottom: .6rem; }
-        .pop-empty { font-size: .85rem; color: #64748b; padding: .35rem 0; }
-        .pop-scroll { max-height: 260px; overflow: auto; padding-right: .25rem; }
+            background: #0f172a;
+            color: #f8fafc;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.30);
 
-        .pop-row {
-            display: flex;
-            justify-content: space-between;
-            gap: .75rem;
-            padding: .45rem .15rem;
-            border-top: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 12px 12px;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity .12s ease, transform .12s ease;
         }
-        .pop-row:first-child { border-top: none; }
-        .pop-user { min-width: 0; }
-        .pop-name {
-            font-weight: 700;
-            color: #0f172a;
+
+        #incomeTooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #incomeTooltip .tt-head {
+            font-weight: 900;
+            font-size: .95rem;
+            margin-bottom: 2px;
+        }
+        #incomeTooltip .tt-meta {
+            font-size: .82rem;
+            opacity: .85;
+            margin-bottom: 8px;
+        }
+        #incomeTooltip .tt-empty {
+            font-size: .85rem;
+            opacity: .85;
+        }
+
+        #incomeTooltip .tt-scroll {
+            max-height: 260px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        #incomeTooltip .tt-row {
+            padding: 8px 6px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
+        }
+        #incomeTooltip .tt-row:first-child { border-top: 0; }
+
+        #incomeTooltip .tt-name {
+            font-weight: 800;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 260px;
         }
-        .pop-id { font-size: .78rem; color: #64748b; }
-        .pop-amt { font-weight: 800; color: #16a34a; font-variant-numeric: tabular-nums; }
-        .pop-more { margin-top: .5rem; font-size: .78rem; color: #64748b; }
+        #incomeTooltip .tt-id {
+            font-size: .78rem;
+            opacity: .75;
+        }
+        #incomeTooltip .tt-more {
+            margin-top: 8px;
+            font-size: .78rem;
+            opacity: .75;
+        }
     </style>
 @endsection
 
@@ -378,18 +438,18 @@
 
                     {{-- KPI hover tooltips for Sub + Cust --}}
                     <div class="small text-muted mt-1 d-flex flex-wrap gap-2 align-items-center">
-                        <span class="income-pop"
-                              data-income-popover="1"
-                              data-popover-content='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                        <span class="income-hover sub"
+                              data-income-tooltip="1"
+                              data-tooltip-html='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                             Sub ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
-                            <span class="info-pill">i</span>
+                            <span class="hint">hover</span>
                         </span>
 
-                        <span class="income-pop cust"
-                              data-income-popover="1"
-                              data-popover-content='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                        <span class="income-hover cust"
+                              data-income-tooltip="1"
+                              data-tooltip-html='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                             Cust ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
-                            <span class="info-pill">i</span>
+                            <span class="hint">hover</span>
                         </span>
                     </div>
                 </div>
@@ -525,23 +585,23 @@
                                                         <td class="col-date">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
                                                         <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
-                                                        {{-- Sub Income (popover) --}}
+                                                        {{-- Sub Income (custom tooltip) --}}
                                                         <td class="money col-finance">
-                                                            <span class="income-pop"
-                                                                  data-income-popover="1"
-                                                                  data-popover-content='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <span class="income-hover sub"
+                                                                  data-income-tooltip="1"
+                                                                  data-tooltip-html='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
-                                                                <span class="info-pill">i</span>
+                                                                <span class="hint">hover</span>
                                                             </span>
                                                         </td>
 
-                                                        {{-- Customize Income (popover) --}}
+                                                        {{-- Customize Income (custom tooltip) --}}
                                                         <td class="money col-finance">
-                                                            <span class="income-pop cust"
-                                                                  data-income-popover="1"
-                                                                  data-popover-content='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                            <span class="income-hover cust"
+                                                                  data-income-tooltip="1"
+                                                                  data-tooltip-html='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                                 ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
-                                                                <span class="info-pill">i</span>
+                                                                <span class="hint">hover</span>
                                                             </span>
                                                         </td>
 
@@ -576,20 +636,20 @@
                                                     <td colspan="2" class="col-date">Week Total</td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop"
-                                                              data-income-popover="1"
-                                                              data-popover-content='@json($w["totals"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <span class="income-hover sub"
+                                                              data-income-tooltip="1"
+                                                              data-tooltip-html='@json($w["totals"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($w['totals']['subscription_income'] ?? 0) }}
-                                                            <span class="info-pill">i</span>
+                                                            <span class="hint">hover</span>
                                                         </span>
                                                     </td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop cust"
-                                                              data-income-popover="1"
-                                                              data-popover-content='@json($w["totals"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <span class="income-hover cust"
+                                                              data-income-tooltip="1"
+                                                              data-tooltip-html='@json($w["totals"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($w['totals']['customize_income'] ?? 0) }}
-                                                            <span class="info-pill">i</span>
+                                                            <span class="hint">hover</span>
                                                         </span>
                                                     </td>
 
@@ -709,20 +769,20 @@
                                                     <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop"
-                                                              data-income-popover="1"
-                                                              data-popover-content='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <span class="income-hover sub"
+                                                              data-income-tooltip="1"
+                                                              data-tooltip-html='@json($d["finance"]["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($d['finance']['subscription_income'] ?? 0) }}
-                                                            <span class="info-pill">i</span>
+                                                            <span class="hint">hover</span>
                                                         </span>
                                                     </td>
 
                                                     <td class="money col-finance">
-                                                        <span class="income-pop cust"
-                                                              data-income-popover="1"
-                                                              data-popover-content='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                        <span class="income-hover cust"
+                                                              data-income-tooltip="1"
+                                                              data-tooltip-html='@json($d["finance"]["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                             ₹{{ number_format($d['finance']['customize_income'] ?? 0) }}
-                                                            <span class="info-pill">i</span>
+                                                            <span class="hint">hover</span>
                                                         </span>
                                                     </td>
 
@@ -753,20 +813,20 @@
                                                 <td colspan="2" class="col-date">Month Total</td>
 
                                                 <td class="money col-finance">
-                                                    <span class="income-pop"
-                                                          data-income-popover="1"
-                                                          data-popover-content='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                    <span class="income-hover sub"
+                                                          data-income-tooltip="1"
+                                                          data-tooltip-html='@json($monthTotals["subscription_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                         ₹{{ number_format($monthTotals['subscription_income'] ?? 0) }}
-                                                        <span class="info-pill">i</span>
+                                                        <span class="hint">hover</span>
                                                     </span>
                                                 </td>
 
                                                 <td class="money col-finance">
-                                                    <span class="income-pop cust"
-                                                          data-income-popover="1"
-                                                          data-popover-content='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
+                                                    <span class="income-hover cust"
+                                                          data-income-tooltip="1"
+                                                          data-tooltip-html='@json($monthTotals["customize_income_tooltip"] ?? "", JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP)'>
                                                         ₹{{ number_format($monthTotals['customize_income'] ?? 0) }}
-                                                        <span class="info-pill">i</span>
+                                                        <span class="hint">hover</span>
                                                     </span>
                                                 </td>
 
@@ -810,7 +870,7 @@
 @endpush
 
 @push('scripts')
-    {{-- IMPORTANT: Bootstrap 5 bundle includes Popper (required for Popover) --}}
+    {{-- Bootstrap needed for tabs/collapse (tooltips are custom JS now) --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -844,51 +904,81 @@
             });
         });
 
-        // ===== Income popovers (hover) =====
-        // data-popover-content contains JSON string (quoted) -> JSON.parse => real HTML string.
+        // ===== New Tooltip (no Bootstrap popover) =====
         function safeJsonParse(str) {
             try { return JSON.parse(str); } catch (e) { return ''; }
         }
 
-        function mountPopover(el) {
-            const raw = el.getAttribute('data-popover-content') || '""';
-            let html = safeJsonParse(raw);
+        // Create one tooltip for whole page (only once)
+        const tt = document.createElement('div');
+        tt.id = 'incomeTooltip';
+        document.body.appendChild(tt);
 
-            if (!html || typeof html !== 'string' || html.trim() === '') {
-                html = "<div class='pop-empty'>No paid payments found.</div>";
+        let activeEl = null;
+
+        function showTooltip(el) {
+            const raw = el.getAttribute('data-tooltip-html') || '""';
+            const html = safeJsonParse(raw) || "<div class='tt-empty'>No paid payments found.</div>";
+            tt.innerHTML = html;
+            tt.classList.add('show');
+            activeEl = el;
+        }
+
+        function hideTooltip() {
+            tt.classList.remove('show');
+            activeEl = null;
+        }
+
+        function moveTooltip(e) {
+            if (!activeEl) return;
+
+            const pad = 14;
+            const rect = tt.getBoundingClientRect();
+
+            let x = e.clientX + pad;
+            let y = e.clientY + pad;
+
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            if (x + rect.width + 10 > vw) x = e.clientX - rect.width - pad;
+            if (y + rect.height + 10 > vh) y = e.clientY - rect.height - pad;
+
+            tt.style.left = x + 'px';
+            tt.style.top  = y + 'px';
+        }
+
+        // Event delegation (works even inside collapsed accordion / tabs)
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('[data-income-tooltip="1"]');
+            if (!el) return;
+            showTooltip(el);
+        });
+
+        document.addEventListener('mousemove', (e) => moveTooltip(e));
+
+        document.addEventListener('mouseout', (e) => {
+            const el = e.target.closest('[data-income-tooltip="1"]');
+            if (!el) return;
+
+            // hide only if leaving the hovered element
+            if (activeEl && !el.contains(e.relatedTarget)) {
+                hideTooltip();
             }
-
-            // Prevent duplicate instances (important when re-initializing on tab/collapse)
-            const existing = bootstrap.Popover.getInstance(el);
-            if (existing) existing.dispose();
-
-            new bootstrap.Popover(el, {
-                container: 'body',
-                html: true,
-                trigger: 'hover focus',
-                placement: 'auto',
-                sanitize: false,
-                content: html
-            });
-        }
-
-        function initIncomePopovers(root = document) {
-            root.querySelectorAll('[data-income-popover="1"]').forEach(mountPopover);
-        }
-
-        // Init once on page load
-        initIncomePopovers();
-
-        // Re-init when collapses/tabs become visible (fixes "hover not working" in many admin layouts)
-        document.addEventListener('shown.bs.collapse', function (e) {
-            initIncomePopovers(e.target);
         });
 
-        document.addEventListener('shown.bs.tab', function (e) {
-            const target = e.target?.getAttribute('data-bs-target');
-            if (!target) return;
-            const pane = document.querySelector(target);
-            if (pane) initIncomePopovers(pane);
+        // Touch support: tap to toggle
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-income-tooltip="1"]');
+            if (!el) { hideTooltip(); return; }
+
+            if (activeEl === el) hideTooltip();
+            else showTooltip(el);
+
+            moveTooltip(e);
         });
+
+        window.addEventListener('scroll', () => hideTooltip(), { passive: true });
+        window.addEventListener('resize', () => hideTooltip(), { passive: true });
     </script>
 @endpush

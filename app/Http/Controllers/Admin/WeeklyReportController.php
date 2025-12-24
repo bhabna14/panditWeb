@@ -605,47 +605,45 @@ class WeeklyReportController extends Controller
         ]);
     }
 
-    /**
-     * Builds HTML for Bootstrap popover (safe: escapes user data).
-     * $users is array of ['user_id','name','amt'].
-     */
-    private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
-    {
-        $safeTitle = e($title);
-        $totalUsers = count($users);
+   /**
+ * Builds HTML tooltip for income (names only).
+ * $users = [['user_id' => .., 'name' => .., 'amt' => ..], ...]
+ */
+private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
+{
+    $safeTitle = e($title);
+    $totalUsers = count($users);
 
-        // show top 20 users
-        $usersTop = array_slice($users, 0, 20);
+    // show max 25 names
+    $usersTop = array_slice($users, 0, 25);
 
-        $html  = "<div class='pop-head'>{$safeTitle}</div>";
-        $html .= "<div class='pop-meta'>Total: <b>₹" . number_format($totalAmt) . "</b> · Users: <b>{$totalUsers}</b></div>";
+    $html  = "<div class='tt-head'>{$safeTitle}</div>";
+    $html .= "<div class='tt-meta'>Customers: <b>{$totalUsers}</b></div>";
 
-        if ($totalUsers === 0) {
-            $html .= "<div class='pop-empty'>No paid payments found.</div>";
-            return $html;
-        }
-
-        $html .= "<div class='pop-scroll'>";
-        foreach ($usersTop as $u) {
-            $name = e($u['name'] ?? '-');
-            $uid  = e((string)($u['user_id'] ?? ''));
-            $amt  = (float)($u['amt'] ?? 0);
-
-            $html .= "
-                <div class='pop-row'>
-                    <div class='pop-user'>
-                        <div class='pop-name'>{$name}</div>
-                        <div class='pop-id'>#{$uid}</div>
-                    </div>
-                    <div class='pop-amt'>₹" . number_format($amt) . "</div>
-                </div>
-            ";
-        }
-        if ($totalUsers > 20) {
-            $html .= "<div class='pop-more'>Showing top 20 users (sorted by amount).</div>";
-        }
-        $html .= "</div>";
-
+    if ($totalUsers === 0) {
+        $html .= "<div class='tt-empty'>No paid payments found.</div>";
         return $html;
     }
+
+    $html .= "<div class='tt-scroll'>";
+    foreach ($usersTop as $u) {
+        $name = e($u['name'] ?? '-');
+        $uid  = e((string)($u['user_id'] ?? ''));
+
+        $html .= "
+            <div class='tt-row'>
+                <div class='tt-name'>{$name}</div>
+                <div class='tt-id'>#{$uid}</div>
+            </div>
+        ";
+    }
+
+    if ($totalUsers > 25) {
+        $html .= "<div class='tt-more'>Showing top 25 customers.</div>";
+    }
+
+    $html .= "</div>";
+    return $html;
+}
+
 }
