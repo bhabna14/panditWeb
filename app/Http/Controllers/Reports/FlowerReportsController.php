@@ -9,7 +9,7 @@ use App\Models\FlowerRequest;
 use App\Models\FlowerPayment;
 use App\Models\FlowerProduct;
 use App\Models\FlowerPickupDetails;
-use Yajra\DataTables\DataTables;
+use Yajra\DataTables\DataTables; // IMPORTANT: use the class (service), not the Facade
 use App\Models\User;
 use App\Models\FlowerVendor;
 use App\Models\Order;
@@ -222,7 +222,8 @@ public function subscriptionReport(Request $request)
     // Initial page (Blade)
     return view('admin.reports.flower-subscription-report');
 }
- public function reportCustomize(Request $request)
+
+    public function reportCustomize(Request $request, DataTables $dataTables)
     {
         if (!$request->ajax()) {
             return view('admin.reports.flower-customize-report');
@@ -267,7 +268,8 @@ public function subscriptionReport(Request $request)
                 ->selectRaw('COALESCE(SUM(COALESCE(orders.total_price, orders.requested_flower_price, 0)), 0) AS today_sum')
                 ->value('today_sum');
 
-            return DataTables::eloquent($baseQuery)
+            // IMPORTANT: use injected service object (no static call)
+            return $dataTables->eloquent($baseQuery)
                 ->with([
                     'total_price_sum' => $totalPrice,
                     'today_price_sum' => $todayPrice,
@@ -276,7 +278,6 @@ public function subscriptionReport(Request $request)
                     $user = $row->user; // can be null
                     $addr = $user->addressDetails ?? null;
 
-                    // If addressDetails is Collection, take first
                     if ($addr instanceof \Illuminate\Support\Collection) {
                         $addr = $addr->first();
                     }
@@ -308,7 +309,7 @@ public function subscriptionReport(Request $request)
                         return trim($name) . ' (' . trim($qty . ' ' . $unit) . ')';
                     })->implode(', ');
                 })
-                // Numeric field for Amount => fixes NaN in JS
+                // Numeric for Amount (prevents NaN in Blade render)
                 ->addColumn('price_number', function ($row) {
                     $price = 0;
                     if ($row->order) {
@@ -329,7 +330,7 @@ public function subscriptionReport(Request $request)
                 'trace'   => Str::limit($e->getTraceAsString(), 4000),
             ]);
 
-            // Return VALID DataTables JSON (HTTP 200), plus error key for modal
+            // Valid DataTables JSON so the modal can show it
             return response()->json([
                 'draw'            => $draw,
                 'recordsTotal'    => 0,
@@ -341,7 +342,6 @@ public function subscriptionReport(Request $request)
             ], 200);
         }
     }
-
 public function flowerPickUp(Request $request)
 {
     $fromDate = $request->input('from_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
