@@ -1,24 +1,29 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
+    <!-- DataTables / Select2 / SweetAlert CSS -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
+    {{-- Poppins (page) + Nunito Sans (table) --}}
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600&display=swap"
         rel="stylesheet">
 
     <style>
         :root {
+            /* Core palette – same family as your other "first page" designs */
             --brand-blue: #e9f2ff;
             --brand-blue-edge: #cfe0ff;
             --header-text: #0b2a5b;
 
             --chip-green: #e9f9ef;
             --chip-green-text: #0b7a33;
+            --chip-orange: #fff3e5;
+            --chip-orange-text: #a24b05;
             --chip-blue: #e0f2fe;
             --chip-blue-text: #0b2a5b;
 
@@ -26,6 +31,7 @@
             --table-head-bg-soft: #1f2937;
             --table-head-text: #e5e7eb;
             --table-border: #e5e7eb;
+            --table-zebra: #f9fafb;
             --table-hover: #fefce8;
 
             --text: #0f172a;
@@ -33,10 +39,15 @@
             --bg: #f7f8fc;
             --card: #ffffff;
             --ring: #e5e7eb;
+            --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
             --radius-lg: 16px;
 
+            --accent: #6f6bfe;
             --accent-strong: #5f59f2;
+            --accent-soft: #eef2ff;
+            --accent-border: #c7d2fe;
+
             --accent-red: #f24b5b;
             --accent-red-2: #e34050;
         }
@@ -46,17 +57,25 @@
             background: var(--bg);
             color: var(--text);
             font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            font-weight: 400;
         }
 
         .container-page {
             max-width: 1320px;
         }
 
+        /* Page header */
         .page-header-title {
             font-weight: 600;
             color: #0f172a;
         }
 
+        .page-header-sub {
+            font-size: .86rem;
+            color: var(--muted);
+        }
+
+        /* Summary band with KPIs */
         .band {
             background: linear-gradient(135deg, #e0f2fe, #eef2ff);
             border: 1px solid var(--brand-blue-edge);
@@ -67,6 +86,31 @@
             display: flex;
             flex-direction: column;
             gap: .4rem;
+        }
+
+        .band h3 {
+            margin: 0;
+            font-size: .98rem;
+            font-weight: 600;
+            color: var(--header-text);
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .band h3 span.label {
+            font-size: .75rem;
+            padding: .12rem .55rem;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.08);
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: .09em;
+        }
+
+        .band-sub {
+            font-size: .84rem;
+            color: var(--muted);
         }
 
         .band-chips {
@@ -87,6 +131,10 @@
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
         }
 
+        .band-chip span.icon {
+            font-size: .9rem;
+        }
+
         .band-chip.green {
             background: var(--chip-green);
             color: var(--chip-green-text);
@@ -103,6 +151,7 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Toolbar – date + quick ranges + Apply/Reset */
         .toolbar {
             position: sticky;
             top: 0;
@@ -149,6 +198,12 @@
             min-width: 160px;
         }
 
+        .date-range input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(111, 107, 254, 0.25);
+        }
+
         .toolbar-right {
             display: flex;
             flex-wrap: wrap;
@@ -171,6 +226,12 @@
             transition: all .15s ease;
         }
 
+        .btn-chip::before {
+            content: '⦿';
+            font-size: .7rem;
+            opacity: .5;
+        }
+
         .btn-chip:hover {
             background: #f3f4f6;
             border-color: #cbd5e1;
@@ -180,18 +241,32 @@
             background: linear-gradient(135deg, #0f172a, #1e293b);
             color: #fff;
             border-color: #020617;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+        }
+
+        .btn-chip.active::before {
+            content: '✓';
+            opacity: .9;
         }
 
         .btn-chip.apply-btn {
             background: linear-gradient(135deg, #0f172a, #1e293b);
             color: #fff;
             border: none;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+        }
+
+        .btn-chip.apply-btn::before {
+            content: '↻';
+            font-size: .75rem;
+            opacity: .8;
         }
 
         .btn-chip.reset-btn {
             border-style: dashed;
         }
 
+        /* Workbook shell around DataTable */
         .workbook {
             background: var(--card);
             border: 1px solid var(--ring);
@@ -225,10 +300,16 @@
             font-size: 1.1rem;
         }
 
+        .workbook-sub {
+            font-size: .84rem;
+            color: var(--muted);
+        }
+
         .workbook-body {
             padding: 1rem 1.1rem 1.1rem;
         }
 
+        /* DataTables export buttons */
         .export-table .dataTables_wrapper .dt-buttons .btn {
             margin-left: .4rem;
             border-radius: 999px;
@@ -248,9 +329,10 @@
             color: #fff;
         }
 
+        /* Table */
         .table {
             border-color: var(--table-border) !important;
-            font-family: 'Nunito Sans', sans-serif;
+            font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
             font-size: .88rem;
         }
 
@@ -268,6 +350,7 @@
             background: var(--table-hover);
         }
 
+        /* Category pill */
         .cat-pill {
             background: #eef2ff;
             color: #4f46e5;
@@ -278,6 +361,13 @@
             font-size: .78rem;
         }
 
+        .cat-pill:hover {
+            background: #e0e7ff;
+            color: #4338ca;
+            text-decoration: none;
+        }
+
+        /* Status badge (solid) */
         .status-badge {
             padding: .38rem .68rem;
             border-radius: 999px;
@@ -318,6 +408,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .toolbar-left {
+                justify-content: flex-start;
+            }
+
             .toolbar-right {
                 justify-content: flex-start;
             }
@@ -333,27 +427,31 @@
 @section('content')
     <div class="container container-page py-3">
 
+        {{-- Page header --}}
         <div class="d-flex align-items-center justify-content-between mb-2">
             <div>
                 <h4 class="page-header-title mb-0">Customize Orders — Report</h4>
             </div>
         </div>
 
+        {{-- Summary band with KPIs --}}
         <div class="band">
+         
             <div class="band-chips">
                 <span class="band-chip green">
                     <span class="icon">💰</span>
                     <span>Total Customize Order Price</span>
-                    <span class="mono" id="totalPrice">₹0.00</span>
+                    <span class="mono" id="totalPrice">₹0</span>
                 </span>
                 <span class="band-chip blue">
                     <span class="icon">📅</span>
                     <span>Today Customize Price</span>
-                    <span class="mono" id="todayPrice">₹0.00</span>
+                    <span class="mono" id="todayPrice">₹0</span>
                 </span>
             </div>
         </div>
 
+        {{-- Toolbar: date filters + quick ranges + apply/reset --}}
         <div class="toolbar mb-3">
             <div class="toolbar-left">
                 <div class="date-range">
@@ -366,19 +464,31 @@
                 </div>
             </div>
             <div class="toolbar-right">
-                <button class="btn-chip" type="button" data-range="today">Today</button>
-                <button class="btn-chip" type="button" data-range="week">This Week</button>
-                <button class="btn-chip" type="button" data-range="month">This Month</button>
-
-                <button id="searchBtn" class="btn-chip apply-btn" type="button">Apply</button>
-                <button id="resetBtn" class="btn-chip reset-btn" type="button">Reset</button>
+                <button class="btn-chip" type="button" data-range="today">
+                    <i class="bi bi-calendar-day"></i><span>Today</span>
+                </button>
+                <button class="btn-chip" type="button" data-range="week">
+                    <i class="bi bi-calendar-week"></i><span>This Week</span>
+                </button>
+                <button class="btn-chip" type="button" data-range="month">
+                    <i class="bi bi-calendar3"></i><span>This Month</span>
+                </button>
+               
+                <button id="searchBtn" class="btn-chip apply-btn" type="button">
+                    <i class="fas fa-search"></i><span>Apply</span>
+                </button>
+                <button id="resetBtn" class="btn-chip reset-btn" type="button">
+                    <i class="bi bi-arrow-counterclockwise"></i><span>Reset</span>
+                </button>
             </div>
         </div>
 
+        {{-- Workbook: table with exports --}}
         <div class="workbook">
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Customize Orders — Detailed Table</div>
+                 
                 </div>
             </div>
             <div class="workbook-body export-table">
@@ -399,11 +509,11 @@
                 </div>
             </div>
         </div>
-
     </div>
 @endsection
 
 @section('scripts')
+    <!-- Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
@@ -417,41 +527,59 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         $(function() {
             const $from = $('#from_date');
             const $to = $('#to_date');
 
-            function formatINR(val) {
-                const n = Number(val ?? 0);
-                return '₹' + (isFinite(n) ? n.toLocaleString('en-IN', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }) : '0.00');
-            }
-
             function applyRange(key) {
                 const today = moment().startOf('day');
                 let start = today.clone(),
                     end = today.clone();
 
-                if (key === 'week') {
-                    start = moment().startOf('isoWeek');
-                    end = moment().endOf('isoWeek');
-                } else if (key === 'month') {
-                    start = moment().startOf('month');
-                    end = moment().endOf('month');
+                switch (key) {
+                    case 'today':
+                        // start/end already today
+                        break;
+                    case 'week':
+                        start = moment().startOf('isoWeek');
+                        end = moment().endOf('isoWeek');
+                        break;
+                    case 'month':
+                        start = moment().startOf('month');
+                        end = moment().endOf('month');
+                        break;
+                    case 'last30':
+                        start = moment().subtract(29, 'days').startOf('day');
+                        end = today.clone();
+                        break;
+                    case 'fy': {
+                        const currentYear = moment().year();
+                        const fyStart = moment({
+                            year: (moment().month() >= 3 ? currentYear : currentYear - 1),
+                            month: 3,
+                            day: 1
+                        }).startOf('day'); // Apr 1
+                        const fyEnd = fyStart.clone().add(1, 'year').subtract(1, 'day').endOf('day'); // Mar 31
+                        start = fyStart;
+                        end = fyEnd;
+                        break;
+                    }
+                    default:
+                        break;
                 }
 
                 $from.val(start.format('YYYY-MM-DD'));
                 $to.val(end.format('YYYY-MM-DD'));
             }
 
-            // Default: today
+            // Init: set Today as default
             applyRange('today');
             $('[data-range="today"]').addClass('active');
 
+            // DataTable
             const table = $('#file-datatable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -459,48 +587,32 @@
                 dom: "<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" +
                     "<'row'<'col-12'tr>>" +
                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                buttons: [{
-                        extend: 'copyHtml5',
-                        text: 'Copy',
-                        className: 'btn btn-pill-red'
-                    },
-                    {
-                        extend: 'csvHtml5',
-                        text: 'CSV',
-                        className: 'btn btn-pill-red'
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        text: 'Excel',
-                        className: 'btn btn-pill-red'
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        text: 'PDF',
-                        className: 'btn btn-pill-red'
-                    },
-                    {
-                        extend: 'print',
-                        text: 'Print',
-                        className: 'btn btn-pill-red'
-                    }
+                buttons: [
+                    { extend: 'copyHtml5',  text: 'Copy',  className: 'btn btn-pill-red' },
+                    { extend: 'csvHtml5',   text: 'CSV',   className: 'btn btn-pill-red' },
+                    { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-pill-red' },
+                    { extend: 'pdfHtml5',   text: 'PDF',   className: 'btn btn-pill-red' },
+                    { extend: 'print',      text: 'Print', className: 'btn btn-pill-red' }
                 ],
                 ajax: {
                     url: "{{ route('report.customize') }}",
                     data: function(d) {
                         d.from_date = $from.val();
-                        d.to_date = $to.val();
+                        d.to_date   = $to.val();
                     },
                     dataSrc: function(json) {
-                        $('#totalPrice').text(formatINR(json.total_price_sum));
-                        $('#todayPrice').text(formatINR(json.today_price_sum));
+                        $('#totalPrice').text('₹' + Number(json.total_price_sum ?? 0).toLocaleString(
+                            'en-IN', { maximumFractionDigits: 2 }
+                        ));
+                        $('#todayPrice').text('₹' + Number(json.today_price_sum ?? 0).toLocaleString(
+                            'en-IN', { maximumFractionDigits: 2 }
+                        ));
                         return json.data || [];
                     }
                 },
-                order: [
-                    [1, 'desc']
-                ],
-                columns: [{
+                order: [[1, 'desc']],
+                columns: [
+                    {
                         data: null,
                         orderable: false,
                         render: function(_, __, row) {
@@ -514,9 +626,9 @@
                             `.trim();
 
                             const modalId = `addr_${userId || Math.random().toString(36).slice(2)}`;
-                            const viewBtn = userId ?
-                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm">View</a>` :
-                                '';
+                            const viewBtn = userId
+                                ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm">View</a>`
+                                : '';
 
                             const addressHtml = `
                                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
@@ -550,23 +662,20 @@
                             `;
                         }
                     },
-                    {
-                        data: 'purchase_date',
-                        name: 'purchase_date'
-                    },
-                    {
-                        data: 'delivery_date',
-                        name: 'delivery_date'
-                    },
+                    { data: 'purchase_date', name: 'purchase_date' },
+                    { data: 'delivery_date', name: 'delivery_date' },
                     {
                         data: 'flower_items',
                         name: 'flower_items',
                         orderable: false,
                         render: function(data, type, row) {
-                            const modalId =
-                                `items_${row.request_id || Math.random().toString(36).slice(2)}`;
+                            const cat = row.category_name
+                                ? `<a href="javascript:void(0)" class="cat-pill">${row.category_name}</a>`
+                                : '';
+                            const modalId = `items_${row.request_id}`;
                             return `
                               <div class="d-flex align-items-center gap-2">
+                                ${cat}
                                 <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#${modalId}">
                                     View Items
                                 </button>
@@ -579,9 +688,7 @@
                                       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                      ${data && data !== 'N/A'
-                                        ? data.split(',').map(i => `<div>• ${i.trim()}</div>`).join('')
-                                        : '<em>No items found.</em>'}
+                                      ${data ? data.split(',').map(i => `<div>• ${i.trim()}</div>`).join('') : '<em>No items found.</em>'}
                                     </div>
                                   </div>
                                 </div>
@@ -597,18 +704,14 @@
                             const t = (s || '').toString().trim().toLowerCase();
                             let cls = 'status-badge--info';
 
-                            if (['success', 'completed', 'complete', 'active', 'ok', 'paid',
-                                    'resume', 'delivered'
-                                ].includes(t)) {
+                            if (['success', 'completed', 'complete', 'active', 'ok', 'paid', 'resume', 'delivered'].includes(t)) {
                                 cls = 'status-badge--success';
-                            } else if (['pending', 'processing', 'in-progress', 'on hold', 'hold',
-                                    'awaiting'
-                                ].includes(t)) {
+                            } else if (['pending', 'processing', 'in-progress', 'on hold', 'hold', 'awaiting'].includes(t)) {
                                 cls = 'status-badge--warning';
-                            } else if (['cancel', 'cancelled', 'failed', 'rejected', 'expired',
-                                    'unpaid'
-                                ].includes(t)) {
+                            } else if (['cancel', 'cancelled', 'failed', 'rejected', 'expired', 'unpaid'].includes(t)) {
                                 cls = 'status-badge--danger';
+                            } else if (['info', 'paused'].includes(t)) {
+                                cls = 'status-badge--info';
                             } else if (['new', 'created', 'open'].includes(t)) {
                                 cls = 'status-badge--neutral';
                             }
@@ -616,18 +719,18 @@
                             return `<span class="status-badge ${cls}">${(s || '').toString()}</span>`;
                         }
                     },
-                    // FIXED: Amount is numeric now, so no NaN.
                     {
-                        data: 'amount',
-                        name: 'amount',
+                        data: 'price',
+                        name: 'price',
                         className: 'text-end mono',
-                        render: function(v) {
-                            return formatINR(v);
-                        }
+                        render: v => '₹' + Number(v || 0).toLocaleString('en-IN', {
+                            minimumFractionDigits: 2
+                        })
                     }
                 ]
             });
 
+            // Range chips click
             $('[data-range]').on('click', function() {
                 $('[data-range]').removeClass('active');
                 $(this).addClass('active');
@@ -635,6 +738,7 @@
                 table.ajax.reload();
             });
 
+            // Reset button
             $('#resetBtn').on('click', function() {
                 $from.val('');
                 $to.val('');
@@ -642,10 +746,12 @@
                 table.ajax.reload();
             });
 
+            // Apply button
             $('#searchBtn').on('click', function() {
                 table.ajax.reload();
             });
 
+            // Tooltips after draw
             $('#file-datatable').on('draw.dt', function() {
                 $('[data-bs-toggle="tooltip"]').each(function() {
                     const t = bootstrap.Tooltip.getInstance(this);
