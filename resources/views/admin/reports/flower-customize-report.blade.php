@@ -15,7 +15,6 @@
 
     <style>
         :root {
-            /* Core palette – same family as your other "first page" designs */
             --brand-blue: #e9f2ff;
             --brand-blue-edge: #cfe0ff;
             --header-text: #0b2a5b;
@@ -64,7 +63,6 @@
             max-width: 1320px;
         }
 
-        /* Page header */
         .page-header-title {
             font-weight: 600;
             color: #0f172a;
@@ -75,7 +73,6 @@
             color: var(--muted);
         }
 
-        /* Summary band with KPIs */
         .band {
             background: linear-gradient(135deg, #e0f2fe, #eef2ff);
             border: 1px solid var(--brand-blue-edge);
@@ -86,31 +83,6 @@
             display: flex;
             flex-direction: column;
             gap: .4rem;
-        }
-
-        .band h3 {
-            margin: 0;
-            font-size: .98rem;
-            font-weight: 600;
-            color: var(--header-text);
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        .band h3 span.label {
-            font-size: .75rem;
-            padding: .12rem .55rem;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.08);
-            color: #0f172a;
-            text-transform: uppercase;
-            letter-spacing: .09em;
-        }
-
-        .band-sub {
-            font-size: .84rem;
-            color: var(--muted);
         }
 
         .band-chips {
@@ -151,7 +123,6 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* Toolbar – date + quick ranges + Apply/Reset */
         .toolbar {
             position: sticky;
             top: 0;
@@ -266,7 +237,6 @@
             border-style: dashed;
         }
 
-        /* Workbook shell around DataTable */
         .workbook {
             background: var(--card);
             border: 1px solid var(--ring);
@@ -300,16 +270,10 @@
             font-size: 1.1rem;
         }
 
-        .workbook-sub {
-            font-size: .84rem;
-            color: var(--muted);
-        }
-
         .workbook-body {
             padding: 1rem 1.1rem 1.1rem;
         }
 
-        /* DataTables export buttons */
         .export-table .dataTables_wrapper .dt-buttons .btn {
             margin-left: .4rem;
             border-radius: 999px;
@@ -329,7 +293,6 @@
             color: #fff;
         }
 
-        /* Table */
         .table {
             border-color: var(--table-border) !important;
             font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
@@ -350,7 +313,6 @@
             background: var(--table-hover);
         }
 
-        /* Category pill */
         .cat-pill {
             background: #eef2ff;
             color: #4f46e5;
@@ -367,7 +329,6 @@
             text-decoration: none;
         }
 
-        /* Status badge (solid) */
         .status-badge {
             padding: .38rem .68rem;
             border-radius: 999px;
@@ -436,17 +397,16 @@
 
         {{-- Summary band with KPIs --}}
         <div class="band">
-         
             <div class="band-chips">
                 <span class="band-chip green">
                     <span class="icon">💰</span>
                     <span>Total Customize Order Price</span>
-                    <span class="mono" id="totalPrice">₹0</span>
+                    <span class="mono" id="totalPrice">₹0.00</span>
                 </span>
                 <span class="band-chip blue">
                     <span class="icon">📅</span>
                     <span>Today Customize Price</span>
-                    <span class="mono" id="todayPrice">₹0</span>
+                    <span class="mono" id="todayPrice">₹0.00</span>
                 </span>
             </div>
         </div>
@@ -473,7 +433,7 @@
                 <button class="btn-chip" type="button" data-range="month">
                     <i class="bi bi-calendar3"></i><span>This Month</span>
                 </button>
-               
+
                 <button id="searchBtn" class="btn-chip apply-btn" type="button">
                     <i class="fas fa-search"></i><span>Apply</span>
                 </button>
@@ -488,7 +448,6 @@
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Customize Orders — Detailed Table</div>
-                 
                 </div>
             </div>
             <div class="workbook-body export-table">
@@ -534,6 +493,15 @@
             const $from = $('#from_date');
             const $to = $('#to_date');
 
+            function formatINR(val) {
+                const n = parseFloat(val);
+                const safe = Number.isFinite(n) ? n : 0;
+                return '₹' + safe.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
             function applyRange(key) {
                 const today = moment().startOf('day');
                 let start = today.clone(),
@@ -541,7 +509,6 @@
 
                 switch (key) {
                     case 'today':
-                        // start/end already today
                         break;
                     case 'week':
                         start = moment().startOf('isoWeek');
@@ -551,22 +518,6 @@
                         start = moment().startOf('month');
                         end = moment().endOf('month');
                         break;
-                    case 'last30':
-                        start = moment().subtract(29, 'days').startOf('day');
-                        end = today.clone();
-                        break;
-                    case 'fy': {
-                        const currentYear = moment().year();
-                        const fyStart = moment({
-                            year: (moment().month() >= 3 ? currentYear : currentYear - 1),
-                            month: 3,
-                            day: 1
-                        }).startOf('day'); // Apr 1
-                        const fyEnd = fyStart.clone().add(1, 'year').subtract(1, 'day').endOf('day'); // Mar 31
-                        start = fyStart;
-                        end = fyEnd;
-                        break;
-                    }
                     default:
                         break;
                 }
@@ -575,11 +526,10 @@
                 $to.val(end.format('YYYY-MM-DD'));
             }
 
-            // Init: set Today as default
-            applyRange('today');
-            $('[data-range="today"]').addClass('active');
+            // Default: This Month (matches controller default behavior)
+            applyRange('month');
+            $('[data-range="month"]').addClass('active');
 
-            // DataTable
             const table = $('#file-datatable').DataTable({
                 processing: true,
                 serverSide: true,
@@ -587,34 +537,55 @@
                 dom: "<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" +
                     "<'row'<'col-12'tr>>" +
                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                buttons: [
-                    { extend: 'copyHtml5',  text: 'Copy',  className: 'btn btn-pill-red' },
-                    { extend: 'csvHtml5',   text: 'CSV',   className: 'btn btn-pill-red' },
-                    { extend: 'excelHtml5', text: 'Excel', className: 'btn btn-pill-red' },
-                    { extend: 'pdfHtml5',   text: 'PDF',   className: 'btn btn-pill-red' },
-                    { extend: 'print',      text: 'Print', className: 'btn btn-pill-red' }
+                buttons: [{
+                        extend: 'copyHtml5',
+                        text: 'Copy',
+                        className: 'btn btn-pill-red'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        text: 'CSV',
+                        className: 'btn btn-pill-red'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        text: 'Excel',
+                        className: 'btn btn-pill-red'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        text: 'PDF',
+                        className: 'btn btn-pill-red'
+                    },
+                    {
+                        extend: 'print',
+                        text: 'Print',
+                        className: 'btn btn-pill-red'
+                    }
                 ],
                 ajax: {
                     url: "{{ route('report.customize') }}",
                     data: function(d) {
                         d.from_date = $from.val();
-                        d.to_date   = $to.val();
+                        d.to_date = $to.val();
                     },
                     dataSrc: function(json) {
-                        $('#totalPrice').text('₹' + Number(json.total_price_sum ?? 0).toLocaleString(
-                            'en-IN', { maximumFractionDigits: 2 }
-                        ));
-                        $('#todayPrice').text('₹' + Number(json.today_price_sum ?? 0).toLocaleString(
-                            'en-IN', { maximumFractionDigits: 2 }
-                        ));
+                        // Controller now returns numeric totals; format only here
+                        $('#totalPrice').text(formatINR(json.total_price_sum ?? 0));
+                        $('#todayPrice').text(formatINR(json.today_price_sum ?? 0));
                         return json.data || [];
                     }
                 },
-                order: [[1, 'desc']],
-                columns: [
-                    {
+
+                // Sort by created_at on server side (purchase_date is computed)
+                order: [
+                    [1, 'desc']
+                ],
+
+                columns: [{
                         data: null,
                         orderable: false,
+                        searchable: false,
                         render: function(_, __, row) {
                             const user = row.user || {};
                             const address = user.address_details || {};
@@ -623,12 +594,12 @@
                             const tooltip = `
                                 <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
                                 <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
-                            `.trim();
+                            `.trim().replace(/"/g, '&quot;');
 
                             const modalId = `addr_${userId || Math.random().toString(36).slice(2)}`;
-                            const viewBtn = userId
-                                ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm">View</a>`
-                                : '';
+                            const viewBtn = userId ?
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm">View</a>` :
+                                '';
 
                             const addressHtml = `
                                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
@@ -662,17 +633,29 @@
                             `;
                         }
                     },
-                    { data: 'purchase_date', name: 'purchase_date' },
-                    { data: 'delivery_date', name: 'delivery_date' },
+                    {
+                        data: 'purchase_date',
+                        name: 'created_at', // IMPORTANT for server-side sorting
+                        defaultContent: 'N/A'
+                    },
+                    {
+                        data: 'delivery_date',
+                        name: 'date',
+                        defaultContent: 'N/A'
+                    },
                     {
                         data: 'flower_items',
                         name: 'flower_items',
                         orderable: false,
+                        searchable: false,
                         render: function(data, type, row) {
-                            const cat = row.category_name
-                                ? `<a href="javascript:void(0)" class="cat-pill">${row.category_name}</a>`
-                                : '';
-                            const modalId = `items_${row.request_id}`;
+                            const cat = row.category_name ?
+                                `<a href="javascript:void(0)" class="cat-pill">${row.category_name}</a>` :
+                                '';
+
+                            const modalId =
+                                `items_${row.request_id || row.id || Math.random().toString(36).slice(2)}`;
+
                             return `
                               <div class="d-flex align-items-center gap-2">
                                 ${cat}
@@ -704,11 +687,17 @@
                             const t = (s || '').toString().trim().toLowerCase();
                             let cls = 'status-badge--info';
 
-                            if (['success', 'completed', 'complete', 'active', 'ok', 'paid', 'resume', 'delivered'].includes(t)) {
+                            if (['success', 'completed', 'complete', 'active', 'ok', 'paid',
+                                    'resume', 'delivered'
+                                ].includes(t)) {
                                 cls = 'status-badge--success';
-                            } else if (['pending', 'processing', 'in-progress', 'on hold', 'hold', 'awaiting'].includes(t)) {
+                            } else if (['pending', 'processing', 'in-progress', 'on hold', 'hold',
+                                    'awaiting'
+                                ].includes(t)) {
                                 cls = 'status-badge--warning';
-                            } else if (['cancel', 'cancelled', 'failed', 'rejected', 'expired', 'unpaid'].includes(t)) {
+                            } else if (['cancel', 'cancelled', 'failed', 'rejected', 'expired',
+                                    'unpaid'
+                                ].includes(t)) {
                                 cls = 'status-badge--danger';
                             } else if (['info', 'paused'].includes(t)) {
                                 cls = 'status-badge--info';
@@ -716,16 +705,17 @@
                                 cls = 'status-badge--neutral';
                             }
 
-                            return `<span class="status-badge ${cls}">${(s || '').toString()}</span>`;
+                            return `<span class="status-badge ${cls}">${(s || 'N/A').toString()}</span>`;
                         }
                     },
                     {
-                        data: 'price',
+                        data: 'price', // controller returns numeric value now
                         name: 'price',
                         className: 'text-end mono',
-                        render: v => '₹' + Number(v || 0).toLocaleString('en-IN', {
-                            minimumFractionDigits: 2
-                        })
+                        orderable: false, // avoid SQL order errors on computed column
+                        render: function(v) {
+                            return formatINR(v);
+                        }
                     }
                 ]
             });
@@ -751,18 +741,26 @@
                 table.ajax.reload();
             });
 
-            // Tooltips after draw
+            // Bootstrap 5 tooltips after draw (no jQuery tooltip)
+            function initTooltips() {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+                    const existing = bootstrap.Tooltip.getInstance(el);
+                    if (existing) existing.dispose();
+
+                    new bootstrap.Tooltip(el, {
+                        html: true,
+                        boundary: 'window',
+                        trigger: 'hover'
+                    });
+                });
+            }
+
             $('#file-datatable').on('draw.dt', function() {
-                $('[data-bs-toggle="tooltip"]').each(function() {
-                    const t = bootstrap.Tooltip.getInstance(this);
-                    if (t) t.dispose();
-                });
-                $('[data-bs-toggle="tooltip"]').tooltip({
-                    html: true,
-                    boundary: 'window',
-                    trigger: 'hover'
-                });
+                initTooltips();
             });
+
+            // initial
+            initTooltips();
         });
     </script>
 @endsection
