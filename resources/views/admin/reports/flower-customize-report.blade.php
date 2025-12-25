@@ -66,11 +66,6 @@
             color: #0f172a;
         }
 
-        .page-header-sub {
-            font-size: .86rem;
-            color: var(--muted);
-        }
-
         .band {
             background: linear-gradient(135deg, #e0f2fe, #eef2ff);
             border: 1px solid var(--brand-blue-edge);
@@ -99,10 +94,6 @@
             font-weight: 600;
             border: 1px solid transparent;
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-        }
-
-        .band-chip span.icon {
-            font-size: .9rem;
         }
 
         .band-chip.green {
@@ -165,12 +156,6 @@
             font-weight: 500;
             font-size: .88rem;
             min-width: 160px;
-        }
-
-        .date-range input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(111, 107, 254, 0.25);
         }
 
         .toolbar-right {
@@ -459,6 +444,39 @@
             </div>
         </div>
     </div>
+
+    <!-- DataTables Ajax Error Modal (ADDED) -->
+    <div class="modal fade" id="dtAjaxErrorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background:#dc2626;">
+                    <h5 class="modal-title">Data Load Error</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <strong>Status:</strong> <span id="dtErrStatus">N/A</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Message:</strong> <span id="dtErrMessage">N/A</span>
+                    </div>
+                    <div class="mb-2">
+                        <strong>Response (snippet):</strong>
+                        <pre id="dtErrResponse" class="p-2 border rounded bg-light" style="max-height:280px; overflow:auto;">N/A</pre>
+                    </div>
+                    <div class="text-muted small">
+                        Tip: If this shows HTML (login page), your route is redirecting or returning non-JSON.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button id="dtRetryBtn" class="btn btn-danger" type="button">Retry</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -479,8 +497,27 @@
 
     <script>
         $(function() {
+            // Disable DataTables default alert popup globally
+            $.fn.dataTable.ext.errMode = 'none';
+
             const $from = $('#from_date');
             const $to = $('#to_date');
+
+            function safeSnippet(text) {
+                if (!text) return '';
+                text = String(text);
+                return text.length > 2500 ? text.substring(0, 2500) + "\n... (truncated)" : text;
+            }
+
+            function showDtErrorModal(opts) {
+                $('#dtErrStatus').text(opts.status ?? 'N/A');
+                $('#dtErrMessage').text(opts.message ?? 'N/A');
+                $('#dtErrResponse').text(opts.response ?? 'N/A');
+
+                const modalEl = document.getElementById('dtAjaxErrorModal');
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
 
             function applyRange(key) {
                 const today = moment().startOf('day');
@@ -497,8 +534,6 @@
                     case 'month':
                         start = moment().startOf('month');
                         end = moment().endOf('month');
-                        break;
-                    default:
                         break;
                 }
 
@@ -544,11 +579,32 @@
                 ],
                 ajax: {
                     url: "{{ route('report.customize') }}",
+                    type: "GET",
                     data: function(d) {
                         d.from_date = $from.val();
                         d.to_date = $to.val();
                     },
+
+                    // IMPORTANT: show modal when request fails (419/500/302/etc.)
+                    error: function(xhr, textStatus, errorThrown) {
+                        showDtErrorModal({
+                            status: xhr.status + ' ' + (xhr.statusText || ''),
+                            message: errorThrown || textStatus || 'Ajax request failed',
+                            response: safeSnippet(xhr.responseText)
+                        });
+                    },
+
+                    // IMPORTANT: show modal when server returns {error: "..."} as JSON
                     dataSrc: function(json) {
+                        if (json && json.error) {
+                            showDtErrorModal({
+                                status: '200 OK (JSON error)',
+                                message: json.error,
+                                response: safeSnippet(JSON.stringify(json, null, 2))
+                            });
+                            return [];
+                        }
+
                         const total = Number(json.total_price_sum ?? 0) || 0;
                         const today = Number(json.today_price_sum ?? 0) || 0;
 
@@ -691,7 +747,6 @@
                             return `<span class="status-badge ${cls}">${(s || '').toString()}</span>`;
                         }
                     },
-                    // FIX: use numeric field from server to avoid NaN
                     {
                         data: 'price_number',
                         name: 'price_number',
@@ -706,6 +761,13 @@
                         }
                     }
                 ]
+            });
+
+            // Retry in modal
+            $('#dtRetryBtn').on('click', function() {
+                table.ajax.reload();
+                const modalEl = document.getElementById('dtAjaxErrorModal');
+                bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             });
 
             $('[data-range]').on('click', function() {

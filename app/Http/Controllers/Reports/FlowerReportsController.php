@@ -219,111 +219,125 @@ public function subscriptionReport(Request $request)
     // Initial page (Blade)
     return view('admin.reports.flower-subscription-report');
 }
+ public function reportCustomize(Request $request)
+    {
+        if (!$request->ajax()) {
+            return view('admin.reports.flower-customize-report');
+        }
 
-public function reportCustomize(Request $request)
-{
-    if ($request->ajax()) {
+        $draw = (int) $request->input('draw', 1);
 
-        // Default: current month
-        $from = $request->from_date
-            ? Carbon::parse($request->from_date)->startOfDay()
-            : Carbon::now()->startOfMonth();
+        try {
+            // Default: current month
+            $from = $request->from_date
+                ? Carbon::parse($request->from_date)->startOfDay()
+                : Carbon::now()->startOfMonth();
 
-        $to = $request->to_date
-            ? Carbon::parse($request->to_date)->endOfDay()
-            : Carbon::now()->endOfMonth();
+            $to = $request->to_date
+                ? Carbon::parse($request->to_date)->endOfDay()
+                : Carbon::now()->endOfMonth();
 
-        // Main query for DataTables (true server-side)
-        $baseQuery = FlowerRequest::query()
-            ->with([
-                'order',
-                'user.addressDetails',
-                'address.localityDetails',
-                'flowerRequestItems',
-            ])
-            ->whereBetween('flower_requests.created_at', [$from, $to])
-            ->orderByDesc('flower_requests.id');
+            // Main server-side query
+            $baseQuery = FlowerRequest::query()
+                ->with([
+                    'order',
+                    'user.addressDetails',
+                    'address.localityDetails',
+                    'flowerRequestItems',
+                ])
+                ->whereBetween('flower_requests.created_at', [$from, $to])
+                ->orderByDesc('flower_requests.id');
 
-        // Totals via SQL (fast + no NaN risk)
-        $totalPrice = (float) FlowerRequest::query()
-            ->leftJoin('orders', 'orders.request_id', '=', 'flower_requests.request_id')
-            ->whereBetween('flower_requests.created_at', [$from, $to])
-            ->selectRaw('COALESCE(SUM(COALESCE(orders.total_price, orders.requested_flower_price, 0)), 0) AS total_sum')
-            ->value('total_sum');
+            // Totals (SQL)
+            $totalPrice = (float) FlowerRequest::query()
+                ->leftJoin('orders', 'orders.request_id', '=', 'flower_requests.request_id')
+                ->whereBetween('flower_requests.created_at', [$from, $to])
+                ->selectRaw('COALESCE(SUM(COALESCE(orders.total_price, orders.requested_flower_price, 0)), 0) AS total_sum')
+                ->value('total_sum');
 
-        $todayStart = Carbon::today()->startOfDay();
-        $todayEnd   = Carbon::today()->endOfDay();
+            $todayStart = Carbon::today()->startOfDay();
+            $todayEnd   = Carbon::today()->endOfDay();
 
-        $todayPrice = (float) FlowerRequest::query()
-            ->leftJoin('orders', 'orders.request_id', '=', 'flower_requests.request_id')
-            ->whereBetween('flower_requests.created_at', [$todayStart, $todayEnd])
-            ->selectRaw('COALESCE(SUM(COALESCE(orders.total_price, orders.requested_flower_price, 0)), 0) AS today_sum')
-            ->value('today_sum');
+            $todayPrice = (float) FlowerRequest::query()
+                ->leftJoin('orders', 'orders.request_id', '=', 'flower_requests.request_id')
+                ->whereBetween('flower_requests.created_at', [$todayStart, $todayEnd])
+                ->selectRaw('COALESCE(SUM(COALESCE(orders.total_price, orders.requested_flower_price, 0)), 0) AS today_sum')
+                ->value('today_sum');
 
-        return DataTables::eloquent($baseQuery)
-            ->with([
-                'total_price_sum' => $totalPrice,
-                'today_price_sum' => $todayPrice,
-            ])
+            return DataTables::eloquent($baseQuery)
+                ->with([
+                    'total_price_sum' => $totalPrice,
+                    'today_price_sum' => $todayPrice,
+                ])
+                ->addColumn('user', function ($row) {
+                    $user = $row->user; // can be null
+                    $addr = $user->addressDetails ?? null;
 
-            ->addColumn('user', function ($row) {
-                $user = $row->user;
+                    // If addressDetails is Collection, take first
+                    if ($addr instanceof \Illuminate\Support\Collection) {
+                        $addr = $addr->first();
+                    }
 
-                $addr = $user->addressDetails ?? null;
-                // If addressDetails is a collection, take first row safely
-                if ($addr instanceof Collection) {
-                    $addr = $addr->first();
-                }
+                    return [
+                        'userid'          => $user->userid ?? null,
+                        'name'            => $user->name ?? 'N/A',
+                        'mobile_number'   => $user->mobile_number ?? 'N/A',
+                        'address_details' => $addr,
+                    ];
+                })
+                ->addColumn('purchase_date', function ($row) {
+                    return optional($row->created_at)->format('d M Y') ?? 'N/A';
+                })
+                ->addColumn('delivery_date', function ($row) {
+                    return $row->date
+                        ? Carbon::parse($row->date)->format('d M Y') . ($row->time ? ' ' . $row->time : '')
+                        : 'N/A';
+                })
+                ->addColumn('flower_items', function ($row) {
+                    if (!$row->relationLoaded('flowerRequestItems') || $row->flowerRequestItems->isEmpty()) {
+                        return 'N/A';
+                    }
 
-                return [
-                    'userid'          => $user->userid ?? null,
-                    'name'            => $user->name ?? 'N/A',
-                    'mobile_number'   => $user->mobile_number ?? 'N/A',
-                    'address_details' => $addr,
-                ];
-            })
+                    return $row->flowerRequestItems->map(function ($item) {
+                        $name = $item->flower_name ?? '';
+                        $qty  = $item->flower_quantity ?? '';
+                        $unit = $item->flower_unit ?? '';
+                        return trim($name) . ' (' . trim($qty . ' ' . $unit) . ')';
+                    })->implode(', ');
+                })
+                // Numeric field for Amount => fixes NaN in JS
+                ->addColumn('price_number', function ($row) {
+                    $price = 0;
+                    if ($row->order) {
+                        $price = $row->order->total_price ?? $row->order->requested_flower_price ?? 0;
+                    }
+                    return (float) $price;
+                })
+                ->addColumn('status', function ($row) {
+                    return ucfirst($row->status ?? 'N/A');
+                })
+                ->make(true);
 
-            ->addColumn('purchase_date', function ($row) {
-                return optional($row->created_at)->format('d M Y') ?? 'N/A';
-            })
+        } catch (\Throwable $e) {
+            Log::error('reportCustomize DataTables error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'trace'   => Str::limit($e->getTraceAsString(), 4000),
+            ]);
 
-            ->addColumn('delivery_date', function ($row) {
-                return $row->date
-                    ? Carbon::parse($row->date)->format('d M Y') . ($row->time ? ' ' . $row->time : '')
-                    : 'N/A';
-            })
-
-            ->addColumn('flower_items', function ($row) {
-                if (!$row->relationLoaded('flowerRequestItems') || $row->flowerRequestItems->isEmpty()) {
-                    return 'N/A';
-                }
-
-                return $row->flowerRequestItems->map(function ($item) {
-                    $name = $item->flower_name ?? '';
-                    $qty  = $item->flower_quantity ?? '';
-                    $unit = $item->flower_unit ?? '';
-                    return trim($name) . ' (' . trim($qty . ' ' . $unit) . ')';
-                })->implode(', ');
-            })
-
-            // IMPORTANT: numeric field for Amount column (fixes NaN)
-            ->addColumn('price_number', function ($row) {
-                $price = 0;
-                if ($row->order) {
-                    $price = $row->order->total_price ?? $row->order->requested_flower_price ?? 0;
-                }
-                return (float) $price;
-            })
-
-            ->addColumn('status', function ($row) {
-                return ucfirst($row->status ?? 'N/A');
-            })
-
-            ->make(true);
+            // Return VALID DataTables JSON (HTTP 200), plus error key for modal
+            return response()->json([
+                'draw'            => $draw,
+                'recordsTotal'    => 0,
+                'recordsFiltered' => 0,
+                'data'            => [],
+                'total_price_sum' => 0,
+                'today_price_sum' => 0,
+                'error'           => 'Server error: ' . $e->getMessage(),
+            ], 200);
+        }
     }
-
-    return view('admin.reports.flower-customize-report');
-}
 
 public function flowerPickUp(Request $request)
 {
