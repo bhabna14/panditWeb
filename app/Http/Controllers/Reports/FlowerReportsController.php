@@ -19,6 +19,9 @@ use App\Models\PauseResumeLog;
 use App\Models\Rider;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 
 class FlowerReportsController extends Controller
 {
