@@ -68,11 +68,6 @@
             color: #0f172a;
         }
 
-        .page-header-sub {
-            font-size: .86rem;
-            color: var(--muted);
-        }
-
         .band {
             background: linear-gradient(135deg, #e0f2fe, #eef2ff);
             border: 1px solid var(--brand-blue-edge);
@@ -388,14 +383,12 @@
 @section('content')
     <div class="container container-page py-3">
 
-        {{-- Page header --}}
         <div class="d-flex align-items-center justify-content-between mb-2">
             <div>
                 <h4 class="page-header-title mb-0">Customize Orders — Report</h4>
             </div>
         </div>
 
-        {{-- Summary band with KPIs --}}
         <div class="band">
             <div class="band-chips">
                 <span class="band-chip green">
@@ -411,7 +404,6 @@
             </div>
         </div>
 
-        {{-- Toolbar: date filters + quick ranges + apply/reset --}}
         <div class="toolbar mb-3">
             <div class="toolbar-left">
                 <div class="date-range">
@@ -423,6 +415,7 @@
                     <input type="date" id="to_date" placeholder="dd-mm-yyyy">
                 </div>
             </div>
+
             <div class="toolbar-right">
                 <button class="btn-chip" type="button" data-range="today">
                     <i class="bi bi-calendar-day"></i><span>Today</span>
@@ -443,13 +436,13 @@
             </div>
         </div>
 
-        {{-- Workbook: table with exports --}}
         <div class="workbook">
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Customize Orders — Detailed Table</div>
                 </div>
             </div>
+
             <div class="workbook-body export-table">
                 <div class="table-responsive">
                     <table id="file-datatable" class="table table-bordered table-hover align-middle w-100">
@@ -467,6 +460,7 @@
                     </table>
                 </div>
             </div>
+
         </div>
     </div>
 @endsection
@@ -493,10 +487,14 @@
             const $from = $('#from_date');
             const $to = $('#to_date');
 
-            function formatINR(val) {
-                const n = parseFloat(val);
-                const safe = Number.isFinite(n) ? n : 0;
-                return '₹' + safe.toLocaleString('en-IN', {
+            function safeNumber(v) {
+                const n = parseFloat(v);
+                return Number.isFinite(n) ? n : 0;
+            }
+
+            function formatINR(v) {
+                const n = safeNumber(v);
+                return '₹' + n.toLocaleString('en-IN', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
@@ -526,9 +524,21 @@
                 $to.val(end.format('YYYY-MM-DD'));
             }
 
-            // Default: This Month (matches controller default behavior)
-            applyRange('month');
-            $('[data-range="month"]').addClass('active');
+            // Default selection: Today (you can change to 'month' if needed)
+            applyRange('today');
+            $('[data-range="today"]').addClass('active');
+
+            function initTooltips() {
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
+                    const inst = bootstrap.Tooltip.getInstance(el);
+                    if (inst) inst.dispose();
+                    new bootstrap.Tooltip(el, {
+                        html: true,
+                        boundary: 'window',
+                        trigger: 'hover'
+                    });
+                });
+            }
 
             const table = $('#file-datatable').DataTable({
                 processing: true,
@@ -565,19 +575,35 @@
                 ],
                 ajax: {
                     url: "{{ route('report.customize') }}",
+                    type: "GET",
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }, // ensures $request->ajax() = true
                     data: function(d) {
                         d.from_date = $from.val();
                         d.to_date = $to.val();
                     },
                     dataSrc: function(json) {
-                        // Controller now returns numeric totals; format only here
                         $('#totalPrice').text(formatINR(json.total_price_sum ?? 0));
                         $('#todayPrice').text(formatINR(json.today_price_sum ?? 0));
                         return json.data || [];
+                    },
+                    error: function(xhr) {
+                        console.log('DataTables Ajax Error:', {
+                            status: xhr.status,
+                            responseText: xhr.responseText
+                        });
+
+                        // Optional: show popup so you immediately know something failed
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Ajax Error',
+                            text: 'DataTables request failed. Check console (F12) → Network/Console for details.'
+                        });
                     }
                 },
 
-                // Sort by created_at on server side (purchase_date is computed)
+                // IMPORTANT: sort must map to real DB columns
                 order: [
                     [1, 'desc']
                 ],
@@ -633,16 +659,19 @@
                             `;
                         }
                     },
+
+                    // IMPORTANT: name must be real DB column for server-side sorting
                     {
                         data: 'purchase_date',
-                        name: 'created_at', // IMPORTANT for server-side sorting
-                        defaultContent: 'N/A'
+                        name: 'created_at'
                     },
+
+                    // IMPORTANT: name must be real DB column for server-side sorting
                     {
                         data: 'delivery_date',
-                        name: 'date',
-                        defaultContent: 'N/A'
+                        name: 'date'
                     },
+
                     {
                         data: 'flower_items',
                         name: 'flower_items',
@@ -699,8 +728,6 @@
                                     'unpaid'
                                 ].includes(t)) {
                                 cls = 'status-badge--danger';
-                            } else if (['info', 'paused'].includes(t)) {
-                                cls = 'status-badge--info';
                             } else if (['new', 'created', 'open'].includes(t)) {
                                 cls = 'status-badge--neutral';
                             }
@@ -709,18 +736,22 @@
                         }
                     },
                     {
-                        data: 'price', // controller returns numeric value now
+                        data: 'price',
                         name: 'price',
                         className: 'text-end mono',
-                        orderable: false, // avoid SQL order errors on computed column
+                        orderable: false,
+                        searchable: false,
                         render: function(v) {
                             return formatINR(v);
                         }
                     }
-                ]
+                ],
+
+                drawCallback: function() {
+                    initTooltips();
+                }
             });
 
-            // Range chips click
             $('[data-range]').on('click', function() {
                 $('[data-range]').removeClass('active');
                 $(this).addClass('active');
@@ -728,7 +759,6 @@
                 table.ajax.reload();
             });
 
-            // Reset button
             $('#resetBtn').on('click', function() {
                 $from.val('');
                 $to.val('');
@@ -736,31 +766,9 @@
                 table.ajax.reload();
             });
 
-            // Apply button
             $('#searchBtn').on('click', function() {
                 table.ajax.reload();
             });
-
-            // Bootstrap 5 tooltips after draw (no jQuery tooltip)
-            function initTooltips() {
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
-                    const existing = bootstrap.Tooltip.getInstance(el);
-                    if (existing) existing.dispose();
-
-                    new bootstrap.Tooltip(el, {
-                        html: true,
-                        boundary: 'window',
-                        trigger: 'hover'
-                    });
-                });
-            }
-
-            $('#file-datatable').on('draw.dt', function() {
-                initTooltips();
-            });
-
-            // initial
-            initTooltips();
         });
     </script>
 @endsection
