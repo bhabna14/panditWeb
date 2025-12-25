@@ -8,7 +8,6 @@
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    {{-- Poppins (page) + Nunito Sans (table) --}}
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600&display=swap"
         rel="stylesheet">
@@ -21,8 +20,6 @@
 
             --chip-green: #e9f9ef;
             --chip-green-text: #0b7a33;
-            --chip-orange: #fff3e5;
-            --chip-orange-text: #a24b05;
             --chip-blue: #e0f2fe;
             --chip-blue-text: #0b2a5b;
 
@@ -30,7 +27,6 @@
             --table-head-bg-soft: #1f2937;
             --table-head-text: #e5e7eb;
             --table-border: #e5e7eb;
-            --table-zebra: #f9fafb;
             --table-hover: #fefce8;
 
             --text: #0f172a;
@@ -38,14 +34,11 @@
             --bg: #f7f8fc;
             --card: #ffffff;
             --ring: #e5e7eb;
-            --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
             --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
             --radius-lg: 16px;
 
             --accent: #6f6bfe;
             --accent-strong: #5f59f2;
-            --accent-soft: #eef2ff;
-            --accent-border: #c7d2fe;
 
             --accent-red: #f24b5b;
             --accent-red-2: #e34050;
@@ -96,10 +89,6 @@
             font-weight: 600;
             border: 1px solid transparent;
             box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
-        }
-
-        .band-chip span.icon {
-            font-size: .9rem;
         }
 
         .band-chip.green {
@@ -364,10 +353,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .toolbar-left {
-                justify-content: flex-start;
-            }
-
+            .toolbar-left,
             .toolbar-right {
                 justify-content: flex-start;
             }
@@ -394,12 +380,12 @@
                 <span class="band-chip green">
                     <span class="icon">💰</span>
                     <span>Total Customize Order Price</span>
-                    <span class="mono" id="totalPrice">₹0.00</span>
+                    <span class="mono" id="totalPrice">₹0</span>
                 </span>
                 <span class="band-chip blue">
                     <span class="icon">📅</span>
                     <span>Today Customize Price</span>
-                    <span class="mono" id="todayPrice">₹0.00</span>
+                    <span class="mono" id="todayPrice">₹0</span>
                 </span>
             </div>
         </div>
@@ -415,7 +401,6 @@
                     <input type="date" id="to_date" placeholder="dd-mm-yyyy">
                 </div>
             </div>
-
             <div class="toolbar-right">
                 <button class="btn-chip" type="button" data-range="today">
                     <i class="bi bi-calendar-day"></i><span>Today</span>
@@ -460,13 +445,12 @@
                     </table>
                 </div>
             </div>
-
         </div>
+
     </div>
 @endsection
 
 @section('scripts')
-    <!-- Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
@@ -486,19 +470,6 @@
         $(function() {
             const $from = $('#from_date');
             const $to = $('#to_date');
-
-            function safeNumber(v) {
-                const n = parseFloat(v);
-                return Number.isFinite(n) ? n : 0;
-            }
-
-            function formatINR(v) {
-                const n = safeNumber(v);
-                return '₹' + n.toLocaleString('en-IN', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-            }
 
             function applyRange(key) {
                 const today = moment().startOf('day');
@@ -524,21 +495,9 @@
                 $to.val(end.format('YYYY-MM-DD'));
             }
 
-            // Default selection: Today (you can change to 'month' if needed)
+            // Init: set Today as default
             applyRange('today');
             $('[data-range="today"]').addClass('active');
-
-            function initTooltips() {
-                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach((el) => {
-                    const inst = bootstrap.Tooltip.getInstance(el);
-                    if (inst) inst.dispose();
-                    new bootstrap.Tooltip(el, {
-                        html: true,
-                        boundary: 'window',
-                        trigger: 'hover'
-                    });
-                });
-            }
 
             const table = $('#file-datatable').DataTable({
                 processing: true,
@@ -575,43 +534,33 @@
                 ],
                 ajax: {
                     url: "{{ route('report.customize') }}",
-                    type: "GET",
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }, // ensures $request->ajax() = true
                     data: function(d) {
                         d.from_date = $from.val();
                         d.to_date = $to.val();
                     },
                     dataSrc: function(json) {
-                        $('#totalPrice').text(formatINR(json.total_price_sum ?? 0));
-                        $('#todayPrice').text(formatINR(json.today_price_sum ?? 0));
-                        return json.data || [];
-                    },
-                    error: function(xhr) {
-                        console.log('DataTables Ajax Error:', {
-                            status: xhr.status,
-                            responseText: xhr.responseText
-                        });
+                        const total = parseFloat(json.total_price_sum ?? 0) || 0;
+                        const today = parseFloat(json.today_price_sum ?? 0) || 0;
 
-                        // Optional: show popup so you immediately know something failed
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Ajax Error',
-                            text: 'DataTables request failed. Check console (F12) → Network/Console for details.'
-                        });
+                        $('#totalPrice').text('₹' + total.toLocaleString('en-IN', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }));
+
+                        $('#todayPrice').text('₹' + today.toLocaleString('en-IN', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        }));
+
+                        return json.data || [];
                     }
                 },
-
-                // IMPORTANT: sort must map to real DB columns
                 order: [
                     [1, 'desc']
                 ],
-
                 columns: [{
                         data: null,
                         orderable: false,
-                        searchable: false,
                         render: function(_, __, row) {
                             const user = row.user || {};
                             const address = user.address_details || {};
@@ -620,7 +569,7 @@
                             const tooltip = `
                                 <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
                                 <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
-                            `.trim().replace(/"/g, '&quot;');
+                            `.trim();
 
                             const modalId = `addr_${userId || Math.random().toString(36).slice(2)}`;
                             const viewBtn = userId ?
@@ -659,31 +608,25 @@
                             `;
                         }
                     },
-
-                    // IMPORTANT: name must be real DB column for server-side sorting
                     {
                         data: 'purchase_date',
-                        name: 'created_at'
+                        name: 'purchase_date'
                     },
-
-                    // IMPORTANT: name must be real DB column for server-side sorting
                     {
                         data: 'delivery_date',
-                        name: 'date'
+                        name: 'delivery_date',
+                        orderable: false
                     },
-
                     {
                         data: 'flower_items',
                         name: 'flower_items',
                         orderable: false,
-                        searchable: false,
                         render: function(data, type, row) {
                             const cat = row.category_name ?
                                 `<a href="javascript:void(0)" class="cat-pill">${row.category_name}</a>` :
                                 '';
-
                             const modalId =
-                                `items_${row.request_id || row.id || Math.random().toString(36).slice(2)}`;
+                                `items_${row.request_id || Math.random().toString(36).slice(2)}`;
 
                             return `
                               <div class="d-flex align-items-center gap-2">
@@ -700,7 +643,9 @@
                                       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                      ${data ? data.split(',').map(i => `<div>• ${i.trim()}</div>`).join('') : '<em>No items found.</em>'}
+                                      ${data && data !== 'N/A'
+                                        ? data.split(',').map(i => `<div>• ${i.trim()}</div>`).join('')
+                                        : '<em>No items found.</em>'}
                                     </div>
                                   </div>
                                 </div>
@@ -732,24 +677,23 @@
                                 cls = 'status-badge--neutral';
                             }
 
-                            return `<span class="status-badge ${cls}">${(s || 'N/A').toString()}</span>`;
+                            return `<span class="status-badge ${cls}">${(s || '').toString()}</span>`;
                         }
                     },
                     {
                         data: 'price',
                         name: 'price',
                         className: 'text-end mono',
-                        orderable: false,
-                        searchable: false,
                         render: function(v) {
-                            return formatINR(v);
+                            // v is numeric from controller now
+                            const amount = parseFloat(v ?? 0) || 0;
+                            return '₹' + amount.toLocaleString('en-IN', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
                         }
                     }
-                ],
-
-                drawCallback: function() {
-                    initTooltips();
-                }
+                ]
             });
 
             $('[data-range]').on('click', function() {
@@ -760,14 +704,27 @@
             });
 
             $('#resetBtn').on('click', function() {
-                $from.val('');
-                $to.val('');
+                // If you want defaults again, set them explicitly:
+                applyRange('today');
                 $('[data-range]').removeClass('active');
+                $('[data-range="today"]').addClass('active');
                 table.ajax.reload();
             });
 
             $('#searchBtn').on('click', function() {
                 table.ajax.reload();
+            });
+
+            $('#file-datatable').on('draw.dt', function() {
+                $('[data-bs-toggle="tooltip"]').each(function() {
+                    const t = bootstrap.Tooltip.getInstance(this);
+                    if (t) t.dispose();
+                });
+                $('[data-bs-toggle="tooltip"]').tooltip({
+                    html: true,
+                    boundary: 'window',
+                    trigger: 'hover'
+                });
             });
         });
     </script>
