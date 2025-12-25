@@ -160,10 +160,9 @@ Route::controller(PodcastController::class)->group(function() {
     Route::get('/podcasthomepage',  'podcasthomepage');
     Route::get('/podcastcategory',  'podcastCategory');
 });
+
 Route::controller(YoutubeUrlController::class)->group(function() {
-
-Route::get('/manage-youtube','manageYoutube')->name('api.manageYoutube');
-
+    Route::get('/manage-youtube','manageYoutube')->name('api.manageYoutube');
 });
 
 Route::controller(CheckController::class)->group(function() {
@@ -274,5 +273,4 @@ Route::middleware('auth:vendor-api')->group(function () {
     Route::post('/update-flower-prices/{pickupId}', [VendorPickupController::class, 'updateFlowerPrices']);
     Route::get('/get-all-pickups', [VendorPickupController::class, 'getAllPickups']);
     Route::get('/get-vendor-details', [VendorPickupController::class, 'vendorDetails']);
-
 });
