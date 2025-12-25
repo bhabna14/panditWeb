@@ -808,7 +808,7 @@ Route::controller(MarketingVisitPlaceController::class)->group(function() {
 
 Route::controller(FlowerReportsController::class)->group(function() {
     Route::get('/report-subscription','subscriptionReport')->name('subscription.report');
-    Route::get('/admin/reports/report-customize','reportCustomize')->name('report.customize');
+    Route::get('/report-customize','reportCustomize')->name('report.customize');
     Route::match(['get', 'post'], '/report-flower-pick-up', 'flowerPickUp')->name('report.flower.pickup');
 });
 
