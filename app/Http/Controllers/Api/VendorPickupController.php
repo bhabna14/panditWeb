@@ -330,73 +330,72 @@ class VendorPickupController extends Controller
         }
     }
 
-public function getAllPickups(Request $request)
-{
-    try {
-        $vendor = Auth::guard('vendor-api')->user();
+    public function getAllPickups(Request $request)
+    {
+        try {
+            $vendor = Auth::guard('vendor-api')->user();
 
-        if (!$vendor) {
+            if (!$vendor) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Unauthorized. Vendor not logged in.',
+                ], 401);
+            }
+
+            // Pagination params
+            $perPage = (int) $request->input('per_page', 10);
+            $perPage = max(1, min($perPage, 100)); // safety: 1..100
+
+            $page = (int) $request->input('page', 1);
+            $page = max(1, $page);
+
+            $query = FlowerPickupDetails::with([
+                    'flowerPickupItems.flower',
+                    'flowerPickupItems.unit',
+                    'vendor',
+                    'rider',
+                ])
+                ->where('vendor_id', $vendor->vendor_id)
+                ->where(function ($q) {
+                    $q->where('status', '!=', 'pending')
+                    ->orWhereNull('status'); // keep only if you want NULL included
+                })
+                ->orderBy('created_at', 'desc');
+
+            // Paginate (this runs LIMIT/OFFSET automatically)
+            $pickups = $query->paginate($perPage, ['*'], 'page', $page);
+
+            // Keep query params in pagination links (page/per_page/etc.)
+            $pickups->appends($request->query());
+
             return response()->json([
-                'status'  => 401,
-                'message' => 'Unauthorized. Vendor not logged in.',
-            ], 401);
+                'status'  => 200,
+                'message' => 'Pickup requests fetched successfully.',
+                'data'    => $pickups->items(), // only current page rows
+                'meta'    => [
+                    'current_page' => $pickups->currentPage(),
+                    'per_page'     => $pickups->perPage(),
+                    'from'         => $pickups->firstItem(),
+                    'to'           => $pickups->lastItem(),
+                    'total'        => $pickups->total(),
+                    'last_page'    => $pickups->lastPage(),
+                ],
+                'links'   => [
+                    'first' => $pickups->url(1),
+                    'last'  => $pickups->url($pickups->lastPage()),
+                    'prev'  => $pickups->previousPageUrl(),
+                    'next'  => $pickups->nextPageUrl(),
+                ],
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Something went wrong while fetching all pickups.',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
-
-        // Pagination params
-        $perPage = (int) $request->input('per_page', 10);
-        $perPage = max(1, min($perPage, 100)); // safety: 1..100
-
-        $page = (int) $request->input('page', 1);
-        $page = max(1, $page);
-
-        $query = FlowerPickupDetails::with([
-                'flowerPickupItems.flower',
-                'flowerPickupItems.unit',
-                'vendor',
-                'rider',
-            ])
-            ->where('vendor_id', $vendor->vendor_id)
-            ->where(function ($q) {
-                $q->where('status', '!=', 'pending')
-                  ->orWhereNull('status'); // keep only if you want NULL included
-            })
-            ->orderBy('created_at', 'desc');
-
-        // Paginate (this runs LIMIT/OFFSET automatically)
-        $pickups = $query->paginate($perPage, ['*'], 'page', $page);
-
-        // Keep query params in pagination links (page/per_page/etc.)
-        $pickups->appends($request->query());
-
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Pickup requests fetched successfully.',
-            'data'    => $pickups->items(), // only current page rows
-            'meta'    => [
-                'current_page' => $pickups->currentPage(),
-                'per_page'     => $pickups->perPage(),
-                'from'         => $pickups->firstItem(),
-                'to'           => $pickups->lastItem(),
-                'total'        => $pickups->total(),
-                'last_page'    => $pickups->lastPage(),
-            ],
-            'links'   => [
-                'first' => $pickups->url(1),
-                'last'  => $pickups->url($pickups->lastPage()),
-                'prev'  => $pickups->previousPageUrl(),
-                'next'  => $pickups->nextPageUrl(),
-            ],
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status'  => 500,
-            'message' => 'Something went wrong while fetching all pickups.',
-            'error'   => $e->getMessage(),
-        ], 500);
     }
-}
-
 
     public function vendorDetails(Request $request)
     {
