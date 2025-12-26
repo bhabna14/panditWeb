@@ -171,6 +171,18 @@ class FlowerDashboardController extends Controller
             ];
         })->values();
 
+                // UNPAID CUSTOM ORDERS (all time)
+        $unpaidCustomizeOrders = FlowerRequest::where(function ($q) {
+                $q->whereNull('status')
+                ->orWhereNotIn('status', [
+                    'paid', 'Paid',
+                    'cancelled', 'Cancelled',
+                    'rejected', 'Rejected',
+                ]);
+            })
+            ->count();
+
+
         $totalRiders = RiderDetails::where('status', 'active')->count();
         $totalDeliveriesToday = $totalDeliveriesTodayCount;
         $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now($tz)->year)
@@ -316,6 +328,7 @@ class FlowerDashboardController extends Controller
             'nextDayPaused',
             'nextDayResumed',
             'upcomingCustomizeOrders',
+            'unpaidCustomizeOrders', // <-- ADD THIS
             'visitPlaceCountToday',
             'todayClaimed',
             'todayApproved',

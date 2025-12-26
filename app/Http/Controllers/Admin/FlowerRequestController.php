@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Log;
 
 class FlowerRequestController extends Controller
 {
-
 public function showRequests(Request $request)
 {
     // Initial page render. Data is SSR.
@@ -56,7 +55,19 @@ public function showRequests(Request $request)
             break;
 
         case 'paid':
-            $query->where('status', 'paid');
+            $query->whereIn('status', ['paid', 'Paid']);
+            break;
+
+        case 'unpaid':
+            // Anything NOT paid and NOT rejected/cancelled (and also includes NULL status)
+            $query->where(function ($q) {
+                $q->whereNull('status')
+                  ->orWhereNotIn('status', [
+                      'paid', 'Paid',
+                      'cancelled', 'Cancelled',
+                      'rejected', 'Rejected',
+                  ]);
+            });
             break;
 
         case 'rejected':
@@ -69,11 +80,11 @@ public function showRequests(Request $request)
             break;
     }
 
-    $pendingRequests       = $query->get();
-    $totalCustomizeOrders  = FlowerRequest::count();
-    $todayCustomizeOrders  = FlowerRequest::whereDate('date', $today)->count();
-    $paidCustomizeOrders   = FlowerRequest::where('status', 'paid')->count();
-    $rejectCustomizeOrders = FlowerRequest::whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled'])->count();
+    $pendingRequests         = $query->get();
+    $totalCustomizeOrders    = FlowerRequest::count();
+    $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
+    $paidCustomizeOrders     = FlowerRequest::whereIn('status', ['paid', 'Paid'])->count();
+    $rejectCustomizeOrders   = FlowerRequest::whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled'])->count();
     $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
     $riders = RiderDetails::where('status', 'active')->get();
@@ -89,7 +100,6 @@ public function showRequests(Request $request)
         'filter'
     ));
 }
-
 public function ajaxData(Request $request)
 {
     // AJAX endpoint for filtering rows without refresh
