@@ -69,6 +69,9 @@ public function showRequests(Request $request)
                   ]);
             });
             break;
+case 'paid':
+    $query->whereIn('status', ['paid', 'Paid']);
+    break;
 
         case 'rejected':
             $query->whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled']);

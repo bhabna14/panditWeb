@@ -189,8 +189,7 @@
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">New Subscription</h6>
-                                        <h4 id="newUserSubscriptionCount"
-                                            data-initial="{{ $newUserSubscription }}"
+                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $newUserSubscription }}
                                         </h4>
@@ -209,8 +208,7 @@
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Renewed Subscription</h6>
-                                        <h4 id="renewSubscriptionCount"
-                                            data-initial="{{ $renewSubscription }}"
+                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $renewSubscription }}
                                         </h4>
@@ -229,8 +227,7 @@
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        <h4 id="ordersRequestedTodayCount"
-                                            data-initial="{{ $ordersRequestedToday }}"
+                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $ordersRequestedToday }}
                                         </h4>
@@ -245,7 +242,7 @@
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.customize.request', ['filter' => 'upcoming']) }}" target="_blank">
                         <div class="card sales-card {{ $upcomingCustomizeOrders > 0 ? 'gradient-4' : '' }}">
-                            <div class="row">    
+                            <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order (Next 3 Days)</h6>
@@ -262,19 +259,21 @@
         </div>
     </div>
 
-    <div class="row mt-2 dashboard-section">
+   <div class="row mt-2 dashboard-section">
     <div class="col-12 mt-2">
         <h4 class="card-title-custom">Customize Order Details</h4>
+
         <div class="row">
+            <!-- Unpaid Order -->
             <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                 <a href="{{ route('flower.customize.request', ['filter' => 'unpaid']) }}" target="_blank">
-                    <div class="card sales-card {{ $unpaidCustomizeOrders > 0 ? 'gradient-2' : '' }}">
+                    <div class="card sales-card {{ ($unpaidCustomizeOrders ?? 0) > 0 ? 'gradient-2' : '' }}">
                         <div class="row">
                             <div class="col-12">
                                 <div class="ps-4 pt-4 pe-3 pb-4">
                                     <h6 class="mb-2 tx-12">Unpaid Order</h6>
                                     <h4 class="tx-22 font-weight-semibold mb-2">
-                                        {{ $unpaidCustomizeOrders }}
+                                        {{ $unpaidCustomizeOrders ?? 0 }}
                                     </h4>
                                 </div>
                             </div>
@@ -282,9 +281,29 @@
                     </div>
                 </a>
             </div>
+
+            <!-- Paid Order -->
+            <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
+                <a href="{{ route('flower.customize.request', ['filter' => 'paid']) }}" target="_blank">
+                    <div class="card sales-card {{ ($paidCustomizeOrders ?? 0) > 0 ? 'gradient-4' : '' }}">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="ps-4 pt-4 pe-3 pb-4">
+                                    <h6 class="mb-2 tx-12">Paid Order</h6>
+                                    <h4 class="tx-22 font-weight-semibold mb-2">
+                                        {{ $paidCustomizeOrders ?? 0 }}
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
         </div>
     </div>
 </div>
+
 
 
     {{-- SUBSCRIPTION STATUS --}}
@@ -482,7 +501,8 @@
                 <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
-                        <div class="card sales-card position-relative {{ $todayTotalExpenditure > 0 ? 'gradient-4' : '' }}">
+                        <div
+                            class="card sales-card position-relative {{ $todayTotalExpenditure > 0 ? 'gradient-4' : '' }}">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -526,12 +546,12 @@
             <div class="row">
                 @foreach ($ridersData as $index => $data)
                     @php
-                        $hasData = ($data['totalAssignedOrders'] > 0) || ($data['totalDeliveredToday'] > 0);
+                        $hasData = $data['totalAssignedOrders'] > 0 || $data['totalDeliveredToday'] > 0;
                         $gradientClass = $hasData ? 'gradient-' . (($index % 6) + 1) : '';
                     @endphp
                     <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}"
-                           target="_blank" class="text-decoration-none">
+                            target="_blank" class="text-decoration-none">
                             <div class="card sales-card {{ $gradientClass }}">
                                 <div class="row">
                                     <div class="col-12">
@@ -589,8 +609,7 @@
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Delivery Today</h6>
-                                        <h4 id="totalDeliveriesTodayCount"
-                                            data-initial="{{ $totalDeliveriesToday }}"
+                                        <h4 id="totalDeliveriesTodayCount" data-initial="{{ $totalDeliveriesToday }}"
                                             class="tx-20 font-weight-semibold mb-2">
                                             {{ $totalDeliveriesToday }}
                                         </h4>
@@ -604,7 +623,7 @@
                 <!-- Delivery in Month -->
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
-                       target="_blank">
+                        target="_blank">
                         <div class="card sales-card {{ $totalDeliveriesThisMonth > 0 ? 'gradient-7' : '' }}">
                             <div class="row">
                                 <div class="col-12">
@@ -666,7 +685,7 @@
         </div>
     </div>
 
-   
+
 
     {{-- REFERRAL DETAILS --}}
     <div class="row mt-2 dashboard-section">
@@ -682,7 +701,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
-                       target="_blank">
+                        target="_blank">
                         <div class="card sales-card {{ $tc > 0 ? 'gradient-10' : '' }}">
                             <div class="row">
                                 <div class="col-12">
@@ -700,7 +719,7 @@
 
                 <div class="col-xl-3 col-lg-6 col-md-6 col-xs-12 mb-3">
                     <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
-                       target##_blank">
+                        target##_blank">
                         <div class="card sales-card {{ $ta > 0 ? 'gradient-11' : '' }}">
                             <div class="row">
                                 <div class="col-12">
@@ -776,24 +795,36 @@
 
     <!-- Live metrics poll (simple, no colors / sounds) -->
     <script>
-        (function () {
-            const watchers = [
-                { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount' },
-                { key: 'newUserSubscription', elId: 'newUserSubscriptionCount' },
-                { key: 'renewSubscription',    elId: 'renewSubscriptionCount' },
-                { key: 'totalDeliveriesToday', elId: 'totalDeliveriesTodayCount' },
+        (function() {
+            const watchers = [{
+                    key: 'ordersRequestedToday',
+                    elId: 'ordersRequestedTodayCount'
+                },
+                {
+                    key: 'newUserSubscription',
+                    elId: 'newUserSubscriptionCount'
+                },
+                {
+                    key: 'renewSubscription',
+                    elId: 'renewSubscriptionCount'
+                },
+                {
+                    key: 'totalDeliveriesToday',
+                    elId: 'totalDeliveriesTodayCount'
+                },
             ];
 
-            const els = {}, prev = {};
+            const els = {},
+                prev = {};
 
             watchers.forEach(w => {
                 const el = document.getElementById(w.elId);
                 els[w.key] = el;
                 if (el) {
                     const initAttr = parseInt(el.getAttribute('data-initial'), 10);
-                    const parsed = Number.isFinite(initAttr)
-                        ? initAttr
-                        : (parseInt(el.textContent, 10) || 0);
+                    const parsed = Number.isFinite(initAttr) ?
+                        initAttr :
+                        (parseInt(el.textContent, 10) || 0);
                     prev[w.key] = parsed;
                 }
             });
@@ -802,7 +833,9 @@
                 try {
                     const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
                     const res = await fetch(url, {
-                        headers: { 'Accept': 'application/json' },
+                        headers: {
+                            'Accept': 'application/json'
+                        },
                         cache: 'no-store'
                     });
                     if (!res.ok) return;

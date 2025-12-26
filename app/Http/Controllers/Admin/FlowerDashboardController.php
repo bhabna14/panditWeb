@@ -182,6 +182,10 @@ class FlowerDashboardController extends Controller
             })
             ->count();
 
+            // PAID CUSTOMIZE ORDERS (all time)
+$paidCustomizeOrders = FlowerRequest::whereIn('status', ['paid', 'Paid'])->count();
+
+
 
         $totalRiders = RiderDetails::where('status', 'active')->count();
         $totalDeliveriesToday = $totalDeliveriesTodayCount;
@@ -328,6 +332,7 @@ class FlowerDashboardController extends Controller
             'nextDayPaused',
             'nextDayResumed',
             'upcomingCustomizeOrders',
+                'paidCustomizeOrders',
             'unpaidCustomizeOrders', // <-- ADD THIS
             'visitPlaceCountToday',
             'todayClaimed',
