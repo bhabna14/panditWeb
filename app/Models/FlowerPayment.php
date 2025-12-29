@@ -18,7 +18,7 @@ class FlowerPayment extends Model
         'user_id',
         'payment_method',
         'paid_amount',
-        'payment_status', // 'pending' | 'paid'
+        'payment_status',
         'received_by',
     ];
 

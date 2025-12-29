@@ -738,7 +738,7 @@ class WeeklyReportController extends Controller
             $html .= "
                 <div class='tt-row'>
                     <div class='tt-name'>{$name}</div>
-                    <div class='tt-id'>#{$uid}</div>
+                    // <div class='tt-id'>#{$uid}</div>
                 </div>
             ";
         }
