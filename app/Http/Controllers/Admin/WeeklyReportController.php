@@ -14,44 +14,50 @@ use App\Models\DeliveryHistory;
 use App\Models\Subscription;
 use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
+use App\Models\SubscriptionPauseResumeLog;
+use App\Models\FlowerRequest;
 use App\Models\OfficeFund;
 
 class WeeklyReportController extends Controller
 {
     public function index(Request $request)
     {
-        // ---- Filters (year/month) ----
-        $year  = (int)($request->year ?? Carbon::now()->year);
-        $month = (int)($request->month ?? Carbon::now()->month);
+        $year  = (int)($request->input('year', Carbon::now()->year));
+        $month = (int)($request->input('month', Carbon::now()->month));
 
-        $monthStart = Carbon::createFromDate($year, $month, 1)->startOfDay();
+        $tz = $request->input('tz', config('app.timezone', 'UTC'));
+        $tzOffset = Carbon::now($tz)->format('P'); // +05:30 etc.
+
+        $monthStart = Carbon::createFromDate($year, $month, 1, $tz)->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth()->endOfDay();
 
-        // Your existing timezone offset string (used in CONVERT_TZ)
-        // If you store UTC in DB and want local report, keep this consistent with your system.
-        $tzOffset = '+05:30';
+        $monthStartUtc = $monthStart->clone()->setTimezone('UTC');
+        $monthEndUtc   = $monthEnd->clone()->setTimezone('UTC');
 
-        // For whereBetween on fp.created_at (assuming created_at stored in UTC)
-        $monthStartUtc = (clone $monthStart)->setTimezone('UTC');
-        $monthEndUtc   = (clone $monthEnd)->setTimezone('UTC');
+        $dateExpr = "DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset'))";
 
-        // ---- Build day skeleton ----
+        // ---- Day skeleton
         $days = [];
-        $period = CarbonPeriod::create($monthStart, $monthEnd);
+        foreach (CarbonPeriod::create($monthStart, $monthEnd) as $d) {
+            $dateKey = $d->toDateString();
+            $days[$dateKey] = [
+                'date'     => $dateKey,
+                'dow'      => $d->format('l'), // Monday, Tuesday...
 
-        foreach ($period as $date) {
-            $d = $date->toDateString();
-            $days[$d] = [
-                'date'     => $d,
                 'finance'  => [
                     'subscription_income' => 0,
                     'customize_income'    => 0,
                     'income_total'        => 0,
 
-                    // For modal (NOW includes payment_methods)
-                    // each item: ['user_id'=>..., 'name'=>..., 'amt'=>..., 'payment_methods'=>...]
-                    'subscription_income_users' => [],
-                    'customize_income_users'    => [],
+                    // for modal
+                    // UPDATED: now each item will also include payment_methods
+                    // [{user_id,name,amt,payment_methods}]
+                    'subscription_income_users'   => [],
+                    'customize_income_users'      => [],
+
+                    // legacy fields (safe to keep)
+                    'subscription_income_tooltip' => '',
+                    'customize_income_tooltip'    => '',
 
                     'expenditure'         => 0,
                     'vendor_fund'         => 0,
@@ -61,7 +67,7 @@ class WeeklyReportController extends Controller
                     'renew'     => 0,
                     'new'       => 0,
                     'pause'     => 0,
-                    'customize' => 0,
+                    'customize' => 0
                 ],
                 'vendors'  => [],
                 'riders'   => [],
@@ -72,21 +78,8 @@ class WeeklyReportController extends Controller
         $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
         $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
 
-        $vendorColumns = array_values(array_unique(array_filter(array_values($vendorMap))));
-        sort($vendorColumns);
-
-        $deliveryCols = array_values(array_unique(array_filter(array_values($riderMap))));
-        sort($deliveryCols);
-
-        // Initialize day vendor/rider columns
-        foreach ($days as $k => $row) {
-            foreach ($vendorColumns as $v) $days[$k]['vendors'][$v] = 0;
-            foreach ($deliveryCols as $r) $days[$k]['riders'][$r] = 0;
-        }
-
         /* ================= Finance: INCOME (Split totals) ================= */
 
-        // Subscription income: flower_payments joined with subscriptions
         $subPayments = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -105,7 +98,6 @@ class WeeklyReportController extends Controller
             }
         }
 
-        // Customize income: flower_payments NOT linked to subscriptions
         $custPayments = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -132,8 +124,8 @@ class WeeklyReportController extends Controller
         }
 
         /* ================= INCOME USER LIST (for modal) ================= */
+        /* UPDATED: include payment_methods (GROUP_CONCAT) */
 
-        // Per-day subscription users list (grouped by day + user) + payment methods
         $subUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -152,7 +144,6 @@ class WeeklyReportController extends Controller
             ->orderByDesc('amt')
             ->get();
 
-        // Per-day customize users list + payment methods
         $custUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
             ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
@@ -192,6 +183,21 @@ class WeeklyReportController extends Controller
             ];
         }
 
+        // (Optional/legacy) tooltips - safe to keep
+        foreach ($days as $dk => $row) {
+            $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Subscription Income',
+                $row['finance']['subscription_income_users'] ?? [],
+                (float)($row['finance']['subscription_income'] ?? 0)
+            );
+
+            $days[$dk]['finance']['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Customize Income',
+                $row['finance']['customize_income_users'] ?? [],
+                (float)($row['finance']['customize_income'] ?? 0)
+            );
+        }
+
         /* ================= Finance: EXPENDITURE ================= */
 
         $expend = FlowerPickupDetails::query()
@@ -228,39 +234,177 @@ class WeeklyReportController extends Controller
             }
         }
 
-        // available_balance per day
         foreach ($days as $k => $row) {
-            $vf = (float)($row['finance']['vendor_fund'] ?? 0);
-            $ex = (float)($row['finance']['expenditure'] ?? 0);
-            $days[$k]['finance']['available_balance'] = $vf - $ex;
+            $vf  = $row['finance']['vendor_fund'] ?? 0;
+            $exp = $row['finance']['expenditure'] ?? 0;
+            $days[$k]['finance']['available_balance'] = $vf - $exp;
         }
 
-        /* ================= Customer counts (existing logic placeholder) ================= */
-        // Keep your original logic here if present in your file.
-        // (Not modified for payment_method request.)
+        /* ================= Customer: NEW / RENEW ================= */
 
-        /* ================= Vendor/Rider deliveries (existing logic placeholder) ================= */
-        // Keep your original logic here if present in your file.
-        // (Not modified for payment_method request.)
+        $firstTimeUserIds = Subscription::query()
+            ->select('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) = 1');
 
-        /* ================= Build week blocks (Mon-Sun) ================= */
+        $newPerDay = Subscription::query()
+            ->select([
+                DB::raw("$dateExpr as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereIn('user_id', $firstTimeUserIds)
+            ->groupBy('d')
+            ->get();
 
-        $cursor = (clone $monthStart)->startOfWeek(Carbon::MONDAY);
-        $endCursor = (clone $monthEnd)->endOfWeek(Carbon::SUNDAY);
+        foreach ($newPerDay as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['new'] = (int)$row->c;
+            }
+        }
+
+        $renewOrderIds = Subscription::query()
+            ->select('order_id')
+            ->groupBy('order_id')
+            ->havingRaw('COUNT(order_id) > 1');
+
+        $renewPerDay = Subscription::query()
+            ->select([
+                DB::raw("$dateExpr as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereIn('order_id', $renewOrderIds)
+            ->groupBy('d')
+            ->get();
+
+        foreach ($renewPerDay as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['renew'] = (int)$row->c;
+            }
+        }
+
+        /* ================= Customer: PAUSE ================= */
+
+        if (class_exists(SubscriptionPauseResumeLog::class)) {
+            $pauses = SubscriptionPauseResumeLog::query()
+                ->select([
+                    DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                    DB::raw("COUNT(*) as c")
+                ])
+                ->where('action', 'paused')
+                ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+                ->groupBy('d')
+                ->get();
+
+            foreach ($pauses as $row) {
+                if (isset($days[$row->d])) {
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
+                }
+            }
+        } else {
+            $pauses = Subscription::query()
+                ->select([
+                    DB::raw("DATE(pause_start_date) as d"),
+                    DB::raw("COUNT(*) as c")
+                ])
+                ->whereNotNull('pause_start_date')
+                ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->groupBy('d')
+                ->get();
+
+            foreach ($pauses as $row) {
+                if (isset($days[$row->d])) {
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
+                }
+            }
+        }
+
+        /* ================= Customer: CUSTOMIZE ================= */
+
+        $customs = FlowerRequest::query()
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($customs as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['customize'] = (int)$row->c;
+            }
+        }
+
+        /* ================= Vendor daily ================= */
+
+        $vendorPaid = FlowerPickupDetails::query()
+            ->select([
+                DB::raw("DATE(pickup_date) as d"),
+                'vendor_id',
+                DB::raw("SUM(total_price) as amt"),
+            ])
+            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->groupBy('d', 'vendor_id')
+            ->get();
+
+        $vendorColumnsSet = [];
+        foreach ($vendorPaid as $row) {
+            $name = $vendorMap[$row->vendor_id] ?? $row->vendor_id;
+            $vendorColumnsSet[$name] = true;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['vendors'][$name] = (float)$row->amt;
+            }
+        }
+
+        $vendorColumns = array_keys($vendorColumnsSet);
+        sort($vendorColumns);
+
+        /* ================= Deliveries per rider ================= */
+
+        $deliv = DeliveryHistory::query()
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                'rider_id',
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->where('delivery_status', 'delivered')
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d', 'rider_id')
+            ->get();
+
+        $deliveryColsSet = [];
+        foreach ($deliv as $row) {
+            $name = $riderMap[$row->rider_id] ?? $row->rider_id;
+            $deliveryColsSet[$name] = true;
+
+            if (isset($days[$row->d])) {
+                $days[$row->d]['riders'][$name] = (int)$row->c;
+                $days[$row->d]['total_delivery'] += (int)$row->c;
+            }
+        }
+
+        $deliveryCols = array_keys($deliveryColsSet);
+        sort($deliveryCols);
+
+        /* ================= Split into weeks + week totals ================= */
 
         $weeks = [];
+        $cursor    = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $endCursor = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+
         while ($cursor->lte($endCursor)) {
-            $rangeStart = (clone $cursor);
-            $rangeEnd   = (clone $cursor)->endOfWeek(Carbon::SUNDAY);
+            $weekStart = $cursor->copy();
+            $weekEnd   = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
+
+            $rangeStart = $weekStart->lt($monthStart) ? $monthStart->copy() : $weekStart->copy();
+            $rangeEnd   = $weekEnd->gt($monthEnd) ? $monthEnd->copy() : $weekEnd->copy();
 
             $weekDays = [];
-            $tmp = (clone $rangeStart);
-            while ($tmp->lte($rangeEnd)) {
-                $key = $tmp->toDateString();
-                if (isset($days[$key])) {
-                    $weekDays[] = $days[$key];
-                }
-                $tmp->addDay();
+            foreach (CarbonPeriod::create($rangeStart, $rangeEnd) as $d) {
+                $key = $d->toDateString();
+                $weekDays[$key] = $days[$key];
             }
 
             $weekTotals = [
@@ -268,28 +412,30 @@ class WeeklyReportController extends Controller
                 'customize_income'    => 0,
                 'income_total'        => 0,
 
-                // modal lists
+                // for modal (UPDATED: keep payment_methods)
                 'subscription_income_users' => [],
                 'customize_income_users'    => [],
+
+                // legacy tooltip fields (safe to keep)
+                'subscription_income_tooltip' => '',
+                'customize_income_tooltip'    => '',
 
                 'expenditure'         => 0,
                 'vendor_fund'         => 0,
                 'available_balance'   => 0,
 
-                'renew'     => 0,
-                'new'       => 0,
-                'pause'     => 0,
-                'customize' => 0,
+                'renew'               => 0,
+                'new'                 => 0,
+                'pause'               => 0,
+                'customize'           => 0,
 
-                'vendors'   => [],
-                'riders'    => [],
-                'total_delivery' => 0,
+                'vendors'             => array_fill_keys($vendorColumns, 0.0),
+                'riders'              => array_fill_keys($deliveryCols, 0),
+                'total_delivery'      => 0,
             ];
 
-            foreach ($vendorColumns as $v) $weekTotals['vendors'][$v] = 0;
-            foreach ($deliveryCols as $r) $weekTotals['riders'][$r] = 0;
-
-            $weekSubUsers = []; // uid => ['user_id','name','amt','methods_set'=>[]]
+            // UPDATED aggregators (merge payment_methods across days)
+            $weekSubUsers = []; // uid => ['user_id','name','amt','_methods_set'=>[]]
             $weekCusUsers = [];
 
             foreach ($weekDays as $row) {
@@ -309,12 +455,11 @@ class WeeklyReportController extends Controller
                     $weekTotals['vendors'][$v] += (float)($row['vendors'][$v] ?? 0);
                 }
                 foreach ($deliveryCols as $r) {
-                    $weekTotals['riders'][$r] += (float)($row['riders'][$r] ?? 0);
+                    $weekTotals['riders'][$r]  += (int)($row['riders'][$r] ?? 0);
                 }
 
                 $weekTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
-                // Aggregate subscription users across week (NOW merges payment_methods)
                 foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
                     $uid = (string)($u['user_id'] ?? '');
                     if ($uid === '') continue;
@@ -337,7 +482,6 @@ class WeeklyReportController extends Controller
                     }
                 }
 
-                // Aggregate customize users across week (NOW merges payment_methods)
                 foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
                     $uid = (string)($u['user_id'] ?? '');
                     if ($uid === '') continue;
@@ -363,7 +507,6 @@ class WeeklyReportController extends Controller
 
             $weekTotals['available_balance'] = $weekTotals['vendor_fund'] - $weekTotals['expenditure'];
 
-            // finalize week user lists
             $weekSubUsersList = array_values($weekSubUsers);
             foreach ($weekSubUsersList as &$x) {
                 $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
@@ -378,17 +521,30 @@ class WeeklyReportController extends Controller
             }
             unset($x);
 
-            usort($weekSubUsersList, fn($a, $b) => ($b['amt'] ?? 0) <=> ($a['amt'] ?? 0));
-            usort($weekCusUsersList, fn($a, $b) => ($b['amt'] ?? 0) <=> ($a['amt'] ?? 0));
+            usort($weekSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
+            usort($weekCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
             $weekTotals['subscription_income_users'] = $weekSubUsersList;
             $weekTotals['customize_income_users']    = $weekCusUsersList;
 
-            // show only vendors used in this week
+            // legacy tooltip (safe to keep)
+            $weekTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Subscription Income (Week)',
+                $weekSubUsersList,
+                (float)$weekTotals['subscription_income']
+            );
+
+            $weekTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Customize Income (Week)',
+                $weekCusUsersList,
+                (float)$weekTotals['customize_income']
+            );
+
             $weekVendorColumns = [];
             foreach ($vendorColumns as $v) {
-                $sumV = (float)($weekTotals['vendors'][$v] ?? 0);
-                if ($sumV > 0) $weekVendorColumns[] = $v;
+                if (($weekTotals['vendors'][$v] ?? 0) > 0) {
+                    $weekVendorColumns[] = $v;
+                }
             }
 
             $weeks[] = [
@@ -409,26 +565,29 @@ class WeeklyReportController extends Controller
             'customize_income'    => 0,
             'income_total'        => 0,
 
+            // for modal (UPDATED: include payment_methods)
             'subscription_income_users' => [],
             'customize_income_users'    => [],
+
+            // legacy tooltip fields (safe to keep)
+            'subscription_income_tooltip' => '',
+            'customize_income_tooltip'    => '',
 
             'expenditure'         => 0,
             'vendor_fund'         => 0,
             'available_balance'   => 0,
 
-            'renew'     => 0,
-            'new'       => 0,
-            'pause'     => 0,
-            'customize' => 0,
+            'renew'               => 0,
+            'new'                 => 0,
+            'pause'               => 0,
+            'customize'           => 0,
 
-            'vendors' => [],
-            'riders'  => [],
-            'total_delivery' => 0,
+            'vendors'             => array_fill_keys($vendorColumns, 0.0),
+            'riders'              => array_fill_keys($deliveryCols, 0),
+            'total_delivery'      => 0,
         ];
 
-        foreach ($vendorColumns as $v) $monthTotals['vendors'][$v] = 0;
-        foreach ($deliveryCols as $r) $monthTotals['riders'][$r] = 0;
-
+        // UPDATED aggregators (merge payment_methods across days)
         $monthSubUsers = [];
         $monthCusUsers = [];
 
@@ -449,11 +608,10 @@ class WeeklyReportController extends Controller
                 $monthTotals['vendors'][$v] += (float)($row['vendors'][$v] ?? 0);
             }
             foreach ($deliveryCols as $r) {
-                $monthTotals['riders'][$r] += (float)($row['riders'][$r] ?? 0);
+                $monthTotals['riders'][$r]  += (int)($row['riders'][$r] ?? 0);
             }
             $monthTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
-            // Aggregate subscription users across month (merge payment methods)
             foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
                 $uid = (string)($u['user_id'] ?? '');
                 if ($uid === '') continue;
@@ -476,7 +634,6 @@ class WeeklyReportController extends Controller
                 }
             }
 
-            // Aggregate customize users across month (merge payment methods)
             foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
                 $uid = (string)($u['user_id'] ?? '');
                 if ($uid === '') continue;
@@ -516,13 +673,27 @@ class WeeklyReportController extends Controller
         }
         unset($x);
 
-        usort($monthSubUsersList, fn($a, $b) => ($b['amt'] ?? 0) <=> ($a['amt'] ?? 0));
-        usort($monthCusUsersList, fn($a, $b) => ($b['amt'] ?? 0) <=> ($a['amt'] ?? 0));
+        usort($monthSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
+        usort($monthCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
         $monthTotals['subscription_income_users'] = $monthSubUsersList;
         $monthTotals['customize_income_users']    = $monthCusUsersList;
 
+        // legacy tooltip (safe to keep)
+        $monthTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
+            'Subscription Income (Month)',
+            $monthSubUsersList,
+            (float)$monthTotals['subscription_income']
+        );
+
+        $monthTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
+            'Customize Income (Month)',
+            $monthCusUsersList,
+            (float)$monthTotals['customize_income']
+        );
+
         $monthDays = $days;
+        ksort($monthDays);
 
         $years = range(Carbon::now()->year - 3, Carbon::now()->year + 1);
 
@@ -540,6 +711,10 @@ class WeeklyReportController extends Controller
         ]);
     }
 
+    /**
+     * Tooltip builder (legacy). Modal uses *_income_users arrays.
+     * $users can contain extra fields like payment_methods; this function ignores them safely.
+     */
     private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
     {
         $safeTitle = e($title);
@@ -559,15 +734,11 @@ class WeeklyReportController extends Controller
         foreach ($usersTop as $u) {
             $name = e($u['name'] ?? '-');
             $uid  = e((string)($u['user_id'] ?? ''));
-            $pm   = e((string)($u['payment_methods'] ?? ''));
-
-            $pmHtml = $pm !== '' ? "<div class='tt-pm'>{$pm}</div>" : "";
 
             $html .= "
                 <div class='tt-row'>
                     <div class='tt-name'>{$name}</div>
                     <div class='tt-id'>#{$uid}</div>
-                    {$pmHtml}
                 </div>
             ";
         }
@@ -579,5 +750,4 @@ class WeeklyReportController extends Controller
         $html .= "</div>";
         return $html;
     }
-
 }
