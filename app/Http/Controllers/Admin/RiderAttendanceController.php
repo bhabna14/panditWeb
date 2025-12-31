@@ -10,55 +10,63 @@ use Illuminate\Support\Facades\DB;
 
 class RiderAttendanceController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
-        // Month filter: YYYY-MM (default current month)
-        $month = $request->get('month', now()->format('Y-m'));
+        // 1) Read filters safely
+        $monthInput = trim((string) $request->query('month', now()->format('Y-m')));
+        if (!preg_match('/^\d{4}\-\d{2}$/', $monthInput)) {
+            $monthInput = now()->format('Y-m');
+        }
 
-        // Rider filter (optional)
-        $selectedRiderId = $request->get('rider_id');
+        $selectedRiderId = $request->query('rider_id');
+        $selectedRiderId = $selectedRiderId !== null ? trim((string) $selectedRiderId) : null;
 
-        // Parse month range
-        $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->startOfDay();
-        $endOfMonth   = Carbon::createFromFormat('Y-m', $month)->endOfMonth()->endOfDay();
+        // 2) Month meta
+        $year      = (int) substr($monthInput, 0, 4);
+        $monthNo   = (int) substr($monthInput, 5, 2);
+        $startOfMonth = Carbon::create($year, $monthNo, 1)->startOfMonth()->startOfDay();
+        $endOfMonth   = Carbon::create($year, $monthNo, 1)->endOfMonth()->endOfDay();
+        $daysInMonth  = $startOfMonth->daysInMonth;
 
-        // Riders list
+        // 3) Riders list
         $riders = RiderDetails::query()
             ->orderBy('rider_name')
             ->get();
 
-        // If rider not selected, pick first rider (if exists)
-        if (!$selectedRiderId && $riders->count() > 0) {
-            $selectedRiderId = $riders->first()->rider_id;
+        if ((!$selectedRiderId || $selectedRiderId === '') && $riders->count() > 0) {
+            $selectedRiderId = (string) $riders->first()->rider_id;
         }
 
-        // -----------------------------
-        // Selected Rider: attendance map (date => delivery count)
-        // Present if count > 0
-        // -----------------------------
+        // 4) Use created_at if it exists, otherwise delivery_time
+        //    This fixes "filter not working" when created_at is null in rows.
+        $dateExpr = "COALESCE(created_at, delivery_time)";
+
+        // Base query factory (so we don’t repeat logic and we can reuse reliably)
+        $baseHistoryQuery = function () use ($dateExpr, $year, $monthNo) {
+            return DB::table('delivery_history')
+                ->whereRaw("$dateExpr IS NOT NULL")
+                ->whereRaw("YEAR($dateExpr) = ?", [$year])
+                ->whereRaw("MONTH($dateExpr) = ?", [$monthNo]);
+        };
+
+        // 5) Selected rider daily counts
         $dailyCounts = [];
         $selectedRider = null;
 
         if ($selectedRiderId) {
             $selectedRider = $riders->firstWhere('rider_id', $selectedRiderId);
 
-            $dailyCounts = DB::table('delivery_history')
-                ->selectRaw('DATE(created_at) as dt, COUNT(*) as deliveries')
+            $dailyCounts = $baseHistoryQuery()
                 ->where('rider_id', $selectedRiderId)
-                ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+                ->selectRaw("DATE($dateExpr) as dt, COUNT(*) as deliveries")
                 ->groupBy('dt')
                 ->pluck('deliveries', 'dt')
                 ->toArray();
         }
 
-        // -----------------------------
-        // All Riders Summary (for the month)
-        // present_days = count(distinct date(created_at))
-        // deliveries   = count(*)
-        // -----------------------------
-        $summaryRows = DB::table('delivery_history')
-            ->selectRaw('rider_id, COUNT(DISTINCT DATE(created_at)) as present_days, COUNT(*) as deliveries')
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        // 6) All riders summary for the month
+        $summaryRows = $baseHistoryQuery()
+            ->selectRaw("rider_id, COUNT(DISTINCT DATE($dateExpr)) as present_days, COUNT(*) as deliveries")
             ->groupBy('rider_id')
             ->get()
             ->keyBy('rider_id');
@@ -75,23 +83,22 @@ class RiderAttendanceController extends Controller
             ];
         });
 
-        // Days in month for calendar + totals
-        $daysInMonth = $startOfMonth->daysInMonth;
-
+        // 7) Totals for selected rider
         $presentDays = 0;
         $totalDeliveries = 0;
 
         foreach ($dailyCounts as $dt => $cnt) {
-            if ((int)$cnt > 0) {
+            $cnt = (int) $cnt;
+            if ($cnt > 0) {
                 $presentDays++;
-                $totalDeliveries += (int)$cnt;
+                $totalDeliveries += $cnt;
             }
         }
 
-        $absentDays = $daysInMonth - $presentDays;
+        $absentDays = max(0, $daysInMonth - $presentDays);
 
         return view('admin.rider-attendance.index', [
-            'month'            => $month,
+            'month'            => $monthInput,
             'startOfMonth'     => $startOfMonth,
             'endOfMonth'       => $endOfMonth,
             'riders'           => $riders,
