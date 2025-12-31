@@ -1054,4 +1054,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
     Route::post('/flower-pickups', [FlowerPickupController::class, 'storeFlowerPickup'])->name('admin.storeFlowerPickup');
     Route::get('/admin/rider-attendance', [RiderAttendanceController::class, 'index'])->name('admin.rider-attendance.index');
+    Route::get('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'index'])->name('admin.rider-attendance.manual');
+    Route::post('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'store'])->name('admin.rider-attendance.manual.store');
         
+

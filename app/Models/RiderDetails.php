@@ -35,4 +35,10 @@ class RiderDetails extends Model
     {
         return $this->hasMany(DeliveryHistory::class, 'rider_id', 'rider_id');
     }
+
+    public function attendances()
+{
+    return $this->hasMany(\App\Models\RiderAttendance::class, 'rider_id', 'rider_id');
+}
+
 }

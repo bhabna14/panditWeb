@@ -7,6 +7,9 @@ use App\Models\RiderDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\RiderAttendance;
+use Illuminate\Validation\Rule;
+
 
 class RiderAttendanceController extends Controller
 {
@@ -111,5 +114,107 @@ class RiderAttendanceController extends Controller
             'totalDeliveries'  => $totalDeliveries,
             'allRiderSummary'  => $allRiderSummary,
         ]);
+    }
+
+     public function indexAttendance(Request $request)
+    {
+        $month = $request->query('month', now()->format('Y-m'));
+        if (!preg_match('/^\d{4}\-\d{2}$/', $month)) {
+            $month = now()->format('Y-m');
+        }
+
+        $selectedRiderId = $request->query('rider_id');
+
+        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->startOfDay();
+        $end   = Carbon::createFromFormat('Y-m', $month)->endOfMonth()->endOfDay();
+
+        $riders = RiderDetails::query()->orderBy('rider_name')->get();
+
+        $q = RiderAttendance::query()
+            ->with('rider')
+            ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()])
+            ->orderBy('attendance_date', 'desc')
+            ->orderBy('id', 'desc');
+
+        if ($selectedRiderId) {
+            $q->where('rider_id', $selectedRiderId);
+        }
+
+        $attendances = $q->paginate(31)->withQueryString();
+
+        // Summary counts for the month (respect rider filter)
+        $summaryQuery = RiderAttendance::query()
+            ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()]);
+        if ($selectedRiderId) {
+            $summaryQuery->where('rider_id', $selectedRiderId);
+        }
+
+        $summary = [
+            'present'  => (clone $summaryQuery)->where('status', 'present')->count(),
+            'absent'   => (clone $summaryQuery)->where('status', 'absent')->count(),
+            'leave'    => (clone $summaryQuery)->where('status', 'leave')->count(),
+            'half_day' => (clone $summaryQuery)->where('status', 'half_day')->count(),
+        ];
+
+        return view('admin.rider-attendance.manual', compact(
+            'month',
+            'selectedRiderId',
+            'start',
+            'end',
+            'riders',
+            'attendances',
+            'summary'
+        ));
+    }
+
+    /**
+     * Save manual attendance (insert or update for same rider+date)
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'rider_id' => [
+                'required',
+                Rule::exists('flower__rider_details', 'rider_id'),
+            ],
+            'attendance_date' => ['required', 'date'],
+            'status' => ['required', Rule::in(['present', 'absent', 'leave', 'half_day'])],
+            'check_in_time' => ['nullable', 'date_format:H:i'],
+            'check_out_time' => ['nullable', 'date_format:H:i'],
+            'remarks' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        // Compute working minutes if both times present
+        $workingMinutes = null;
+        if (!empty($validated['check_in_time']) && !empty($validated['check_out_time'])) {
+            $in  = Carbon::createFromFormat('H:i', $validated['check_in_time']);
+            $out = Carbon::createFromFormat('H:i', $validated['check_out_time']);
+
+            // If out < in, assume next day (night shift)
+            if ($out->lt($in)) {
+                $out->addDay();
+            }
+
+            $workingMinutes = $in->diffInMinutes($out);
+        }
+
+        RiderAttendance::updateOrCreate(
+            [
+                'rider_id' => $validated['rider_id'],
+                'attendance_date' => Carbon::parse($validated['attendance_date'])->toDateString(),
+            ],
+            [
+                'status' => $validated['status'],
+                'check_in_time' => $validated['check_in_time'] ?? null,
+                'check_out_time' => $validated['check_out_time'] ?? null,
+                'working_minutes' => $workingMinutes,
+                'remarks' => $validated['remarks'] ?? null,
+                'marked_by' => auth()->id(), // optional; remove if not using auth
+            ]
+        );
+
+        return redirect()
+            ->back()
+            ->with('success', 'Attendance saved successfully.');
     }
 }
