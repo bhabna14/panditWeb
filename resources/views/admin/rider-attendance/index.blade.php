@@ -1,4 +1,4 @@
-@extends('layouts.admin') {{-- change to your admin layout path --}}
+@extends('admin.layouts.apps')
 
 @section('title', 'Rider Attendance')
 
