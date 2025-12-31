@@ -224,6 +224,8 @@ class OfficeTransactionController extends Controller
             'date'            => 'required|date',
             'categories'      => 'required|string|max:255',
             'amount'          => 'required|numeric|min:0',
+            'mode_of_payment' => 'required|string|in:cash,upi,icici',
+            'paid_by'         => 'required|string|in:pankaj,subrat,basudha,biswa,pooja',
             'description'     => 'nullable|string|max:500',
         ]);
 
