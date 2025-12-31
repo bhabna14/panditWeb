@@ -1020,6 +1020,9 @@ Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'save
      Route::get('admin/ops-report', [WeeklyReportController::class, 'index'])
             ->name('admin.ops-report');
 
+            Route::get('/admin/ops-report/vendor-payment-items', [WeeklyReportController::class, 'vendorPaymentItems'])
+    ->name('admin.ops-report.vendor-payment-items');
+
 Route::prefix('admin')->as('admin.')->group(function () {
     // List (Manage page)
     Route::get('flower-details', [FlowerDetailsController::class, 'index'])
@@ -1056,5 +1059,3 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/admin/rider-attendance', [RiderAttendanceController::class, 'index'])->name('admin.rider-attendance.index');
     Route::get('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'indexAttendance'])->name('admin.rider-attendance.manual');
     Route::post('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'store'])->name('admin.rider-attendance.manual.store');
-        
-

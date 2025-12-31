@@ -78,6 +78,20 @@ class WeeklyReportController extends Controller
         $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
         $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
 
+        /**
+         * IMPORTANT:
+         * Your vendor columns use vendor NAME strings ($v),
+         * but vendorPaymentItems() requires vendor_id.
+         * So we build a name->id map + also allow clicking when column name is vendor_id.
+         */
+        $vendorNameToId = [];
+        foreach ($vendorMap as $vid => $vname) {
+            if (!empty($vname)) {
+                $vendorNameToId[$vname] = $vid;
+            }
+            $vendorNameToId[(string)$vid] = $vid; // fallback if column label is vendor_id
+        }
+
         /* ================= Finance: INCOME (Split totals) ================= */
 
         $subPayments = FlowerPayment::query()
@@ -697,24 +711,26 @@ class WeeklyReportController extends Controller
 
         $years = range(Carbon::now()->year - 3, Carbon::now()->year + 1);
 
-        return view('admin.reports.month-weeks-report', [
+            return view('admin.reports.month-weeks-report', [
             'year'           => $year,
             'month'          => $month,
             'monthStart'     => $monthStart,
             'monthEnd'       => $monthEnd,
             'weeks'          => $weeks,
+
+            // FIXED HERE (remove "perc")
             'vendorColumns'  => $vendorColumns,
+
             'deliveryCols'   => $deliveryCols,
             'monthTotals'    => $monthTotals,
             'monthDays'      => $monthDays,
             'years'          => $years,
+
+            // ADD THIS
+            'vendorNameToId' => $vendorNameToId,
         ]);
     }
 
-    /**
-     * Tooltip builder (legacy). Modal uses *_income_users arrays.
-     * $users can contain extra fields like payment_methods; this function ignores them safely.
-     */
     private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
     {
         $safeTitle = e($title);
@@ -750,21 +766,45 @@ class WeeklyReportController extends Controller
         $html .= "</div>";
         return $html;
     }
+    
+public function vendorPaymentItems(Request $request)
+{
+    $vendorId = $request->query('vendor_id');
+    $from     = $request->query('from');
+    $to       = $request->query('to');
 
-    public function items(string $pick_up_id)
-    {
-        $pickup = FlowerPickupDetails::query()
-            ->with([
-                'vendor',
-                'rider',
-                'flowerPickupItems.flower',
-                'flowerPickupItems.unit',
-                'flowerPickupItems.estUnit',
-            ])
-            ->where('pick_up_id', $pick_up_id)
-            ->firstOrFail();
+    if (!$vendorId || !$from || !$to) {
+        return response()->json([
+            'meta'   => [],
+            'pickups'=> [],
+            'error'  => 'vendor_id, from, to are required'
+        ], 422);
+    }
 
-        $items = $pickup->flowerPickupItems->map(function ($it) {
+    $fromDate = Carbon::parse($from)->startOfDay();
+    $toDate   = Carbon::parse($to)->endOfDay();
+
+    $vendor = FlowerVendor::query()
+        ->where('vendor_id', $vendorId)
+        ->first();
+
+    $pickups = FlowerPickupDetails::query()
+        ->with([
+            'vendor',
+            'rider',
+            'flowerPickupItems.flower',
+            'flowerPickupItems.unit',
+            'flowerPickupItems.estUnit',
+        ])
+        ->where('vendor_id', $vendorId)
+        ->whereBetween('pickup_date', [$fromDate->toDateString(), $toDate->toDateString()])
+        ->orderByDesc('pickup_date')
+        ->orderByDesc('id')
+        ->get();
+
+    $mappedPickups = $pickups->map(function ($p) {
+        $items = $p->flowerPickupItems->map(function ($it) {
+
             // actual total fallback
             $actualTotal = $it->item_total_price;
             if ($actualTotal === null && $it->quantity !== null && $it->price !== null) {
@@ -778,7 +818,6 @@ class WeeklyReportController extends Controller
             }
 
             return [
-                'id'           => $it->id,
                 'flower_name'  => optional($it->flower)->name ?? '-',
                 'unit'         => optional($it->unit)->unit_name ?? 'N/A',
                 'quantity'     => $it->quantity !== null ? (float)$it->quantity : null,
@@ -792,19 +831,28 @@ class WeeklyReportController extends Controller
             ];
         });
 
-        return response()->json([
-            'pickup' => [
-                'pick_up_id'         => $pickup->pick_up_id,
-                'pickup_date'        => optional($pickup->pickup_date)->format('Y-m-d'),
-                'delivery_date'      => optional($pickup->delivery_date)->format('Y-m-d'),
-                'vendor_name'        => optional($pickup->vendor)->name ?? optional($pickup->vendor)->vendor_name ?? '-',
-                'rider_name'         => optional($pickup->rider)->name ?? optional($pickup->rider)->rider_name ?? '-',
-                'grand_total_price'  => $pickup->grand_total_price,
-                'payment_method'     => $pickup->payment_method,
-                'payment_status'     => $pickup->payment_status,
-                'status'             => $pickup->status,
-            ],
-            'items' => $items,
-        ]);
-    }
+        return [
+            'pick_up_id'        => $p->pick_up_id,
+            'pickup_date'       => optional($p->pickup_date)->format('Y-m-d'),
+            'delivery_date'     => optional($p->delivery_date)->format('Y-m-d'),
+            'payment_status'    => $p->payment_status,
+            'payment_method'    => $p->payment_method,
+            'grand_total_price' => (float)($p->grand_total_price ?? 0),
+            'items'             => $items,
+        ];
+    });
+
+    return response()->json([
+        'meta' => [
+            'vendor_id'     => $vendorId,
+            'vendor_name'   => $vendor->vendor_name ?? $vendor->name ?? '-',
+            'from'          => $fromDate->toDateString(),
+            'to'            => $toDate->toDateString(),
+            'pickups_count' => $pickups->count(),
+            'grand_total'   => round((float)$pickups->sum('grand_total_price'), 2),
+        ],
+        'pickups' => $mappedPickups,
+    ]);
+}
+
 }
