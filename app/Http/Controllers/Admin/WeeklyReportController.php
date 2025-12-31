@@ -738,7 +738,7 @@ class WeeklyReportController extends Controller
             $html .= "
                 <div class='tt-row'>
                     <div class='tt-name'>{$name}</div>
-                    
+                    <div class='tt-id'>#{$uid}</div>
                 </div>
             ";
         }
@@ -749,5 +749,62 @@ class WeeklyReportController extends Controller
 
         $html .= "</div>";
         return $html;
+    }
+
+    public function items(string $pick_up_id)
+    {
+        $pickup = FlowerPickupDetails::query()
+            ->with([
+                'vendor',
+                'rider',
+                'flowerPickupItems.flower',
+                'flowerPickupItems.unit',
+                'flowerPickupItems.estUnit',
+            ])
+            ->where('pick_up_id', $pick_up_id)
+            ->firstOrFail();
+
+        $items = $pickup->flowerPickupItems->map(function ($it) {
+            // actual total fallback
+            $actualTotal = $it->item_total_price;
+            if ($actualTotal === null && $it->quantity !== null && $it->price !== null) {
+                $actualTotal = round(((float)$it->quantity) * ((float)$it->price), 2);
+            }
+
+            // estimate total fallback
+            $estTotal = null;
+            if ($it->est_quantity !== null && $it->est_price !== null) {
+                $estTotal = round(((float)$it->est_quantity) * ((float)$it->est_price), 2);
+            }
+
+            return [
+                'id'           => $it->id,
+                'flower_name'  => optional($it->flower)->name ?? '-',
+                'unit'         => optional($it->unit)->unit_name ?? 'N/A',
+                'quantity'     => $it->quantity !== null ? (float)$it->quantity : null,
+                'price'        => $it->price !== null ? (float)$it->price : null,
+                'item_total'   => $actualTotal !== null ? (float)$actualTotal : null,
+
+                'est_unit'     => optional($it->estUnit)->unit_name ?? 'N/A',
+                'est_quantity' => $it->est_quantity !== null ? (float)$it->est_quantity : null,
+                'est_price'    => $it->est_price !== null ? (float)$it->est_price : null,
+                'est_total'    => $estTotal !== null ? (float)$estTotal : null,
+            ];
+        });
+
+        return response()->json([
+            'pickup' => [
+                'pick_up_id'         => $pickup->pick_up_id,
+                'pickup_date'        => optional($pickup->pickup_date)->format('Y-m-d'),
+                'delivery_date'      => optional($pickup->delivery_date)->format('Y-m-d'),
+                'vendor_name'        => optional($pickup->vendor)->name ?? optional($pickup->vendor)->vendor_name ?? '-',
+                'rider_name'         => optional($pickup->rider)->name ?? optional($pickup->rider)->rider_name ?? '-',
+                'grand_total_price'  => $pickup->grand_total_price,
+                'payment_method'     => $pickup->payment_method,
+                'payment_status'     => $pickup->payment_status,
+                'status'             => $pickup->status,
+            ],
+            'items' => $items,
+        ]);
     }
 }

@@ -60,6 +60,7 @@ use App\Http\Controllers\Admin\TomorrowSubscriptionsController;
 use App\Http\Controllers\Admin\WeeklyReportController;
 use App\Http\Controllers\Admin\AdminWhatsappMessageController;
 use App\Http\Controllers\Admin\FlowerDetailsController;
+use App\Http\Controllers\Admin\RiderAttendanceController;
 use App\Http\Controllers\Admin\OfficeLedgerController; // Optional if you created a separate ledger page
 
 
@@ -1052,3 +1053,5 @@ Route::prefix('admin')->as('admin.')->group(function () {
 });
 
     Route::post('/flower-pickups', [FlowerPickupController::class, 'storeFlowerPickup'])->name('admin.storeFlowerPickup');
+    Route::get('/rider-attendance', [RiderAttendanceController::class, 'index'])->name('admin.rider-attendance.index');
+        

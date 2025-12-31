@@ -18,6 +18,7 @@ class DeliveryHistory extends Model
         'delivery_time',
         'longitude',
         'latitude',
+        'created_at'
     ];
 
     public function order()
