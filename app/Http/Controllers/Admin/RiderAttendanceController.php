@@ -116,56 +116,70 @@ class RiderAttendanceController extends Controller
         ]);
     }
 
-  public function indexAttendance(Request $request)
-    {
-        $month = $request->query('month', now()->format('Y-m'));
-        if (!preg_match('/^\d{4}\-\d{2}$/', $month)) {
-            $month = now()->format('Y-m');
-        }
-
-        $selectedRiderId = $request->query('rider_id');
-
-        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-        $end   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-
-        $riders = RiderDetails::query()->orderBy('rider_name')->get();
-
-        $q = RiderAttendance::query()
-            ->with('rider')
-            ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()])
-            ->orderBy('attendance_date', 'desc')
-            ->orderByDesc('id');
-
-        if ($selectedRiderId) {
-            $q->where('rider_id', $selectedRiderId);
-        }
-
-        $attendances = $q->paginate(31)->withQueryString();
-
-        $summaryQuery = RiderAttendance::query()
-            ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()]);
-
-        if ($selectedRiderId) {
-            $summaryQuery->where('rider_id', $selectedRiderId);
-        }
-
-        $summary = [
-            'present'  => (clone $summaryQuery)->where('status', 'present')->count(),
-            'absent'   => (clone $summaryQuery)->where('status', 'absent')->count(),
-            'leave'    => (clone $summaryQuery)->where('status', 'leave')->count(),
-            'half_day' => (clone $summaryQuery)->where('status', 'half_day')->count(),
-        ];
-
-        return view('admin.rider-attendance.manual', compact(
-            'month',
-            'selectedRiderId',
-            'start',
-            'end',
-            'riders',
-            'attendances',
-            'summary'
-        ));
+ public function indexAttendance(Request $request)
+{
+    // Month filter: YYYY-MM (default current month)
+    $month = trim((string) $request->query('month', now()->format('Y-m')));
+    try {
+        $monthObj = Carbon::createFromFormat('Y-m', $month);
+    } catch (\Throwable $e) {
+        $monthObj = now();
+        $month = $monthObj->format('Y-m');
     }
+
+    // Rider filter (optional)
+    $selectedRiderId = $request->filled('rider_id') ? trim((string) $request->query('rider_id')) : null;
+
+    // Date range as DATE strings (important for whereDate)
+    $fromDate = $monthObj->copy()->startOfMonth()->toDateString();
+    $toDate   = $monthObj->copy()->endOfMonth()->toDateString();
+
+    $start = $monthObj->copy()->startOfMonth();
+    $end   = $monthObj->copy()->endOfMonth();
+
+    $riders = RiderDetails::query()->orderBy('rider_name')->get();
+
+    // Attendance list query (FIXED)
+    $q = RiderAttendance::query()
+        ->with('rider')
+        ->whereDate('attendance_date', '>=', $fromDate)
+        ->whereDate('attendance_date', '<=', $toDate)
+        ->orderBy('attendance_date', 'desc')
+        ->orderByDesc('id');
+
+    if ($selectedRiderId) {
+        $q->where('rider_id', $selectedRiderId);
+    }
+
+    $attendances = $q->paginate(31)->withQueryString();
+
+    // Summary counts (FIXED)
+    $summaryQuery = RiderAttendance::query()
+        ->whereDate('attendance_date', '>=', $fromDate)
+        ->whereDate('attendance_date', '<=', $toDate);
+
+    if ($selectedRiderId) {
+        $summaryQuery->where('rider_id', $selectedRiderId);
+    }
+
+    $summary = [
+        'present'  => (clone $summaryQuery)->where('status', 'present')->count(),
+        'absent'   => (clone $summaryQuery)->where('status', 'absent')->count(),
+        'leave'    => (clone $summaryQuery)->where('status', 'leave')->count(),
+        'half_day' => (clone $summaryQuery)->where('status', 'half_day')->count(),
+    ];
+
+    return view('admin.rider-attendance.manual', compact(
+        'month',
+        'selectedRiderId',
+        'start',
+        'end',
+        'riders',
+        'attendances',
+        'summary'
+    ));
+}
+
 
     public function store(Request $request)
     {

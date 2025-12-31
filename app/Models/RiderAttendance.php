@@ -25,6 +25,7 @@ class RiderAttendance extends Model
     protected $casts = [
         'attendance_date' => 'date',
     ];
+    
 
     public function rider()
     {
