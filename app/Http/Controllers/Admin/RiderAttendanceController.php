@@ -116,7 +116,7 @@ class RiderAttendanceController extends Controller
         ]);
     }
 
-     public function indexAttendance(Request $request)
+  public function indexAttendance(Request $request)
     {
         $month = $request->query('month', now()->format('Y-m'));
         if (!preg_match('/^\d{4}\-\d{2}$/', $month)) {
@@ -125,8 +125,8 @@ class RiderAttendanceController extends Controller
 
         $selectedRiderId = $request->query('rider_id');
 
-        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth()->startOfDay();
-        $end   = Carbon::createFromFormat('Y-m', $month)->endOfMonth()->endOfDay();
+        $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+        $end   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
         $riders = RiderDetails::query()->orderBy('rider_name')->get();
 
@@ -134,7 +134,7 @@ class RiderAttendanceController extends Controller
             ->with('rider')
             ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()])
             ->orderBy('attendance_date', 'desc')
-            ->orderBy('id', 'desc');
+            ->orderByDesc('id');
 
         if ($selectedRiderId) {
             $q->where('rider_id', $selectedRiderId);
@@ -142,9 +142,9 @@ class RiderAttendanceController extends Controller
 
         $attendances = $q->paginate(31)->withQueryString();
 
-        // Summary counts for the month (respect rider filter)
         $summaryQuery = RiderAttendance::query()
             ->whereBetween('attendance_date', [$start->toDateString(), $end->toDateString()]);
+
         if ($selectedRiderId) {
             $summaryQuery->where('rider_id', $selectedRiderId);
         }
@@ -167,16 +167,10 @@ class RiderAttendanceController extends Controller
         ));
     }
 
-    /**
-     * Save manual attendance (insert or update for same rider+date)
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'rider_id' => [
-                'required',
-                Rule::exists('flower__rider_details', 'rider_id'),
-            ],
+            'rider_id' => ['required', Rule::exists('flower__rider_details', 'rider_id')],
             'attendance_date' => ['required', 'date'],
             'status' => ['required', Rule::in(['present', 'absent', 'leave', 'half_day'])],
             'check_in_time' => ['nullable', 'date_format:H:i'],
@@ -184,37 +178,55 @@ class RiderAttendanceController extends Controller
             'remarks' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Compute working minutes if both times present
-        $workingMinutes = null;
-        if (!empty($validated['check_in_time']) && !empty($validated['check_out_time'])) {
-            $in  = Carbon::createFromFormat('H:i', $validated['check_in_time']);
-            $out = Carbon::createFromFormat('H:i', $validated['check_out_time']);
+        $attendanceDate = Carbon::parse($validated['attendance_date'])->toDateString();
+        $status = $validated['status'];
 
-            // If out < in, assume next day (night shift)
+        // If absent/leave -> force times to null
+        $checkIn  = $validated['check_in_time'] ?? null;
+        $checkOut = $validated['check_out_time'] ?? null;
+
+        if (in_array($status, ['absent', 'leave'], true)) {
+            $checkIn = null;
+            $checkOut = null;
+        }
+
+        // Compute working minutes (only if both times exist)
+        $workingMinutes = null;
+        if ($checkIn && $checkOut) {
+            $in  = Carbon::createFromFormat('H:i', $checkIn);
+            $out = Carbon::createFromFormat('H:i', $checkOut);
+
+            // If out < in -> assume next day
             if ($out->lt($in)) {
                 $out->addDay();
             }
-
             $workingMinutes = $in->diffInMinutes($out);
         }
 
+        // Save into rider_attendances table (Model enforces table name)
         RiderAttendance::updateOrCreate(
             [
-                'rider_id' => $validated['rider_id'],
-                'attendance_date' => Carbon::parse($validated['attendance_date'])->toDateString(),
+                'rider_id' => (string) $validated['rider_id'],
+                'attendance_date' => $attendanceDate,
             ],
             [
-                'status' => $validated['status'],
-                'check_in_time' => $validated['check_in_time'] ?? null,
-                'check_out_time' => $validated['check_out_time'] ?? null,
+                'status' => $status,
+                'check_in_time' => $checkIn,
+                'check_out_time' => $checkOut,
                 'working_minutes' => $workingMinutes,
                 'remarks' => $validated['remarks'] ?? null,
-                'marked_by' => auth()->id(), // optional; remove if not using auth
+                'marked_by' => auth()->id(),
             ]
         );
 
+        // Redirect back with filters preserved (month from the attendance date)
+        $month = Carbon::parse($attendanceDate)->format('Y-m');
+
         return redirect()
-            ->back()
+            ->route('admin.rider-attendance.manual', [
+                'month' => $month,
+                'rider_id' => $validated['rider_id'],
+            ])
             ->with('success', 'Attendance saved successfully.');
     }
 }
