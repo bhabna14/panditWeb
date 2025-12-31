@@ -311,7 +311,7 @@
             border-radius: 6px;
         }
 
-        /* Modal list */
+        /* ===== Income modal list ===== */
         .income-user-list .list-group-item {
             display: flex;
             align-items: center;
@@ -333,6 +333,18 @@
         .income-user-list .uid {
             font-size: .82rem;
             color: #64748b;
+        }
+        /* NEW: payment method line */
+        .income-user-list .pm {
+            font-size: .82rem;
+            color: #0f766e;
+            font-weight: 600;
+        }
+        /* NEW: payment date line */
+        .income-user-list .pdate {
+            font-size: .82rem;
+            color: #7c2d12;
+            font-weight: 600;
         }
         .income-user-list .amt {
             flex: 0 0 auto;
@@ -519,7 +531,7 @@
                                                 <th>Pause</th>
                                                 <th>Customize</th>
 
-                                                {{-- Vendor headers clickable (BOOTSTRAP MODAL OPEN) --}}
+                                                {{-- Vendor headers clickable --}}
                                                 @forelse($weekVendorColumns as $v)
                                                     @php
                                                         $vendorColClass = $loop->iteration % 2 === 1 ? 'vendor-odd' : 'vendor-even';
@@ -562,7 +574,6 @@
                                                     <td class="col-date">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
                                                     <td class="text-muted col-dow">{{ $d['dow'] }}</td>
 
-                                                    {{-- Sub Income --}}
                                                     <td class="money col-finance">
                                                         <button type="button"
                                                                 class="income-click sub"
@@ -573,7 +584,6 @@
                                                         </button>
                                                     </td>
 
-                                                    {{-- Customize Income --}}
                                                     <td class="money col-finance">
                                                         <button type="button"
                                                                 class="income-click cust"
@@ -592,7 +602,7 @@
                                                     <td><span class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span></td>
                                                     <td><span class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span></td>
 
-                                                    {{-- Vendor cells clickable (BOOTSTRAP MODAL OPEN) --}}
+                                                    {{-- Vendor cells clickable --}}
                                                     @if (safe_count($weekVendorColumns))
                                                         @foreach ($weekVendorColumns as $v)
                                                             @php
@@ -925,7 +935,7 @@
         </div>
     </div>
 
-    {{-- ========= MODAL: Income Users List ========= --}}
+    {{-- ========= MODAL: Income Users List (UPDATED: Method + Date) ========= --}}
     <div class="modal fade" id="incomeUsersModal" tabindex="-1" aria-labelledby="incomeUsersModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-md">
             <div class="modal-content">
@@ -941,8 +951,8 @@
                             <div id="incomeUsersTotal">Total: ₹0</div>
                         </div>
 
-                        <input type="text" class="form-control form-control-sm" style="max-width: 240px"
-                               id="incomeUsersSearch" placeholder="Search name...">
+                        <input type="text" class="form-control form-control-sm" style="max-width: 260px"
+                               id="incomeUsersSearch" placeholder="Search name / id / method / date...">
                     </div>
 
                     <div id="incomeUsersEmpty" class="alert alert-info d-none mb-0">
@@ -1020,7 +1030,7 @@
         </div>
     </div>
 
-    {{-- Scripts (keep if your layout doesn't already include bootstrap.bundle.js) --}}
+    {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -1054,7 +1064,7 @@
             });
         });
 
-        // ===== Modal: Income Users =====
+        // ===== Modal: Income Users (UPDATED: Method + Date) =====
         const incomeModalEl = document.getElementById('incomeUsersModal');
         const incomeModal = bootstrap.Modal.getOrCreateInstance(incomeModalEl);
 
@@ -1070,15 +1080,60 @@
         function safeJsonParse(str, fallback) {
             try { return JSON.parse(str); } catch (e) { return fallback; }
         }
+
         function formatINR(n) {
             const num = Number(n || 0);
             return '₹' + num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
         }
+
+        function getPaymentMethodText(u) {
+            const pm = (u && (u.payment_methods ?? u.payment_method)) ?? '';
+            return String(pm || '').trim();
+        }
+
+        function normalizeDateText(raw) {
+            const s = String(raw || '').trim();
+            if (!s) return '';
+
+            // YYYY-MM-DD -> DD/MM/YYYY
+            const m1 = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (m1) return `${m1[3]}/${m1[2]}/${m1[1]}`;
+
+            // ISO date-time -> locale date
+            if (s.includes('T')) {
+                const d = new Date(s);
+                if (!isNaN(d.getTime())) {
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const yy = d.getFullYear();
+                    return `${dd}/${mm}/${yy}`;
+                }
+            }
+
+            return s; // fallback: show as-is
+        }
+
+        function getPaymentDateText(u) {
+            // controller can send any of these; we normalize for display
+            const raw = (u && (u.payment_date ?? u.paid_at ?? u.date ?? u.created_at)) ?? '';
+            return normalizeDateText(raw);
+        }
+
         function renderUsers(users, q = '') {
             const query = (q || '').trim().toLowerCase();
-            const filtered = query ? users.filter(u => String(u.name || '').toLowerCase().includes(query)) : users;
+
+            const filtered = query
+                ? users.filter(u => {
+                    const name = String(u.name ?? '').toLowerCase();
+                    const uid  = String(u.user_id ?? '').toLowerCase();
+                    const pm   = getPaymentMethodText(u).toLowerCase();
+                    const pd   = getPaymentDateText(u).toLowerCase();
+                    return name.includes(query) || uid.includes(query) || pm.includes(query) || pd.includes(query);
+                })
+                : users;
 
             listEl.innerHTML = '';
+
             const total = filtered.reduce((sum, u) => sum + Number(u.amt || 0), 0);
 
             countEl.textContent = 'Customers: ' + filtered.length;
@@ -1105,8 +1160,20 @@
                 uid.className = 'uid';
                 uid.textContent = u.user_id ? ('#' + u.user_id) : '';
 
+                const pmText = getPaymentMethodText(u);
+                const pm = document.createElement('div');
+                pm.className = 'pm';
+                pm.textContent = pmText ? ('Method: ' + pmText) : 'Method: -';
+
+                const pdText = getPaymentDateText(u);
+                const pd = document.createElement('div');
+                pd.className = 'pdate';
+                pd.textContent = pdText ? ('Date: ' + pdText) : 'Date: -';
+
                 left.appendChild(name);
                 left.appendChild(uid);
+                left.appendChild(pm);
+                left.appendChild(pd);
 
                 const amt = document.createElement('div');
                 amt.className = 'amt';
@@ -1127,6 +1194,13 @@
             const rawUsers = el.getAttribute('data-users') || '[]';
 
             currentUsers = safeJsonParse(rawUsers, []);
+
+            if (Array.isArray(currentUsers)) {
+                currentUsers.sort((a, b) => Number(b?.amt || 0) - Number(a?.amt || 0));
+            } else {
+                currentUsers = [];
+            }
+
             modalTitle.textContent = title;
 
             searchEl.value = '';
@@ -1149,7 +1223,7 @@
         });
 
         // ============================
-        // Vendor Payment Items Modal (FIXED - loads on show.bs.modal)
+        // Vendor Payment Items Modal
         // ============================
         const vendorItemsUrl = @json(route('admin.ops-report.vendor-payment-items'));
 
@@ -1295,7 +1369,6 @@
             }
         }
 
-        // Load vendor data when modal is opening (Bootstrap gives clicked element)
         vpModalEl.addEventListener('show.bs.modal', function (event) {
             vpReset();
 
