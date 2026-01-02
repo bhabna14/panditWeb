@@ -33,7 +33,6 @@ public function showRequests(Request $request)
     $startDate       = $startDateCarbon->toDateString();
     $endDate         = $endDateCarbon->toDateString();
 
-    // Base query (SSR list)
     $query = FlowerRequest::with([
         'order' => function ($q) {
             $q->with('flowerPayments', 'delivery', 'rider');
@@ -48,28 +47,24 @@ public function showRequests(Request $request)
 
     $pendingRequests = $query->get();
 
-    // ---------------------------
-    // Card Counts (Global)
-    // ---------------------------
+    // Card counts
     $totalCustomizeOrders    = FlowerRequest::count();
     $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
     $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
     $paidCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyPaidFilter($q);
-        })
+        ->where(function ($q) { $this->applyPaidFilter($q); })
         ->count();
 
-    $rejectCustomizeOrders = FlowerRequest::whereIn('status', $this->rejectedStatuses())->count();
+    // IMPORTANT: Rejected card should show ONLY "Rejected" (not cancelled)
+    $rejectCustomizeOrders = FlowerRequest::query()
+        ->where(function ($q) { $this->applyRejectedOnlyFilter($q); })
+        ->count();
 
     $unpaidCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyUnpaidFilter($q);
-        })
+        ->where(function ($q) { $this->applyUnpaidFilter($q); })
         ->count();
 
-    // NEW: unpaid amount to collect (must match unpaid definition)
     $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
 
     $riders = RiderDetails::where('status', 'active')->get();
@@ -117,23 +112,22 @@ public function ajaxData(Request $request)
 
     $pendingRequests = $query->get();
 
-    // Counts for cards
+    // counts
     $totalCustomizeOrders    = FlowerRequest::count();
     $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
     $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
     $paidCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyPaidFilter($q);
-        })
+        ->where(function ($q) { $this->applyPaidFilter($q); })
         ->count();
 
-    $rejectCustomizeOrders = FlowerRequest::whereIn('status', $this->rejectedStatuses())->count();
+    // Rejected ONLY
+    $rejectCustomizeOrders = FlowerRequest::query()
+        ->where(function ($q) { $this->applyRejectedOnlyFilter($q); })
+        ->count();
 
     $unpaidCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyUnpaidFilter($q);
-        })
+        ->where(function ($q) { $this->applyUnpaidFilter($q); })
         ->count();
 
     $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
@@ -144,14 +138,14 @@ public function ajaxData(Request $request)
     return response()->json([
         'rows_html' => $rowsHtml,
         'counts' => [
-            'total'               => $totalCustomizeOrders,
-            'today'               => $todayCustomizeOrders,
-            'paid'                => $paidCustomizeOrders,
-            'unpaid'              => $unpaidCustomizeOrders,
-            'unpaid_amount'       => (float) $unpaidAmountToCollect,
-            'unpaid_amount_fmt'   => '₹' . number_format((float) $unpaidAmountToCollect, 2),
-            'rejected'            => $rejectCustomizeOrders,
-            'upcoming'            => $upcomingCustomizeOrders,
+            'total'             => $totalCustomizeOrders,
+            'today'             => $todayCustomizeOrders,
+            'paid'              => $paidCustomizeOrders,
+            'unpaid'            => $unpaidCustomizeOrders,
+            'unpaid_amount'     => (float) $unpaidAmountToCollect,
+            'unpaid_amount_fmt' => '₹' . number_format((float) $unpaidAmountToCollect, 2),
+            'rejected'          => $rejectCustomizeOrders, // Rejected ONLY
+            'upcoming'          => $upcomingCustomizeOrders,
         ],
         'active' => $filter,
     ]);
@@ -182,67 +176,114 @@ private function applyRequestFilter($query, string $filter, string $today, strin
             break;
 
         case 'rejected':
-            $query->whereIn('status', $this->rejectedStatuses());
+            // IMPORTANT: only status = Rejected (not cancelled)
+            $this->applyRejectedOnlyFilter($query);
             break;
 
         case 'all':
         default:
-            // no extra where
             break;
     }
 }
 
 private function applyPaidFilter($query): void
 {
-    $paidStatuses = $this->paidStatuses();
-    $paidPayStatuses = $this->paidPaymentStatuses();
+    $paidStatusesLower    = $this->paidStatusesLower();
+    $paidPayStatusesLower = $this->paidPaymentStatusesLower();
 
-    $query->where(function ($q) use ($paidStatuses, $paidPayStatuses) {
-        // (A) FlowerRequest status says paid
-        $q->whereIn('status', $paidStatuses)
+    $query->where(function ($q) use ($paidStatusesLower, $paidPayStatusesLower) {
 
-          // OR (B) there is a successful payment against the order
-          ->orWhereHas('order.flowerPayments', function ($p) use ($paidPayStatuses) {
-              $p->whereIn('payment_status', $paidPayStatuses);
-          });
+        // A) request.status says paid
+        $this->whereStatusInLowerTrim($q, $paidStatusesLower)
+
+        // OR B) payment record says success/paid
+        ->orWhereHas('order.flowerPayments', function ($p) use ($paidPayStatusesLower) {
+            $this->wherePaymentStatusInLowerTrim($p, $paidPayStatusesLower);
+        });
     });
+}
+
+private function applyRejectedOnlyFilter($query): void
+{
+    // Rejected only (status = "Rejected")
+    $rejectedLower = ['rejected'];
+    $this->whereStatusInLowerTrim($query, $rejectedLower);
 }
 
 private function applyUnpaidFilter($query): void
 {
-    $rejectStatuses  = $this->rejectedStatuses();
-    $paidStatuses    = $this->paidStatuses();
-    $paidPayStatuses = $this->paidPaymentStatuses();
+    $excludeLower = array_values(array_unique(array_merge(
+        $this->paidStatusesLower(),
+        $this->closedStatusesLower() // cancelled + rejected excluded from unpaid
+    )));
 
-    // Unpaid = status is NULL or not in (paid+rejected)
-    $query->where(function ($q) use ($paidStatuses, $rejectStatuses) {
+    $paidPayStatusesLower = $this->paidPaymentStatusesLower();
+
+    // Unpaid = status is NULL OR not in (paid + cancelled + rejected)
+    $query->where(function ($q) use ($excludeLower) {
         $q->whereNull('status')
-          ->orWhereNotIn('status', array_merge($paidStatuses, $rejectStatuses));
+          ->orWhere(function ($qq) use ($excludeLower) {
+              $this->whereStatusNotInLowerTrim($qq, $excludeLower);
+          });
     });
 
     // AND no successful payment exists
-    $query->whereDoesntHave('order.flowerPayments', function ($p) use ($paidPayStatuses) {
-        $p->whereIn('payment_status', $paidPayStatuses);
+    $query->whereDoesntHave('order.flowerPayments', function ($p) use ($paidPayStatusesLower) {
+        $this->wherePaymentStatusInLowerTrim($p, $paidPayStatusesLower);
     });
 }
 
-private function paidStatuses(): array
+/* ---------- normalization helpers ---------- */
+
+private function whereStatusInLowerTrim($query, array $valuesLower)
 {
-    return ['paid', 'Paid', 'PAID'];
+    $valuesLower = array_values(array_unique(array_map('strtolower', $valuesLower)));
+    $ph = implode(',', array_fill(0, count($valuesLower), '?'));
+    return $query->whereRaw("LOWER(TRIM(status)) IN ($ph)", $valuesLower);
 }
 
-private function rejectedStatuses(): array
+private function whereStatusNotInLowerTrim($query, array $valuesLower)
 {
-    return ['cancelled', 'Cancelled', 'rejected', 'Rejected'];
+    $valuesLower = array_values(array_unique(array_map('strtolower', $valuesLower)));
+    $ph = implode(',', array_fill(0, count($valuesLower), '?'));
+    return $query->whereRaw("LOWER(TRIM(status)) NOT IN ($ph)", $valuesLower);
 }
 
-/**
- * Adjust if your gateway uses different success keywords.
- * Keep it broad so it never mis-classifies paid as unpaid.
- */
-private function paidPaymentStatuses(): array
+private function wherePaymentStatusInLowerTrim($query, array $valuesLower)
 {
-    return ['paid', 'Paid', 'PAID', 'success', 'Success', 'captured', 'CAPTURED'];
+    $valuesLower = array_values(array_unique(array_map('strtolower', $valuesLower)));
+    $ph = implode(',', array_fill(0, count($valuesLower), '?'));
+    return $query->whereRaw("LOWER(TRIM(payment_status)) IN ($ph)", $valuesLower);
+}
+
+/* ---------- status sets ---------- */
+
+private function paidStatusesLower(): array
+{
+    return ['paid'];
+}
+
+private function cancelledStatusesLower(): array
+{
+    return ['cancelled'];
+}
+
+private function rejectedStatusesLower(): array
+{
+    // rejected only
+    return ['rejected'];
+}
+
+private function closedStatusesLower(): array
+{
+    // excluded from unpaid
+    return array_merge($this->cancelledStatusesLower(), $this->rejectedStatusesLower());
+}
+
+private function paidPaymentStatusesLower(): array
+{
+    // Make sure this list matches your gateway values
+    return ['paid', 'success', 'captured'];
 }
 
 
@@ -252,28 +293,15 @@ private function paidPaymentStatuses(): array
 
 private function computeUnpaidAmountToCollect(): float
 {
-    $paidPayStatuses = $this->paidPaymentStatuses();
-    $rejectStatuses  = $this->rejectedStatuses();
-    $paidStatuses    = $this->paidStatuses();
+    $q = FlowerRequest::with(['order.flowerPayments', 'flowerRequestItems']);
+    $this->applyUnpaidFilter($q);
 
-    $unpaidRequests = FlowerRequest::with([
-            'order.flowerPayments',
-            'flowerRequestItems',
-        ])
-        ->where(function ($q) use ($paidStatuses, $rejectStatuses) {
-            $q->whereNull('status')
-              ->orWhereNotIn('status', array_merge($paidStatuses, $rejectStatuses));
-        })
-        ->whereDoesntHave('order.flowerPayments', function ($p) use ($paidPayStatuses) {
-            $p->whereIn('payment_status', $paidPayStatuses);
-        })
-        ->get();
+    $unpaidRequests = $q->get();
 
     $sum = 0.0;
     foreach ($unpaidRequests as $req) {
         $sum += $this->resolveRequestCollectableAmount($req);
     }
-
     return (float) $sum;
 }
 
@@ -315,20 +343,19 @@ private function resolveRequestCollectableAmount($req): float
                     return (float) $it->{$col};
                 }
             }
-
             $qty   = $it->quantity ?? ($it->qty ?? 0);
             $price = $it->price ?? ($it->unit_price ?? 0);
 
             if (is_numeric($qty) && is_numeric($price)) {
                 return (float) $qty * (float) $price;
             }
-
             return 0.0;
         });
     }
 
     return 0.0;
 }
+
 public function saveOrder(Request $request, $id)
 {
     try {
