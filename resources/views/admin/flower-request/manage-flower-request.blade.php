@@ -12,6 +12,11 @@
         : (Route::has('admin.flower-request.data')
             ? route('admin.flower-request.data')
             : url('/admin/flower-request/ajax-data'));
+
+    // For JS replace
+    $rejectUrlTemplate = Route::has('admin.flower-request.reject')
+        ? route('admin.flower-request.reject', ['flowerRequest' => '___ID___'])
+        : url('/admin/flower-request/___ID___/reject');
 @endphp
 
 @section('styles')
@@ -26,7 +31,6 @@
         .table td, .table th { vertical-align: middle !important; }
         .action-btns .btn { margin: 2px 0; }
 
-        /* ============ FILTER GRID (Perfect alignment) ============ */
         .filter-grid{
             display:grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -34,10 +38,7 @@
             margin-top: 1rem;
             margin-bottom: 1rem;
         }
-        .filter-link{
-            display:block;
-            text-decoration:none !important;
-        }
+        .filter-link{ display:block; text-decoration:none !important; }
         .filter-card{
             border: 1px solid #e5e7eb !important;
             border-radius: 16px;
@@ -156,7 +157,6 @@
     {{-- Filter Cards --}}
     <div class="filter-grid">
 
-        {{-- Total --}}
         <a href="{{ $pageUrl }}?filter=all" class="filter-link card-filter" data-filter="all">
             <div class="card filter-card {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
                 <div class="card-body">
@@ -175,7 +175,6 @@
             </div>
         </a>
 
-        {{-- Today --}}
         <a href="{{ $pageUrl }}?filter=today" class="filter-link card-filter" data-filter="today">
             <div class="card filter-card {{ ($filter ?? 'all') === 'today' ? 'is-active' : '' }}" data-card="today">
                 <div class="card-body">
@@ -194,7 +193,6 @@
             </div>
         </a>
 
-        {{-- Approved (NEW CARD) --}}
         <a href="{{ $pageUrl }}?filter=approved" class="filter-link card-filter" data-filter="approved">
             <div class="card filter-card {{ ($filter ?? 'all') === 'approved' ? 'is-active' : '' }}" data-card="approved">
                 <div class="card-body">
@@ -213,7 +211,6 @@
             </div>
         </a>
 
-        {{-- Unpaid (Approved but not Paid) --}}
         <a href="{{ $pageUrl }}?filter=unpaid" class="filter-link card-filter" data-filter="unpaid">
             <div class="card filter-card {{ ($filter ?? 'all') === 'unpaid' ? 'is-active' : '' }}" data-card="unpaid">
                 <div class="card-body">
@@ -234,7 +231,6 @@
             </div>
         </a>
 
-        {{-- Paid (with collected amount) --}}
         <a href="{{ $pageUrl }}?filter=paid" class="filter-link card-filter" data-filter="paid">
             <div class="card filter-card {{ ($filter ?? 'all') === 'paid' ? 'is-active' : '' }}" data-card="paid">
                 <div class="card-body">
@@ -255,7 +251,6 @@
             </div>
         </a>
 
-        {{-- Rejected (ONLY Rejected) --}}
         <a href="{{ $pageUrl }}?filter=rejected" class="filter-link card-filter" data-filter="rejected">
             <div class="card filter-card {{ ($filter ?? 'all') === 'rejected' ? 'is-active' : '' }}" data-card="rejected">
                 <div class="card-body">
@@ -274,7 +269,6 @@
             </div>
         </a>
 
-        {{-- Upcoming --}}
         <a href="{{ $pageUrl }}?filter=upcoming" class="filter-link card-filter" data-filter="upcoming">
             <div class="card filter-card {{ ($filter ?? 'all') === 'upcoming' ? 'is-active' : '' }}" data-card="upcoming">
                 <div class="card-body">
@@ -326,6 +320,53 @@
         </div>
     </div>
 
+    {{-- Reject Modal (ONE modal, reused) --}}
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="rejectForm" method="POST" action="">
+                    @csrf
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">Reject Order: <span id="rejectRequestCode"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <label class="form-label fw-bold">Reject Reason</label>
+                        <textarea id="rejectReason" name="reason" class="form-control" rows="4"
+                                  placeholder="Enter reject reason..." required></textarea>
+                        <small class="text-muted d-block mt-2">This will set status to <b>rejected</b> and save the reason.</small>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Save Rejection</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- View Reject Reason Modal --}}
+    <div class="modal fade" id="viewRejectModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">Rejected Reason: <span id="viewRejectRequestCode"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="p-3 bg-light rounded" id="viewRejectReasonText" style="white-space: pre-wrap;"></div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('scripts')
@@ -337,6 +378,7 @@
 
     <script>
         const AJAX_URL = @json($ajaxUrl);
+        const REJECT_URL_TEMPLATE = @json($rejectUrlTemplate);
 
         function reinitDataTable() {
             if ($.fn.DataTable.isDataTable('#file-datatable')) {
@@ -450,5 +492,32 @@
             });
         }
         window.confirmPayment = confirmPayment;
+
+        // Reject button -> open modal + set action URL
+        $(document).on('click', '.btn-reject', function () {
+            const id  = $(this).data('id');
+            const req = $(this).data('req');
+
+            $('#rejectRequestCode').text('#' + req);
+            $('#rejectReason').val('');
+
+            const action = REJECT_URL_TEMPLATE.replace('___ID___', id);
+            $('#rejectForm').attr('action', action);
+
+            const modal = new bootstrap.Modal(document.getElementById('rejectModal'));
+            modal.show();
+        });
+
+        // View reject reason
+        $(document).on('click', '.btn-view-reject', function () {
+            const req    = $(this).data('req');
+            const reason = $(this).data('reason') || '--';
+
+            $('#viewRejectRequestCode').text('#' + req);
+            $('#viewRejectReasonText').text(reason);
+
+            const modal = new bootstrap.Modal(document.getElementById('viewRejectModal'));
+            modal.show();
+        });
     </script>
 @endsection
