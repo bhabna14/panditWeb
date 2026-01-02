@@ -1,4 +1,31 @@
 @foreach ($pendingRequests as $request)
+    @php
+        // Normalize status (handles "Rejected" / "rejected" / spaces)
+        $st = strtolower(trim((string)($request->status ?? '')));
+
+        // Badge mapping (ONLY your 3 statuses + pending fallback)
+        if ($st === 'approved') {
+            $statusLabel = 'Approved';
+            $statusClass = 'bg-info';
+        } elseif ($st === 'paid') {
+            $statusLabel = 'Paid';
+            $statusClass = 'bg-success';
+        } elseif ($st === 'rejected') {
+            $statusLabel = 'Rejected';
+            $statusClass = 'bg-danger';
+        } elseif ($st === '' || $st === 'pending') {
+            $statusLabel = 'Pending';
+            $statusClass = 'bg-warning';
+        } else {
+            // If any other value comes, show it clearly (no "Unknown")
+            $statusLabel = ucfirst($st);
+            $statusClass = 'bg-secondary';
+        }
+
+        $isApproved = ($st === 'approved');
+        $isPaid     = ($st === 'paid');
+    @endphp
+
     <tr>
         {{-- # / User --}}
         <td>
@@ -69,32 +96,9 @@
             </div>
         </td>
 
-        {{-- Status --}}
+        {{-- Status (UPDATED) --}}
         <td>
-            @switch($request->status)
-                @case('pending')
-                    <span class="badge bg-warning">Pending</span>
-                    @break
-
-                @case('approved')
-                    <span class="badge bg-info">Approved</span>
-                    @break
-
-                @case('paid')
-                    <span class="badge bg-success">Paid</span>
-                    @break
-
-                @case('cancelled')
-                    <span class="badge bg-danger">Cancelled</span>
-                    @break
-
-                @case('rejected')
-                    <span class="badge bg-danger">Rejected</span>
-                    @break
-
-                @default
-                    <span class="badge bg-secondary">Unknown</span>
-            @endswitch
+            <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
         </td>
 
         {{-- Price / Save Order --}}
@@ -123,7 +127,7 @@
 
         {{-- Rider (only after paid + price set) --}}
         <td>
-            @if ($request->status == 'paid' && $request->order && $request->order->total_price)
+            @if ($isPaid && $request->order && $request->order->total_price)
                 @if ($request->order->rider_id)
                     <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
                 @else
@@ -143,7 +147,7 @@
             @endif
         </td>
 
-        {{-- Address (null-safe) --}}
+        {{-- Address --}}
         <td>
             @if ($request->address)
                 <small>
@@ -202,13 +206,13 @@
                 @csrf
                 <input type="hidden" name="payment_method" value="">
 
-                @if ($request->status == 'approved' && $request->order && $request->order->total_price)
+                @if ($isApproved && $request->order && $request->order->total_price)
                     <button type="button"
                             class="btn btn-success btn-sm w-100"
                             onclick="confirmPayment('{{ $request->request_id }}')">
                         Mark Paid
                     </button>
-                @elseif($request->status == 'paid')
+                @elseif($isPaid)
                     <button type="button" class="btn btn-success btn-sm w-100" disabled>Paid</button>
                 @else
                     <button type="button" class="btn btn-secondary btn-sm w-100" disabled>
@@ -217,7 +221,7 @@
                 @endif
             </form>
 
-            {{-- Notify button --}}
+            {{-- Notify --}}
             @if (!empty($request->user) && !empty($request->user->userid))
                 <a href="{{ route('admin.notification.create') }}?user={{ $request->user->userid }}"
                    class="btn btn-outline-primary btn-sm w-100 mb-2"
@@ -226,7 +230,7 @@
                 </a>
             @endif
 
-            {{-- Details modal trigger --}}
+            {{-- Details --}}
             <button class="btn btn-outline-dark btn-sm w-100 mb-2"
                     data-bs-toggle="modal"
                     data-bs-target="#detailsModal{{ $request->id }}">
@@ -250,7 +254,7 @@
                         </div>
                         <div class="modal-body">
                             <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}</p>
-                            <p><strong>Status:</strong> {{ ucfirst($request->status) }}</p>
+                            <p><strong>Status:</strong> {{ $statusLabel }}</p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
