@@ -7,22 +7,21 @@ use Illuminate\Support\Facades\Log;
 
 class Msg91WhatsappService
 {
-    /** ===== HARD-CODED MSG91 CONFIG ===== */
+    /** ===== MSG91 CONFIG (keep here or move to .env) ===== */
     private const AUTHKEY            = '425546AOXNCrBOzpq6878de9cP1';
     private const INTEGRATED_NUMBER  = '919124420330';   // digits only (no +)
     private const SENDER_E164        = '+919124420330';  // for display/help only
 
-    // Template configuration (MATCH your MSG91 template setup)
+    // Your Utility template configuration
     private const TEMPLATE_NAMESPACE = '73669fdc_d75e_4db4_a7b8_1cf1ed246b43';
-    private const TEMPLATE_NAME      = 'customer';       // <-- your template name
-    private const LANGUAGE_CODE      = 'en';
+    private const TEMPLATE_NAME      = 'subscription_renewal'; // ✅ UPDATED
+    private const LANGUAGE_CODE      = 'en_US';                // ✅ UPDATED
 
     private const ENDPOINT_BULK      = 'https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/';
 
     // URL param/button support (not used now, but kept for future)
     private const REQUIRES_URL_PARAM = false;
     private const BUTTON_BASE        = '';
-
     /** ==================================== */
 
     protected Client $http;
@@ -41,20 +40,18 @@ class Msg91WhatsappService
     public static function templateName(): string     { return self::TEMPLATE_NAME; }
 
     /**
-     * Send bulk template with MSG91 "bulk" endpoint, using:
+     * Send bulk template (subscription_renewal) with MSG91 "bulk" endpoint, using:
+     *   - body_1
+     *   - body_2
      *
-     * Template "customer":
-     *   - header param  -> header_1
-     *   - body param    -> body_1
-     *
-     * @param array       $to          MSISDN numbers (digits only, with country code)
-     * @param string|null $headerText  -> header_1 value (e.g. title, customer name)
-     * @param string|null $bodyText    -> body_1 value (e.g. full message)
+     * @param array  $to      MSISDN numbers (digits only, with country code)
+     * @param string $body1   -> body_1 value
+     * @param string $body2   -> body_2 value
      *
      * @return array ['http_status' => int, 'json' => ?array, 'body' => string]
      * @throws \Throwable
      */
-    public function sendBulkTemplate(array $to, ?string $headerText = null, ?string $bodyText = null): array
+    public function sendBulkTemplate(array $to, string $body1, string $body2): array
     {
         // Normalize recipients: keep digits only, unique
         $to = array_values(array_unique(array_map(
@@ -62,18 +59,14 @@ class Msg91WhatsappService
             $to
         )));
 
-        // Ensure we always send both params (template expects them)
-        $headerValue = (string)($headerText ?? '');
-        $bodyValue   = (string)($bodyText   ?? '');
-
         $components = [
-            'header_1' => [
+            'body_1' => [
                 'type'  => 'text',
-                'value' => $headerValue,
+                'value' => (string)$body1,
             ],
-            'body_1'   => [
+            'body_2' => [
                 'type'  => 'text',
-                'value' => $bodyValue,
+                'value' => (string)$body2,
             ],
         ];
 

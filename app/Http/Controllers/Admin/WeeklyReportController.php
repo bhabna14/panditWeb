@@ -20,420 +20,588 @@ use App\Models\OfficeFund;
 
 class WeeklyReportController extends Controller
 {
-   public function index(Request $request)
-{
-    $year  = (int)($request->input('year', Carbon::now()->year));
-    $month = (int)($request->input('month', Carbon::now()->month));
 
-    $tz = $request->input('tz', config('app.timezone', 'UTC'));
-    $tzOffset = Carbon::now($tz)->format('P'); // +05:30 etc.
+    public function index(Request $request)
+    {
+        $year  = (int)($request->input('year', Carbon::now()->year));
+        $month = (int)($request->input('month', Carbon::now()->month));
 
-    $monthStart = Carbon::createFromDate($year, $month, 1, $tz)->startOfDay();
-    $monthEnd   = (clone $monthStart)->endOfMonth()->endOfDay();
+        $tz = $request->input('tz', config('app.timezone', 'UTC'));
+        $tzOffset = Carbon::now($tz)->format('P'); // +05:30 etc.
 
-    $monthStartUtc = $monthStart->clone()->setTimezone('UTC');
-    $monthEndUtc   = $monthEnd->clone()->setTimezone('UTC');
+        $monthStart = Carbon::createFromDate($year, $month, 1, $tz)->startOfDay();
+        $monthEnd   = (clone $monthStart)->endOfMonth()->endOfDay();
 
-    $dateExpr = "DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset'))";
+        $monthStartUtc = $monthStart->clone()->setTimezone('UTC');
+        $monthEndUtc   = $monthEnd->clone()->setTimezone('UTC');
 
-    // ---- Day skeleton
-    $days = [];
-    foreach (CarbonPeriod::create($monthStart, $monthEnd) as $d) {
-        $dateKey = $d->toDateString();
-        $days[$dateKey] = [
-            'date'     => $dateKey,
-            'dow'      => $d->format('l'), // Monday, Tuesday...
+        $dateExpr = "DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset'))";
 
-            'finance'  => [
+        // ---- Day skeleton
+        $days = [];
+        foreach (CarbonPeriod::create($monthStart, $monthEnd) as $d) {
+            $dateKey = $d->toDateString();
+            $days[$dateKey] = [
+                'date'     => $dateKey,
+                'dow'      => $d->format('l'), // Monday, Tuesday...
+
+                'finance'  => [
+                    'subscription_income' => 0,
+                    'customize_income'    => 0,
+                    'income_total'        => 0,
+
+                    // for modal
+                    // UPDATED: now each item includes payment_methods + payment_date
+                    // [{user_id,name,amt,payment_methods,payment_date}]
+                    'subscription_income_users'   => [],
+                    'customize_income_users'      => [],
+
+                    // legacy fields (safe to keep)
+                    'subscription_income_tooltip' => '',
+                    'customize_income_tooltip'    => '',
+
+                    'expenditure'         => 0,
+                    'vendor_fund'         => 0,
+                    'available_balance'   => 0,
+                ],
+                'customer' => [
+                    'renew'     => 0,
+                    'new'       => 0,
+                    'pause'     => 0,
+                    'customize' => 0
+                ],
+                'vendors'  => [],
+                'riders'   => [],
+                'total_delivery' => 0,
+            ];
+        }
+
+        $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
+        $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
+
+        /**
+         * IMPORTANT:
+         * Your vendor columns use vendor NAME strings ($v),
+         * but vendorPaymentItems() requires vendor_id.
+         * So we build a name->id map + also allow clicking when column name is vendor_id.
+         */
+        $vendorNameToId = [];
+        foreach ($vendorMap as $vid => $vname) {
+            if (!empty($vname)) {
+                $vendorNameToId[$vname] = $vid;
+            }
+            $vendorNameToId[(string)$vid] = $vid; // fallback if column label is vendor_id
+        }
+
+        /* ================= Finance: INCOME (Split totals) ================= */
+
+        $subPayments = FlowerPayment::query()
+            ->from('flower_payments as fp')
+            ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
+                DB::raw("SUM(fp.paid_amount) as amt"),
+            ])
+            ->where('fp.payment_status', 'paid')
+            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($subPayments as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['subscription_income'] = (float)$row->amt;
+            }
+        }
+
+        $custPayments = FlowerPayment::query()
+            ->from('flower_payments as fp')
+            ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
+                DB::raw("SUM(fp.paid_amount) as amt"),
+            ])
+            ->whereNull('s.order_id')
+            ->where('fp.payment_status', 'paid')
+            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($custPayments as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['customize_income'] = (float)$row->amt;
+            }
+        }
+
+        foreach ($days as $k => $row) {
+            $sub = $row['finance']['subscription_income'] ?? 0;
+            $cus = $row['finance']['customize_income'] ?? 0;
+            $days[$k]['finance']['income_total'] = $sub + $cus;
+        }
+
+        /* ================= INCOME USER LIST (for modal) ================= */
+        /* UPDATED: include payment_methods + payment_date */
+
+        $subUsersRows = FlowerPayment::query()
+            ->from('flower_payments as fp')
+            ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+            ->leftJoin('users as u', 'u.userid', '=', 'fp.user_id')
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
+                'fp.user_id as user_id',
+                DB::raw("COALESCE(u.name, 'Unknown') as name"),
+                DB::raw("SUM(fp.paid_amount) as amt"),
+                DB::raw("GROUP_CONCAT(DISTINCT fp.payment_method ORDER BY fp.payment_method SEPARATOR ', ') as payment_methods"),
+            ])
+            ->where('fp.payment_status', 'paid')
+            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d', 'fp.user_id', 'u.name')
+            ->orderBy('d')
+            ->orderByDesc('amt')
+            ->get();
+
+        $custUsersRows = FlowerPayment::query()
+            ->from('flower_payments as fp')
+            ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+            ->leftJoin('users as u', 'u.userid', '=', 'fp.user_id')
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
+                'fp.user_id as user_id',
+                DB::raw("COALESCE(u.name, 'Unknown') as name"),
+                DB::raw("SUM(fp.paid_amount) as amt"),
+                DB::raw("GROUP_CONCAT(DISTINCT fp.payment_method ORDER BY fp.payment_method SEPARATOR ', ') as payment_methods"),
+            ])
+            ->whereNull('s.order_id')
+            ->where('fp.payment_status', 'paid')
+            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d', 'fp.user_id', 'u.name')
+            ->orderBy('d')
+            ->orderByDesc('amt')
+            ->get();
+
+        foreach ($subUsersRows as $r) {
+            if (!isset($days[$r->d])) continue;
+            $days[$r->d]['finance']['subscription_income_users'][] = [
+                'user_id'         => $r->user_id,
+                'name'            => $r->name,
+                'amt'             => (float)$r->amt,
+                'payment_methods' => (string)($r->payment_methods ?? ''),
+                'payment_date'    => (string)($r->d ?? ''), // NEW
+            ];
+        }
+
+        foreach ($custUsersRows as $r) {
+            if (!isset($days[$r->d])) continue;
+            $days[$r->d]['finance']['customize_income_users'][] = [
+                'user_id'         => $r->user_id,
+                'name'            => $r->name,
+                'amt'             => (float)$r->amt,
+                'payment_methods' => (string)($r->payment_methods ?? ''),
+                'payment_date'    => (string)($r->d ?? ''), // NEW
+            ];
+        }
+
+        // (Optional/legacy) tooltips - safe to keep
+        foreach ($days as $dk => $row) {
+            $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Subscription Income',
+                $row['finance']['subscription_income_users'] ?? [],
+                (float)($row['finance']['subscription_income'] ?? 0)
+            );
+
+            $days[$dk]['finance']['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Customize Income',
+                $row['finance']['customize_income_users'] ?? [],
+                (float)($row['finance']['customize_income'] ?? 0)
+            );
+        }
+
+        /* ================= Finance: EXPENDITURE ================= */
+
+        $expend = FlowerPickupDetails::query()
+            ->select([
+                DB::raw("DATE(pickup_date) as d"),
+                DB::raw("SUM(total_price) as amt"),
+            ])
+            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($expend as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
+            }
+        }
+
+        /* ================= Finance: Vendor Fund ================= */
+
+        $vendorFund = OfficeFund::query()
+            ->active()
+            ->where('categories', 'vendor_payment')
+            ->select([
+                DB::raw("DATE(date) as d"),
+                DB::raw("SUM(amount) as amt"),
+            ])
+            ->whereBetween('date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($vendorFund as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['finance']['vendor_fund'] = (float)$row->amt;
+            }
+        }
+
+        foreach ($days as $k => $row) {
+            $vf  = $row['finance']['vendor_fund'] ?? 0;
+            $exp = $row['finance']['expenditure'] ?? 0;
+            $days[$k]['finance']['available_balance'] = $vf - $exp;
+        }
+
+        /* ================= Customer: NEW / RENEW ================= */
+
+        $firstTimeUserIds = Subscription::query()
+            ->select('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) = 1');
+
+        $newPerDay = Subscription::query()
+            ->select([
+                DB::raw("$dateExpr as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereIn('user_id', $firstTimeUserIds)
+            ->groupBy('d')
+            ->get();
+
+        foreach ($newPerDay as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['new'] = (int)$row->c;
+            }
+        }
+
+        $renewOrderIds = Subscription::query()
+            ->select('order_id')
+            ->groupBy('order_id')
+            ->havingRaw('COUNT(order_id) > 1');
+
+        $renewPerDay = Subscription::query()
+            ->select([
+                DB::raw("$dateExpr as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereIn('order_id', $renewOrderIds)
+            ->groupBy('d')
+            ->get();
+
+        foreach ($renewPerDay as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['renew'] = (int)$row->c;
+            }
+        }
+
+        /* ================= Customer: PAUSE ================= */
+
+        if (class_exists(SubscriptionPauseResumeLog::class)) {
+            $pauses = SubscriptionPauseResumeLog::query()
+                ->select([
+                    DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                    DB::raw("COUNT(*) as c")
+                ])
+                ->where('action', 'paused')
+                ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+                ->groupBy('d')
+                ->get();
+
+            foreach ($pauses as $row) {
+                if (isset($days[$row->d])) {
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
+                }
+            }
+        } else {
+            $pauses = Subscription::query()
+                ->select([
+                    DB::raw("DATE(pause_start_date) as d"),
+                    DB::raw("COUNT(*) as c")
+                ])
+                ->whereNotNull('pause_start_date')
+                ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->groupBy('d')
+                ->get();
+
+            foreach ($pauses as $row) {
+                if (isset($days[$row->d])) {
+                    $days[$row->d]['customer']['pause'] = (int)$row->c;
+                }
+            }
+        }
+
+        /* ================= Customer: CUSTOMIZE ================= */
+
+        $customs = FlowerRequest::query()
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d')
+            ->get();
+
+        foreach ($customs as $row) {
+            if (isset($days[$row->d])) {
+                $days[$row->d]['customer']['customize'] = (int)$row->c;
+            }
+        }
+
+        /* ================= Vendor daily ================= */
+
+        $vendorPaid = FlowerPickupDetails::query()
+            ->select([
+                DB::raw("DATE(pickup_date) as d"),
+                'vendor_id',
+                DB::raw("SUM(total_price) as amt"),
+            ])
+            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->groupBy('d', 'vendor_id')
+            ->get();
+
+        $vendorColumnsSet = [];
+        foreach ($vendorPaid as $row) {
+            $name = $vendorMap[$row->vendor_id] ?? $row->vendor_id;
+            $vendorColumnsSet[$name] = true;
+            if (isset($days[$row->d])) {
+                $days[$row->d]['vendors'][$name] = (float)$row->amt;
+            }
+        }
+
+        $vendorColumns = array_keys($vendorColumnsSet);
+        sort($vendorColumns);
+
+        /* ================= Deliveries per rider ================= */
+
+        $deliv = DeliveryHistory::query()
+            ->select([
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                'rider_id',
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->where('delivery_status', 'delivered')
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->groupBy('d', 'rider_id')
+            ->get();
+
+        $deliveryColsSet = [];
+        foreach ($deliv as $row) {
+            $name = $riderMap[$row->rider_id] ?? $row->rider_id;
+            $deliveryColsSet[$name] = true;
+
+            if (isset($days[$row->d])) {
+                $days[$row->d]['riders'][$name] = (int)$row->c;
+                $days[$row->d]['total_delivery'] += (int)$row->c;
+            }
+        }
+
+        $deliveryCols = array_keys($deliveryColsSet);
+        sort($deliveryCols);
+
+        /* ================= Split into weeks + week totals ================= */
+
+        $weeks = [];
+        $cursor    = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $endCursor = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+
+        while ($cursor->lte($endCursor)) {
+            $weekStart = $cursor->copy();
+            $weekEnd   = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
+
+            $rangeStart = $weekStart->lt($monthStart) ? $monthStart->copy() : $weekStart->copy();
+            $rangeEnd   = $weekEnd->gt($monthEnd) ? $monthEnd->copy() : $weekEnd->copy();
+
+            $weekDays = [];
+            foreach (CarbonPeriod::create($rangeStart, $rangeEnd) as $d) {
+                $key = $d->toDateString();
+                $weekDays[$key] = $days[$key];
+            }
+
+            $weekTotals = [
                 'subscription_income' => 0,
                 'customize_income'    => 0,
                 'income_total'        => 0,
 
                 // for modal
-                // UPDATED: now each item includes payment_methods + payment_date
-                // [{user_id,name,amt,payment_methods,payment_date}]
-                'subscription_income_users'   => [],
-                'customize_income_users'      => [],
+                // UPDATED: include payment_methods + payment_date
+                'subscription_income_users' => [],
+                'customize_income_users'    => [],
 
-                // legacy fields (safe to keep)
+                // legacy tooltip fields (safe to keep)
                 'subscription_income_tooltip' => '',
                 'customize_income_tooltip'    => '',
 
                 'expenditure'         => 0,
                 'vendor_fund'         => 0,
                 'available_balance'   => 0,
-            ],
-            'customer' => [
-                'renew'     => 0,
-                'new'       => 0,
-                'pause'     => 0,
-                'customize' => 0
-            ],
-            'vendors'  => [],
-            'riders'   => [],
-            'total_delivery' => 0,
-        ];
-    }
 
-    $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
-    $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
+                'renew'               => 0,
+                'new'                 => 0,
+                'pause'               => 0,
+                'customize'           => 0,
 
-    /**
-     * IMPORTANT:
-     * Your vendor columns use vendor NAME strings ($v),
-     * but vendorPaymentItems() requires vendor_id.
-     * So we build a name->id map + also allow clicking when column name is vendor_id.
-     */
-    $vendorNameToId = [];
-    foreach ($vendorMap as $vid => $vname) {
-        if (!empty($vname)) {
-            $vendorNameToId[$vname] = $vid;
-        }
-        $vendorNameToId[(string)$vid] = $vid; // fallback if column label is vendor_id
-    }
+                'vendors'             => array_fill_keys($vendorColumns, 0.0),
+                'riders'              => array_fill_keys($deliveryCols, 0),
+                'total_delivery'      => 0,
+            ];
 
-    /* ================= Finance: INCOME (Split totals) ================= */
+            // UPDATED aggregators (merge payment_methods + keep latest payment_date)
+            $weekSubUsers = []; // uid => ['user_id','name','amt','_methods_set'=>[],'_latest_date'=>'YYYY-MM-DD']
+            $weekCusUsers = [];
 
-    $subPayments = FlowerPayment::query()
-        ->from('flower_payments as fp')
-        ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-        ->select([
-            DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
-            DB::raw("SUM(fp.paid_amount) as amt"),
-        ])
-        ->where('fp.payment_status', 'paid')
-        ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
-        ->groupBy('d')
-        ->get();
+            foreach ($weekDays as $row) {
+                $weekTotals['subscription_income'] += (float)($row['finance']['subscription_income'] ?? 0);
+                $weekTotals['customize_income']    += (float)($row['finance']['customize_income'] ?? 0);
+                $weekTotals['income_total']        += (float)($row['finance']['income_total'] ?? 0);
 
-    foreach ($subPayments as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['finance']['subscription_income'] = (float)$row->amt;
-        }
-    }
+                $weekTotals['expenditure']         += (float)($row['finance']['expenditure'] ?? 0);
+                $weekTotals['vendor_fund']         += (float)($row['finance']['vendor_fund'] ?? 0);
 
-    $custPayments = FlowerPayment::query()
-        ->from('flower_payments as fp')
-        ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-        ->select([
-            DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
-            DB::raw("SUM(fp.paid_amount) as amt"),
-        ])
-        ->whereNull('s.order_id')
-        ->where('fp.payment_status', 'paid')
-        ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
-        ->groupBy('d')
-        ->get();
+                $weekTotals['renew']               += (int)($row['customer']['renew'] ?? 0);
+                $weekTotals['new']                 += (int)($row['customer']['new'] ?? 0);
+                $weekTotals['pause']               += (int)($row['customer']['pause'] ?? 0);
+                $weekTotals['customize']           += (int)($row['customer']['customize'] ?? 0);
 
-    foreach ($custPayments as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['finance']['customize_income'] = (float)$row->amt;
-        }
-    }
+                foreach ($vendorColumns as $v) {
+                    $weekTotals['vendors'][$v] += (float)($row['vendors'][$v] ?? 0);
+                }
+                foreach ($deliveryCols as $r) {
+                    $weekTotals['riders'][$r]  += (int)($row['riders'][$r] ?? 0);
+                }
 
-    foreach ($days as $k => $row) {
-        $sub = $row['finance']['subscription_income'] ?? 0;
-        $cus = $row['finance']['customize_income'] ?? 0;
-        $days[$k]['finance']['income_total'] = $sub + $cus;
-    }
+                $weekTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
-    /* ================= INCOME USER LIST (for modal) ================= */
-    /* UPDATED: include payment_methods + payment_date */
+                foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
+                    $uid = (string)($u['user_id'] ?? '');
+                    if ($uid === '') continue;
 
-    $subUsersRows = FlowerPayment::query()
-        ->from('flower_payments as fp')
-        ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-        ->leftJoin('users as u', 'u.userid', '=', 'fp.user_id')
-        ->select([
-            DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
-            'fp.user_id as user_id',
-            DB::raw("COALESCE(u.name, 'Unknown') as name"),
-            DB::raw("SUM(fp.paid_amount) as amt"),
-            DB::raw("GROUP_CONCAT(DISTINCT fp.payment_method ORDER BY fp.payment_method SEPARATOR ', ') as payment_methods"),
-        ])
-        ->where('fp.payment_status', 'paid')
-        ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
-        ->groupBy('d', 'fp.user_id', 'u.name')
-        ->orderBy('d')
-        ->orderByDesc('amt')
-        ->get();
+                    if (!isset($weekSubUsers[$uid])) {
+                        $weekSubUsers[$uid] = [
+                            'user_id' => $u['user_id'],
+                            'name'    => $u['name'],
+                            'amt'     => 0.0,
+                            '_methods_set' => [],
+                            '_latest_date' => '',
+                        ];
+                    }
 
-    $custUsersRows = FlowerPayment::query()
-        ->from('flower_payments as fp')
-        ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-        ->leftJoin('users as u', 'u.userid', '=', 'fp.user_id')
-        ->select([
-            DB::raw("DATE(CONVERT_TZ(fp.created_at, '+00:00', '$tzOffset')) as d"),
-            'fp.user_id as user_id',
-            DB::raw("COALESCE(u.name, 'Unknown') as name"),
-            DB::raw("SUM(fp.paid_amount) as amt"),
-            DB::raw("GROUP_CONCAT(DISTINCT fp.payment_method ORDER BY fp.payment_method SEPARATOR ', ') as payment_methods"),
-        ])
-        ->whereNull('s.order_id')
-        ->where('fp.payment_status', 'paid')
-        ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
-        ->groupBy('d', 'fp.user_id', 'u.name')
-        ->orderBy('d')
-        ->orderByDesc('amt')
-        ->get();
+                    $weekSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
 
-    foreach ($subUsersRows as $r) {
-        if (!isset($days[$r->d])) continue;
-        $days[$r->d]['finance']['subscription_income_users'][] = [
-            'user_id'         => $r->user_id,
-            'name'            => $r->name,
-            'amt'             => (float)$r->amt,
-            'payment_methods' => (string)($r->payment_methods ?? ''),
-            'payment_date'    => (string)($r->d ?? ''), // NEW
-        ];
-    }
+                    $methods = (string)($u['payment_methods'] ?? '');
+                    if ($methods !== '') {
+                        foreach (array_map('trim', explode(',', $methods)) as $m) {
+                            if ($m !== '') $weekSubUsers[$uid]['_methods_set'][$m] = true;
+                        }
+                    }
 
-    foreach ($custUsersRows as $r) {
-        if (!isset($days[$r->d])) continue;
-        $days[$r->d]['finance']['customize_income_users'][] = [
-            'user_id'         => $r->user_id,
-            'name'            => $r->name,
-            'amt'             => (float)$r->amt,
-            'payment_methods' => (string)($r->payment_methods ?? ''),
-            'payment_date'    => (string)($r->d ?? ''), // NEW
-        ];
-    }
+                    $pdate = (string)($u['payment_date'] ?? '');
+                    if ($pdate !== '' && ($weekSubUsers[$uid]['_latest_date'] === '' || $pdate > $weekSubUsers[$uid]['_latest_date'])) {
+                        $weekSubUsers[$uid]['_latest_date'] = $pdate;
+                    }
+                }
 
-    // (Optional/legacy) tooltips - safe to keep
-    foreach ($days as $dk => $row) {
-        $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
-            'Subscription Income',
-            $row['finance']['subscription_income_users'] ?? [],
-            (float)($row['finance']['subscription_income'] ?? 0)
-        );
+                foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
+                    $uid = (string)($u['user_id'] ?? '');
+                    if ($uid === '') continue;
 
-        $days[$dk]['finance']['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
-            'Customize Income',
-            $row['finance']['customize_income_users'] ?? [],
-            (float)($row['finance']['customize_income'] ?? 0)
-        );
-    }
+                    if (!isset($weekCusUsers[$uid])) {
+                        $weekCusUsers[$uid] = [
+                            'user_id' => $u['user_id'],
+                            'name'    => $u['name'],
+                            'amt'     => 0.0,
+                            '_methods_set' => [],
+                            '_latest_date' => '',
+                        ];
+                    }
 
-    /* ================= Finance: EXPENDITURE ================= */
+                    $weekCusUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
 
-    $expend = FlowerPickupDetails::query()
-        ->select([
-            DB::raw("DATE(pickup_date) as d"),
-            DB::raw("SUM(total_price) as amt"),
-        ])
-        ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-        ->groupBy('d')
-        ->get();
+                    $methods = (string)($u['payment_methods'] ?? '');
+                    if ($methods !== '') {
+                        foreach (array_map('trim', explode(',', $methods)) as $m) {
+                            if ($m !== '') $weekCusUsers[$uid]['_methods_set'][$m] = true;
+                        }
+                    }
 
-    foreach ($expend as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
-        }
-    }
-
-    /* ================= Finance: Vendor Fund ================= */
-
-    $vendorFund = OfficeFund::query()
-        ->active()
-        ->where('categories', 'vendor_payment')
-        ->select([
-            DB::raw("DATE(date) as d"),
-            DB::raw("SUM(amount) as amt"),
-        ])
-        ->whereBetween('date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-        ->groupBy('d')
-        ->get();
-
-    foreach ($vendorFund as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['finance']['vendor_fund'] = (float)$row->amt;
-        }
-    }
-
-    foreach ($days as $k => $row) {
-        $vf  = $row['finance']['vendor_fund'] ?? 0;
-        $exp = $row['finance']['expenditure'] ?? 0;
-        $days[$k]['finance']['available_balance'] = $vf - $exp;
-    }
-
-    /* ================= Customer: NEW / RENEW ================= */
-
-    $firstTimeUserIds = Subscription::query()
-        ->select('user_id')
-        ->groupBy('user_id')
-        ->havingRaw('COUNT(*) = 1');
-
-    $newPerDay = Subscription::query()
-        ->select([
-            DB::raw("$dateExpr as d"),
-            DB::raw("COUNT(*) as c"),
-        ])
-        ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-        ->whereIn('user_id', $firstTimeUserIds)
-        ->groupBy('d')
-        ->get();
-
-    foreach ($newPerDay as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['customer']['new'] = (int)$row->c;
-        }
-    }
-
-    $renewOrderIds = Subscription::query()
-        ->select('order_id')
-        ->groupBy('order_id')
-        ->havingRaw('COUNT(order_id) > 1');
-
-    $renewPerDay = Subscription::query()
-        ->select([
-            DB::raw("$dateExpr as d"),
-            DB::raw("COUNT(*) as c"),
-        ])
-        ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-        ->whereIn('order_id', $renewOrderIds)
-        ->groupBy('d')
-        ->get();
-
-    foreach ($renewPerDay as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['customer']['renew'] = (int)$row->c;
-        }
-    }
-
-    /* ================= Customer: PAUSE ================= */
-
-    if (class_exists(SubscriptionPauseResumeLog::class)) {
-        $pauses = SubscriptionPauseResumeLog::query()
-            ->select([
-                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
-                DB::raw("COUNT(*) as c")
-            ])
-            ->where('action', 'paused')
-            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-            ->groupBy('d')
-            ->get();
-
-        foreach ($pauses as $row) {
-            if (isset($days[$row->d])) {
-                $days[$row->d]['customer']['pause'] = (int)$row->c;
+                    $pdate = (string)($u['payment_date'] ?? '');
+                    if ($pdate !== '' && ($weekCusUsers[$uid]['_latest_date'] === '' || $pdate > $weekCusUsers[$uid]['_latest_date'])) {
+                        $weekCusUsers[$uid]['_latest_date'] = $pdate;
+                    }
+                }
             }
-        }
-    } else {
-        $pauses = Subscription::query()
-            ->select([
-                DB::raw("DATE(pause_start_date) as d"),
-                DB::raw("COUNT(*) as c")
-            ])
-            ->whereNotNull('pause_start_date')
-            ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-            ->groupBy('d')
-            ->get();
 
-        foreach ($pauses as $row) {
-            if (isset($days[$row->d])) {
-                $days[$row->d]['customer']['pause'] = (int)$row->c;
+            $weekTotals['available_balance'] = $weekTotals['vendor_fund'] - $weekTotals['expenditure'];
+
+            $weekSubUsersList = array_values($weekSubUsers);
+            foreach ($weekSubUsersList as &$x) {
+                $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
+                $x['payment_date']    = (string)($x['_latest_date'] ?? '');
+                unset($x['_methods_set'], $x['_latest_date']);
             }
-        }
-    }
+            unset($x);
 
-    /* ================= Customer: CUSTOMIZE ================= */
+            $weekCusUsersList = array_values($weekCusUsers);
+            foreach ($weekCusUsersList as &$x) {
+                $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
+                $x['payment_date']    = (string)($x['_latest_date'] ?? '');
+                unset($x['_methods_set'], $x['_latest_date']);
+            }
+            unset($x);
 
-    $customs = FlowerRequest::query()
-        ->select([
-            DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
-            DB::raw("COUNT(*) as c"),
-        ])
-        ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-        ->groupBy('d')
-        ->get();
+            usort($weekSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
+            usort($weekCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
-    foreach ($customs as $row) {
-        if (isset($days[$row->d])) {
-            $days[$row->d]['customer']['customize'] = (int)$row->c;
-        }
-    }
+            $weekTotals['subscription_income_users'] = $weekSubUsersList;
+            $weekTotals['customize_income_users']    = $weekCusUsersList;
 
-    /* ================= Vendor daily ================= */
+            $weekTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Subscription Income (Week)',
+                $weekSubUsersList,
+                (float)$weekTotals['subscription_income']
+            );
 
-    $vendorPaid = FlowerPickupDetails::query()
-        ->select([
-            DB::raw("DATE(pickup_date) as d"),
-            'vendor_id',
-            DB::raw("SUM(total_price) as amt"),
-        ])
-        ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-        ->groupBy('d', 'vendor_id')
-        ->get();
+            $weekTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
+                'Customize Income (Week)',
+                $weekCusUsersList,
+                (float)$weekTotals['customize_income']
+            );
 
-    $vendorColumnsSet = [];
-    foreach ($vendorPaid as $row) {
-        $name = $vendorMap[$row->vendor_id] ?? $row->vendor_id;
-        $vendorColumnsSet[$name] = true;
-        if (isset($days[$row->d])) {
-            $days[$row->d]['vendors'][$name] = (float)$row->amt;
-        }
-    }
+            $weekVendorColumns = [];
+            foreach ($vendorColumns as $v) {
+                if (($weekTotals['vendors'][$v] ?? 0) > 0) {
+                    $weekVendorColumns[] = $v;
+                }
+            }
 
-    $vendorColumns = array_keys($vendorColumnsSet);
-    sort($vendorColumns);
+            $weeks[] = [
+                'start'         => $rangeStart,
+                'end'           => $rangeEnd,
+                'days'          => $weekDays,
+                'totals'        => $weekTotals,
+                'vendorColumns' => $weekVendorColumns,
+            ];
 
-    /* ================= Deliveries per rider ================= */
-
-    $deliv = DeliveryHistory::query()
-        ->select([
-            DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
-            'rider_id',
-            DB::raw("COUNT(*) as c"),
-        ])
-        ->where('delivery_status', 'delivered')
-        ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
-        ->groupBy('d', 'rider_id')
-        ->get();
-
-    $deliveryColsSet = [];
-    foreach ($deliv as $row) {
-        $name = $riderMap[$row->rider_id] ?? $row->rider_id;
-        $deliveryColsSet[$name] = true;
-
-        if (isset($days[$row->d])) {
-            $days[$row->d]['riders'][$name] = (int)$row->c;
-            $days[$row->d]['total_delivery'] += (int)$row->c;
-        }
-    }
-
-    $deliveryCols = array_keys($deliveryColsSet);
-    sort($deliveryCols);
-
-    /* ================= Split into weeks + week totals ================= */
-
-    $weeks = [];
-    $cursor    = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
-    $endCursor = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
-
-    while ($cursor->lte($endCursor)) {
-        $weekStart = $cursor->copy();
-        $weekEnd   = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
-
-        $rangeStart = $weekStart->lt($monthStart) ? $monthStart->copy() : $weekStart->copy();
-        $rangeEnd   = $weekEnd->gt($monthEnd) ? $monthEnd->copy() : $weekEnd->copy();
-
-        $weekDays = [];
-        foreach (CarbonPeriod::create($rangeStart, $rangeEnd) as $d) {
-            $key = $d->toDateString();
-            $weekDays[$key] = $days[$key];
+            $cursor->addWeek();
         }
 
-        $weekTotals = [
+        /* ================= Month totals ================= */
+
+        $monthTotals = [
             'subscription_income' => 0,
             'customize_income'    => 0,
             'income_total'        => 0,
 
-            // for modal
             // UPDATED: include payment_methods + payment_date
             'subscription_income_users' => [],
             'customize_income_users'    => [],
 
-            // legacy tooltip fields (safe to keep)
             'subscription_income_tooltip' => '',
             'customize_income_tooltip'    => '',
 
@@ -452,37 +620,36 @@ class WeeklyReportController extends Controller
         ];
 
         // UPDATED aggregators (merge payment_methods + keep latest payment_date)
-        $weekSubUsers = []; // uid => ['user_id','name','amt','_methods_set'=>[],'_latest_date'=>'YYYY-MM-DD']
-        $weekCusUsers = [];
+        $monthSubUsers = [];
+        $monthCusUsers = [];
 
-        foreach ($weekDays as $row) {
-            $weekTotals['subscription_income'] += (float)($row['finance']['subscription_income'] ?? 0);
-            $weekTotals['customize_income']    += (float)($row['finance']['customize_income'] ?? 0);
-            $weekTotals['income_total']        += (float)($row['finance']['income_total'] ?? 0);
+        foreach ($days as $row) {
+            $monthTotals['subscription_income'] += (float)($row['finance']['subscription_income'] ?? 0);
+            $monthTotals['customize_income']    += (float)($row['finance']['customize_income'] ?? 0);
+            $monthTotals['income_total']        += (float)($row['finance']['income_total'] ?? 0);
 
-            $weekTotals['expenditure']         += (float)($row['finance']['expenditure'] ?? 0);
-            $weekTotals['vendor_fund']         += (float)($row['finance']['vendor_fund'] ?? 0);
+            $monthTotals['expenditure']         += (float)($row['finance']['expenditure'] ?? 0);
+            $monthTotals['vendor_fund']         += (float)($row['finance']['vendor_fund'] ?? 0);
 
-            $weekTotals['renew']               += (int)($row['customer']['renew'] ?? 0);
-            $weekTotals['new']                 += (int)($row['customer']['new'] ?? 0);
-            $weekTotals['pause']               += (int)($row['customer']['pause'] ?? 0);
-            $weekTotals['customize']           += (int)($row['customer']['customize'] ?? 0);
+            $monthTotals['renew']               += (int)($row['customer']['renew'] ?? 0);
+            $monthTotals['new']                 += (int)($row['customer']['new'] ?? 0);
+            $monthTotals['pause']               += (int)($row['customer']['pause'] ?? 0);
+            $monthTotals['customize']           += (int)($row['customer']['customize'] ?? 0);
 
             foreach ($vendorColumns as $v) {
-                $weekTotals['vendors'][$v] += (float)($row['vendors'][$v] ?? 0);
+                $monthTotals['vendors'][$v] += (float)($row['vendors'][$v] ?? 0);
             }
             foreach ($deliveryCols as $r) {
-                $weekTotals['riders'][$r]  += (int)($row['riders'][$r] ?? 0);
+                $monthTotals['riders'][$r]  += (int)($row['riders'][$r] ?? 0);
             }
-
-            $weekTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
+            $monthTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
 
             foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
                 $uid = (string)($u['user_id'] ?? '');
                 if ($uid === '') continue;
 
-                if (!isset($weekSubUsers[$uid])) {
-                    $weekSubUsers[$uid] = [
+                if (!isset($monthSubUsers[$uid])) {
+                    $monthSubUsers[$uid] = [
                         'user_id' => $u['user_id'],
                         'name'    => $u['name'],
                         'amt'     => 0.0,
@@ -491,18 +658,18 @@ class WeeklyReportController extends Controller
                     ];
                 }
 
-                $weekSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
+                $monthSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
 
                 $methods = (string)($u['payment_methods'] ?? '');
                 if ($methods !== '') {
                     foreach (array_map('trim', explode(',', $methods)) as $m) {
-                        if ($m !== '') $weekSubUsers[$uid]['_methods_set'][$m] = true;
+                        if ($m !== '') $monthSubUsers[$uid]['_methods_set'][$m] = true;
                     }
                 }
 
                 $pdate = (string)($u['payment_date'] ?? '');
-                if ($pdate !== '' && ($weekSubUsers[$uid]['_latest_date'] === '' || $pdate > $weekSubUsers[$uid]['_latest_date'])) {
-                    $weekSubUsers[$uid]['_latest_date'] = $pdate;
+                if ($pdate !== '' && ($monthSubUsers[$uid]['_latest_date'] === '' || $pdate > $monthSubUsers[$uid]['_latest_date'])) {
+                    $monthSubUsers[$uid]['_latest_date'] = $pdate;
                 }
             }
 
@@ -510,8 +677,8 @@ class WeeklyReportController extends Controller
                 $uid = (string)($u['user_id'] ?? '');
                 if ($uid === '') continue;
 
-                if (!isset($weekCusUsers[$uid])) {
-                    $weekCusUsers[$uid] = [
+                if (!isset($monthCusUsers[$uid])) {
+                    $monthCusUsers[$uid] = [
                         'user_id' => $u['user_id'],
                         'name'    => $u['name'],
                         'amt'     => 0.0,
@@ -520,246 +687,79 @@ class WeeklyReportController extends Controller
                     ];
                 }
 
-                $weekCusUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
+                $monthCusUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
 
                 $methods = (string)($u['payment_methods'] ?? '');
                 if ($methods !== '') {
                     foreach (array_map('trim', explode(',', $methods)) as $m) {
-                        if ($m !== '') $weekCusUsers[$uid]['_methods_set'][$m] = true;
+                        if ($m !== '') $monthCusUsers[$uid]['_methods_set'][$m] = true;
                     }
                 }
 
                 $pdate = (string)($u['payment_date'] ?? '');
-                if ($pdate !== '' && ($weekCusUsers[$uid]['_latest_date'] === '' || $pdate > $weekCusUsers[$uid]['_latest_date'])) {
-                    $weekCusUsers[$uid]['_latest_date'] = $pdate;
+                if ($pdate !== '' && ($monthCusUsers[$uid]['_latest_date'] === '' || $pdate > $monthCusUsers[$uid]['_latest_date'])) {
+                    $monthCusUsers[$uid]['_latest_date'] = $pdate;
                 }
             }
         }
 
-        $weekTotals['available_balance'] = $weekTotals['vendor_fund'] - $weekTotals['expenditure'];
+        $monthTotals['available_balance'] = $monthTotals['vendor_fund'] - $monthTotals['expenditure'];
 
-        $weekSubUsersList = array_values($weekSubUsers);
-        foreach ($weekSubUsersList as &$x) {
+        $monthSubUsersList = array_values($monthSubUsers);
+        foreach ($monthSubUsersList as &$x) {
             $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
             $x['payment_date']    = (string)($x['_latest_date'] ?? '');
             unset($x['_methods_set'], $x['_latest_date']);
         }
         unset($x);
 
-        $weekCusUsersList = array_values($weekCusUsers);
-        foreach ($weekCusUsersList as &$x) {
+        $monthCusUsersList = array_values($monthCusUsers);
+        foreach ($monthCusUsersList as &$x) {
             $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
             $x['payment_date']    = (string)($x['_latest_date'] ?? '');
             unset($x['_methods_set'], $x['_latest_date']);
         }
         unset($x);
 
-        usort($weekSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
-        usort($weekCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
+        usort($monthSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
+        usort($monthCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
 
-        $weekTotals['subscription_income_users'] = $weekSubUsersList;
-        $weekTotals['customize_income_users']    = $weekCusUsersList;
+        $monthTotals['subscription_income_users'] = $monthSubUsersList;
+        $monthTotals['customize_income_users']    = $monthCusUsersList;
 
-        $weekTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
-            'Subscription Income (Week)',
-            $weekSubUsersList,
-            (float)$weekTotals['subscription_income']
+        $monthTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
+            'Subscription Income (Month)',
+            $monthSubUsersList,
+            (float)$monthTotals['subscription_income']
         );
 
-        $weekTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
-            'Customize Income (Week)',
-            $weekCusUsersList,
-            (float)$weekTotals['customize_income']
+        $monthTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
+            'Customize Income (Month)',
+            $monthCusUsersList,
+            (float)$monthTotals['customize_income']
         );
 
-        $weekVendorColumns = [];
-        foreach ($vendorColumns as $v) {
-            if (($weekTotals['vendors'][$v] ?? 0) > 0) {
-                $weekVendorColumns[] = $v;
-            }
-        }
+        $monthDays = $days;
+        ksort($monthDays);
 
-        $weeks[] = [
-            'start'         => $rangeStart,
-            'end'           => $rangeEnd,
-            'days'          => $weekDays,
-            'totals'        => $weekTotals,
-            'vendorColumns' => $weekVendorColumns,
-        ];
+        $years = range(Carbon::now()->year - 3, Carbon::now()->year + 1);
 
-        $cursor->addWeek();
+        return view('admin.reports.month-weeks-report', [
+            'year'           => $year,
+            'month'          => $month,
+            'monthStart'     => $monthStart,
+            'monthEnd'       => $monthEnd,
+            'weeks'          => $weeks,
+
+            'vendorColumns'  => $vendorColumns,
+            'deliveryCols'   => $deliveryCols,
+            'monthTotals'    => $monthTotals,
+            'monthDays'      => $monthDays,
+            'years'          => $years,
+
+            'vendorNameToId' => $vendorNameToId,
+        ]);
     }
-
-    /* ================= Month totals ================= */
-
-    $monthTotals = [
-        'subscription_income' => 0,
-        'customize_income'    => 0,
-        'income_total'        => 0,
-
-        // UPDATED: include payment_methods + payment_date
-        'subscription_income_users' => [],
-        'customize_income_users'    => [],
-
-        'subscription_income_tooltip' => '',
-        'customize_income_tooltip'    => '',
-
-        'expenditure'         => 0,
-        'vendor_fund'         => 0,
-        'available_balance'   => 0,
-
-        'renew'               => 0,
-        'new'                 => 0,
-        'pause'               => 0,
-        'customize'           => 0,
-
-        'vendors'             => array_fill_keys($vendorColumns, 0.0),
-        'riders'              => array_fill_keys($deliveryCols, 0),
-        'total_delivery'      => 0,
-    ];
-
-    // UPDATED aggregators (merge payment_methods + keep latest payment_date)
-    $monthSubUsers = [];
-    $monthCusUsers = [];
-
-    foreach ($days as $row) {
-        $monthTotals['subscription_income'] += (float)($row['finance']['subscription_income'] ?? 0);
-        $monthTotals['customize_income']    += (float)($row['finance']['customize_income'] ?? 0);
-        $monthTotals['income_total']        += (float)($row['finance']['income_total'] ?? 0);
-
-        $monthTotals['expenditure']         += (float)($row['finance']['expenditure'] ?? 0);
-        $monthTotals['vendor_fund']         += (float)($row['finance']['vendor_fund'] ?? 0);
-
-        $monthTotals['renew']               += (int)($row['customer']['renew'] ?? 0);
-        $monthTotals['new']                 += (int)($row['customer']['new'] ?? 0);
-        $monthTotals['pause']               += (int)($row['customer']['pause'] ?? 0);
-        $monthTotals['customize']           += (int)($row['customer']['customize'] ?? 0);
-
-        foreach ($vendorColumns as $v) {
-            $monthTotals['vendors'][$v] += (float)($row['vendors'][$v] ?? 0);
-        }
-        foreach ($deliveryCols as $r) {
-            $monthTotals['riders'][$r]  += (int)($row['riders'][$r] ?? 0);
-        }
-        $monthTotals['total_delivery'] += (int)($row['total_delivery'] ?? 0);
-
-        foreach (($row['finance']['subscription_income_users'] ?? []) as $u) {
-            $uid = (string)($u['user_id'] ?? '');
-            if ($uid === '') continue;
-
-            if (!isset($monthSubUsers[$uid])) {
-                $monthSubUsers[$uid] = [
-                    'user_id' => $u['user_id'],
-                    'name'    => $u['name'],
-                    'amt'     => 0.0,
-                    '_methods_set' => [],
-                    '_latest_date' => '',
-                ];
-            }
-
-            $monthSubUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
-
-            $methods = (string)($u['payment_methods'] ?? '');
-            if ($methods !== '') {
-                foreach (array_map('trim', explode(',', $methods)) as $m) {
-                    if ($m !== '') $monthSubUsers[$uid]['_methods_set'][$m] = true;
-                }
-            }
-
-            $pdate = (string)($u['payment_date'] ?? '');
-            if ($pdate !== '' && ($monthSubUsers[$uid]['_latest_date'] === '' || $pdate > $monthSubUsers[$uid]['_latest_date'])) {
-                $monthSubUsers[$uid]['_latest_date'] = $pdate;
-            }
-        }
-
-        foreach (($row['finance']['customize_income_users'] ?? []) as $u) {
-            $uid = (string)($u['user_id'] ?? '');
-            if ($uid === '') continue;
-
-            if (!isset($monthCusUsers[$uid])) {
-                $monthCusUsers[$uid] = [
-                    'user_id' => $u['user_id'],
-                    'name'    => $u['name'],
-                    'amt'     => 0.0,
-                    '_methods_set' => [],
-                    '_latest_date' => '',
-                ];
-            }
-
-            $monthCusUsers[$uid]['amt'] += (float)($u['amt'] ?? 0);
-
-            $methods = (string)($u['payment_methods'] ?? '');
-            if ($methods !== '') {
-                foreach (array_map('trim', explode(',', $methods)) as $m) {
-                    if ($m !== '') $monthCusUsers[$uid]['_methods_set'][$m] = true;
-                }
-            }
-
-            $pdate = (string)($u['payment_date'] ?? '');
-            if ($pdate !== '' && ($monthCusUsers[$uid]['_latest_date'] === '' || $pdate > $monthCusUsers[$uid]['_latest_date'])) {
-                $monthCusUsers[$uid]['_latest_date'] = $pdate;
-            }
-        }
-    }
-
-    $monthTotals['available_balance'] = $monthTotals['vendor_fund'] - $monthTotals['expenditure'];
-
-    $monthSubUsersList = array_values($monthSubUsers);
-    foreach ($monthSubUsersList as &$x) {
-        $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
-        $x['payment_date']    = (string)($x['_latest_date'] ?? '');
-        unset($x['_methods_set'], $x['_latest_date']);
-    }
-    unset($x);
-
-    $monthCusUsersList = array_values($monthCusUsers);
-    foreach ($monthCusUsersList as &$x) {
-        $x['payment_methods'] = implode(', ', array_keys($x['_methods_set'] ?? []));
-        $x['payment_date']    = (string)($x['_latest_date'] ?? '');
-        unset($x['_methods_set'], $x['_latest_date']);
-    }
-    unset($x);
-
-    usort($monthSubUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
-    usort($monthCusUsersList, fn($a, $b) => $b['amt'] <=> $a['amt']);
-
-    $monthTotals['subscription_income_users'] = $monthSubUsersList;
-    $monthTotals['customize_income_users']    = $monthCusUsersList;
-
-    $monthTotals['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
-        'Subscription Income (Month)',
-        $monthSubUsersList,
-        (float)$monthTotals['subscription_income']
-    );
-
-    $monthTotals['customize_income_tooltip'] = $this->buildIncomePopoverHtml(
-        'Customize Income (Month)',
-        $monthCusUsersList,
-        (float)$monthTotals['customize_income']
-    );
-
-    $monthDays = $days;
-    ksort($monthDays);
-
-    $years = range(Carbon::now()->year - 3, Carbon::now()->year + 1);
-
-    return view('admin.reports.month-weeks-report', [
-        'year'           => $year,
-        'month'          => $month,
-        'monthStart'     => $monthStart,
-        'monthEnd'       => $monthEnd,
-        'weeks'          => $weeks,
-
-        'vendorColumns'  => $vendorColumns,
-        'deliveryCols'   => $deliveryCols,
-        'monthTotals'    => $monthTotals,
-        'monthDays'      => $monthDays,
-        'years'          => $years,
-
-        'vendorNameToId' => $vendorNameToId,
-    ]);
-}
-
 
     private function buildIncomePopoverHtml(string $title, array $users, float $totalAmt): string
     {
@@ -796,93 +796,93 @@ class WeeklyReportController extends Controller
         $html .= "</div>";
         return $html;
     }
-    
-public function vendorPaymentItems(Request $request)
-{
-    $vendorId = $request->query('vendor_id');
-    $from     = $request->query('from');
-    $to       = $request->query('to');
 
-    if (!$vendorId || !$from || !$to) {
-        return response()->json([
-            'meta'   => [],
-            'pickups'=> [],
-            'error'  => 'vendor_id, from, to are required'
-        ], 422);
-    }
+    public function vendorPaymentItems(Request $request)
+    {
+        $vendorId = $request->query('vendor_id');
+        $from     = $request->query('from');
+        $to       = $request->query('to');
 
-    $fromDate = Carbon::parse($from)->startOfDay();
-    $toDate   = Carbon::parse($to)->endOfDay();
+        if (!$vendorId || !$from || !$to) {
+            return response()->json([
+                'meta'   => [],
+                'pickups'=> [],
+                'error'  => 'vendor_id, from, to are required'
+            ], 422);
+        }
 
-    $vendor = FlowerVendor::query()
-        ->where('vendor_id', $vendorId)
-        ->first();
+        $fromDate = Carbon::parse($from)->startOfDay();
+        $toDate   = Carbon::parse($to)->endOfDay();
 
-    $pickups = FlowerPickupDetails::query()
-        ->with([
-            'vendor',
-            'rider',
-            'flowerPickupItems.flower',
-            'flowerPickupItems.unit',
-            'flowerPickupItems.estUnit',
-        ])
-        ->where('vendor_id', $vendorId)
-        ->whereBetween('pickup_date', [$fromDate->toDateString(), $toDate->toDateString()])
-        ->orderByDesc('pickup_date')
-        ->orderByDesc('id')
-        ->get();
+        $vendor = FlowerVendor::query()
+            ->where('vendor_id', $vendorId)
+            ->first();
 
-    $mappedPickups = $pickups->map(function ($p) {
-        $items = $p->flowerPickupItems->map(function ($it) {
+        $pickups = FlowerPickupDetails::query()
+            ->with([
+                'vendor',
+                'rider',
+                'flowerPickupItems.flower',
+                'flowerPickupItems.unit',
+                'flowerPickupItems.estUnit',
+            ])
+            ->where('vendor_id', $vendorId)
+            ->whereBetween('pickup_date', [$fromDate->toDateString(), $toDate->toDateString()])
+            ->orderByDesc('pickup_date')
+            ->orderByDesc('id')
+            ->get();
 
-            // actual total fallback
-            $actualTotal = $it->item_total_price;
-            if ($actualTotal === null && $it->quantity !== null && $it->price !== null) {
-                $actualTotal = round(((float)$it->quantity) * ((float)$it->price), 2);
-            }
+        $mappedPickups = $pickups->map(function ($p) {
+            $items = $p->flowerPickupItems->map(function ($it) {
 
-            // estimate total fallback
-            $estTotal = null;
-            if ($it->est_quantity !== null && $it->est_price !== null) {
-                $estTotal = round(((float)$it->est_quantity) * ((float)$it->est_price), 2);
-            }
+                // actual total fallback
+                $actualTotal = $it->item_total_price;
+                if ($actualTotal === null && $it->quantity !== null && $it->price !== null) {
+                    $actualTotal = round(((float)$it->quantity) * ((float)$it->price), 2);
+                }
+
+                // estimate total fallback
+                $estTotal = null;
+                if ($it->est_quantity !== null && $it->est_price !== null) {
+                    $estTotal = round(((float)$it->est_quantity) * ((float)$it->est_price), 2);
+                }
+
+                return [
+                    'flower_name'  => optional($it->flower)->name ?? '-',
+                    'unit'         => optional($it->unit)->unit_name ?? 'N/A',
+                    'quantity'     => $it->quantity !== null ? (float)$it->quantity : null,
+                    'price'        => $it->price !== null ? (float)$it->price : null,
+                    'item_total'   => $actualTotal !== null ? (float)$actualTotal : null,
+
+                    'est_unit'     => optional($it->estUnit)->unit_name ?? 'N/A',
+                    'est_quantity' => $it->est_quantity !== null ? (float)$it->est_quantity : null,
+                    'est_price'    => $it->est_price !== null ? (float)$it->est_price : null,
+                    'est_total'    => $estTotal !== null ? (float)$estTotal : null,
+                ];
+            });
 
             return [
-                'flower_name'  => optional($it->flower)->name ?? '-',
-                'unit'         => optional($it->unit)->unit_name ?? 'N/A',
-                'quantity'     => $it->quantity !== null ? (float)$it->quantity : null,
-                'price'        => $it->price !== null ? (float)$it->price : null,
-                'item_total'   => $actualTotal !== null ? (float)$actualTotal : null,
-
-                'est_unit'     => optional($it->estUnit)->unit_name ?? 'N/A',
-                'est_quantity' => $it->est_quantity !== null ? (float)$it->est_quantity : null,
-                'est_price'    => $it->est_price !== null ? (float)$it->est_price : null,
-                'est_total'    => $estTotal !== null ? (float)$estTotal : null,
+                'pick_up_id'        => $p->pick_up_id,
+                'pickup_date'       => optional($p->pickup_date)->format('Y-m-d'),
+                'delivery_date'     => optional($p->delivery_date)->format('Y-m-d'),
+                'payment_status'    => $p->payment_status,
+                'payment_method'    => $p->payment_method,
+                'grand_total_price' => (float)($p->grand_total_price ?? 0),
+                'items'             => $items,
             ];
         });
 
-        return [
-            'pick_up_id'        => $p->pick_up_id,
-            'pickup_date'       => optional($p->pickup_date)->format('Y-m-d'),
-            'delivery_date'     => optional($p->delivery_date)->format('Y-m-d'),
-            'payment_status'    => $p->payment_status,
-            'payment_method'    => $p->payment_method,
-            'grand_total_price' => (float)($p->grand_total_price ?? 0),
-            'items'             => $items,
-        ];
-    });
-
-    return response()->json([
-        'meta' => [
-            'vendor_id'     => $vendorId,
-            'vendor_name'   => $vendor->vendor_name ?? $vendor->name ?? '-',
-            'from'          => $fromDate->toDateString(),
-            'to'            => $toDate->toDateString(),
-            'pickups_count' => $pickups->count(),
-            'grand_total'   => round((float)$pickups->sum('grand_total_price'), 2),
-        ],
-        'pickups' => $mappedPickups,
-    ]);
-}
+        return response()->json([
+            'meta' => [
+                'vendor_id'     => $vendorId,
+                'vendor_name'   => $vendor->vendor_name ?? $vendor->name ?? '-',
+                'from'          => $fromDate->toDateString(),
+                'to'            => $toDate->toDateString(),
+                'pickups_count' => $pickups->count(),
+                'grand_total'   => round((float)$pickups->sum('grand_total_price'), 2),
+            ],
+            'pickups' => $mappedPickups,
+        ]);
+    }
 
 }

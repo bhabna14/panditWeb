@@ -16,53 +16,55 @@ use Twilio\Rest\Client;
 
 class AdminNotificationController extends Controller
 {
-   public function whatsappcreate(Request $request)
-{
-    $users = User::query()
-        ->select('id', 'name', 'email', 'mobile_number')
-        ->whereNotNull('mobile_number')
-        ->where('mobile_number', '!=', '')
-        ->orderBy('name')
-        ->limit(1000)
-        ->get();
+    
+    public function whatsappcreate(Request $request)
+    {
+        $users = User::query()
+            ->select('id', 'name', 'email', 'mobile_number')
+            ->whereNotNull('mobile_number')
+            ->where('mobile_number', '!=', '')
+            ->orderBy('name')
+            ->limit(1000)
+            ->get();
 
-    $requiresParam = Msg91WhatsappService::requiresUrlParam();
-    $buttonBase    = Msg91WhatsappService::buttonBase();
-    $senderLabel   = Msg91WhatsappService::senderE164();
-    $templateName  = Msg91WhatsappService::templateName();   // "customer"
+        $requiresParam = Msg91WhatsappService::requiresUrlParam();
+        $buttonBase    = Msg91WhatsappService::buttonBase();
+        $senderLabel   = Msg91WhatsappService::senderE164();
+        $templateName  = Msg91WhatsappService::templateName(); // ✅ now "subscription_renewal"
 
-    // ── Prefill single user from ?mobile= query ─────────────────────────────
-    $prefillMobiles = [];
-    $initialAudience = 'all';
+        // Prefill single user from ?mobile=
+        $prefillMobiles = [];
+        $initialAudience = 'all';
 
-    if ($request->filled('mobile')) {
-        $mobile = trim($request->query('mobile'));
-        if ($mobile !== '') {
-            $prefillMobiles[] = $mobile;
-            $initialAudience = 'selected';
+        if ($request->filled('mobile')) {
+            $mobile = trim($request->query('mobile'));
+            if ($mobile !== '') {
+                $prefillMobiles[] = $mobile;
+                $initialAudience = 'selected';
+            }
         }
-    }
 
-    return view('admin.fcm-notification.send-whatsaap-notification', compact(
-        'users',
-        'requiresParam',
-        'buttonBase',
-        'senderLabel',
-        'templateName',
-        'prefillMobiles',
-        'initialAudience'
-    ));
-}
+        return view('admin.fcm-notification.send-whatsaap-notification', compact(
+            'users',
+            'requiresParam',
+            'buttonBase',
+            'senderLabel',
+            'templateName',
+            'prefillMobiles',
+            'initialAudience'
+        ));
+    }
 
     public function whatsappSend(Request $request)
     {
         $validated = $request->validate([
-            'audience'    => ['required', Rule::in(['all', 'selected'])],
-            'user'        => ['nullable', 'array'],
-            'user.*'      => ['nullable', 'string'],
-            // These map to header_1 and body_1
-            'title'       => ['nullable', 'string', 'max:255'],  // header_1
-            'description' => ['nullable', 'string'],             // body_1
+            'audience' => ['required', Rule::in(['all', 'selected'])],
+            'user'     => ['nullable', 'array'],
+            'user.*'   => ['nullable', 'string'],
+
+            // ✅ subscription_renewal template params
+            'body_1'   => ['required', 'string', 'max:255'],
+            'body_2'   => ['required', 'string', 'max:255'],
         ]);
 
         // Resolve recipients
@@ -97,17 +99,15 @@ class AdminNotificationController extends Controller
                 ->withInput();
         }
 
-        // Clean title/description before sending as template params
-        $title = $this->sanitizeBodyValue($validated['title'] ?? '');
-        $desc  = $this->sanitizeBodyValue($validated['description'] ?? '');
+        // Clean template params
+        $body1 = $this->sanitizeBodyValue($validated['body_1']);
+        $body2 = $this->sanitizeBodyValue($validated['body_2']);
 
         /** @var Msg91WhatsappService $wa */
         $wa = app(Msg91WhatsappService::class);
 
         try {
-            // title     -> header_1
-            // desc      -> body_1
-            $resp   = $wa->sendBulkTemplate($toMsisdns, $title, $desc);
+            $resp   = $wa->sendBulkTemplate($toMsisdns, $body1, $body2);
             $status = $resp['http_status'] ?? 0;
             $json   = $resp['json'] ?? null;
 
