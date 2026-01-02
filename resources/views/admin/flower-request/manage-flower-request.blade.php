@@ -1,5 +1,27 @@
 @extends('admin.layouts.apps')
 
+@php
+    use Illuminate\Support\Facades\Route;
+
+    /*
+    |--------------------------------------------------------------------------
+    | IMPORTANT
+    |--------------------------------------------------------------------------
+    | Change these route names ONLY if your project uses different names.
+    | - $pageUrl:  main SSR page (showRequests)
+    | - $ajaxUrl:  ajax endpoint (ajaxData)
+    */
+    $pageUrl = Route::has('flower.customize.request')
+        ? route('flower.customize.request')
+        : url()->current();
+
+    $ajaxUrl = Route::has('admin.flower-request.ajaxData')
+        ? route('admin.flower-request.ajaxData')
+        : (Route::has('admin.flower-request.data')
+            ? route('admin.flower-request.data')
+            : url('/admin/flower-request/ajax-data'));
+@endphp
+
 @section('styles')
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
@@ -8,71 +30,73 @@
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
 
     <style>
-        .badge {
-            font-size: 0.8rem;
-        }
+        .badge { font-size: 0.8rem; }
+        .table td, .table th { vertical-align: middle !important; }
+        .action-btns .btn { margin: 2px 0; }
 
-        .table td,
-        .table th {
-            vertical-align: middle !important;
-        }
-
-        .action-btns .btn {
-            margin: 2px 0;
-        }
-
-        /* Metric cards: no bg, light border, subtle hover */
-        .metric-card {
-            background-color: transparent !important;
-            border: 1px solid rgb(186, 185, 185) !important;
-            transition: box-shadow .2s ease, transform .2s ease, opacity .2s ease;
+        /* Metric cards */
+        .metric-card{
+            border: 1px solid #e5e7eb !important;
             border-radius: 18px;
-            padding: 16px;
-            background: linear-gradient(135deg, #ffffff, #f9f9f9);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, #ffffff, #f9fafb);
+            box-shadow: 0 4px 14px rgba(0,0,0,.04);
+            transition: all .2s ease;
         }
-
-        .metric-card .card-body {
-            padding: 1rem 1.25rem;
+        .metric-card .card-body{ padding: 16px 18px; }
+        .metric-icon{
+            width: 44px; height: 44px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #f3f4f6;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
         }
+        .metric-icon i{ font-size: 18px; }
+        .metric-title{ font-size: 13px; font-weight: 700; letter-spacing: .2px; color: #6b7280; }
+        .metric-value{ font-size: 26px; font-weight: 800; line-height: 1.1; margin: 0; }
 
-        .metric-card .icon {
-            font-size: 2rem;
-            line-height: 1;
-        }
-
-        .metric-card .label {
-            font-weight: 600;
-        }
-
-        .metric-card.opacity-90 {
-            opacity: .85;
-        }
-
-        .card-filter:hover .metric-card {
-            box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+        .card-filter:hover .metric-card{
             transform: translateY(-2px);
-            opacity: 1;
+            box-shadow: 0 8px 22px rgba(0,0,0,.08);
+        }
+
+        .metric-card.is-active{
+            border-color: #c7d2fe !important;
+            box-shadow: 0 10px 26px rgba(99,102,241,.16);
+        }
+
+        .metric-sub{
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+        .metric-sub b{ color:#111827; }
+
+        /* Loading row */
+        .table-loading{
+            padding: 48px 0;
+            color:#6b7280;
         }
     </style>
 @endsection
 
 @section('content')
-    {{-- counters --}}
-    <div class="row mb-4 mt-4">
+
+    {{-- Cards --}}
+    <div class="row mt-4 mb-3">
+
         {{-- Total --}}
-        <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'all']) }}"
-               class="card-filter text-decoration-none"
-               data-filter="all">
-                <div class="card metric-card h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fa fa-list icon text-warning"></i>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <a href="{{ $pageUrl }}?filter=all" class="card-filter text-decoration-none" data-filter="all">
+                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
+                    <div class="card-body d-flex gap-3 align-items-center">
+                        <div class="metric-icon">
+                            <i class="fa fa-list text-warning"></i>
                         </div>
                         <div>
-                            <h5 class="card-title mb-1 label text-muted">Total Orders</h5>
-                            <h3 class="mb-0 text-warning" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
+                            <div class="metric-title">TOTAL ORDERS</div>
+                            <div class="metric-value text-warning" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</div>
                         </div>
                     </div>
                 </div>
@@ -80,18 +104,16 @@
         </div>
 
         {{-- Today --}}
-        <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'today']) }}"
-               class="card-filter text-decoration-none"
-               data-filter="today">
-                <div class="card metric-card h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}" data-card="today">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fa fa-calendar-day icon text-success"></i>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <a href="{{ $pageUrl }}?filter=today" class="card-filter text-decoration-none" data-filter="today">
+                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'today' ? 'is-active' : '' }}" data-card="today">
+                    <div class="card-body d-flex gap-3 align-items-center">
+                        <div class="metric-icon">
+                            <i class="fa fa-calendar-day text-success"></i>
                         </div>
                         <div>
-                            <h5 class="card-title mb-1 label text-muted">Today's Orders</h5>
-                            <h3 class="mb-0 text-success" id="todayCount">{{ $todayCustomizeOrders ?? 0 }}</h3>
+                            <div class="metric-title">TODAY'S ORDERS</div>
+                            <div class="metric-value text-success" id="todayCount">{{ $todayCustomizeOrders ?? 0 }}</div>
                         </div>
                     </div>
                 </div>
@@ -99,18 +121,39 @@
         </div>
 
         {{-- Paid --}}
-        <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'paid']) }}"
-               class="card-filter text-decoration-none"
-               data-filter="paid">
-                <div class="card metric-card h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}" data-card="paid">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fa fa-check-circle icon text-info"></i>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <a href="{{ $pageUrl }}?filter=paid" class="card-filter text-decoration-none" data-filter="paid">
+                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'paid' ? 'is-active' : '' }}" data-card="paid">
+                    <div class="card-body d-flex gap-3 align-items-center">
+                        <div class="metric-icon">
+                            <i class="fa fa-check-circle text-info"></i>
                         </div>
                         <div>
-                            <h5 class="card-title mb-1 label text-muted">Paid Orders</h5>
-                            <h3 class="mb-0 text-info" id="paidCount">{{ $paidCustomizeOrders ?? 0 }}</h3>
+                            <div class="metric-title">PAID ORDERS</div>
+                            <div class="metric-value text-info" id="paidCount">{{ $paidCustomizeOrders ?? 0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        {{-- Unpaid (NEW) --}}
+        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
+            <a href="{{ $pageUrl }}?filter=unpaid" class="card-filter text-decoration-none" data-filter="unpaid">
+                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'unpaid' ? 'is-active' : '' }}" data-card="unpaid">
+                    <div class="card-body d-flex gap-3 align-items-center">
+                        <div class="metric-icon">
+                            <i class="fa fa-hourglass-half text-danger"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="metric-title">UNPAID ORDERS</div>
+                            <div class="d-flex align-items-end justify-content-between gap-3">
+                                <div class="metric-value text-danger" id="unpaidCount">{{ $unpaidCustomizeOrders ?? 0 }}</div>
+                                <div class="metric-sub text-end">
+                                    Collect:
+                                    <b id="unpaidAmount">₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}</b>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -118,26 +161,42 @@
         </div>
 
         {{-- Rejected --}}
-        <div class="col-md-3">
-            <a href="{{ route('flower.customize.request', ['filter' => 'rejected']) }}"
-               class="card-filter text-decoration-none"
-               data-filter="rejected">
-                <div class="card metric-card h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3">
-                            <i class="fa fa-ban icon text-primary"></i>
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <a href="{{ $pageUrl }}?filter=rejected" class="card-filter text-decoration-none" data-filter="rejected">
+                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'rejected' ? 'is-active' : '' }}" data-card="rejected">
+                    <div class="card-body d-flex gap-3 align-items-center">
+                        <div class="metric-icon">
+                            <i class="fa fa-ban text-primary"></i>
                         </div>
                         <div>
-                            <h5 class="card-title mb-1 label text-muted">Rejected Orders</h5>
-                            <h3 class="mb-0 text-primary" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</h3>
+                            <div class="metric-title">REJECTED</div>
+                            <div class="metric-value text-primary" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</div>
                         </div>
                     </div>
                 </div>
             </a>
         </div>
+
+        {{-- Upcoming --}}
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+            <a href="{{ $pageUrl }}?filter=upcoming" class="card-filter text-decoration-none" data-filter="upcoming">
+                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'upcoming' ? 'is-active' : '' }}" data-card="upcoming">
+                    <div class="card-body d-flex gap-3 align-items-center">
+                        <div class="metric-icon">
+                            <i class="fa fa-clock text-secondary"></i>
+                        </div>
+                        <div>
+                            <div class="metric-title">UPCOMING (NEXT 3 DAYS)</div>
+                            <div class="metric-value text-secondary" id="upcomingCount">{{ $upcomingCustomizeOrders ?? 0 }}</div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
     </div>
 
-    {{-- table --}}
+    {{-- Table --}}
     <div class="card custom-card">
         <div class="card-body">
             <div class="table-responsive">
@@ -167,45 +226,62 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('scripts')
+    {{-- Datatables JS (keep if not already loaded in layout) --}}
+    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
+    <script src="{{ asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/datatable/js/responsive.bootstrap5.min.js') }}"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Re-init DataTable safely after we replace tbody
+        const AJAX_URL = @json($ajaxUrl);
+
         function reinitDataTable() {
             if ($.fn.DataTable.isDataTable('#file-datatable')) {
                 $('#file-datatable').DataTable().destroy();
             }
-            $('#file-datatable').DataTable({});
+            $('#file-datatable').DataTable({
+                pageLength: 25,
+                order: [],
+            });
         }
 
         function setActiveCard(filter) {
-            $('[data-card]').addClass('opacity-90');
-            $('[data-card="' + filter + '"]').removeClass('opacity-90');
+            $('[data-card]').removeClass('is-active');
+            $('[data-card="' + filter + '"]').addClass('is-active');
         }
 
         function updateCounts(counts) {
-            if (typeof counts !== 'object') return;
+            if (!counts) return;
+
             $('#totalCount').text(counts.total ?? 0);
             $('#todayCount').text(counts.today ?? 0);
             $('#paidCount').text(counts.paid ?? 0);
             $('#rejectedCount').text(counts.rejected ?? 0);
+            $('#upcomingCount').text(counts.upcoming ?? {{ (int)($upcomingCustomizeOrders ?? 0) }});
+
+            // NEW: unpaid
+            $('#unpaidCount').text(counts.unpaid ?? {{ (int)($unpaidCustomizeOrders ?? 0) }});
+            $('#unpaidAmount').text(counts.unpaid_amount_fmt ?? '₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}');
         }
 
         function loadRequests(filter, pushUrl = true) {
-            const url = "{{ route('admin.flower-request.data') }}";
             const $tbody = $('#requestsBody');
             const prevHtml = $tbody.html();
 
-            $tbody.html('<tr><td colspan="11" class="text-center py-5">Loading...</td></tr>');
+            $tbody.html('<tr><td colspan="11" class="text-center table-loading">Loading...</td></tr>');
 
-            $.get(url, { filter: filter })
+            $.get(AJAX_URL, { filter: filter })
                 .done(function (res) {
                     if (res && res.rows_html !== undefined) {
                         $tbody.html(res.rows_html);
                         reinitDataTable();
+
                         updateCounts(res.counts || {});
                         setActiveCard(res.active || filter);
 
@@ -215,12 +291,10 @@
                             window.history.pushState({ filter: res.active || filter }, '', pageUrl.toString());
                         }
                     } else {
-                        $tbody.html(
-                            '<tr><td colspan="11" class="text-center py-5 text-danger">Unexpected response</td></tr>'
-                        );
+                        $tbody.html('<tr><td colspan="11" class="text-center text-danger table-loading">Unexpected response</td></tr>');
                     }
                 })
-                .fail(function () {
+                .fail(function (xhr) {
                     $tbody.html(prevHtml);
                     Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
                 });
@@ -232,21 +306,22 @@
             loadRequests(filter, true);
         });
 
-        // Handle back/forward navigation to keep filter in sync
         window.addEventListener('popstate', function () {
             const params = new URLSearchParams(window.location.search);
             const filter = params.get('filter') || 'all';
             loadRequests(filter, false);
         });
 
-        // Ensure DataTable is created once on first load
         $(document).ready(function () {
             if (!$.fn.DataTable.isDataTable('#file-datatable')) {
-                $('#file-datatable').DataTable({});
+                $('#file-datatable').DataTable({
+                    pageLength: 25,
+                    order: [],
+                });
             }
         });
 
-        // ------- Mark Paid: choose payment method via SweetAlert -------
+        // Optional: your existing "Mark Paid" flow (keep only if you use it)
         function confirmPayment(requestId) {
             Swal.fire({
                 title: 'Select payment method',
@@ -257,9 +332,7 @@
                     cash: 'Cash'
                 },
                 inputValidator: (value) => {
-                    if (!value) {
-                        return 'Please select a payment method';
-                    }
+                    if (!value) return 'Please select a payment method';
                 },
                 showCancelButton: true,
                 confirmButtonColor: '#28a745',
@@ -268,22 +341,16 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     const form = document.getElementById('markPaymentForm_' + requestId);
-                    if (!form) {
-                        console.error('Form not found for request', requestId);
-                        return;
-                    }
+                    if (!form) return;
+
                     const input = form.querySelector('input[name="payment_method"]');
-                    if (!input) {
-                        console.error('payment_method input not found in form', form);
-                        return;
-                    }
-                    input.value = result.value; // upi | razorpay | cash
+                    if (!input) return;
+
+                    input.value = result.value;
                     form.submit();
                 }
             });
         }
-
-        // Make accessible after AJAX swaps
         window.confirmPayment = confirmPayment;
     </script>
 @endsection
