@@ -80,22 +80,14 @@
                             <label class="form-label fw-semibold d-block">Audience</label>
 
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       name="audience"
-                                       id="audAll"
-                                       value="all"
-                                       {{ $audDefault === 'all' ? 'checked' : '' }}>
+                                <input class="form-check-input" type="radio" name="audience" id="audAll" value="all"
+                                    {{ $audDefault === 'all' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audAll">All users</label>
                             </div>
 
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       name="audience"
-                                       id="audSelected"
-                                       value="selected"
-                                       {{ $audDefault === 'selected' ? 'checked' : '' }}>
+                                <input class="form-check-input" type="radio" name="audience" id="audSelected"
+                                    value="selected" {{ $audDefault === 'selected' ? 'checked' : '' }}>
                                 <label class="form-check-label" for="audSelected">Selected users / custom numbers</label>
                             </div>
                         </div>
@@ -128,23 +120,47 @@
                             </div>
                         </div>
 
-                        {{-- Title / header param --}}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Title (optional)</label>
-                            <input type="text"
-                                   name="title"
-                                   class="form-control"
-                                   maxlength="255"
-                                   value="{{ old('title') }}">
+                        {{-- Template variables --}}
+                        <div class="nu-card p-3 mb-3" style="border-style:dashed;">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <div>
+                                    <div class="fw-bold">Template Variables</div>
+                                    <div class="text-muted small">
+                                        This template expects <code>body_1</code> and <code>body_2</code> values.
+                                    </div>
+                                </div>
+                                <div class="text-end small">
+                                    <div class="text-muted">Template</div>
+                                    <div><code>{{ $templateName ?? 'N/A' }}</code></div>
+                                </div>
+                            </div>
                         </div>
 
-                        {{-- Description / body param --}}
+                        {{-- Body 1 --}}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Message</label>
-                            <textarea name="description" rows="5" class="form-control">{{ old('description') }}</textarea>
+                            <label class="form-label fw-semibold">Body 1 <span class="text-danger">*</span></label>
+                            <input type="text" name="body_1" class="form-control @error('body_1') is-invalid @enderror"
+                                maxlength="255" value="{{ old('body_1') }}" placeholder="Template variable 1 (body_1)"
+                                required>
+                            @error('body_1')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                             <div class="form-text">
-                                This text will be used as template variables (e.g. header / body) in MSG91 template
-                                <code>{{ $templateName ?? 'template' }}</code>.
+                                Example: Customer Name / Plan Name / Amount (based on your MSG91 template).
+                            </div>
+                        </div>
+
+                        {{-- Body 2 --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Body 2 <span class="text-danger">*</span></label>
+                            <input type="text" name="body_2" class="form-control @error('body_2') is-invalid @enderror"
+                                maxlength="255" value="{{ old('body_2') }}" placeholder="Template variable 2 (body_2)"
+                                required>
+                            @error('body_2')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <div class="form-text">
+                                Example: Renewal Date / Due Date / Support Number (based on your MSG91 template).
                             </div>
                         </div>
 
@@ -167,12 +183,13 @@
                     <ul class="mb-0">
                         <li>Your MSG91 sender {{ $senderLabel ?? '+91XXXXXXXXXX' }} must be approved &amp; verified.</li>
                         <li>
-                            Template <code>{{ $templateName ?? 'customer' }}</code> must be approved in MSG91
-                            with matching header/body variables.
+                            Template <code>{{ $templateName ?? 'subscription_renewal' }}</code> must be approved in MSG91
+                            and must contain exactly the variables you are sending (<code>body_1</code>,
+                            <code>body_2</code>).
                         </li>
                         <li>
                             If you change template parameters (add/remove variables/buttons),
-                            update <code>Msg91WhatsappService::sendBulkTemplate()</code> accordingly.
+                            update your service payload accordingly.
                         </li>
                     </ul>
                 </div>
@@ -196,6 +213,8 @@
             const mode = document.querySelector('input[name="audience"]:checked')?.value;
             const disabled = (mode !== 'selected');
             $('#waUsers').prop('disabled', disabled);
+
+            // If switching away from selected, clear selection to avoid confusion
             if (disabled) {
                 $waUsers.val(null).trigger('change');
             }
@@ -207,16 +226,21 @@
         setAudienceState();
 
         document.getElementById('waPreviewBtn').addEventListener('click', () => {
-            const title = document.querySelector('[name="title"]').value || '(No title)';
-            const desc  = document.querySelector('[name="description"]').value || '(No message)';
+            const body1 = document.querySelector('[name="body_1"]').value || '(Empty body_1)';
+            const body2 = document.querySelector('[name="body_2"]').value || '(Empty body_2)';
+            const tpl = @json($templateName ?? 'template');
 
             Swal.fire({
-                title,
-                html: `<div style="text-align:left">
-                        <p><b>${title}</b></p>
-                        <p>${desc.replace(/\n/g,'<br>')}</p>
-                       </div>`,
-                confirmButtonText: 'Looks Good'
+                title: 'WhatsApp Template Preview',
+                html: `
+                    <div style="text-align:left">
+                        <div><b>Template:</b> <code>${tpl}</code></div>
+                        <hr style="margin:10px 0"/>
+                        <div><b>body_1:</b> ${body1}</div>
+                        <div style="margin-top:6px"><b>body_2:</b> ${body2}</div>
+                    </div>
+                `,
+                confirmButtonText: 'OK'
             });
         });
 
