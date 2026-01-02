@@ -19,9 +19,9 @@ use Illuminate\Support\Facades\Log;
 
 class FlowerRequestController extends Controller
 {
- public function showRequests(Request $request)
+
+public function showRequests(Request $request)
 {
-    // Initial page render. Data is SSR.
     $filter = $request->query('filter', 'all');
 
     $tz          = config('app.timezone', 'Asia/Kolkata');
@@ -31,9 +31,8 @@ class FlowerRequestController extends Controller
     // Next 3 days (excluding today)
     $startDateCarbon = $todayCarbon->copy()->addDay();   // tomorrow
     $endDateCarbon   = $todayCarbon->copy()->addDays(3); // 3 days from today
-
-    $startDate = $startDateCarbon->toDateString();
-    $endDate   = $endDateCarbon->toDateString();
+    $startDate       = $startDateCarbon->toDateString();
+    $endDate         = $endDateCarbon->toDateString();
 
     $query = FlowerRequest::with([
         'order' => function ($q) {
@@ -59,7 +58,6 @@ class FlowerRequestController extends Controller
             break;
 
         case 'unpaid':
-            // Anything NOT paid and NOT rejected/cancelled (and also includes NULL status)
             $query->where(function ($q) {
                 $q->whereNull('status')
                   ->orWhereNotIn('status', [
@@ -76,7 +74,6 @@ class FlowerRequestController extends Controller
 
         case 'all':
         default:
-            // No extra where
             break;
     }
 
@@ -101,26 +98,8 @@ class FlowerRequestController extends Controller
           ]);
     })->count();
 
-    // NEW: unpaid amount to collect (sum of order totals)
-    $unpaidAmountToCollect = FlowerRequest::select(['id', 'request_id', 'status'])
-        ->where(function ($q) {
-            $q->whereNull('status')
-              ->orWhereNotIn('status', [
-                  'paid', 'Paid',
-                  'cancelled', 'Cancelled',
-                  'rejected', 'Rejected',
-              ]);
-        })
-        ->with(['order' => function ($q) {
-            // Adjust these columns if your Order table uses different names
-            $q->select(['id', 'request_id', 'grand_total_price', 'total_price']);
-        }])
-        ->get()
-        ->sum(function ($req) {
-            $order = $req->order;
-            if (!$order) return 0;
-            return (float) ($order->grand_total_price ?? $order->total_price ?? 0);
-        });
+    // NEW: unpaid amount to collect (robust; NO hardcoded order columns)
+    $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
 
     $riders = RiderDetails::where('status', 'active')->get();
 
@@ -132,8 +111,8 @@ class FlowerRequestController extends Controller
         'paidCustomizeOrders',
         'rejectCustomizeOrders',
         'upcomingCustomizeOrders',
-        'unpaidCustomizeOrders',      // NEW
-        'unpaidAmountToCollect',      // NEW
+        'unpaidCustomizeOrders',
+        'unpaidAmountToCollect',
         'filter'
     ));
 }
@@ -141,7 +120,6 @@ class FlowerRequestController extends Controller
 
 public function ajaxData(Request $request)
 {
-    // AJAX endpoint for filtering rows without refresh
     $filter = $request->query('filter', 'all');
 
     $tz          = config('app.timezone', 'Asia/Kolkata');
@@ -151,9 +129,8 @@ public function ajaxData(Request $request)
     // Next 3 days (excluding today)
     $startDateCarbon = $todayCarbon->copy()->addDay();
     $endDateCarbon   = $todayCarbon->copy()->addDays(3);
-
-    $startDate = $startDateCarbon->toDateString();
-    $endDate   = $endDateCarbon->toDateString();
+    $startDate       = $startDateCarbon->toDateString();
+    $endDate         = $endDateCarbon->toDateString();
 
     $query = FlowerRequest::with([
         'order' => function ($q) {
@@ -216,7 +193,41 @@ public function ajaxData(Request $request)
           ]);
     })->count();
 
-    $unpaidAmountToCollect = FlowerRequest::select(['id', 'request_id', 'status'])
+    $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
+
+    $riders  = RiderDetails::where('status', 'active')->get();
+    $rowsHtml = view('admin.flower-request.partials._rows', compact('pendingRequests', 'riders'))->render();
+
+    return response()->json([
+        'rows_html' => $rowsHtml,
+        'counts' => [
+            'total'             => $totalCustomizeOrders,
+            'today'             => $todayCustomizeOrders,
+            'paid'              => $paidCustomizeOrders,
+            'unpaid'            => $unpaidCustomizeOrders,
+            'unpaid_amount'     => (float) $unpaidAmountToCollect,
+            'unpaid_amount_fmt' => '₹' . number_format((float) $unpaidAmountToCollect, 2),
+            'rejected'          => $rejectCustomizeOrders,
+            'upcoming'          => $upcomingCustomizeOrders,
+        ],
+        'active' => $filter,
+    ]);
+}
+
+
+/**
+ * Compute total "amount to collect" for unpaid requests.
+ * Priority:
+ * 1) Order total fields (if they exist)
+ * 2) Latest FlowerPayment.paid_amount (since you use it as collectable/collected amount)
+ * 3) Sum from items (item_total or qty*price)
+ */
+private function computeUnpaidAmountToCollect(): float
+{
+    $unpaidRequests = FlowerRequest::with([
+            'order.flowerPayments',
+            'flowerRequestItems',
+        ])
         ->where(function ($q) {
             $q->whereNull('status')
               ->orWhereNotIn('status', [
@@ -225,35 +236,77 @@ public function ajaxData(Request $request)
                   'rejected', 'Rejected',
               ]);
         })
-        ->with(['order' => function ($q) {
-            $q->select(['id', 'request_id', 'grand_total_price', 'total_price']);
-        }])
-        ->get()
-        ->sum(function ($req) {
-            $order = $req->order;
-            if (!$order) return 0;
-            return (float) ($order->grand_total_price ?? $order->total_price ?? 0);
+        ->get();
+
+    $sum = 0.0;
+
+    foreach ($unpaidRequests as $req) {
+        $sum += $this->resolveRequestCollectableAmount($req);
+    }
+
+    return (float) $sum;
+}
+
+private function resolveRequestCollectableAmount($req): float
+{
+    // ---------------------------
+    // 1) Try ORDER total columns
+    // ---------------------------
+    $order = $req->order ?? null;
+
+    if ($order) {
+        // Try common total column names safely (no SELECT, no SQL error)
+        foreach ([
+            'grand_total_price',
+            'grand_total',
+            'total_price',
+            'total_amount',
+            'amount',
+            'payable_amount',
+            'order_total',
+        ] as $col) {
+            if (isset($order->{$col}) && is_numeric($order->{$col})) {
+                return (float) $order->{$col};
+            }
+        }
+
+        // ---------------------------
+        // 2) Try latest PAYMENT paid_amount
+        // ---------------------------
+        $payments = $order->flowerPayments ?? collect();
+        if ($payments->count() > 0) {
+            // Take latest payment record's paid_amount (avoid overcount if multiple attempts)
+            $latest = $payments->sortByDesc('id')->first();
+            if ($latest && isset($latest->paid_amount) && is_numeric($latest->paid_amount)) {
+                return (float) $latest->paid_amount;
+            }
+        }
+    }
+
+    // ---------------------------
+    // 3) Fallback: compute from items
+    // ---------------------------
+    $items = $req->flowerRequestItems ?? collect();
+    if ($items->count() > 0) {
+        return (float) $items->sum(function ($it) {
+            foreach (['item_total', 'total', 'total_price', 'amount'] as $col) {
+                if (isset($it->{$col}) && is_numeric($it->{$col})) {
+                    return (float) $it->{$col};
+                }
+            }
+
+            $qty   = $it->quantity ?? ($it->qty ?? 0);
+            $price = $it->price ?? ($it->unit_price ?? 0);
+
+            if (is_numeric($qty) && is_numeric($price)) {
+                return (float) $qty * (float) $price;
+            }
+
+            return 0.0;
         });
+    }
 
-    $riders = RiderDetails::where('status', 'active')->get();
-
-    // Render only the <tr> rows via a partial
-    $rowsHtml = view('admin.flower-request.partials._rows', compact('pendingRequests', 'riders'))->render();
-
-    return response()->json([
-        'rows_html' => $rowsHtml,
-        'counts' => [
-            'total'          => $totalCustomizeOrders,
-            'today'          => $todayCustomizeOrders,
-            'paid'           => $paidCustomizeOrders,
-            'unpaid'         => $unpaidCustomizeOrders,                 // NEW
-            'unpaid_amount'  => (float) $unpaidAmountToCollect,         // NEW
-            'unpaid_amount_fmt' => '₹' . number_format((float)$unpaidAmountToCollect, 2), // NEW
-            'rejected'       => $rejectCustomizeOrders,
-            'upcoming'       => $upcomingCustomizeOrders,
-        ],
-        'active' => $filter,
-    ]);
+    return 0.0;
 }
 
 public function saveOrder(Request $request, $id)
