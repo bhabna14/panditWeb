@@ -7,9 +7,9 @@
     |--------------------------------------------------------------------------
     | IMPORTANT
     |--------------------------------------------------------------------------
-    | Change these route names ONLY if your project uses different names.
-    | - $pageUrl:  main SSR page (showRequests)
-    | - $ajaxUrl:  ajax endpoint (ajaxData)
+    | If your routes are fixed and known, you can replace this fallback with:
+    | $pageUrl = route('flower.customize.request');
+    | $ajaxUrl = route('admin.flower-request.ajaxData');
     */
     $pageUrl = Route::has('flower.customize.request')
         ? route('flower.customize.request')
@@ -34,46 +34,141 @@
         .table td, .table th { vertical-align: middle !important; }
         .action-btns .btn { margin: 2px 0; }
 
-        /* Metric cards */
-        .metric-card{
+        /* =========================
+           Filter Cards (Pro Layout)
+           ========================= */
+        .filter-grid { margin-top: 1rem; margin-bottom: 1rem; }
+
+        .filter-link{
+            display:block;
+            height:100%;
+            text-decoration:none !important;
+        }
+
+        .filter-card{
+            height:100%;
+            min-height: 108px;
             border: 1px solid #e5e7eb !important;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #ffffff, #f9fafb);
-            box-shadow: 0 4px 14px rgba(0,0,0,.04);
-            transition: all .2s ease;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 4px 16px rgba(0,0,0,.04);
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .metric-card .card-body{ padding: 16px 18px; }
-        .metric-icon{
-            width: 44px; height: 44px;
-            border-radius: 14px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #f3f4f6;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
-        }
-        .metric-icon i{ font-size: 18px; }
-        .metric-title{ font-size: 13px; font-weight: 700; letter-spacing: .2px; color: #6b7280; }
-        .metric-value{ font-size: 26px; font-weight: 800; line-height: 1.1; margin: 0; }
 
-        .card-filter:hover .metric-card{
+        .filter-card::before{
+            content:'';
+            position:absolute;
+            inset:0;
+            background: linear-gradient(135deg, rgba(249,250,251,.95), rgba(255,255,255,1));
+            pointer-events:none;
+        }
+
+        .filter-card .card-body{
+            position:relative;
+            padding: 14px 14px 12px;
+            display:flex;
+            flex-direction:column;
+            gap: 10px;
+        }
+
+        .filter-card:hover{
             transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(0,0,0,.08);
+            box-shadow: 0 10px 26px rgba(0,0,0,.08);
         }
 
-        .metric-card.is-active{
+        .filter-card.is-active{
             border-color: #c7d2fe !important;
-            box-shadow: 0 10px 26px rgba(99,102,241,.16);
+            box-shadow: 0 12px 30px rgba(99,102,241,.16);
         }
 
-        .metric-sub{
+        .stat-top{
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:12px;
+        }
+
+        .stat-left{
+            min-width: 0;
+        }
+
+        .stat-title{
             font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .3px;
             color: #6b7280;
-            margin-top: 6px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .metric-sub b{ color:#111827; }
 
-        /* Loading row */
+        .stat-value{
+            font-size: 26px;
+            font-weight: 900;
+            line-height: 1;
+            margin: 0;
+        }
+
+        .icon-chip{
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            flex: 0 0 auto;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+            border: 1px solid #eef2f7;
+            background: #f9fafb;
+        }
+        .icon-chip i{ font-size: 18px; }
+
+        /* Chip accent variants */
+        .chip-warning{ background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.18); }
+        .chip-success{ background: rgba(34,197,94,.10);  border-color: rgba(34,197,94,.18); }
+        .chip-info{    background: rgba(59,130,246,.10);  border-color: rgba(59,130,246,.18); }
+        .chip-danger{  background: rgba(239,68,68,.10);   border-color: rgba(239,68,68,.18); }
+        .chip-primary{ background: rgba(99,102,241,.10);  border-color: rgba(99,102,241,.18); }
+        .chip-muted{   background: rgba(107,114,128,.10); border-color: rgba(107,114,128,.18); }
+
+        .stat-meta{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:10px;
+            margin-top:auto;
+            font-size: 12px;
+            color:#6b7280;
+        }
+
+        .meta-left{
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .meta-pill{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid #e5e7eb;
+            background:#f9fafb;
+            color:#111827;
+            font-weight: 800;
+            max-width: 180px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .table-loading{
             padding: 48px 0;
             color:#6b7280;
@@ -83,20 +178,30 @@
 
 @section('content')
 
-    {{-- Cards --}}
-    <div class="row mt-4 mb-3">
+    {{-- Filter Cards --}}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-6 g-3 filter-grid">
 
         {{-- Total --}}
-        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-            <a href="{{ $pageUrl }}?filter=all" class="card-filter text-decoration-none" data-filter="all">
-                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
-                    <div class="card-body d-flex gap-3 align-items-center">
-                        <div class="metric-icon">
-                            <i class="fa fa-list text-warning"></i>
+        <div class="col">
+            <a href="{{ $pageUrl }}?filter=all"
+               class="filter-link card-filter"
+               data-filter="all"
+               aria-label="Filter: All orders">
+                <div class="card filter-card {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
+                    <div class="card-body">
+                        <div class="stat-top">
+                            <div class="stat-left">
+                                <div class="stat-title">Total Orders</div>
+                                <div class="stat-value text-warning" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</div>
+                            </div>
+                            <div class="icon-chip chip-warning">
+                                <i class="fa fa-list text-warning"></i>
+                            </div>
                         </div>
-                        <div>
-                            <div class="metric-title">TOTAL ORDERS</div>
-                            <div class="metric-value text-warning" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</div>
+
+                        <div class="stat-meta">
+                            <div class="meta-left">All time</div>
+                            <span class="meta-pill">Overview</span>
                         </div>
                     </div>
                 </div>
@@ -104,16 +209,26 @@
         </div>
 
         {{-- Today --}}
-        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-            <a href="{{ $pageUrl }}?filter=today" class="card-filter text-decoration-none" data-filter="today">
-                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'today' ? 'is-active' : '' }}" data-card="today">
-                    <div class="card-body d-flex gap-3 align-items-center">
-                        <div class="metric-icon">
-                            <i class="fa fa-calendar-day text-success"></i>
+        <div class="col">
+            <a href="{{ $pageUrl }}?filter=today"
+               class="filter-link card-filter"
+               data-filter="today"
+               aria-label="Filter: Today's orders">
+                <div class="card filter-card {{ ($filter ?? 'all') === 'today' ? 'is-active' : '' }}" data-card="today">
+                    <div class="card-body">
+                        <div class="stat-top">
+                            <div class="stat-left">
+                                <div class="stat-title">Today's Orders</div>
+                                <div class="stat-value text-success" id="todayCount">{{ $todayCustomizeOrders ?? 0 }}</div>
+                            </div>
+                            <div class="icon-chip chip-success">
+                                <i class="fa fa-calendar-day text-success"></i>
+                            </div>
                         </div>
-                        <div>
-                            <div class="metric-title">TODAY'S ORDERS</div>
-                            <div class="metric-value text-success" id="todayCount">{{ $todayCustomizeOrders ?? 0 }}</div>
+
+                        <div class="stat-meta">
+                            <div class="meta-left">Scheduled today</div>
+                            <span class="meta-pill">Today</span>
                         </div>
                     </div>
                 </div>
@@ -121,39 +236,55 @@
         </div>
 
         {{-- Paid --}}
-        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-            <a href="{{ $pageUrl }}?filter=paid" class="card-filter text-decoration-none" data-filter="paid">
-                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'paid' ? 'is-active' : '' }}" data-card="paid">
-                    <div class="card-body d-flex gap-3 align-items-center">
-                        <div class="metric-icon">
-                            <i class="fa fa-check-circle text-info"></i>
+        <div class="col">
+            <a href="{{ $pageUrl }}?filter=paid"
+               class="filter-link card-filter"
+               data-filter="paid"
+               aria-label="Filter: Paid orders">
+                <div class="card filter-card {{ ($filter ?? 'all') === 'paid' ? 'is-active' : '' }}" data-card="paid">
+                    <div class="card-body">
+                        <div class="stat-top">
+                            <div class="stat-left">
+                                <div class="stat-title">Paid Orders</div>
+                                <div class="stat-value text-info" id="paidCount">{{ $paidCustomizeOrders ?? 0 }}</div>
+                            </div>
+                            <div class="icon-chip chip-info">
+                                <i class="fa fa-check-circle text-info"></i>
+                            </div>
                         </div>
-                        <div>
-                            <div class="metric-title">PAID ORDERS</div>
-                            <div class="metric-value text-info" id="paidCount">{{ $paidCustomizeOrders ?? 0 }}</div>
+
+                        <div class="stat-meta">
+                            <div class="meta-left">Payment done</div>
+                            <span class="meta-pill">Paid</span>
                         </div>
                     </div>
                 </div>
             </a>
         </div>
 
-        {{-- Unpaid (NEW) --}}
-        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-3">
-            <a href="{{ $pageUrl }}?filter=unpaid" class="card-filter text-decoration-none" data-filter="unpaid">
-                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'unpaid' ? 'is-active' : '' }}" data-card="unpaid">
-                    <div class="card-body d-flex gap-3 align-items-center">
-                        <div class="metric-icon">
-                            <i class="fa fa-hourglass-half text-danger"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="metric-title">UNPAID ORDERS</div>
-                            <div class="d-flex align-items-end justify-content-between gap-3">
-                                <div class="metric-value text-danger" id="unpaidCount">{{ $unpaidCustomizeOrders ?? 0 }}</div>
-                                <div class="metric-sub text-end">
-                                    Collect:
-                                    <b id="unpaidAmount">₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}</b>
-                                </div>
+        {{-- Unpaid --}}
+        <div class="col">
+            <a href="{{ $pageUrl }}?filter=unpaid"
+               class="filter-link card-filter"
+               data-filter="unpaid"
+               aria-label="Filter: Unpaid orders">
+                <div class="card filter-card {{ ($filter ?? 'all') === 'unpaid' ? 'is-active' : '' }}" data-card="unpaid">
+                    <div class="card-body">
+                        <div class="stat-top">
+                            <div class="stat-left">
+                                <div class="stat-title">Unpaid Orders</div>
+                                <div class="stat-value text-danger" id="unpaidCount">{{ $unpaidCustomizeOrders ?? 0 }}</div>
                             </div>
+                            <div class="icon-chip chip-danger">
+                                <i class="fa fa-hourglass-half text-danger"></i>
+                            </div>
+                        </div>
+
+                        <div class="stat-meta">
+                            <div class="meta-left">Amount to collect</div>
+                            <span class="meta-pill" id="unpaidAmount">
+                                ₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -161,16 +292,26 @@
         </div>
 
         {{-- Rejected --}}
-        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-            <a href="{{ $pageUrl }}?filter=rejected" class="card-filter text-decoration-none" data-filter="rejected">
-                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'rejected' ? 'is-active' : '' }}" data-card="rejected">
-                    <div class="card-body d-flex gap-3 align-items-center">
-                        <div class="metric-icon">
-                            <i class="fa fa-ban text-primary"></i>
+        <div class="col">
+            <a href="{{ $pageUrl }}?filter=rejected"
+               class="filter-link card-filter"
+               data-filter="rejected"
+               aria-label="Filter: Rejected orders">
+                <div class="card filter-card {{ ($filter ?? 'all') === 'rejected' ? 'is-active' : '' }}" data-card="rejected">
+                    <div class="card-body">
+                        <div class="stat-top">
+                            <div class="stat-left">
+                                <div class="stat-title">Rejected</div>
+                                <div class="stat-value text-primary" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</div>
+                            </div>
+                            <div class="icon-chip chip-primary">
+                                <i class="fa fa-ban text-primary"></i>
+                            </div>
                         </div>
-                        <div>
-                            <div class="metric-title">REJECTED</div>
-                            <div class="metric-value text-primary" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</div>
+
+                        <div class="stat-meta">
+                            <div class="meta-left">Cancelled / Rejected</div>
+                            <span class="meta-pill">Closed</span>
                         </div>
                     </div>
                 </div>
@@ -178,16 +319,26 @@
         </div>
 
         {{-- Upcoming --}}
-        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-            <a href="{{ $pageUrl }}?filter=upcoming" class="card-filter text-decoration-none" data-filter="upcoming">
-                <div class="card metric-card h-100 {{ ($filter ?? 'all') === 'upcoming' ? 'is-active' : '' }}" data-card="upcoming">
-                    <div class="card-body d-flex gap-3 align-items-center">
-                        <div class="metric-icon">
-                            <i class="fa fa-clock text-secondary"></i>
+        <div class="col">
+            <a href="{{ $pageUrl }}?filter=upcoming"
+               class="filter-link card-filter"
+               data-filter="upcoming"
+               aria-label="Filter: Upcoming orders">
+                <div class="card filter-card {{ ($filter ?? 'all') === 'upcoming' ? 'is-active' : '' }}" data-card="upcoming">
+                    <div class="card-body">
+                        <div class="stat-top">
+                            <div class="stat-left">
+                                <div class="stat-title">Upcoming</div>
+                                <div class="stat-value text-secondary" id="upcomingCount">{{ $upcomingCustomizeOrders ?? 0 }}</div>
+                            </div>
+                            <div class="icon-chip chip-muted">
+                                <i class="fa fa-clock text-secondary"></i>
+                            </div>
                         </div>
-                        <div>
-                            <div class="metric-title">UPCOMING (NEXT 3 DAYS)</div>
-                            <div class="metric-value text-secondary" id="upcomingCount">{{ $upcomingCustomizeOrders ?? 0 }}</div>
+
+                        <div class="stat-meta">
+                            <div class="meta-left">Next 3 days</div>
+                            <span class="meta-pill">Upcoming</span>
                         </div>
                     </div>
                 </div>
@@ -265,9 +416,11 @@
             $('#rejectedCount').text(counts.rejected ?? 0);
             $('#upcomingCount').text(counts.upcoming ?? {{ (int)($upcomingCustomizeOrders ?? 0) }});
 
-            // NEW: unpaid
+            // unpaid
             $('#unpaidCount').text(counts.unpaid ?? {{ (int)($unpaidCustomizeOrders ?? 0) }});
-            $('#unpaidAmount').text(counts.unpaid_amount_fmt ?? '₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}');
+            $('#unpaidAmount').text(
+                counts.unpaid_amount_fmt ?? '₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}'
+            );
         }
 
         function loadRequests(filter, pushUrl = true) {
@@ -294,7 +447,7 @@
                         $tbody.html('<tr><td colspan="11" class="text-center text-danger table-loading">Unexpected response</td></tr>');
                     }
                 })
-                .fail(function (xhr) {
+                .fail(function () {
                     $tbody.html(prevHtml);
                     Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
                 });
@@ -321,7 +474,7 @@
             }
         });
 
-        // Optional: your existing "Mark Paid" flow (keep only if you use it)
+        // Optional: your existing "Mark Paid" flow
         function confirmPayment(requestId) {
             Swal.fire({
                 title: 'Select payment method',
