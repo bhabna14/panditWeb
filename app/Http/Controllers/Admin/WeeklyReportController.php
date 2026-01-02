@@ -32,31 +32,37 @@ class WeeklyReportController extends Controller
         $monthStart = Carbon::createFromDate($year, $month, 1, $tz)->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth()->endOfDay();
 
-        $monthStartUtc = $monthStart->clone()->setTimezone('UTC');
-        $monthEndUtc   = $monthEnd->clone()->setTimezone('UTC');
+        /**
+         * ✅ FIX: Report range covers FULL weeks around the month.
+         * Example: For January 2026, reportStart becomes 2025-12-29 (Mon),
+         * so 2025-12-31 vendor fund appears in the same weekly block.
+         */
+        $reportStart = $monthStart->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
+        $reportEnd   = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY)->endOfDay();
+
+        $monthStartUtc  = $monthStart->clone()->setTimezone('UTC');
+        $monthEndUtc    = $monthEnd->clone()->setTimezone('UTC');
+        $reportStartUtc = $reportStart->clone()->setTimezone('UTC');
+        $reportEndUtc   = $reportEnd->clone()->setTimezone('UTC');
 
         $dateExpr = "DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset'))";
 
-        // ---- Day skeleton
+        // ---- Day skeleton (✅ build using report range, not month-only)
         $days = [];
-        foreach (CarbonPeriod::create($monthStart, $monthEnd) as $d) {
+        foreach (CarbonPeriod::create($reportStart, $reportEnd) as $d) {
             $dateKey = $d->toDateString();
             $days[$dateKey] = [
                 'date'     => $dateKey,
-                'dow'      => $d->format('l'), // Monday, Tuesday...
+                'dow'      => $d->format('l'),
 
                 'finance'  => [
                     'subscription_income' => 0,
                     'customize_income'    => 0,
                     'income_total'        => 0,
 
-                    // for modal
-                    // UPDATED: now each item includes payment_methods + payment_date
-                    // [{user_id,name,amt,payment_methods,payment_date}]
                     'subscription_income_users'   => [],
                     'customize_income_users'      => [],
 
-                    // legacy fields (safe to keep)
                     'subscription_income_tooltip' => '',
                     'customize_income_tooltip'    => '',
 
@@ -79,18 +85,12 @@ class WeeklyReportController extends Controller
         $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
         $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
 
-        /**
-         * IMPORTANT:
-         * Your vendor columns use vendor NAME strings ($v),
-         * but vendorPaymentItems() requires vendor_id.
-         * So we build a name->id map + also allow clicking when column name is vendor_id.
-         */
         $vendorNameToId = [];
         foreach ($vendorMap as $vid => $vname) {
             if (!empty($vname)) {
                 $vendorNameToId[$vname] = $vid;
             }
-            $vendorNameToId[(string)$vid] = $vid; // fallback if column label is vendor_id
+            $vendorNameToId[(string)$vid] = $vid;
         }
 
         /* ================= Finance: INCOME (Split totals) ================= */
@@ -103,7 +103,7 @@ class WeeklyReportController extends Controller
                 DB::raw("SUM(fp.paid_amount) as amt"),
             ])
             ->where('fp.payment_status', 'paid')
-            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('fp.created_at', [$reportStartUtc, $reportEndUtc])
             ->groupBy('d')
             ->get();
 
@@ -122,7 +122,7 @@ class WeeklyReportController extends Controller
             ])
             ->whereNull('s.order_id')
             ->where('fp.payment_status', 'paid')
-            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('fp.created_at', [$reportStartUtc, $reportEndUtc])
             ->groupBy('d')
             ->get();
 
@@ -139,7 +139,6 @@ class WeeklyReportController extends Controller
         }
 
         /* ================= INCOME USER LIST (for modal) ================= */
-        /* UPDATED: include payment_methods + payment_date */
 
         $subUsersRows = FlowerPayment::query()
             ->from('flower_payments as fp')
@@ -153,7 +152,7 @@ class WeeklyReportController extends Controller
                 DB::raw("GROUP_CONCAT(DISTINCT fp.payment_method ORDER BY fp.payment_method SEPARATOR ', ') as payment_methods"),
             ])
             ->where('fp.payment_status', 'paid')
-            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('fp.created_at', [$reportStartUtc, $reportEndUtc])
             ->groupBy('d', 'fp.user_id', 'u.name')
             ->orderBy('d')
             ->orderByDesc('amt')
@@ -172,7 +171,7 @@ class WeeklyReportController extends Controller
             ])
             ->whereNull('s.order_id')
             ->where('fp.payment_status', 'paid')
-            ->whereBetween('fp.created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('fp.created_at', [$reportStartUtc, $reportEndUtc])
             ->groupBy('d', 'fp.user_id', 'u.name')
             ->orderBy('d')
             ->orderByDesc('amt')
@@ -185,7 +184,7 @@ class WeeklyReportController extends Controller
                 'name'            => $r->name,
                 'amt'             => (float)$r->amt,
                 'payment_methods' => (string)($r->payment_methods ?? ''),
-                'payment_date'    => (string)($r->d ?? ''), // NEW
+                'payment_date'    => (string)($r->d ?? ''),
             ];
         }
 
@@ -196,11 +195,10 @@ class WeeklyReportController extends Controller
                 'name'            => $r->name,
                 'amt'             => (float)$r->amt,
                 'payment_methods' => (string)($r->payment_methods ?? ''),
-                'payment_date'    => (string)($r->d ?? ''), // NEW
+                'payment_date'    => (string)($r->d ?? ''),
             ];
         }
 
-        // (Optional/legacy) tooltips - safe to keep
         foreach ($days as $dk => $row) {
             $days[$dk]['finance']['subscription_income_tooltip'] = $this->buildIncomePopoverHtml(
                 'Subscription Income',
@@ -222,7 +220,7 @@ class WeeklyReportController extends Controller
                 DB::raw("DATE(pickup_date) as d"),
                 DB::raw("SUM(total_price) as amt"),
             ])
-            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->whereBetween('pickup_date', [$reportStart->toDateString(), $reportEnd->toDateString()])
             ->groupBy('d')
             ->get();
 
@@ -232,16 +230,18 @@ class WeeklyReportController extends Controller
             }
         }
 
-        /* ================= Finance: Vendor Fund ================= */
+        /* ================= Finance: Vendor Fund (✅ FIXED) ================= */
 
         $vendorFund = OfficeFund::query()
             ->active()
             ->where('categories', 'vendor_payment')
             ->select([
-                DB::raw("DATE(date) as d"),
+                DB::raw("DATE(`date`) as d"),
                 DB::raw("SUM(amount) as amt"),
             ])
-            ->whereBetween('date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            // ✅ FIX: include cross-month full-week range + safe for datetime
+            ->whereDate('date', '>=', $reportStart->toDateString())
+            ->whereDate('date', '<=', $reportEnd->toDateString())
             ->groupBy('d')
             ->get();
 
@@ -269,7 +269,7 @@ class WeeklyReportController extends Controller
                 DB::raw("$dateExpr as d"),
                 DB::raw("COUNT(*) as c"),
             ])
-            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('created_at', [$reportStartUtc, $reportEndUtc])
             ->whereIn('user_id', $firstTimeUserIds)
             ->groupBy('d')
             ->get();
@@ -290,7 +290,7 @@ class WeeklyReportController extends Controller
                 DB::raw("$dateExpr as d"),
                 DB::raw("COUNT(*) as c"),
             ])
-            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('created_at', [$reportStartUtc, $reportEndUtc])
             ->whereIn('order_id', $renewOrderIds)
             ->groupBy('d')
             ->get();
@@ -310,7 +310,7 @@ class WeeklyReportController extends Controller
                     DB::raw("COUNT(*) as c")
                 ])
                 ->where('action', 'paused')
-                ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+                ->whereBetween('created_at', [$reportStartUtc, $reportEndUtc])
                 ->groupBy('d')
                 ->get();
 
@@ -326,7 +326,7 @@ class WeeklyReportController extends Controller
                     DB::raw("COUNT(*) as c")
                 ])
                 ->whereNotNull('pause_start_date')
-                ->whereBetween('pause_start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+                ->whereBetween('pause_start_date', [$reportStart->toDateString(), $reportEnd->toDateString()])
                 ->groupBy('d')
                 ->get();
 
@@ -344,7 +344,7 @@ class WeeklyReportController extends Controller
                 DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
                 DB::raw("COUNT(*) as c"),
             ])
-            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('created_at', [$reportStartUtc, $reportEndUtc])
             ->groupBy('d')
             ->get();
 
@@ -362,7 +362,7 @@ class WeeklyReportController extends Controller
                 'vendor_id',
                 DB::raw("SUM(total_price) as amt"),
             ])
-            ->whereBetween('pickup_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->whereBetween('pickup_date', [$reportStart->toDateString(), $reportEnd->toDateString()])
             ->groupBy('d', 'vendor_id')
             ->get();
 
@@ -387,7 +387,7 @@ class WeeklyReportController extends Controller
                 DB::raw("COUNT(*) as c"),
             ])
             ->where('delivery_status', 'delivered')
-            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereBetween('created_at', [$reportStartUtc, $reportEndUtc])
             ->groupBy('d', 'rider_id')
             ->get();
 
@@ -405,23 +405,22 @@ class WeeklyReportController extends Controller
         $deliveryCols = array_keys($deliveryColsSet);
         sort($deliveryCols);
 
-        /* ================= Split into weeks + week totals ================= */
+        /* ================= Split into weeks + week totals (✅ FIXED) ================= */
 
         $weeks = [];
-        $cursor    = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
-        $endCursor = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
+        $cursor    = $reportStart->copy()->startOfWeek(Carbon::MONDAY);
+        $endCursor = $reportEnd->copy()->endOfWeek(Carbon::SUNDAY);
 
         while ($cursor->lte($endCursor)) {
-            $weekStart = $cursor->copy();
-            $weekEnd   = $cursor->copy()->endOfWeek(Carbon::SUNDAY);
-
-            $rangeStart = $weekStart->lt($monthStart) ? $monthStart->copy() : $weekStart->copy();
-            $rangeEnd   = $weekEnd->gt($monthEnd) ? $monthEnd->copy() : $weekEnd->copy();
+            $weekStart = $cursor->copy()->startOfDay();
+            $weekEnd   = $cursor->copy()->endOfWeek(Carbon::SUNDAY)->endOfDay();
 
             $weekDays = [];
-            foreach (CarbonPeriod::create($rangeStart, $rangeEnd) as $d) {
+            foreach (CarbonPeriod::create($weekStart, $weekEnd) as $d) {
                 $key = $d->toDateString();
-                $weekDays[$key] = $days[$key];
+                if (isset($days[$key])) {
+                    $weekDays[$key] = $days[$key];
+                }
             }
 
             $weekTotals = [
@@ -429,12 +428,9 @@ class WeeklyReportController extends Controller
                 'customize_income'    => 0,
                 'income_total'        => 0,
 
-                // for modal
-                // UPDATED: include payment_methods + payment_date
                 'subscription_income_users' => [],
                 'customize_income_users'    => [],
 
-                // legacy tooltip fields (safe to keep)
                 'subscription_income_tooltip' => '',
                 'customize_income_tooltip'    => '',
 
@@ -452,8 +448,7 @@ class WeeklyReportController extends Controller
                 'total_delivery'      => 0,
             ];
 
-            // UPDATED aggregators (merge payment_methods + keep latest payment_date)
-            $weekSubUsers = []; // uid => ['user_id','name','amt','_methods_set'=>[],'_latest_date'=>'YYYY-MM-DD']
+            $weekSubUsers = [];
             $weekCusUsers = [];
 
             foreach ($weekDays as $row) {
@@ -581,8 +576,8 @@ class WeeklyReportController extends Controller
             }
 
             $weeks[] = [
-                'start'         => $rangeStart,
-                'end'           => $rangeEnd,
+                'start'         => $weekStart,
+                'end'           => $weekEnd,
                 'days'          => $weekDays,
                 'totals'        => $weekTotals,
                 'vendorColumns' => $weekVendorColumns,
@@ -591,14 +586,21 @@ class WeeklyReportController extends Controller
             $cursor->addWeek();
         }
 
-        /* ================= Month totals ================= */
+        /* ================= Month totals (✅ Only month days, not report days) ================= */
+
+        $monthDays = [];
+        foreach (CarbonPeriod::create($monthStart, $monthEnd) as $d) {
+            $key = $d->toDateString();
+            $monthDays[$key] = $days[$key] ?? null;
+        }
+        $monthDays = array_filter($monthDays);
+        ksort($monthDays);
 
         $monthTotals = [
             'subscription_income' => 0,
             'customize_income'    => 0,
             'income_total'        => 0,
 
-            // UPDATED: include payment_methods + payment_date
             'subscription_income_users' => [],
             'customize_income_users'    => [],
 
@@ -619,11 +621,10 @@ class WeeklyReportController extends Controller
             'total_delivery'      => 0,
         ];
 
-        // UPDATED aggregators (merge payment_methods + keep latest payment_date)
         $monthSubUsers = [];
         $monthCusUsers = [];
 
-        foreach ($days as $row) {
+        foreach ($monthDays as $row) {
             $monthTotals['subscription_income'] += (float)($row['finance']['subscription_income'] ?? 0);
             $monthTotals['customize_income']    += (float)($row['finance']['customize_income'] ?? 0);
             $monthTotals['income_total']        += (float)($row['finance']['income_total'] ?? 0);
@@ -738,9 +739,6 @@ class WeeklyReportController extends Controller
             $monthCusUsersList,
             (float)$monthTotals['customize_income']
         );
-
-        $monthDays = $days;
-        ksort($monthDays);
 
         $years = range(Carbon::now()->year - 3, Carbon::now()->year + 1);
 
