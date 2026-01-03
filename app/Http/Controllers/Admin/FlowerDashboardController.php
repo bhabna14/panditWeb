@@ -171,20 +171,28 @@ class FlowerDashboardController extends Controller
             ];
         })->values();
 
-                // UNPAID CUSTOM ORDERS (all time)
-        $unpaidCustomizeOrders = FlowerRequest::where(function ($q) {
-                $q->whereNull('status')
-                ->orWhereNotIn('status', [
-                    'paid', 'Paid',
-                    'cancelled', 'Cancelled',
-                    'rejected', 'Rejected',
-                ]);
-            })
-            ->count();
+      $paidPaymentExists = function ($sq) {
+    $sq->select(DB::raw(1))
+        ->from('orders as o')
+        ->join('flower_payments as fp', 'fp.order_id', '=', 'o.order_id')
+        ->whereColumn('o.request_id', 'flower_requests.request_id')
+        ->whereRaw('LOWER(COALESCE(fp.payment_status,"")) = "paid"');
+};
 
-            // PAID CUSTOMIZE ORDERS (all time)
-$paidCustomizeOrders = FlowerRequest::whereIn('status', ['paid', 'Paid'])->count();
+$paidCustomizeOrders = \App\Models\FlowerRequest::query()
+    ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
+    ->where(function ($q) use ($paidPaymentExists) {
+        $q->whereRaw('LOWER(COALESCE(status,"")) = "paid"')
+          ->orWhereExists($paidPaymentExists);
+    })
+    ->count();
 
+
+$unpaidCustomizeOrders = \App\Models\FlowerRequest::query()
+    ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
+    ->whereRaw('LOWER(COALESCE(status,"")) <> "paid"')
+    ->whereNotExists($paidPaymentExists)
+    ->count();
 
 
         $totalRiders = RiderDetails::where('status', 'active')->count();
@@ -332,7 +340,7 @@ $paidCustomizeOrders = FlowerRequest::whereIn('status', ['paid', 'Paid'])->count
             'nextDayPaused',
             'nextDayResumed',
             'upcomingCustomizeOrders',
-                'paidCustomizeOrders',
+            'paidCustomizeOrders',
             'unpaidCustomizeOrders', // <-- ADD THIS
             'visitPlaceCountToday',
             'todayClaimed',
@@ -355,8 +363,8 @@ $paidCustomizeOrders = FlowerRequest::whereIn('status', ['paid', 'Paid'])->count
                 'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
                 'order.deliveryHistories' => function ($q) use ($today) {
                     $q->whereDate('created_at', $today)
-                      ->where('delivery_status', 'delivered')
-                      ->latest('created_at');
+                    ->where('delivery_status', 'delivered')
+                    ->latest('created_at');
                 },
                 'order.deliveryHistories.rider:id,rider_name'
             ])
