@@ -475,14 +475,6 @@
 @section('content')
 <div class="container container-page py-4">
 
-    <div class="d-flex align-items-center justify-content-between mb-2">
-        <div>
-            <h4 class="page-header-title mb-0">
-                <i class="bi bi-cash-coin me-1"></i> Payments History
-            </h4>
-        </div>
-    </div>
-
     @php
         $startLabel = $start ? \Carbon\Carbon::parse($start)->toFormattedDateString() : '—';
         $endLabel   = $end   ? \Carbon\Carbon::parse($end)->toFormattedDateString()   : '—';
