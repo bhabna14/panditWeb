@@ -19,460 +19,258 @@ use Illuminate\Support\Facades\Log;
 
 class FlowerRequestController extends Controller
 {
-public function showRequests(Request $request)
+    public function showRequests(Request $request)
     {
-        $filter = $request->query('filter', 'all');
+        $filter = strtolower(trim($request->query('filter', 'all')));
 
-        $tz          = config('app.timezone', 'Asia/Kolkata');
-        $todayCarbon = Carbon::today($tz);
-        $today       = $todayCarbon->toDateString();
+        // Card counts + amounts
+        $counts = $this->buildCounts();
 
-        // Next 3 days (excluding today)
-        $startDateCarbon = $todayCarbon->copy()->addDay();
-        $endDateCarbon   = $todayCarbon->copy()->addDays(3);
-        $startDate       = $startDateCarbon->toDateString();
-        $endDate         = $endDateCarbon->toDateString();
+        // Table data (first load)
+        $requests = $this->buildListQuery($filter)->paginate(10)->withQueryString();
 
-        $query = FlowerRequest::with([
-            'order' => function ($q) {
-                $q->with('flowerPayments', 'delivery', 'rider');
-            },
-            'flowerProduct',
-            'user',
-            'address.localityDetails',
-            'flowerRequestItems',
-        ])->orderByDesc('id');
+        return view('admin.manage-flower-request', [
+            'filter' => $filter,
+            'requests' => $requests,
 
-        $this->applyRequestFilter($query, $filter, $today, $startDate, $endDate);
+            'totalCount'    => $counts['total'],
+            'pendingCount'  => $counts['pending'],
+            'approvedCount' => $counts['approved'],
+            'paidCount'     => $counts['paid'],
+            'rejectedCount' => $counts['rejected'],
+            'unpaidCount'   => $counts['unpaid'],
 
-        $pendingRequests = $query->get();
-
-        // ---------------------------
-        // Card Counts (Global)
-        // ---------------------------
-        $totalCustomizeOrders    = FlowerRequest::count();
-        $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
-        $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
-
-        $approvedCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyApprovedFilter($q);
-            })
-            ->count();
-
-        $paidCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyPaidFilter($q);
-            })
-            ->count();
-
-        $rejectCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyRejectedFilter($q);
-            })
-            ->count();
-
-        // UNPAID: approved + payment exists (any attempt) + no successful payment
-        $unpaidCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyUnpaidFilter($q);
-            })
-            ->count();
-
-        $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
-        $paidCollectedAmount   = $this->computePaidCollectedAmount();
-
-        $riders = RiderDetails::where('status', 'active')->get();
-
-        return view('admin.flower-request.manage-flower-request', compact(
-            'riders',
-            'pendingRequests',
-            'totalCustomizeOrders',
-            'todayCustomizeOrders',
-            'upcomingCustomizeOrders',
-            'approvedCustomizeOrders',
-            'paidCustomizeOrders',
-            'rejectCustomizeOrders',
-            'unpaidCustomizeOrders',
-            'unpaidAmountToCollect',
-            'paidCollectedAmount',
-            'filter'
-        ));
+            'paidCollectedAmount'   => $counts['paidCollectedAmount'],
+            'unpaidAmountToCollect' => $counts['unpaidAmountToCollect'],
+        ]);
     }
 
     public function ajaxData(Request $request)
     {
-        $filter = $request->query('filter', 'all');
+        $filter = strtolower(trim($request->query('filter', 'all')));
 
-        $tz          = config('app.timezone', 'Asia/Kolkata');
-        $todayCarbon = Carbon::today($tz);
-        $today       = $todayCarbon->toDateString();
+        $requests = $this->buildListQuery($filter)->paginate(10)->withQueryString();
 
-        $startDateCarbon = $todayCarbon->copy()->addDay();
-        $endDateCarbon   = $todayCarbon->copy()->addDays(3);
-        $startDate       = $startDateCarbon->toDateString();
-        $endDate         = $endDateCarbon->toDateString();
-
-        $query = FlowerRequest::with([
-            'order' => function ($q) {
-                $q->with('flowerPayments', 'delivery', 'rider');
-            },
-            'flowerProduct',
-            'user',
-            'address.localityDetails',
-            'flowerRequestItems',
-        ])->orderByDesc('id');
-
-        $this->applyRequestFilter($query, $filter, $today, $startDate, $endDate);
-
-        $pendingRequests = $query->get();
-
-        $totalCustomizeOrders    = FlowerRequest::count();
-        $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
-        $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
-
-        $approvedCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyApprovedFilter($q);
-            })
-            ->count();
-
-        $paidCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyPaidFilter($q);
-            })
-            ->count();
-
-        $rejectCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyRejectedFilter($q);
-            })
-            ->count();
-
-        $unpaidCustomizeOrders = FlowerRequest::query()
-            ->where(function ($q) {
-                $this->applyUnpaidFilter($q);
-            })
-            ->count();
-
-        $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
-        $paidCollectedAmount   = $this->computePaidCollectedAmount();
-
-        $riders   = RiderDetails::where('status', 'active')->get();
-        $rowsHtml = view('admin.flower-request.partials._rows', compact('pendingRequests', 'riders'))->render();
+        $rowsHtml = '';
+        foreach ($requests as $row) {
+            $rowsHtml .= view('admin._row', compact('row'))->render();
+        }
 
         return response()->json([
-            'rows_html' => $rowsHtml,
-            'counts' => [
-                'total'                => $totalCustomizeOrders,
-                'today'                => $todayCustomizeOrders,
-                'upcoming'             => $upcomingCustomizeOrders,
-                'approved'             => $approvedCustomizeOrders,
-                'paid'                 => $paidCustomizeOrders,
-                'rejected'             => $rejectCustomizeOrders,
-                'unpaid'               => $unpaidCustomizeOrders,
-                'unpaid_amount'        => (float) $unpaidAmountToCollect,
-                'unpaid_amount_fmt'    => '₹' . number_format((float) $unpaidAmountToCollect, 2),
-                'paid_amount'          => (float) $paidCollectedAmount,
-                'paid_amount_fmt'      => '₹' . number_format((float) $paidCollectedAmount, 2),
-            ],
-            'active' => $filter,
+            'rows_html'       => $rowsHtml,
+            'pagination_html' => $requests->links('pagination::bootstrap-4')->render(),
+            'total'           => $requests->total(),
         ]);
     }
 
-    // ---------------------------
-    // Save Reject Reason (NEW)
-    // ---------------------------
-    public function rejectRequest(Request $request, FlowerRequest $flowerRequest)
+    private function successPaymentStatuses(): array
     {
-        $validated = $request->validate([
-            'reason' => ['required', 'string', 'max:500'],
-        ]);
-
-        $flowerRequest->status        = 'rejected';
-        $flowerRequest->cancel_by     = 'admin';
-        $flowerRequest->cancel_reason = $validated['reason'];
-        $flowerRequest->save();
-
-        return redirect()->back()->with('success', 'Order rejected successfully.');
+        return ['paid', 'success', 'captured'];
+        // If you also treat "approved" as paid in payment table, then use:
+        // return ['paid', 'success', 'captured', 'approved'];
     }
 
-    // ---------------------------
-    // Filtering Helpers (UPDATED)
-    // ---------------------------
-    private function applyRequestFilter($query, string $filter, string $today, string $startDate, string $endDate): void
+    private function buildListQuery(string $filter)
     {
-        switch ($filter) {
-            case 'today':
-                $query->whereDate('date', $today);
-                break;
+        $success = $this->successPaymentStatuses();
+        $placeholders = implode(',', array_fill(0, count($success), '?'));
 
-            case 'upcoming':
-                $query->whereBetween('date', [$startDate, $endDate]);
-                break;
+        $q = FlowerRequest::query()
+            ->with([
+                'user',
+                'address',
+                'flowerProduct',
+                'order',               // request_id -> orders.request_id
+                'order.flowerPayments' // orders.order_id -> flower_payments.order_id
+            ])
+            ->orderByDesc('id');
 
-            case 'approved':
-                $this->applyApprovedFilter($query);
-                break;
-
-            case 'paid':
-                $this->applyPaidFilter($query);
-                break;
-
-            case 'unpaid':
-                $this->applyUnpaidFilter($query);
-                break;
-
-            case 'rejected':
-                $this->applyRejectedFilter($query);
-                break;
-
-            case 'all':
-            default:
-                break;
-        }
-    }
-
-    private function applyApprovedFilter($query): void
-    {
-        $this->whereStatusEqualsLowerTrim($query, 'approved');
-    }
-
-    private function applyRejectedFilter($query): void
-    {
-        $this->whereStatusEqualsLowerTrim($query, 'rejected');
-    }
-
-    private function applyPaidFilter($query): void
-    {
-        // Paid = request.status=paid OR payment_status in success list (includes "approved")
-        $paidPaymentStatusesLower = $this->paidPaymentStatusesLower();
-
-        $query->where(function ($q) use ($paidPaymentStatusesLower) {
-            $this->whereStatusEqualsLowerTrim($q, 'paid')
-                ->orWhereHas('order.flowerPayments', function ($p) use ($paidPaymentStatusesLower) {
-                    $this->wherePaymentStatusInLowerTrim($p, $paidPaymentStatusesLower);
-                });
-        });
-    }
-
-    private function applyUnpaidFilter($query): void
-    {
-        // UNPAID (as you asked):
-        // - request.status MUST be approved
-        // - payment row MUST exist (no payment found -> DO NOT SHOW)
-        // - but NO successful payment exists (approved/paid/success/captured)
-        $paidPaymentStatusesLower = $this->paidPaymentStatusesLower();
-
-        $this->whereStatusEqualsLowerTrim($query, 'approved');
-
-        // Must have at least one payment attempt
-        $query->whereHas('order.flowerPayments');
-
-        // But no successful/approved payment
-        $query->whereDoesntHave('order.flowerPayments', function ($p) use ($paidPaymentStatusesLower) {
-            $this->wherePaymentStatusInLowerTrim($p, $paidPaymentStatusesLower);
-        });
-    }
-
-    private function whereStatusEqualsLowerTrim($query, string $valueLower)
-    {
-        return $query->whereRaw("LOWER(TRIM(status)) = ?", [$valueLower]);
-    }
-
-    private function wherePaymentStatusInLowerTrim($query, array $valuesLower)
-    {
-        $valuesLower = array_values(array_unique(array_map('strtolower', $valuesLower)));
-        $ph = implode(',', array_fill(0, count($valuesLower), '?'));
-        return $query->whereRaw("LOWER(TRIM(payment_status)) IN ($ph)", $valuesLower);
-    }
-
-    private function paidPaymentStatusesLower(): array
-    {
-        // IMPORTANT: includes "approved" as successful payment
-        return ['approved', 'paid', 'success', 'captured'];
-    }
-
-    // ---------------------------
-    // Amount Helpers (Same, aligned with new Unpaid rule)
-    // ---------------------------
-    private function computeUnpaidAmountToCollect(): float
-    {
-        $q = FlowerRequest::with(['order.flowerPayments', 'flowerRequestItems']);
-        $this->applyUnpaidFilter($q);
-
-        $rows = $q->get();
-
-        $sum = 0.0;
-        foreach ($rows as $req) {
-            $sum += $this->resolveRequestAmount($req);
-        }
-        return (float) $sum;
-    }
-
-    private function computePaidCollectedAmount(): float
-    {
-        $q = FlowerRequest::with(['order.flowerPayments', 'flowerRequestItems']);
-        $this->applyPaidFilter($q);
-
-        $rows = $q->get();
-
-        $sum = 0.0;
-        foreach ($rows as $req) {
-            $sum += $this->resolvePaidCollectedAmount($req);
-        }
-        return (float) $sum;
-    }
-
-    private function resolvePaidCollectedAmount($req): float
-    {
-        $order = $req->order ?? null;
-
-        if ($order && $order->flowerPayments) {
-            $success = $order->flowerPayments->filter(function ($p) {
-                $st = strtolower(trim((string)($p->payment_status ?? '')));
-                return in_array($st, $this->paidPaymentStatusesLower(), true);
-            });
-
-            if ($success->count() > 0) {
-                $latest = $success->sortByDesc('id')->first();
-                if ($latest && is_numeric($latest->paid_amount)) {
-                    return (float) $latest->paid_amount;
-                }
-            }
-        }
-
-        return (float) $this->resolveRequestAmount($req);
-    }
-
-    private function resolveRequestAmount($req): float
-    {
-        $order = $req->order ?? null;
-
-        if ($order) {
-            foreach (['total_price', 'total_amount', 'amount', 'payable_amount', 'order_total', 'grand_total'] as $col) {
-                if (isset($order->{$col}) && is_numeric($order->{$col})) {
-                    return (float) $order->{$col};
-                }
-            }
-        }
-
-        $items = $req->flowerRequestItems ?? collect();
-        if ($items->count() > 0) {
-            return (float) $items->sum(function ($it) {
-                foreach (['item_total', 'total', 'total_price', 'amount'] as $col) {
-                    if (isset($it->{$col}) && is_numeric($it->{$col})) {
-                        return (float) $it->{$col};
-                    }
-                }
-
-                $qty   = $it->quantity ?? ($it->qty ?? 0);
-                $price = $it->price ?? ($it->unit_price ?? 0);
-
-                if (is_numeric($qty) && is_numeric($price)) {
-                    return (float) $qty * (float) $price;
-                }
-                return 0.0;
-            });
-        }
-
-        return 0.0;
-    }
-
-public function saveOrder(Request $request, $id)
-{
-    try {
-        $flowerRequest = FlowerRequest::findOrFail($id);
-
-        // Generate a unique order ID
-        $orderId = 'ORD-' . strtoupper(Str::random(12));
-
-        // Create the order
-        $order = Order::create([
-            'order_id' => $orderId,
-            'request_id' => $flowerRequest->request_id,
-            'product_id' => $flowerRequest->product_id,
-            'user_id' => $flowerRequest->user_id,
-            'address_id' => $flowerRequest->address_id,
-            'quantity' => 1,
-            'requested_flower_price' => $request->requested_flower_price,
-            'delivery_charge' => $request->delivery_charge,
-            'total_price' => ($request->requested_flower_price ?: 0) + ($request->delivery_charge ?: 0),
-            'suggestion' => $flowerRequest->suggestion,
-        ]);
-
-        // Update the flower request status
-        $flowerRequest->status = 'approved';
-        $flowerRequest->save();
-
-        // Send notification to user's devices
-        $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
-
-        if (!empty($deviceTokens)) {
-            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $notificationService->sendBulkNotifications(
-                $deviceTokens,
-                'Order Approved',
-                'Price is updated, please pay the amount',
-                ['order_id' => $order->order_id]
-            );
-
-            \Log::info('Notification sent successfully to all devices.', [
-                'user_id' => $flowerRequest->user_id,
-                'device_tokens' => $deviceTokens,
-            ]);
+        if ($filter === 'pending') {
+            $q->whereRaw('LOWER(status) = ?', ['pending']);
+        } elseif ($filter === 'approved') {
+            $q->whereRaw('LOWER(status) = ?', ['approved']);
+        } elseif ($filter === 'paid') {
+            $q->whereRaw('LOWER(status) = ?', ['paid']);
+        } elseif ($filter === 'rejected') {
+            // handles "Rejected" or "rejected"
+            $q->whereRaw('LOWER(status) = ?', ['rejected']);
+        } elseif ($filter === 'unpaid') {
+            // Unpaid = approved AND (no order OR order exists but no successful payment)
+            $q->whereRaw('LOWER(status) = ?', ['approved'])
+              ->where(function ($x) use ($placeholders, $success) {
+                  $x->whereDoesntHave('order')
+                    ->orWhereHas('order', function ($oq) use ($placeholders, $success) {
+                        $oq->whereDoesntHave('flowerPayments', function ($pq) use ($placeholders, $success) {
+                            $pq->whereRaw("LOWER(payment_status) IN ($placeholders)", $success);
+                        });
+                    });
+              });
         } else {
-            \Log::warning('No device tokens found for user.', ['user_id' => $flowerRequest->user_id]);
+            // all
         }
 
-        return redirect()->back()->with('success', 'Order saved successfully');
-    } catch (\Exception $e) {
-        \Log::error('Failed to save order.', ['error' => $e->getMessage()]);
-        return redirect()->back()->with('error', 'Failed to save order');
+        return $q;
     }
-}
 
-public function markPayment(Request $request, $id)
-{
-    // Validate payment method coming from SweetAlert
-    $request->validate([
-        'payment_method' => ['required', 'in:upi,razorpay,cash'],
-    ]);
+    private function buildCounts(): array
+    {
+        $success = $this->successPaymentStatuses();
+        $placeholders = implode(',', array_fill(0, count($success), '?'));
 
-    try {
-        $order         = Order::where('request_id', $id)->firstOrFail();
-        $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
+        $base = FlowerRequest::query();
 
-        DB::transaction(function () use ($request, $order, $flowerRequest) {
-            // Create flower payment row
-            FlowerPayment::create([
-                'order_id'       => $order->order_id,
-                'payment_id'     => null, // set later if you want
-                'user_id'        => $order->user_id,
-                'payment_method' => $request->payment_method, // upi | razorpay | cash
-                'paid_amount'    => $order->total_price,
-                'payment_status' => 'paid',
+        $total    = (clone $base)->count();
+        $pending  = (clone $base)->whereRaw('LOWER(status)=?', ['pending'])->count();
+        $approved = (clone $base)->whereRaw('LOWER(status)=?', ['approved'])->count();
+        $paid     = (clone $base)->whereRaw('LOWER(status)=?', ['paid'])->count();
+        $rejected = (clone $base)->whereRaw('LOWER(status)=?', ['rejected'])->count();
+
+        // Unpaid count: approved AND (no order OR no successful payment)
+        $unpaid = (clone $base)
+            ->whereRaw('LOWER(status)=?', ['approved'])
+            ->where(function ($x) use ($placeholders, $success) {
+                $x->whereDoesntHave('order')
+                  ->orWhereHas('order', function ($oq) use ($placeholders, $success) {
+                      $oq->whereDoesntHave('flowerPayments', function ($pq) use ($placeholders, $success) {
+                          $pq->whereRaw("LOWER(payment_status) IN ($placeholders)", $success);
+                      });
+                  });
+            })
+            ->count();
+
+        // Paid Collected Amount: sum successful payments for requests with status = paid
+        $paidCollectedAmount = FlowerPayment::query()
+            ->whereHas('order.flowerRequest', function ($rq) {
+                $rq->whereRaw('LOWER(status)=?', ['paid']);
+            })
+            ->whereRaw("LOWER(payment_status) IN ($placeholders)", $success)
+            ->sum('paid_amount');
+
+        // Unpaid Amount to Collect: sum (orders.total_price + orders.delivery_charge) for approved+unpaid
+        // NOTE: This avoids grand_total_price column issue.
+        $unpaidAmountToCollect = DB::table('flower_requests as fr')
+            ->leftJoin('orders as o', 'o.request_id', '=', 'fr.request_id')
+            ->whereRaw('LOWER(fr.status)=?', ['approved'])
+            ->where(function ($x) {
+                $x->whereNull('o.order_id')
+                  ->orWhereRaw('o.order_id IS NOT NULL AND NOT EXISTS (
+                        SELECT 1
+                        FROM flower_payments p2
+                        WHERE p2.order_id = o.order_id
+                          AND LOWER(p2.payment_status) IN ("paid","success","captured")
+                    )');
+            })
+            ->selectRaw('SUM(COALESCE(o.total_price,0) + COALESCE(o.delivery_charge,0)) as total_due')
+            ->value('total_due');
+
+        return [
+            'total' => (int) $total,
+            'pending' => (int) $pending,
+            'approved' => (int) $approved,
+            'paid' => (int) $paid,
+            'rejected' => (int) $rejected,
+            'unpaid' => (int) $unpaid,
+
+            'paidCollectedAmount' => (float) ($paidCollectedAmount ?? 0),
+            'unpaidAmountToCollect' => (float) ($unpaidAmountToCollect ?? 0),
+        ];
+    }
+
+    public function saveOrder(Request $request, $id)
+    {
+        try {
+            $flowerRequest = FlowerRequest::findOrFail($id);
+
+            // Generate a unique order ID
+            $orderId = 'ORD-' . strtoupper(Str::random(12));
+
+            // Create the order
+            $order = Order::create([
+                'order_id' => $orderId,
+                'request_id' => $flowerRequest->request_id,
+                'product_id' => $flowerRequest->product_id,
+                'user_id' => $flowerRequest->user_id,
+                'address_id' => $flowerRequest->address_id,
+                'quantity' => 1,
+                'requested_flower_price' => $request->requested_flower_price,
+                'delivery_charge' => $request->delivery_charge,
+                'total_price' => ($request->requested_flower_price ?: 0) + ($request->delivery_charge ?: 0),
+                'suggestion' => $flowerRequest->suggestion,
             ]);
 
-            // Update request status
-            if ($flowerRequest->status === 'approved') {
-                $flowerRequest->status = 'paid';
-                $flowerRequest->save();
-            }
-        });
+            // Update the flower request status
+            $flowerRequest->status = 'approved';
+            $flowerRequest->save();
 
-        return redirect()
-            ->back()
-            ->with('success', 'Payment marked as paid via ' . strtoupper($request->payment_method) . '.');
-    } catch (\Throwable $e) {
-        Log::error('Failed to mark payment as paid', [
-            'request_id' => $id,
-            'error'      => $e->getMessage(),
+            // Send notification to user's devices
+            $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
+
+            if (!empty($deviceTokens)) {
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Order Approved',
+                    'Price is updated, please pay the amount',
+                    ['order_id' => $order->order_id]
+                );
+
+                \Log::info('Notification sent successfully to all devices.', [
+                    'user_id' => $flowerRequest->user_id,
+                    'device_tokens' => $deviceTokens,
+                ]);
+            } else {
+                \Log::warning('No device tokens found for user.', ['user_id' => $flowerRequest->user_id]);
+            }
+
+            return redirect()->back()->with('success', 'Order saved successfully');
+        } catch (\Exception $e) {
+            \Log::error('Failed to save order.', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to save order');
+        }
+    }
+
+    public function markPayment(Request $request, $id)
+    {
+        // Validate payment method coming from SweetAlert
+        $request->validate([
+            'payment_method' => ['required', 'in:upi,razorpay,cash'],
         ]);
 
-        return redirect()
-            ->back()
-            ->with('error', 'Failed to mark payment as paid');
+        try {
+            $order         = Order::where('request_id', $id)->firstOrFail();
+            $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
+
+            DB::transaction(function () use ($request, $order, $flowerRequest) {
+                // Create flower payment row
+                FlowerPayment::create([
+                    'order_id'       => $order->order_id,
+                    'payment_id'     => null, // set later if you want
+                    'user_id'        => $order->user_id,
+                    'payment_method' => $request->payment_method, // upi | razorpay | cash
+                    'paid_amount'    => $order->total_price,
+                    'payment_status' => 'paid',
+                ]);
+
+                // Update request status
+                if ($flowerRequest->status === 'approved') {
+                    $flowerRequest->status = 'paid';
+                    $flowerRequest->save();
+                }
+            });
+
+            return redirect()
+                ->back()
+                ->with('success', 'Payment marked as paid via ' . strtoupper($request->payment_method) . '.');
+        } catch (\Throwable $e) {
+            Log::error('Failed to mark payment as paid', [
+                'request_id' => $id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to mark payment as paid');
+        }
     }
-}
+
 }
