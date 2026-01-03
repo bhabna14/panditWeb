@@ -100,20 +100,5 @@ public function deliveryHistories()
     return $this->hasMany(DeliveryHistory::class, 'order_id', 'order_id');
 }
 
-public function latestPayment()
-{
-    return $this->hasOne(FlowerPayment::class, 'order_id', 'order_id')
-        ->orderByDesc('id');
-}
-
-public function latestSuccessfulPayment()
-{
-    $success = ['paid', 'success', 'captured']; // adjust if your gateway uses different success values
-    $placeholders = implode(',', array_fill(0, count($success), '?'));
-
-    return $this->hasOne(FlowerPayment::class, 'order_id', 'order_id')
-        ->whereRaw("LOWER(payment_status) IN ($placeholders)", $success)
-        ->orderByDesc('id');
-}
 
 }

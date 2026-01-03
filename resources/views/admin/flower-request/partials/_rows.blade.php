@@ -1,73 +1,284 @@
-@php
-    $success = ['paid', 'success', 'captured'];
-@endphp
+@foreach ($pendingRequests as $request)
+    @php
+        $st = strtolower(trim((string)($request->status ?? '')));
 
-@if($requests->count() === 0)
+        $paidStatuses = ['approved', 'paid', 'success', 'captured'];
+
+        $payments = optional($request->order)->flowerPayments;
+        $hasAnyPayment = $payments && $payments->count() > 0;
+
+        $hasSuccessPayment = false;
+        if ($hasAnyPayment) {
+            $hasSuccessPayment = $payments->contains(function ($p) use ($paidStatuses) {
+                $ps = strtolower(trim((string)($p->payment_status ?? '')));
+                return in_array($ps, $paidStatuses, true);
+            });
+        }
+
+        // Effective status (important for cards + table)
+        $isRejected = ($st === 'rejected');
+        $isPaidEffective = ($st === 'paid') || $hasSuccessPayment;
+
+        // Unpaid (your rule): approved + payment exists + no success
+        $isUnpaidEffective = ($st === 'approved') && $hasAnyPayment && !$hasSuccessPayment;
+
+        // Badge mapping
+        if ($isRejected) {
+            $statusLabel = 'Rejected';
+            $statusClass = 'bg-danger';
+        } elseif ($isPaidEffective) {
+            $statusLabel = 'Paid';
+            $statusClass = 'bg-success';
+        } elseif ($isUnpaidEffective) {
+            $statusLabel = 'Unpaid';
+            $statusClass = 'bg-danger';
+        } elseif ($st === 'approved') {
+            $statusLabel = 'Approved';
+            $statusClass = 'bg-info';
+        } elseif ($st === '' || $st === 'pending') {
+            $statusLabel = 'Pending';
+            $statusClass = 'bg-warning';
+        } else {
+            $statusLabel = ucfirst($st);
+            $statusClass = 'bg-secondary';
+        }
+
+        $canMarkPaid = ($st === 'approved') && !$isPaidEffective && $request->order && $request->order->total_price;
+        $canReject   = ($st === 'approved') && !$isPaidEffective; // reject only when approved & not paid
+    @endphp
+
     <tr>
-        <td colspan="10" class="text-center text-muted py-4">
-            No records found.
+        <td>
+            <strong>#{{ $request->request_id }}</strong><br>
+            <small class="text-muted">{{ $request->user->name ?? 'N/A' }}</small><br>
+            <small class="text-muted">{{ $request->user->mobile_number ?? 'N/A' }}</small>
+        </td>
+
+        <td>{{ optional($request->created_at)->format('d-m-Y h:i A') ?? 'N/A' }}</td>
+
+        <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
+
+        <td>
+            <button class="btn btn-sm btn-outline-primary w-100"
+                    data-bs-toggle="modal"
+                    data-bs-target="#itemsModal{{ $request->id }}">
+                View Items
+            </button>
+
+            <div class="modal fade" id="itemsModal{{ $request->id }}" tabindex="-1"
+                 aria-labelledby="itemsModalLabel{{ $request->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="itemsModalLabel{{ $request->id }}">
+                                Order Items - #{{ $request->request_id }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            @if ($request->flowerRequestItems->count())
+                                <ul class="list-group">
+                                    @foreach ($request->flowerRequestItems as $item)
+                                        @if ($item->type === 'garland')
+                                            <li class="list-group-item">
+                                                <strong>Garland:</strong> {{ $item->garland_name ?? 'N/A' }}<br>
+                                                <small>Quantity: {{ $item->garland_quantity ?? 0 }}</small><br>
+                                                @if ($item->garland_size)
+                                                    <small>Size: {{ $item->garland_size }} ft</small><br>
+                                                @endif
+                                                @if ($item->flower_count)
+                                                    <small>Flower Count: {{ $item->flower_count }}</small>
+                                                @endif
+                                            </li>
+                                        @else
+                                            <li class="list-group-item">
+                                                <strong>Flower:</strong> {{ $item->flower_name ?? 'N/A' }}<br>
+                                                <small>
+                                                    Quantity: {{ $item->flower_quantity ?? 0 }}
+                                                    {{ $item->flower_unit ?? '' }}
+                                                </small>
+                                            </li>
+                                        @endif
+                                    @endforeach
+                                </ul>
+                            @else
+                                <p class="text-muted">No items found.</p>
+                            @endif
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+
+        <td>
+            <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
+        </td>
+
+        <td>
+            @if ($request->order && $request->order->total_price)
+                <div><strong>₹{{ $request->order->total_price }}</strong></div>
+                <small>Flower: ₹{{ $request->order->requested_flower_price }}</small><br>
+                <small>Delivery: ₹{{ $request->order->delivery_charge }}</small>
+            @else
+                <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST">
+                    @csrf
+                    <input type="number" name="requested_flower_price" class="form-control mb-2" placeholder="Flower Price" required>
+                    <input type="number" name="delivery_charge" class="form-control mb-2" placeholder="Delivery Charge" required>
+                    <button type="submit" class="btn btn-sm btn-primary w-100">Save</button>
+                </form>
+            @endif
+        </td>
+
+        <td>
+            @if ($isPaidEffective && $request->order && $request->order->total_price)
+                @if ($request->order->rider_id)
+                    <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
+                @else
+                    <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
+                        @csrf
+                        <select name="rider_id" class="form-select mb-2">
+                            <option disabled selected>Choose Rider</option>
+                            @foreach ($riders as $rider)
+                                <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-success w-100">Assign</button>
+                    </form>
+                @endif
+            @else
+                <span class="text-muted">--</span>
+            @endif
+        </td>
+
+        <td>
+            @if ($request->address)
+                <small>
+                    {{ $request->address->apartment_flat_plot ?? '' }}
+                    @if(!empty($request->address->apartment_flat_plot)),@endif
+                    {{ $request->address->apartment_name ?? '' }}
+                    @if(!empty($request->address->apartment_name)),@endif
+                    {{ $request->address->locality_name ?? '' }}
+                </small><br>
+
+                <small class="text-muted">
+                    {{ $request->address->city ?? '' }}
+                    @if(!empty($request->address->city)),@endif
+                    {{ $request->address->state ?? '' }}
+                    @if(!empty($request->address->state)),@endif
+                    {{ $request->address->pincode ?? '' }}
+                </small><br>
+
+                <small class="text-muted">
+                    Landmark: {{ $request->address->landmark ?? 'N/A' }}
+                </small>
+            @else
+                <small class="text-muted">Address not available</small>
+            @endif
+        </td>
+
+        <td>
+            @if ($request->cancel_by)
+                <span class="badge bg-dark">{{ ucfirst($request->cancel_by) }}</span>
+            @else
+                <span class="text-muted">--</span>
+            @endif
+        </td>
+
+        <td>
+            @if ($request->cancel_reason)
+                {{ $request->cancel_reason }}
+            @else
+                <span class="text-muted">--</span>
+            @endif
+        </td>
+
+        <td class="action-btns">
+
+            {{-- Mark Payment form --}}
+            <form id="markPaymentForm_{{ $request->request_id }}"
+                  action="{{ route('admin.markPayment', $request->request_id) }}"
+                  method="POST"
+                  class="mb-2">
+                @csrf
+                <input type="hidden" name="payment_method" value="">
+
+                @if ($canMarkPaid)
+                    <button type="button" class="btn btn-success btn-sm w-100"
+                            onclick="confirmPayment('{{ $request->request_id }}')">
+                        Mark Paid
+                    </button>
+                @elseif($isPaidEffective)
+                    <button type="button" class="btn btn-success btn-sm w-100" disabled>Paid</button>
+                @else
+                    <button type="button" class="btn btn-secondary btn-sm w-100" disabled>Mark Paid</button>
+                @endif
+            </form>
+
+            {{-- Reject action (Approved only) --}}
+            @if ($canReject)
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm w-100 mb-2 btn-reject"
+                        data-id="{{ $request->id }}"
+                        data-req="{{ $request->request_id }}">
+                    Reject
+                </button>
+            @endif
+
+            {{-- View reject reason (Rejected only) --}}
+            @if ($isRejected)
+                <button type="button"
+                        class="btn btn-outline-dark btn-sm w-100 mb-2 btn-view-reject"
+                        data-req="{{ $request->request_id }}"
+                        data-reason="{{ $request->cancel_reason ?? '--' }}">
+                    View Reject Reason
+                </button>
+            @endif
+
+            {{-- Notify --}}
+            @if (!empty($request->user) && !empty($request->user->userid))
+                <a href="{{ route('admin.notification.create') }}?user={{ $request->user->userid }}"
+                   class="btn btn-outline-primary btn-sm w-100 mb-2"
+                   title="Send notification to {{ $request->user->name ?? '' }}">
+                    Notify
+                </a>
+            @endif
+
+            {{-- Details --}}
+            <button class="btn btn-outline-dark btn-sm w-100 mb-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#detailsModal{{ $request->id }}">
+                Details
+            </button>
+
+            {{-- Re-order --}}
+            <a href="{{ route('reorderCustomizeOrder', ['id' => $request->id]) }}"
+               class="btn btn-sm btn-secondary w-100">
+                Re-order
+            </a>
+
+            {{-- Details modal --}}
+            <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
+                 aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title" id="detailsModalLabel{{ $request->id }}">Request Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}</p>
+                            <p><strong>Status:</strong> {{ $statusLabel }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </td>
     </tr>
-@else
-    @foreach($requests as $req)
-        @php
-            $order = $req->order;
-            $payment = $order?->latestSuccessfulPayment ?: $order?->latestPayment;
-
-            $reqStatus = strtolower($req->status ?? '');
-            $statusClass = match ($reqStatus) {
-                'paid' => 'success',
-                'approved' => 'primary',
-                'pending' => 'warning',
-                'rejected' => 'danger',
-                default => 'secondary',
-            };
-
-            $isPaid = false;
-            if ($payment && $payment->payment_status) {
-                $isPaid = in_array(strtolower($payment->payment_status), $success, true);
-            }
-
-            // Payment display text
-            if (!$order) {
-                $paymentText = 'Order not created';
-                $paymentBadge = 'secondary';
-            } elseif (!$payment) {
-                $paymentText = 'Unpaid';
-                $paymentBadge = 'danger';
-            } else {
-                $paymentText = $payment->payment_status ?? 'Unknown';
-                $paymentBadge = $isPaid ? 'success' : 'danger';
-            }
-
-            $paidAmount = ($isPaid && $payment) ? number_format((float)$payment->paid_amount, 2) : '0.00';
-            $method = $payment->payment_method ?? '-';
-            $receivedBy = $payment->received_by ?? '-';
-        @endphp
-
-        <tr>
-            <td class="fw-semibold">{{ $req->request_id }}</td>
-            <td>
-                <div class="fw-semibold">{{ $req->user->name ?? 'N/A' }}</div>
-                <div class="text-muted small">{{ $req->user->mobile ?? '' }}</div>
-            </td>
-            <td>{{ $req->flowerProduct->product_name ?? 'N/A' }}</td>
-            <td>
-                <div class="fw-semibold">{{ $req->date ?? '-' }}</div>
-                <div class="text-muted small">{{ $req->time ?? '-' }}</div>
-            </td>
-            <td>
-                <span class="badge bg-{{ $statusClass }}">
-                    {{ $req->status ?? 'Unknown' }}
-                </span>
-            </td>
-            <td>{{ $order->order_id ?? '-' }}</td>
-            <td>
-                <span class="badge bg-{{ $paymentBadge }}">{{ $paymentText }}</span>
-            </td>
-            <td>₹ {{ $paidAmount }}</td>
-            <td>{{ $method }}</td>
-            <td>{{ $receivedBy }}</td>
-        </tr>
-    @endforeach
-@endif
+@endforeach

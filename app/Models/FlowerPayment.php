@@ -25,9 +25,4 @@ class FlowerPayment extends Model
     protected $casts = [
         'paid_amount' => 'float',
     ];
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class, 'order_id', 'order_id');
-    }
 }
