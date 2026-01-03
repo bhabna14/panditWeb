@@ -29,7 +29,7 @@ class FlowerRequestController extends Controller
         // Table data (first load)
         $requests = $this->buildListQuery($filter)->paginate(10)->withQueryString();
 
-        return view('admin.manage-flower-request', [
+        return view('admin.flower-request.manage-flower-request', [
             'filter' => $filter,
             'requests' => $requests,
 
