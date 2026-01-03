@@ -186,11 +186,9 @@ $paidCustomizeOrders = \App\Models\FlowerRequest::query()
           ->orWhereExists($paidPaymentExists);
     })
     ->count();
-
-
 $unpaidCustomizeOrders = \App\Models\FlowerRequest::query()
+    ->whereRaw('LOWER(COALESCE(status,"")) = "approved"')
     ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
-    ->whereRaw('LOWER(COALESCE(status,"")) <> "paid"')
     ->whereNotExists($paidPaymentExists)
     ->count();
 
