@@ -1,11 +1,10 @@
 @extends('admin.layouts.apps')
 
 @php
-    use Illuminate\Support\Facades\Route;
-
     $pageUrl = route('flower.customize.request');
     $ajaxUrl = route('admin.flower-request.data');
 
+    // for reject modal action building
     $rejectUrlTemplate = route('admin.flower-request.reject', ['flowerRequest' => '___ID___']);
 @endphp
 
@@ -15,59 +14,65 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
-        .badge { font-size: 0.8rem; }
-        .table td, .table th { vertical-align: middle !important; }
-        .action-btns .btn { margin: 2px 0; }
+        .table td,
+        .table th {
+            vertical-align: middle !important;
+        }
 
-        .filter-grid{
-            display:grid;
+        .badge {
+            font-size: .80rem;
+        }
+
+        /* Cards layout */
+        .filter-grid {
+            display: grid;
             grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
             gap: 14px;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
+            margin: 14px 0 18px;
         }
-        .filter-link{ display:block; text-decoration:none !important; }
-        .filter-card{
+
+        .filter-link {
+            display: block;
+            text-decoration: none !important;
+        }
+
+        .filter-card {
             border: 1px solid #e5e7eb !important;
             border-radius: 16px;
-            background: #ffffff;
-            box-shadow: 0 4px 16px rgba(0,0,0,.04);
+            background: #fff;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .04);
             transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
             position: relative;
             overflow: hidden;
             height: 100%;
             min-height: 110px;
         }
-        .filter-card::before{
-            content:'';
-            position:absolute;
-            inset:0;
-            background: linear-gradient(135deg, rgba(249,250,251,.95), rgba(255,255,255,1));
-            pointer-events:none;
-        }
-        .filter-card .card-body{
-            position:relative;
-            padding: 14px 14px 12px;
-            display:flex;
-            flex-direction:column;
-            gap: 10px;
-        }
-        .filter-card:hover{
+
+        .filter-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 26px rgba(0,0,0,.08);
-        }
-        .filter-card.is-active{
-            border-color: #c7d2fe !important;
-            box-shadow: 0 12px 30px rgba(99,102,241,.16);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, .08);
         }
 
-        .stat-top{
-            display:flex;
-            align-items:flex-start;
-            justify-content:space-between;
-            gap:12px;
+        .filter-card.is-active {
+            border-color: #c7d2fe !important;
+            box-shadow: 0 12px 30px rgba(99, 102, 241, .16);
         }
-        .stat-title{
+
+        .filter-card .card-body {
+            padding: 14px 14px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .stat-title {
             font-size: 12px;
             font-weight: 800;
             letter-spacing: .3px;
@@ -76,68 +81,93 @@
             line-height: 1.2;
             margin-bottom: 6px;
         }
-        .stat-value{
+
+        .stat-value {
             font-size: 26px;
             font-weight: 900;
             line-height: 1;
             margin: 0;
         }
 
-        .icon-chip{
+        .icon-chip {
             width: 44px;
             height: 44px;
             border-radius: 14px;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: 1px solid #eef2f7;
             background: #f9fafb;
         }
-        .icon-chip i{ font-size: 18px; }
 
-        .chip-warning{ background: rgba(245,158,11,.10); border-color: rgba(245,158,11,.18); }
-        .chip-success{ background: rgba(34,197,94,.10);  border-color: rgba(34,197,94,.18); }
-        .chip-info{    background: rgba(59,130,246,.10);  border-color: rgba(59,130,246,.18); }
-        .chip-danger{  background: rgba(239,68,68,.10);   border-color: rgba(239,68,68,.18); }
-        .chip-primary{ background: rgba(99,102,241,.10);  border-color: rgba(99,102,241,.18); }
-        .chip-muted{   background: rgba(107,114,128,.10); border-color: rgba(107,114,128,.18); }
-
-        .stat-meta{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:10px;
-            margin-top:auto;
-            font-size: 12px;
-            color:#6b7280;
+        .icon-chip i {
+            font-size: 18px;
         }
 
-        .meta-pill{
-            display:inline-flex;
-            align-items:center;
-            gap:6px;
+        .chip-warning {
+            background: rgba(245, 158, 11, .10);
+            border-color: rgba(245, 158, 11, .18);
+        }
+
+        .chip-success {
+            background: rgba(34, 197, 94, .10);
+            border-color: rgba(34, 197, 94, .18);
+        }
+
+        .chip-info {
+            background: rgba(59, 130, 246, .10);
+            border-color: rgba(59, 130, 246, .18);
+        }
+
+        .chip-danger {
+            background: rgba(239, 68, 68, .10);
+            border-color: rgba(239, 68, 68, .18);
+        }
+
+        .chip-primary {
+            background: rgba(99, 102, 241, .10);
+            border-color: rgba(99, 102, 241, .18);
+        }
+
+        .stat-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: auto;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .meta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             padding: 4px 10px;
             border-radius: 999px;
             border: 1px solid #e5e7eb;
-            background:#f9fafb;
-            color:#111827;
+            background: #f9fafb;
+            color: #111827;
             font-weight: 800;
             white-space: nowrap;
         }
 
-        .table-loading{
+        .table-loading {
             padding: 48px 0;
-            color:#6b7280;
+            color: #6b7280;
+        }
+
+        .action-btns .btn {
+            margin-bottom: 8px;
         }
     </style>
 @endsection
 
 @section('content')
-
+    {{-- FILTER CARDS --}}
     <div class="filter-grid">
 
-        {{-- Total --}}
+        {{-- All --}}
         <a href="{{ $pageUrl }}?filter=all" class="filter-link card-filter" data-filter="all">
             <div class="card filter-card {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
                 <div class="card-body">
@@ -156,7 +186,7 @@
             </div>
         </a>
 
-        {{-- Pending (NEW) --}}
+        {{-- Pending --}}
         <a href="{{ $pageUrl }}?filter=pending" class="filter-link card-filter" data-filter="pending">
             <div class="card filter-card {{ ($filter ?? 'all') === 'pending' ? 'is-active' : '' }}" data-card="pending">
                 <div class="card-body">
@@ -168,7 +198,7 @@
                         <div class="icon-chip chip-warning"><i class="fa fa-hourglass-start text-warning"></i></div>
                     </div>
                     <div class="stat-meta">
-                        <div>Status: Pending</div>
+                        <div>Status</div>
                         <span class="meta-pill">Pending</span>
                     </div>
                 </div>
@@ -182,19 +212,20 @@
                     <div class="stat-top">
                         <div>
                             <div class="stat-title">Approved</div>
-                            <div class="stat-value text-primary" id="approvedCount">{{ $approvedCustomizeOrders ?? 0 }}</div>
+                            <div class="stat-value text-primary" id="approvedCount">{{ $approvedCustomizeOrders ?? 0 }}
+                            </div>
                         </div>
                         <div class="icon-chip chip-primary"><i class="fa fa-thumbs-up text-primary"></i></div>
                     </div>
                     <div class="stat-meta">
-                        <div>Status: Approved</div>
+                        <div>Status</div>
                         <span class="meta-pill">Approved</span>
                     </div>
                 </div>
             </div>
         </a>
 
-        {{-- Unpaid (kept) --}}
+        {{-- Unpaid --}}
         <a href="{{ $pageUrl }}?filter=unpaid" class="filter-link card-filter" data-filter="unpaid">
             <div class="card filter-card {{ ($filter ?? 'all') === 'unpaid' ? 'is-active' : '' }}" data-card="unpaid">
                 <div class="card-body">
@@ -206,9 +237,9 @@
                         <div class="icon-chip chip-danger"><i class="fa fa-hourglass-half text-danger"></i></div>
                     </div>
                     <div class="stat-meta">
-                        <div>To collect</div>
+                        <div>To Collect</div>
                         <span class="meta-pill" id="unpaidAmount">
-                            ₹{{ number_format((float)($unpaidAmountToCollect ?? 0), 2) }}
+                            ₹{{ number_format((float) ($unpaidAmountToCollect ?? 0), 2) }}
                         </span>
                     </div>
                 </div>
@@ -229,7 +260,7 @@
                     <div class="stat-meta">
                         <div>Collected</div>
                         <span class="meta-pill" id="paidAmount">
-                            ₹{{ number_format((float)($paidCollectedAmount ?? 0), 2) }}
+                            ₹{{ number_format((float) ($paidCollectedAmount ?? 0), 2) }}
                         </span>
                     </div>
                 </div>
@@ -248,7 +279,7 @@
                         <div class="icon-chip chip-danger"><i class="fa fa-ban text-danger"></i></div>
                     </div>
                     <div class="stat-meta">
-                        <div>Status: Rejected</div>
+                        <div>Status</div>
                         <span class="meta-pill">Rejected</span>
                     </div>
                 </div>
@@ -257,6 +288,7 @@
 
     </div>
 
+    {{-- TABLE --}}
     <div class="card custom-card">
         <div class="card-body">
             <div class="table-responsive">
@@ -276,6 +308,7 @@
                             <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody id="requestsBody">
                         @include('admin.flower-request.partials._rows', [
                             'pendingRequests' => $pendingRequests,
@@ -287,7 +320,7 @@
         </div>
     </div>
 
-    {{-- Reject Modal --}}
+    {{-- REJECT MODAL --}}
     <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -300,8 +333,8 @@
 
                     <div class="modal-body">
                         <label class="form-label fw-bold">Reject Reason</label>
-                        <textarea id="rejectReason" name="reason" class="form-control" rows="4"
-                                  placeholder="Enter reject reason..." required></textarea>
+                        <textarea id="rejectReason" name="reason" class="form-control" rows="4" placeholder="Enter reject reason..."
+                            required></textarea>
                     </div>
 
                     <div class="modal-footer">
@@ -313,7 +346,7 @@
         </div>
     </div>
 
-    {{-- View Reject Reason Modal --}}
+    {{-- VIEW REJECT REASON MODAL --}}
     <div class="modal fade" id="viewRejectModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -332,7 +365,6 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('scripts')
@@ -378,58 +410,67 @@
         function loadRequests(filter, pushUrl = true) {
             const $tbody = $('#requestsBody');
 
-            // IMPORTANT FIX: destroy DataTable BEFORE touching tbody
+            // IMPORTANT FIX: destroy datatable before changing tbody
             destroyDataTable();
 
             $tbody.html('<tr><td colspan="11" class="text-center table-loading">Loading...</td></tr>');
 
-            $.get(AJAX_URL, { filter: filter })
-                .done(function (res) {
+            $.get(AJAX_URL, {
+                    filter: filter
+                })
+                .done(function(res) {
                     if (res && res.rows_html !== undefined) {
                         $tbody.html(res.rows_html);
-
                         initDataTable();
-
                         updateCounts(res.counts || {});
                         setActiveCard(res.active || filter);
 
                         if (pushUrl) {
-                            const pageUrl = new URL(window.location);
-                            pageUrl.searchParams.set('filter', res.active || filter);
-                            window.history.pushState({ filter: res.active || filter }, '', pageUrl.toString());
+                            const url = new URL(window.location);
+                            url.searchParams.set('filter', res.active || filter);
+                            window.history.pushState({
+                                filter: res.active || filter
+                            }, '', url.toString());
                         }
                     } else {
-                        $tbody.html('<tr><td colspan="11" class="text-center text-danger table-loading">Unexpected response</td></tr>');
+                        $tbody.html(
+                            '<tr><td colspan="11" class="text-center text-danger table-loading">Unexpected response</td></tr>'
+                            );
                         initDataTable();
                     }
                 })
-                .fail(function () {
-                    $tbody.html('<tr><td colspan="11" class="text-center text-danger table-loading">Failed to load</td></tr>');
+                .fail(function() {
+                    $tbody.html(
+                        '<tr><td colspan="11" class="text-center text-danger table-loading">Failed to load</td></tr>'
+                        );
                     initDataTable();
                     Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
                 });
         }
 
-        $(document).on('click', '.card-filter', function (e) {
+        // Card click filter
+        $(document).on('click', '.card-filter', function(e) {
             e.preventDefault();
             const filter = $(this).data('filter') || 'all';
             loadRequests(filter, true);
         });
 
-        window.addEventListener('popstate', function () {
+        // Browser back/forward support
+        window.addEventListener('popstate', function() {
             const params = new URLSearchParams(window.location.search);
             const filter = params.get('filter') || 'all';
             loadRequests(filter, false);
         });
 
-        $(document).ready(function () {
+        // Initial
+        $(document).ready(function() {
             initDataTable();
         });
 
-        // Reject button -> open modal + set action URL
-        $(document).on('click', '.btn-reject', function () {
-            const id  = $(this).data('id');
-            const req = $(this).data('req');
+        // Reject button -> open modal
+        $(document).on('click', '.btn-reject', function() {
+            const id = $(this).data('id'); // FlowerRequest numeric id
+            const req = $(this).data('req'); // request_id string
 
             $('#rejectRequestCode').text('#' + req);
             $('#rejectReason').val('');
@@ -442,8 +483,8 @@
         });
 
         // View reject reason
-        $(document).on('click', '.btn-view-reject', function () {
-            const req    = $(this).data('req');
+        $(document).on('click', '.btn-view-reject', function() {
+            const req = $(this).data('req');
             const reason = $(this).data('reason') || '--';
 
             $('#viewRejectRequestCode').text('#' + req);
@@ -452,5 +493,39 @@
             const modal = new bootstrap.Modal(document.getElementById('viewRejectModal'));
             modal.show();
         });
+
+        // SweetAlert payment method picker
+        function confirmPayment(requestId) {
+            Swal.fire({
+                title: 'Confirm Payment',
+                text: 'Select payment method to mark this order as PAID.',
+                icon: 'question',
+                input: 'select',
+                inputOptions: {
+                    upi: 'UPI',
+                    razorpay: 'Razorpay',
+                    cash: 'Cash'
+                },
+                inputPlaceholder: 'Select payment method',
+                showCancelButton: true,
+                confirmButtonText: 'Mark Paid',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value) return 'Please select a payment method';
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const method = result.value;
+                    const formId = '#markPaymentForm_' + requestId;
+                    const $form = $(formId);
+
+                    $form.find('input[name="payment_method"]').val(method);
+                    $form.submit();
+                }
+            });
+        }
+
+        // expose to global for inline onclick
+        window.confirmPayment = confirmPayment;
     </script>
 @endsection
