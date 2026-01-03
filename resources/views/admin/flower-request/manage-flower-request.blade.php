@@ -3,28 +3,16 @@
 @php
     use Illuminate\Support\Facades\Route;
 
-    $pageUrl = Route::has('flower.customize.request')
-        ? route('flower.customize.request')
-        : url()->current();
+    $pageUrl = route('flower.customize.request');
+    $ajaxUrl = route('admin.flower-request.data');
 
-    $ajaxUrl = Route::has('admin.flower-request.ajaxData')
-        ? route('admin.flower-request.ajaxData')
-        : (Route::has('admin.flower-request.data')
-            ? route('admin.flower-request.data')
-            : url('/admin/flower-request/ajax-data'));
-
-    // For JS replace
-    $rejectUrlTemplate = Route::has('admin.flower-request.reject')
-        ? route('admin.flower-request.reject', ['flowerRequest' => '___ID___'])
-        : url('/admin/flower-request/___ID___/reject');
+    $rejectUrlTemplate = route('admin.flower-request.reject', ['flowerRequest' => '___ID___']);
 @endphp
 
 @section('styles')
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
-    <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
 
     <style>
         .badge { font-size: 0.8rem; }
@@ -87,9 +75,6 @@
             text-transform: uppercase;
             line-height: 1.2;
             margin-bottom: 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
         .stat-value{
             font-size: 26px;
@@ -105,7 +90,6 @@
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            flex: 0 0 auto;
             box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
             border: 1px solid #eef2f7;
             background: #f9fafb;
@@ -139,10 +123,7 @@
             background:#f9fafb;
             color:#111827;
             font-weight: 800;
-            max-width: 180px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .table-loading{
@@ -154,9 +135,9 @@
 
 @section('content')
 
-    {{-- Filter Cards --}}
     <div class="filter-grid">
 
+        {{-- Total --}}
         <a href="{{ $pageUrl }}?filter=all" class="filter-link card-filter" data-filter="all">
             <div class="card filter-card {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
                 <div class="card-body">
@@ -175,24 +156,26 @@
             </div>
         </a>
 
-        <a href="{{ $pageUrl }}?filter=today" class="filter-link card-filter" data-filter="today">
-            <div class="card filter-card {{ ($filter ?? 'all') === 'today' ? 'is-active' : '' }}" data-card="today">
+        {{-- Pending (NEW) --}}
+        <a href="{{ $pageUrl }}?filter=pending" class="filter-link card-filter" data-filter="pending">
+            <div class="card filter-card {{ ($filter ?? 'all') === 'pending' ? 'is-active' : '' }}" data-card="pending">
                 <div class="card-body">
                     <div class="stat-top">
                         <div>
-                            <div class="stat-title">Today's Orders</div>
-                            <div class="stat-value text-success" id="todayCount">{{ $todayCustomizeOrders ?? 0 }}</div>
+                            <div class="stat-title">Pending</div>
+                            <div class="stat-value text-warning" id="pendingCount">{{ $pendingCustomizeOrders ?? 0 }}</div>
                         </div>
-                        <div class="icon-chip chip-success"><i class="fa fa-calendar-day text-success"></i></div>
+                        <div class="icon-chip chip-warning"><i class="fa fa-hourglass-start text-warning"></i></div>
                     </div>
                     <div class="stat-meta">
-                        <div>Scheduled today</div>
-                        <span class="meta-pill">Today</span>
+                        <div>Status: Pending</div>
+                        <span class="meta-pill">Pending</span>
                     </div>
                 </div>
             </div>
         </a>
 
+        {{-- Approved --}}
         <a href="{{ $pageUrl }}?filter=approved" class="filter-link card-filter" data-filter="approved">
             <div class="card filter-card {{ ($filter ?? 'all') === 'approved' ? 'is-active' : '' }}" data-card="approved">
                 <div class="card-body">
@@ -211,6 +194,7 @@
             </div>
         </a>
 
+        {{-- Unpaid (kept) --}}
         <a href="{{ $pageUrl }}?filter=unpaid" class="filter-link card-filter" data-filter="unpaid">
             <div class="card filter-card {{ ($filter ?? 'all') === 'unpaid' ? 'is-active' : '' }}" data-card="unpaid">
                 <div class="card-body">
@@ -231,12 +215,13 @@
             </div>
         </a>
 
+        {{-- Paid --}}
         <a href="{{ $pageUrl }}?filter=paid" class="filter-link card-filter" data-filter="paid">
             <div class="card filter-card {{ ($filter ?? 'all') === 'paid' ? 'is-active' : '' }}" data-card="paid">
                 <div class="card-body">
                     <div class="stat-top">
                         <div>
-                            <div class="stat-title">Paid Orders</div>
+                            <div class="stat-title">Paid</div>
                             <div class="stat-value text-info" id="paidCount">{{ $paidCustomizeOrders ?? 0 }}</div>
                         </div>
                         <div class="icon-chip chip-info"><i class="fa fa-check-circle text-info"></i></div>
@@ -251,6 +236,7 @@
             </div>
         </a>
 
+        {{-- Rejected --}}
         <a href="{{ $pageUrl }}?filter=rejected" class="filter-link card-filter" data-filter="rejected">
             <div class="card filter-card {{ ($filter ?? 'all') === 'rejected' ? 'is-active' : '' }}" data-card="rejected">
                 <div class="card-body">
@@ -269,27 +255,8 @@
             </div>
         </a>
 
-        <a href="{{ $pageUrl }}?filter=upcoming" class="filter-link card-filter" data-filter="upcoming">
-            <div class="card filter-card {{ ($filter ?? 'all') === 'upcoming' ? 'is-active' : '' }}" data-card="upcoming">
-                <div class="card-body">
-                    <div class="stat-top">
-                        <div>
-                            <div class="stat-title">Upcoming</div>
-                            <div class="stat-value text-secondary" id="upcomingCount">{{ $upcomingCustomizeOrders ?? 0 }}</div>
-                        </div>
-                        <div class="icon-chip chip-muted"><i class="fa fa-clock text-secondary"></i></div>
-                    </div>
-                    <div class="stat-meta">
-                        <div>Next 3 days</div>
-                        <span class="meta-pill">Upcoming</span>
-                    </div>
-                </div>
-            </div>
-        </a>
-
     </div>
 
-    {{-- Table --}}
     <div class="card custom-card">
         <div class="card-body">
             <div class="table-responsive">
@@ -320,7 +287,7 @@
         </div>
     </div>
 
-    {{-- Reject Modal (ONE modal, reused) --}}
+    {{-- Reject Modal --}}
     <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -335,7 +302,6 @@
                         <label class="form-label fw-bold">Reject Reason</label>
                         <textarea id="rejectReason" name="reason" class="form-control" rows="4"
                                   placeholder="Enter reject reason..." required></textarea>
-                        <small class="text-muted d-block mt-2">This will set status to <b>rejected</b> and save the reason.</small>
                     </div>
 
                     <div class="modal-footer">
@@ -372,18 +338,19 @@
 @section('scripts')
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/responsive.bootstrap5.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         const AJAX_URL = @json($ajaxUrl);
         const REJECT_URL_TEMPLATE = @json($rejectUrlTemplate);
 
-        function reinitDataTable() {
+        function destroyDataTable() {
             if ($.fn.DataTable.isDataTable('#file-datatable')) {
-                $('#file-datatable').DataTable().destroy();
+                $('#file-datatable').DataTable().clear().destroy();
             }
+        }
+
+        function initDataTable() {
             $('#file-datatable').DataTable({
                 pageLength: 25,
                 order: [],
@@ -399,23 +366,20 @@
             if (!counts) return;
 
             $('#totalCount').text(counts.total ?? $('#totalCount').text());
-            $('#todayCount').text(counts.today ?? $('#todayCount').text());
-            $('#upcomingCount').text(counts.upcoming ?? $('#upcomingCount').text());
-
+            $('#pendingCount').text(counts.pending ?? $('#pendingCount').text());
             $('#approvedCount').text(counts.approved ?? $('#approvedCount').text());
-
             $('#paidCount').text(counts.paid ?? $('#paidCount').text());
             $('#paidAmount').text(counts.paid_amount_fmt ?? $('#paidAmount').text());
-
             $('#unpaidCount').text(counts.unpaid ?? $('#unpaidCount').text());
             $('#unpaidAmount').text(counts.unpaid_amount_fmt ?? $('#unpaidAmount').text());
-
             $('#rejectedCount').text(counts.rejected ?? $('#rejectedCount').text());
         }
 
         function loadRequests(filter, pushUrl = true) {
             const $tbody = $('#requestsBody');
-            const prevHtml = $tbody.html();
+
+            // IMPORTANT FIX: destroy DataTable BEFORE touching tbody
+            destroyDataTable();
 
             $tbody.html('<tr><td colspan="11" class="text-center table-loading">Loading...</td></tr>');
 
@@ -423,7 +387,8 @@
                 .done(function (res) {
                     if (res && res.rows_html !== undefined) {
                         $tbody.html(res.rows_html);
-                        reinitDataTable();
+
+                        initDataTable();
 
                         updateCounts(res.counts || {});
                         setActiveCard(res.active || filter);
@@ -435,10 +400,12 @@
                         }
                     } else {
                         $tbody.html('<tr><td colspan="11" class="text-center text-danger table-loading">Unexpected response</td></tr>');
+                        initDataTable();
                     }
                 })
                 .fail(function () {
-                    $tbody.html(prevHtml);
+                    $tbody.html('<tr><td colspan="11" class="text-center text-danger table-loading">Failed to load</td></tr>');
+                    initDataTable();
                     Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
                 });
         }
@@ -456,42 +423,8 @@
         });
 
         $(document).ready(function () {
-            if (!$.fn.DataTable.isDataTable('#file-datatable')) {
-                $('#file-datatable').DataTable({ pageLength: 25, order: [] });
-            }
+            initDataTable();
         });
-
-        // Mark Paid flow (unchanged)
-        function confirmPayment(requestId) {
-            Swal.fire({
-                title: 'Select payment method',
-                input: 'radio',
-                inputOptions: {
-                    upi: 'UPI',
-                    razorpay: 'Razorpay',
-                    cash: 'Cash'
-                },
-                inputValidator: (value) => {
-                    if (!value) return 'Please select a payment method';
-                },
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Mark as Paid'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.getElementById('markPaymentForm_' + requestId);
-                    if (!form) return;
-
-                    const input = form.querySelector('input[name="payment_method"]');
-                    if (!input) return;
-
-                    input.value = result.value;
-                    form.submit();
-                }
-            });
-        }
-        window.confirmPayment = confirmPayment;
 
         // Reject button -> open modal + set action URL
         $(document).on('click', '.btn-reject', function () {

@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 
 class FlowerRequestController extends Controller
 {
-public function showRequests(Request $request)
+    public function showRequests(Request $request)
     {
         $filter = $request->query('filter', 'all');
 
@@ -27,7 +27,6 @@ public function showRequests(Request $request)
         $todayCarbon = Carbon::today($tz);
         $today       = $todayCarbon->toDateString();
 
-        // Next 3 days (excluding today)
         $startDateCarbon = $todayCarbon->copy()->addDay();
         $endDateCarbon   = $todayCarbon->copy()->addDays(3);
         $startDate       = $startDateCarbon->toDateString();
@@ -54,6 +53,12 @@ public function showRequests(Request $request)
         $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
         $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
+        $pendingCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyPendingFilter($q);
+            })
+            ->count();
+
         $approvedCustomizeOrders = FlowerRequest::query()
             ->where(function ($q) {
                 $this->applyApprovedFilter($q);
@@ -72,7 +77,7 @@ public function showRequests(Request $request)
             })
             ->count();
 
-        // UNPAID: approved + payment exists (any attempt) + no successful payment
+        // UNPAID: Approved but NOT paid (payment not received OR no successful payment)
         $unpaidCustomizeOrders = FlowerRequest::query()
             ->where(function ($q) {
                 $this->applyUnpaidFilter($q);
@@ -90,6 +95,7 @@ public function showRequests(Request $request)
             'totalCustomizeOrders',
             'todayCustomizeOrders',
             'upcomingCustomizeOrders',
+            'pendingCustomizeOrders',
             'approvedCustomizeOrders',
             'paidCustomizeOrders',
             'rejectCustomizeOrders',
@@ -127,9 +133,16 @@ public function showRequests(Request $request)
 
         $pendingRequests = $query->get();
 
+        // Counts
         $totalCustomizeOrders    = FlowerRequest::count();
         $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
         $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
+
+        $pendingCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyPendingFilter($q);
+            })
+            ->count();
 
         $approvedCustomizeOrders = FlowerRequest::query()
             ->where(function ($q) {
@@ -164,32 +177,31 @@ public function showRequests(Request $request)
         return response()->json([
             'rows_html' => $rowsHtml,
             'counts' => [
-                'total'                => $totalCustomizeOrders,
-                'today'                => $todayCustomizeOrders,
-                'upcoming'             => $upcomingCustomizeOrders,
-                'approved'             => $approvedCustomizeOrders,
-                'paid'                 => $paidCustomizeOrders,
-                'rejected'             => $rejectCustomizeOrders,
-                'unpaid'               => $unpaidCustomizeOrders,
-                'unpaid_amount'        => (float) $unpaidAmountToCollect,
-                'unpaid_amount_fmt'    => '₹' . number_format((float) $unpaidAmountToCollect, 2),
-                'paid_amount'          => (float) $paidCollectedAmount,
-                'paid_amount_fmt'      => '₹' . number_format((float) $paidCollectedAmount, 2),
+                'total'             => $totalCustomizeOrders,
+                'today'             => $todayCustomizeOrders,
+                'upcoming'          => $upcomingCustomizeOrders,
+                'pending'           => $pendingCustomizeOrders,
+                'approved'          => $approvedCustomizeOrders,
+                'paid'              => $paidCustomizeOrders,
+                'rejected'          => $rejectCustomizeOrders,
+                'unpaid'            => $unpaidCustomizeOrders,
+                'unpaid_amount'     => (float) $unpaidAmountToCollect,
+                'unpaid_amount_fmt' => '₹' . number_format((float) $unpaidAmountToCollect, 2),
+                'paid_amount'       => (float) $paidCollectedAmount,
+                'paid_amount_fmt'   => '₹' . number_format((float) $paidCollectedAmount, 2),
             ],
             'active' => $filter,
         ]);
     }
 
-    // ---------------------------
-    // Save Reject Reason (NEW)
-    // ---------------------------
     public function rejectRequest(Request $request, FlowerRequest $flowerRequest)
     {
         $validated = $request->validate([
             'reason' => ['required', 'string', 'max:500'],
         ]);
 
-        $flowerRequest->status        = 'rejected';
+        // store as "Rejected" (matches your DB value too), but filter is case-insensitive
+        $flowerRequest->status        = 'Rejected';
         $flowerRequest->cancel_by     = 'admin';
         $flowerRequest->cancel_reason = $validated['reason'];
         $flowerRequest->save();
@@ -198,7 +210,7 @@ public function showRequests(Request $request)
     }
 
     // ---------------------------
-    // Filtering Helpers (UPDATED)
+    // FILTER SWITCH (includes PENDING)
     // ---------------------------
     private function applyRequestFilter($query, string $filter, string $today, string $startDate, string $endDate): void
     {
@@ -209,6 +221,10 @@ public function showRequests(Request $request)
 
             case 'upcoming':
                 $query->whereBetween('date', [$startDate, $endDate]);
+                break;
+
+            case 'pending':
+                $this->applyPendingFilter($query);
                 break;
 
             case 'approved':
@@ -233,6 +249,16 @@ public function showRequests(Request $request)
         }
     }
 
+    private function applyPendingFilter($query): void
+    {
+        // pending = NULL OR '' OR 'pending' (case-insensitive)
+        $query->where(function ($q) {
+            $q->whereNull('status')
+              ->orWhereRaw("TRIM(COALESCE(status,'')) = ''")
+              ->orWhereRaw("LOWER(TRIM(status)) = 'pending'");
+        });
+    }
+
     private function applyApprovedFilter($query): void
     {
         $this->whereStatusEqualsLowerTrim($query, 'approved');
@@ -240,12 +266,13 @@ public function showRequests(Request $request)
 
     private function applyRejectedFilter($query): void
     {
+        // handles "Rejected" also because we compare lower(trim())
         $this->whereStatusEqualsLowerTrim($query, 'rejected');
     }
 
     private function applyPaidFilter($query): void
     {
-        // Paid = request.status=paid OR payment_status in success list (includes "approved")
+        // Paid = request.status = paid OR payment_status is successful
         $paidPaymentStatusesLower = $this->paidPaymentStatusesLower();
 
         $query->where(function ($q) use ($paidPaymentStatusesLower) {
@@ -258,18 +285,11 @@ public function showRequests(Request $request)
 
     private function applyUnpaidFilter($query): void
     {
-        // UNPAID (as you asked):
-        // - request.status MUST be approved
-        // - payment row MUST exist (no payment found -> DO NOT SHOW)
-        // - but NO successful payment exists (approved/paid/success/captured)
+        // Unpaid = status approved AND NO successful payment exists
         $paidPaymentStatusesLower = $this->paidPaymentStatusesLower();
 
         $this->whereStatusEqualsLowerTrim($query, 'approved');
 
-        // Must have at least one payment attempt
-        $query->whereHas('order.flowerPayments');
-
-        // But no successful/approved payment
         $query->whereDoesntHave('order.flowerPayments', function ($p) use ($paidPaymentStatusesLower) {
             $this->wherePaymentStatusInLowerTrim($p, $paidPaymentStatusesLower);
         });
@@ -277,24 +297,28 @@ public function showRequests(Request $request)
 
     private function whereStatusEqualsLowerTrim($query, string $valueLower)
     {
-        return $query->whereRaw("LOWER(TRIM(status)) = ?", [$valueLower]);
+        return $query->whereRaw("LOWER(TRIM(COALESCE(status,''))) = ?", [$valueLower]);
     }
 
     private function wherePaymentStatusInLowerTrim($query, array $valuesLower)
     {
         $valuesLower = array_values(array_unique(array_map('strtolower', $valuesLower)));
+        if (count($valuesLower) === 0) {
+            return $query->whereRaw('1=0');
+        }
+
         $ph = implode(',', array_fill(0, count($valuesLower), '?'));
-        return $query->whereRaw("LOWER(TRIM(payment_status)) IN ($ph)", $valuesLower);
+        return $query->whereRaw("LOWER(TRIM(COALESCE(payment_status,''))) IN ($ph)", $valuesLower);
     }
 
     private function paidPaymentStatusesLower(): array
     {
-        // IMPORTANT: includes "approved" as successful payment
+        // keep "approved" if your payment gateway stores it as success
         return ['approved', 'paid', 'success', 'captured'];
     }
 
     // ---------------------------
-    // Amount Helpers (Same, aligned with new Unpaid rule)
+    // Amount Helpers
     // ---------------------------
     private function computeUnpaidAmountToCollect(): float
     {

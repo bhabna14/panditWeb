@@ -283,6 +283,8 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/manage-flower-request/data', [FlowerRequestController::class, 'ajaxData'])->name('admin.flower-request.data');
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
+    Route::post('/manage-flower-request/{flowerRequest}/reject', [FlowerRequestController::class, 'rejectRequest'])
+    ->name('admin.flower-request.reject');
     
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');

@@ -2,49 +2,46 @@
     @php
         $st = strtolower(trim((string)($request->status ?? '')));
 
-        $paidStatuses = ['approved', 'paid', 'success', 'captured'];
+        // payment success statuses (case-insensitive)
+        $paidPaymentStatuses = ['approved', 'paid', 'success', 'captured'];
 
-        $payments = optional($request->order)->flowerPayments;
-        $hasAnyPayment = $payments && $payments->count() > 0;
+        $payments       = optional($request->order)->flowerPayments;
+        $hasAnyPayment   = $payments && $payments->count() > 0;
 
         $hasSuccessPayment = false;
         if ($hasAnyPayment) {
-            $hasSuccessPayment = $payments->contains(function ($p) use ($paidStatuses) {
+            $hasSuccessPayment = $payments->contains(function ($p) use ($paidPaymentStatuses) {
                 $ps = strtolower(trim((string)($p->payment_status ?? '')));
-                return in_array($ps, $paidStatuses, true);
+                return in_array($ps, $paidPaymentStatuses, true);
             });
         }
 
-        // Effective status (important for cards + table)
-        $isRejected = ($st === 'rejected');
+        $isRejected     = ($st === 'rejected');
+        $isPending      = ($st === '' || $st === 'pending');
         $isPaidEffective = ($st === 'paid') || $hasSuccessPayment;
 
-        // Unpaid (your rule): approved + payment exists + no success
-        $isUnpaidEffective = ($st === 'approved') && $hasAnyPayment && !$hasSuccessPayment;
+        // Unpaid: approved but NOT paid (no successful payment)
+        $isUnpaidEffective = ($st === 'approved') && !$isPaidEffective;
 
-        // Badge mapping
         if ($isRejected) {
             $statusLabel = 'Rejected';
             $statusClass = 'bg-danger';
         } elseif ($isPaidEffective) {
             $statusLabel = 'Paid';
             $statusClass = 'bg-success';
-        } elseif ($isUnpaidEffective) {
-            $statusLabel = 'Unpaid';
-            $statusClass = 'bg-danger';
         } elseif ($st === 'approved') {
             $statusLabel = 'Approved';
             $statusClass = 'bg-info';
-        } elseif ($st === '' || $st === 'pending') {
+        } elseif ($isPending) {
             $statusLabel = 'Pending';
             $statusClass = 'bg-warning';
         } else {
-            $statusLabel = ucfirst($st);
+            $statusLabel = ucfirst($st ?: 'Unknown');
             $statusClass = 'bg-secondary';
         }
 
         $canMarkPaid = ($st === 'approved') && !$isPaidEffective && $request->order && $request->order->total_price;
-        $canReject   = ($st === 'approved') && !$isPaidEffective; // reject only when approved & not paid
+        $canReject   = ($st === 'approved') && !$isPaidEffective;
     @endphp
 
     <tr>
@@ -123,12 +120,7 @@
                 <small>Flower: ₹{{ $request->order->requested_flower_price }}</small><br>
                 <small>Delivery: ₹{{ $request->order->delivery_charge }}</small>
             @else
-                <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST">
-                    @csrf
-                    <input type="number" name="requested_flower_price" class="form-control mb-2" placeholder="Flower Price" required>
-                    <input type="number" name="delivery_charge" class="form-control mb-2" placeholder="Delivery Charge" required>
-                    <button type="submit" class="btn btn-sm btn-primary w-100">Save</button>
-                </form>
+                <span class="text-muted">--</span>
             @endif
         </td>
 
@@ -137,16 +129,7 @@
                 @if ($request->order->rider_id)
                     <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
                 @else
-                    <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
-                        @csrf
-                        <select name="rider_id" class="form-select mb-2">
-                            <option disabled selected>Choose Rider</option>
-                            @foreach ($riders as $rider)
-                                <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
-                            @endforeach
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-success w-100">Assign</button>
-                    </form>
+                    <span class="text-muted">--</span>
                 @endif
             @else
                 <span class="text-muted">--</span>
@@ -196,28 +179,7 @@
         </td>
 
         <td class="action-btns">
-
-            {{-- Mark Payment form --}}
-            <form id="markPaymentForm_{{ $request->request_id }}"
-                  action="{{ route('admin.markPayment', $request->request_id) }}"
-                  method="POST"
-                  class="mb-2">
-                @csrf
-                <input type="hidden" name="payment_method" value="">
-
-                @if ($canMarkPaid)
-                    <button type="button" class="btn btn-success btn-sm w-100"
-                            onclick="confirmPayment('{{ $request->request_id }}')">
-                        Mark Paid
-                    </button>
-                @elseif($isPaidEffective)
-                    <button type="button" class="btn btn-success btn-sm w-100" disabled>Paid</button>
-                @else
-                    <button type="button" class="btn btn-secondary btn-sm w-100" disabled>Mark Paid</button>
-                @endif
-            </form>
-
-            {{-- Reject action (Approved only) --}}
+            {{-- Reject (Approved only) --}}
             @if ($canReject)
                 <button type="button"
                         class="btn btn-outline-danger btn-sm w-100 mb-2 btn-reject"
@@ -227,7 +189,7 @@
                 </button>
             @endif
 
-            {{-- View reject reason (Rejected only) --}}
+            {{-- View reject reason --}}
             @if ($isRejected)
                 <button type="button"
                         class="btn btn-outline-dark btn-sm w-100 mb-2 btn-view-reject"
@@ -236,49 +198,6 @@
                     View Reject Reason
                 </button>
             @endif
-
-            {{-- Notify --}}
-            @if (!empty($request->user) && !empty($request->user->userid))
-                <a href="{{ route('admin.notification.create') }}?user={{ $request->user->userid }}"
-                   class="btn btn-outline-primary btn-sm w-100 mb-2"
-                   title="Send notification to {{ $request->user->name ?? '' }}">
-                    Notify
-                </a>
-            @endif
-
-            {{-- Details --}}
-            <button class="btn btn-outline-dark btn-sm w-100 mb-2"
-                    data-bs-toggle="modal"
-                    data-bs-target="#detailsModal{{ $request->id }}">
-                Details
-            </button>
-
-            {{-- Re-order --}}
-            <a href="{{ route('reorderCustomizeOrder', ['id' => $request->id]) }}"
-               class="btn btn-sm btn-secondary w-100">
-                Re-order
-            </a>
-
-            {{-- Details modal --}}
-            <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
-                 aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header bg-dark text-white">
-                            <h5 class="modal-title" id="detailsModalLabel{{ $request->id }}">Request Details</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}</p>
-                            <p><strong>Status:</strong> {{ $statusLabel }}</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </td>
     </tr>
 @endforeach
