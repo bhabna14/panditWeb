@@ -29,8 +29,6 @@ use App\Http\Controllers\Api\VendorOtpController;
 use App\Http\Controllers\Api\VendorPickupController;
 use App\Http\Controllers\Api\CustomizeDeliveryController;
 
-
-
 use App\Http\Controllers\Admin\NotificationController;
 
 /// controllers for frontend pages 

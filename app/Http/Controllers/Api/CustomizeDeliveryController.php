@@ -12,7 +12,8 @@ use Illuminate\Validation\Rule;
 
 class CustomizeDeliveryController extends Controller
 {
-    public function markDelivered(Request $request, $order_id)
+    
+public function markDelivered(Request $request, $order_id)
 {
     $validated = $request->validate([
         'rider_id'  => ['required'],
