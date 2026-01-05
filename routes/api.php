@@ -27,6 +27,8 @@ use App\Http\Controllers\Api\FlowerReferalController;
 use App\Http\Controllers\Api\ReferController;
 use App\Http\Controllers\Api\VendorOtpController;
 use App\Http\Controllers\Api\VendorPickupController;
+use App\Http\Controllers\Api\CustomizeDeliveryController;
+
 
 
 use App\Http\Controllers\Admin\NotificationController;
@@ -274,3 +276,6 @@ Route::middleware('auth:vendor-api')->group(function () {
     Route::get('/get-all-pickups', [VendorPickupController::class, 'getAllPickups']);
     Route::get('/get-vendor-details', [VendorPickupController::class, 'vendorDetails']);
 });
+
+
+Route::post('/customize-orders/{order_id}/delivered', [CustomizeDeliveryController::class, 'markDelivered']);

@@ -21,6 +21,7 @@ class FlowerRequest extends Model
         'date',
         'time',
         'status',
+        'delivery_status',
         'cancel_by',
         'cancel_reason',
     ];

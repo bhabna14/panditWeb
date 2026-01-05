@@ -209,9 +209,6 @@ class FlowerRequestController extends Controller
         return redirect()->back()->with('success', 'Order rejected successfully.');
     }
 
-    // ---------------------------
-    // FILTER SWITCH (includes PENDING)
-    // ---------------------------
     private function applyRequestFilter($query, string $filter, string $today, string $startDate, string $endDate): void
     {
         switch ($filter) {
@@ -317,9 +314,6 @@ class FlowerRequestController extends Controller
         return ['approved', 'paid', 'success', 'captured'];
     }
 
-    // ---------------------------
-    // Amount Helpers
-    // ---------------------------
     private function computeUnpaidAmountToCollect(): float
     {
         $q = FlowerRequest::with(['order.flowerPayments', 'flowerRequestItems']);
@@ -402,137 +396,139 @@ class FlowerRequestController extends Controller
 
         return 0.0;
     }
-public function saveOrder(Request $request, $id)
-{
-    $request->validate([
-        'requested_flower_price' => ['required', 'numeric', 'min:0'],
-        'delivery_charge'        => ['required', 'numeric', 'min:0'],
-    ]);
-
-    try {
-        $flowerRequest = FlowerRequest::findOrFail($id);
-
-        // Block invalid transitions
-        $st = strtolower(trim((string)($flowerRequest->status ?? '')));
-        if ($st === 'paid' || $st === 'rejected') {
-            return redirect()->back()->with('error', 'This request is already finalized. You cannot update price.');
-        }
-
-        DB::transaction(function () use ($request, $flowerRequest) {
-
-            // If order already exists for this request_id, update it (avoid duplicate orders)
-            $existingOrder = Order::where('request_id', $flowerRequest->request_id)->first();
-
-            if ($existingOrder) {
-                $existingOrder->requested_flower_price = $request->requested_flower_price;
-                $existingOrder->delivery_charge        = $request->delivery_charge;
-                $existingOrder->total_price            = ((float)$request->requested_flower_price) + ((float)$request->delivery_charge);
-                $existingOrder->suggestion             = $flowerRequest->suggestion;
-                $existingOrder->save();
-
-                $order = $existingOrder;
-            } else {
-                $orderId = 'ORD-' . strtoupper(Str::random(12));
-
-                $order = Order::create([
-                    'order_id'               => $orderId,
-                    'request_id'             => $flowerRequest->request_id,
-                    'product_id'             => $flowerRequest->product_id,
-                    'user_id'                => $flowerRequest->user_id,
-                    'address_id'             => $flowerRequest->address_id,
-                    'quantity'               => 1,
-                    'requested_flower_price' => $request->requested_flower_price,
-                    'delivery_charge'        => $request->delivery_charge,
-                    'total_price'            => ((float)$request->requested_flower_price) + ((float)$request->delivery_charge),
-                    'suggestion'             => $flowerRequest->suggestion,
-                ]);
-            }
-
-            // Update request status => approved
-            $flowerRequest->status = 'approved';
-            $flowerRequest->save();
-
-            // Attach order_id into local scope for notification below
-            $GLOBALS['__last_order_id'] = $order->order_id;
-        });
-
-        // Send notification to user's devices
-        $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)
-            ->whereNotNull('device_id')
-            ->pluck('device_id')
-            ->toArray();
-
-        if (!empty($deviceTokens)) {
-            $notificationService = new \NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $notificationService->sendBulkNotifications(
-                $deviceTokens,
-                'Order Approved',
-                'Price is updated, please pay the amount',
-                ['order_id' => $GLOBALS['__last_order_id'] ?? null]
-            );
-
-            Log::info('Notification sent successfully to all devices.', [
-                'user_id'        => $flowerRequest->user_id,
-                'device_tokens'  => $deviceTokens,
-            ]);
-        } else {
-            Log::warning('No device tokens found for user.', ['user_id' => $flowerRequest->user_id]);
-        }
-
-        return redirect()->back()->with('success', 'Order saved successfully');
-    } catch (\Throwable $e) {
-        Log::error('Failed to save order.', ['error' => $e->getMessage()]);
-        return redirect()->back()->with('error', 'Failed to save order');
-    }
-}
-public function markPayment(Request $request, $request_id)
-{
-    $request->validate([
-        'payment_method' => ['required', 'in:upi,razorpay,cash'],
-    ]);
-
-    try {
-        $order         = Order::where('request_id', $request_id)->firstOrFail();
-        $flowerRequest = FlowerRequest::where('request_id', $request_id)->firstOrFail();
-
-        DB::transaction(function () use ($request, $order, $flowerRequest) {
-
-            // Prevent duplicate paid rows (optional but recommended)
-            $alreadyPaid = FlowerPayment::where('order_id', $order->order_id)
-                ->whereRaw("LOWER(TRIM(COALESCE(payment_status,''))) IN ('paid','approved','success','captured')")
-                ->exists();
-
-            if (!$alreadyPaid) {
-                FlowerPayment::create([
-                    'order_id'       => $order->order_id,
-                    'payment_id'     => null,
-                    'user_id'        => $order->user_id,
-                    'payment_method' => $request->payment_method,
-                    'paid_amount'    => $order->total_price,
-                    'payment_status' => 'paid',
-                ]);
-            }
-
-            // Update request status
-            $st = strtolower(trim((string)($flowerRequest->status ?? '')));
-            if ($st === 'approved') {
-                $flowerRequest->status = 'paid';
-                $flowerRequest->save();
-            }
-        });
-
-        return redirect()->back()->with(
-            'success',
-            'Payment marked as paid via ' . strtoupper($request->payment_method) . '.'
-        );
-    } catch (\Throwable $e) {
-        Log::error('Failed to mark payment as paid', [
-            'request_id' => $request_id,
-            'error'      => $e->getMessage(),
+        
+    public function saveOrder(Request $request, $id)
+    {
+        $request->validate([
+            'requested_flower_price' => ['required', 'numeric', 'min:0'],
+            'delivery_charge'        => ['required', 'numeric', 'min:0'],
         ]);
 
-        return redirect()->back()->with('error', 'Failed to mark payment as paid');
+        try {
+            $flowerRequest = FlowerRequest::findOrFail($id);
+
+            // Block invalid transitions
+            $st = strtolower(trim((string)($flowerRequest->status ?? '')));
+            if ($st === 'paid' || $st === 'rejected') {
+                return redirect()->back()->with('error', 'This request is already finalized. You cannot update price.');
+            }
+
+            DB::transaction(function () use ($request, $flowerRequest) {
+
+                // If order already exists for this request_id, update it (avoid duplicate orders)
+                $existingOrder = Order::where('request_id', $flowerRequest->request_id)->first();
+
+                if ($existingOrder) {
+                    $existingOrder->requested_flower_price = $request->requested_flower_price;
+                    $existingOrder->delivery_charge        = $request->delivery_charge;
+                    $existingOrder->total_price            = ((float)$request->requested_flower_price) + ((float)$request->delivery_charge);
+                    $existingOrder->suggestion             = $flowerRequest->suggestion;
+                    $existingOrder->save();
+
+                    $order = $existingOrder;
+                } else {
+                    $orderId = 'ORD-' . strtoupper(Str::random(12));
+
+                    $order = Order::create([
+                        'order_id'               => $orderId,
+                        'request_id'             => $flowerRequest->request_id,
+                        'product_id'             => $flowerRequest->product_id,
+                        'user_id'                => $flowerRequest->user_id,
+                        'address_id'             => $flowerRequest->address_id,
+                        'quantity'               => 1,
+                        'requested_flower_price' => $request->requested_flower_price,
+                        'delivery_charge'        => $request->delivery_charge,
+                        'total_price'            => ((float)$request->requested_flower_price) + ((float)$request->delivery_charge),
+                        'suggestion'             => $flowerRequest->suggestion,
+                    ]);
+                }
+
+                // Update request status => approved
+                $flowerRequest->status = 'approved';
+                $flowerRequest->save();
+
+                // Attach order_id into local scope for notification below
+                $GLOBALS['__last_order_id'] = $order->order_id;
+            });
+
+            // Send notification to user's devices
+            $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)
+                ->whereNotNull('device_id')
+                ->pluck('device_id')
+                ->toArray();
+
+            if (!empty($deviceTokens)) {
+                $notificationService = new \NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Order Approved',
+                    'Price is updated, please pay the amount',
+                    ['order_id' => $GLOBALS['__last_order_id'] ?? null]
+                );
+
+                Log::info('Notification sent successfully to all devices.', [
+                    'user_id'        => $flowerRequest->user_id,
+                    'device_tokens'  => $deviceTokens,
+                ]);
+            } else {
+                Log::warning('No device tokens found for user.', ['user_id' => $flowerRequest->user_id]);
+            }
+
+            return redirect()->back()->with('success', 'Order saved successfully');
+        } catch (\Throwable $e) {
+            Log::error('Failed to save order.', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to save order');
+        }
     }
-}
+
+    public function markPayment(Request $request, $request_id)
+    {
+        $request->validate([
+            'payment_method' => ['required', 'in:upi,razorpay,cash'],
+        ]);
+
+        try {
+            $order         = Order::where('request_id', $request_id)->firstOrFail();
+            $flowerRequest = FlowerRequest::where('request_id', $request_id)->firstOrFail();
+
+            DB::transaction(function () use ($request, $order, $flowerRequest) {
+
+                // Prevent duplicate paid rows (optional but recommended)
+                $alreadyPaid = FlowerPayment::where('order_id', $order->order_id)
+                    ->whereRaw("LOWER(TRIM(COALESCE(payment_status,''))) IN ('paid','approved','success','captured')")
+                    ->exists();
+
+                if (!$alreadyPaid) {
+                    FlowerPayment::create([
+                        'order_id'       => $order->order_id,
+                        'payment_id'     => null,
+                        'user_id'        => $order->user_id,
+                        'payment_method' => $request->payment_method,
+                        'paid_amount'    => $order->total_price,
+                        'payment_status' => 'paid',
+                    ]);
+                }
+
+                // Update request status
+                $st = strtolower(trim((string)($flowerRequest->status ?? '')));
+                if ($st === 'approved') {
+                    $flowerRequest->status = 'paid';
+                    $flowerRequest->save();
+                }
+            });
+
+            return redirect()->back()->with(
+                'success',
+                'Payment marked as paid via ' . strtoupper($request->payment_method) . '.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Failed to mark payment as paid', [
+                'request_id' => $request_id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to mark payment as paid');
+        }
+    }
 
 }

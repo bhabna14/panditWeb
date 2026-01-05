@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class DeliveryCustomizeHistory extends Model
 {
     use HasFactory;
+
+    protected $table = 'delivery_customize_histories';
+
     protected $fillable = [
         'order_id',
         'rider_id',
