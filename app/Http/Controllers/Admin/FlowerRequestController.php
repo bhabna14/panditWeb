@@ -531,4 +531,19 @@ class FlowerRequestController extends Controller
         }
     }
 
+public function updateDeliveryStatus(\Illuminate\Http\Request $request, \App\Models\FlowerRequest $flowerRequest)
+{
+    $validated = $request->validate([
+        'delivery_status' => ['required', 'string', \Illuminate\Validation\Rule::in([
+            'pending', 'assigned', 'out_for_delivery', 'delivered', 'failed', 'returned'
+        ])],
+    ]);
+
+    $flowerRequest->delivery_status = $validated['delivery_status'];
+    $flowerRequest->save();
+
+    return back()->with('success', 'Delivery status updated successfully.');
+}
+
+
 }

@@ -310,7 +310,6 @@ class OrderController extends Controller
                     'delivery_status' => 'delivered',
                     'longitude'       => $lon,
                     'latitude'        => $lat,
-                    // ✅ save only time in IST
                     'delivery_time'   => $istTimeOnly,
                 ]);
             } else {

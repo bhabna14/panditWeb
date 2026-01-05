@@ -277,5 +277,5 @@ Route::middleware('auth:vendor-api')->group(function () {
 
 
 Route::middleware('auth:rider-api')->group(function () {
-    Route::post('/customize-requests-delivered/{request_id}', [CustomizeDeliveryController::class, 'markDelivered']);
+    Route::post('/rider/requested-deliver/{req_id}', [CustomizeDeliveryController::class, 'markDelivered']);
 });

@@ -1062,5 +1062,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'indexAttendance'])->name('admin.rider-attendance.manual');
     Route::post('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'store'])->name('admin.rider-attendance.manual.store');
 
-Route::get('/admin/rider-salary', [RiderSalaryController::class, 'index'])
-    ->name('admin.rider-salary.index');
+    Route::get('/admin/rider-salary', [RiderSalaryController::class, 'index'])
+        ->name('admin.rider-salary.index');
+
+
+    Route::post('/manage-flower-request/{flowerRequest}/delivery-status', [FlowerRequestController::class, 'updateDeliveryStatus'])
+        ->name('admin.flower-request.delivery-status');
+

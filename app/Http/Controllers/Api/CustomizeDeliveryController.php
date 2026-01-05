@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class CustomizeDeliveryController extends Controller
 {
 
-    public function markDelivered(Request $request, $request_id)
+    public function markDelivered(Request $request, $req_id)
     {
         // Authenticated rider
         $rider = Auth::guard('rider-api')->user();
@@ -35,7 +35,7 @@ class CustomizeDeliveryController extends Controller
 
         // 1) Find FlowerRequest by request_id
         $flowerRequest = FlowerRequest::query()
-            ->where('request_id', $request_id)
+            ->where('request_id', $req_id)
             ->first();
 
         if (!$flowerRequest) {
@@ -51,7 +51,7 @@ class CustomizeDeliveryController extends Controller
                 'status' => true,
                 'message' => 'Request is already marked as delivered.',
                 'data' => [
-                    'request_id' => $flowerRequest->request_id,
+                    'request_id' => $flowerRequest->req_id,
                     'delivery_status' => $flowerRequest->delivery_status,
                 ],
             ], 200);
@@ -68,7 +68,7 @@ class CustomizeDeliveryController extends Controller
             // B) Insert delivery history with request_id + authenticated rider_id + location
             // NOTE: rider model key might be "rider_id" or "id" based on your RiderDetails model
             $history = DeliveryCustomizeHistory::create([
-                'request_id' => $flowerRequest->request_id,
+                'request_id' => $flowerRequest->req_id,
                 'rider_id' => $rider->rider_id ?? $rider->id,  // safe fallback
                 'delivery_status' => $deliveryStatus,
                 'longitude' => $validated['longitude'],
@@ -80,7 +80,7 @@ class CustomizeDeliveryController extends Controller
             'status' => true,
             'message' => 'Request marked as delivered successfully.',
             'data' => [
-                'request_id' => $flowerRequest->request_id,
+                'request_id' => $flowerRequest->req_id,
                 'delivery_status' => $flowerRequest->delivery_status,
                 'latitude' => $history->latitude,
                 'longitude' => $history->longitude,
