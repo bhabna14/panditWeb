@@ -149,11 +149,20 @@
 
         {{-- Rider --}}
         <td>
-            @if ($isPaidEffective && $request->order && $request->order->total_price)
-                @if (!empty($request->order->rider_id))
-                    <span class="badge bg-primary">{{ $request->order->rider->rider_name ?? 'Rider' }}</span>
+            @if ($request->status == 'paid' && $request->order && $request->order->total_price)
+                @if ($request->order->rider_id)
+                    <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
                 @else
-                    <span class="text-muted">--</span>
+                    <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
+                        @csrf
+                        <select name="rider_id" class="form-select mb-2">
+                            <option disabled selected>Choose Rider</option>
+                            @foreach ($riders as $rider)
+                                <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-success w-100">Assign</button>
+                    </form>
                 @endif
             @else
                 <span class="text-muted">--</span>
