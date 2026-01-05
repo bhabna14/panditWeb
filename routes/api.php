@@ -276,4 +276,4 @@ Route::middleware('auth:vendor-api')->group(function () {
 });
 
 
-Route::post('/customize-orders/{order_id}/delivered', [CustomizeDeliveryController::class, 'markDelivered']);
+Route::post('/customize-orders-delivered/{request_id}', [CustomizeDeliveryController::class, 'markDelivered']);

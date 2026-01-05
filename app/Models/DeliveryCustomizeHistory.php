@@ -12,18 +12,18 @@ class DeliveryCustomizeHistory extends Model
     protected $table = 'delivery_customize_histories';
 
     protected $fillable = [
-        'order_id',
+        'request_id',
         'rider_id',
         'delivery_status',
         'longitude',
         'latitude',
     ];
 
-    public function order()
+    public function flowerRequest()
     {
-        return $this->belongsTo(Order::class, 'order_id','order_id');
+        return $this->belongsTo(FlowerRequest::class,'request_id', 'request_id');
     }
-    
+
     public function rider()
     {
         return $this->belongsTo(RiderDetails::class,'rider_id', 'rider_id');
