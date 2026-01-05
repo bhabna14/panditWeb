@@ -160,13 +160,34 @@
         .action-btns .btn {
             margin-bottom: 8px;
         }
+
+        /* Delivery status UI */
+        .ds-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .ds-form {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .ds-form .form-select {
+            min-width: 160px;
+        }
+
+        .ds-muted {
+            font-size: 12px;
+            color: #6b7280;
+        }
     </style>
 @endsection
 
 @section('content')
     {{-- FILTER CARDS --}}
     <div class="filter-grid">
-
         {{-- All --}}
         <a href="{{ $pageUrl }}?filter=all" class="filter-link card-filter" data-filter="all">
             <div class="card filter-card {{ ($filter ?? 'all') === 'all' ? 'is-active' : '' }}" data-card="all">
@@ -238,9 +259,8 @@
                     </div>
                     <div class="stat-meta">
                         <div>To Collect</div>
-                        <span class="meta-pill" id="unpaidAmount">
-                            ₹{{ number_format((float) ($unpaidAmountToCollect ?? 0), 2) }}
-                        </span>
+                        <span class="meta-pill"
+                            id="unpaidAmount">₹{{ number_format((float) ($unpaidAmountToCollect ?? 0), 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -259,9 +279,8 @@
                     </div>
                     <div class="stat-meta">
                         <div>Collected</div>
-                        <span class="meta-pill" id="paidAmount">
-                            ₹{{ number_format((float) ($paidCollectedAmount ?? 0), 2) }}
-                        </span>
+                        <span class="meta-pill"
+                            id="paidAmount">₹{{ number_format((float) ($paidCollectedAmount ?? 0), 2) }}</span>
                     </div>
                 </div>
             </div>
@@ -285,7 +304,6 @@
                 </div>
             </div>
         </a>
-
     </div>
 
     {{-- TABLE --}}
@@ -300,7 +318,7 @@
                             <th>Delivery</th>
                             <th>Items</th>
                             <th>Status</th>
-                            <th>Del. Status</th>
+                            <th>Delivery Status</th>
                             <th>Price</th>
                             <th>Rider</th>
                             <th>Address</th>
@@ -411,10 +429,10 @@
         function loadRequests(filter, pushUrl = true) {
             const $tbody = $('#requestsBody');
 
-            // IMPORTANT FIX: destroy datatable before changing tbody
             destroyDataTable();
 
-            $tbody.html('<tr><td colspan="11" class="text-center table-loading">Loading...</td></tr>');
+            // FIX: colspan should be 12 (your table has 12 columns)
+            $tbody.html('<tr><td colspan="12" class="text-center table-loading">Loading...</td></tr>');
 
             $.get(AJAX_URL, {
                     filter: filter
@@ -435,14 +453,14 @@
                         }
                     } else {
                         $tbody.html(
-                            '<tr><td colspan="11" class="text-center text-danger table-loading">Unexpected response</td></tr>'
+                            '<tr><td colspan="12" class="text-center text-danger table-loading">Unexpected response</td></tr>'
                             );
                         initDataTable();
                     }
                 })
                 .fail(function() {
                     $tbody.html(
-                        '<tr><td colspan="11" class="text-center text-danger table-loading">Failed to load</td></tr>'
+                        '<tr><td colspan="12" class="text-center text-danger table-loading">Failed to load</td></tr>'
                         );
                     initDataTable();
                     Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
@@ -470,8 +488,8 @@
 
         // Reject button -> open modal
         $(document).on('click', '.btn-reject', function() {
-            const id = $(this).data('id'); // FlowerRequest numeric id
-            const req = $(this).data('req'); // request_id string
+            const id = $(this).data('id');
+            const req = $(this).data('req');
 
             $('#rejectRequestCode').text('#' + req);
             $('#rejectReason').val('');
@@ -525,8 +543,31 @@
                 }
             });
         }
-
-        // expose to global for inline onclick
         window.confirmPayment = confirmPayment;
+
+        // Delivery status update confirm
+        function confirmDeliveryStatus(rowId, requestCode) {
+            const formId = '#deliveryStatusForm_' + rowId;
+            const $form = $(formId);
+            const status = $form.find('select[name="delivery_status"]').val();
+
+            const label = (status || 'pending')
+                .replace(/_/g, ' ')
+                .replace(/\b\w/g, c => c.toUpperCase());
+
+            Swal.fire({
+                title: 'Update Delivery Status',
+                html: `Order <b>#${requestCode}</b><br>Set to <b>${label}</b>?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Update',
+                cancelButtonText: 'Cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $form.submit();
+                }
+            });
+        }
+        window.confirmDeliveryStatus = confirmDeliveryStatus;
     </script>
 @endsection

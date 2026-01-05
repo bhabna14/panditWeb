@@ -2,7 +2,7 @@
     @php
         $st = strtolower(trim((string)($request->status ?? '')));
 
-        // success statuses for payment table
+        // payment success statuses
         $paidPaymentStatuses = ['approved','paid','success','captured'];
 
         $payments = optional($request->order)->flowerPayments;
@@ -19,7 +19,7 @@
         $isPending       = ($st === '' || $st === 'pending');
         $isPaidEffective = ($st === 'paid') || $hasSuccessPayment;
 
-        // Status badge
+        // Status badge (ORDER STATUS)
         if ($isRejected) {
             $statusLabel = 'Rejected';
             $statusClass = 'bg-danger';
@@ -45,6 +45,42 @@
 
         // Reject only when approved + not paid
         $canReject = ($st === 'approved') && !$isPaidEffective;
+
+        // DELIVERY STATUS (flower_requests.delivery_status)
+        $ds = strtolower(trim((string)($request->delivery_status ?? '')));
+        if ($ds === '') $ds = 'pending';
+
+        $deliveryLabel = 'Pending';
+        $deliveryClass = 'bg-secondary';
+
+        if ($ds === 'pending') {
+            $deliveryLabel = 'Pending';
+            $deliveryClass = 'bg-warning';
+        } elseif ($ds === 'assigned') {
+            $deliveryLabel = 'Assigned';
+            $deliveryClass = 'bg-primary';
+        } elseif ($ds === 'out_for_delivery') {
+            $deliveryLabel = 'Out for Delivery';
+            $deliveryClass = 'bg-info';
+        } elseif ($ds === 'delivered') {
+            $deliveryLabel = 'Delivered';
+            $deliveryClass = 'bg-success';
+        } elseif ($ds === 'failed') {
+            $deliveryLabel = 'Failed';
+            $deliveryClass = 'bg-danger';
+        } elseif ($ds === 'returned') {
+            $deliveryLabel = 'Returned';
+            $deliveryClass = 'bg-dark';
+        } else {
+            $deliveryLabel = ucfirst($ds);
+            $deliveryClass = 'bg-secondary';
+        }
+
+        // Allow delivery status update only when:
+        // - Not rejected
+        // - Paid (or payment captured)
+        $canUpdateDelivery = !$isRejected && $isPaidEffective;
+        $isDelivered = ($ds === 'delivered');
     @endphp
 
     <tr>
@@ -124,12 +160,49 @@
             </div>
         </td>
 
-        {{-- Status --}}
+        {{-- Status (ORDER STATUS) --}}
         <td>
             <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
         </td>
 
-        {{-- Price (YOUR REQUIREMENT) --}}
+        {{-- Delivery Status (REAL delivery_status column) --}}
+        <td>
+            <div class="ds-wrap">
+                <span class="badge {{ $deliveryClass }}">{{ $deliveryLabel }}</span>
+
+                @if($canUpdateDelivery)
+                    <form id="deliveryStatusForm_{{ $request->id }}"
+                          action="{{ route('admin.flower-request.delivery-status', $request->id) }}"
+                          method="POST"
+                          class="ds-form">
+                        @csrf
+
+                        <select name="delivery_status" class="form-select form-select-sm" {{ $isDelivered ? 'disabled' : '' }}>
+                            <option value="pending" {{ $ds === 'pending' ? 'selected' : '' }}>Pending</option>
+                            <option value="assigned" {{ $ds === 'assigned' ? 'selected' : '' }}>Assigned</option>
+                            <option value="out_for_delivery" {{ $ds === 'out_for_delivery' ? 'selected' : '' }}>Out for Delivery</option>
+                            <option value="delivered" {{ $ds === 'delivered' ? 'selected' : '' }}>Delivered</option>
+                            <option value="failed" {{ $ds === 'failed' ? 'selected' : '' }}>Failed</option>
+                            <option value="returned" {{ $ds === 'returned' ? 'selected' : '' }}>Returned</option>
+                        </select>
+
+                        @if($isDelivered)
+                            <button type="button" class="btn btn-sm btn-success" disabled>Delivered</button>
+                        @else
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-primary"
+                                    onclick="confirmDeliveryStatus('{{ $request->id }}', '{{ $request->request_id }}')">
+                                Update
+                            </button>
+                        @endif
+                    </form>
+                @else
+                    <small class="ds-muted">Update allowed after payment (Paid).</small>
+                @endif
+            </div>
+        </td>
+
+        {{-- Price --}}
         <td>
             @if ($request->order && $request->order->total_price)
                 <div><strong>₹{{ $request->order->total_price }}</strong></div>
@@ -214,7 +287,7 @@
             @endif
         </td>
 
-        {{-- Actions (YOUR REQUIREMENT: Mark Paid + Reject + others) --}}
+        {{-- Actions --}}
         <td class="action-btns">
 
             {{-- Mark Payment --}}
@@ -236,7 +309,7 @@
                 @endif
             </form>
 
-            {{-- Reject (Approved only) --}}
+            {{-- Reject --}}
             @if ($canReject)
                 <button type="button"
                         class="btn btn-outline-danger btn-sm w-100 btn-reject"
@@ -290,6 +363,7 @@
                         <div class="modal-body">
                             <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}</p>
                             <p><strong>Status:</strong> {{ $statusLabel }}</p>
+                            <p><strong>Delivery Status:</strong> {{ $deliveryLabel }}</p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
