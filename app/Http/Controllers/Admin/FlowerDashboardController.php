@@ -179,19 +179,19 @@ class FlowerDashboardController extends Controller
         ->whereRaw('LOWER(COALESCE(fp.payment_status,"")) = "paid"');
 };
 
-$paidCustomizeOrders = \App\Models\FlowerRequest::query()
-    ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
-    ->where(function ($q) use ($paidPaymentExists) {
-        $q->whereRaw('LOWER(COALESCE(status,"")) = "paid"')
-          ->orWhereExists($paidPaymentExists);
-    })
-    ->count();
-$unpaidCustomizeOrders = \App\Models\FlowerRequest::query()
-    ->whereRaw('LOWER(COALESCE(status,"")) = "approved"')
-    ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
-    ->whereNotExists($paidPaymentExists)
-    ->count();
+    $paidCustomizeOrders = \App\Models\FlowerRequest::query()
+        ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
+        ->where(function ($q) use ($paidPaymentExists) {
+            $q->whereRaw('LOWER(COALESCE(status,"")) = "paid"')
+            ->orWhereExists($paidPaymentExists);
+        })
+        ->count();
 
+    $unpaidCustomizeOrders = \App\Models\FlowerRequest::query()
+        ->whereRaw('LOWER(COALESCE(status,"")) = "approved"')
+        ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
+        ->whereNotExists($paidPaymentExists)
+        ->count();
 
         $totalRiders = RiderDetails::where('status', 'active')->count();
         $totalDeliveriesToday = $totalDeliveriesTodayCount;

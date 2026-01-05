@@ -88,6 +88,8 @@ use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 
 use App\Http\Controllers\Refer\ReferController;
+    use App\Http\Controllers\Admin\RiderSalaryController;
+
 
 use Twilio\Rest\Client;
 
@@ -225,7 +227,6 @@ Route::controller(SuperAdminController::class)->group(function() {
     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
 });
 
-
 ##super admin routes
 Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::controller(SuperAdminController::class)->group(function() {
@@ -237,7 +238,6 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/editadmin/{id}', [SuperAdminController::class, 'editadmin'])->name('editadmin');
     Route::post('/update/{id}', [SuperAdminController::class, 'update'])->name('update');
     Route::get('/dltadmin/{id}', [SuperAdminController::class, 'dltadmin'])->name('dltadmin');
-
 });
 
 ## admin routes
@@ -1061,3 +1061,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/admin/rider-attendance', [RiderAttendanceController::class, 'index'])->name('admin.rider-attendance.index');
     Route::get('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'indexAttendance'])->name('admin.rider-attendance.manual');
     Route::post('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'store'])->name('admin.rider-attendance.manual.store');
+
+Route::get('/admin/rider-salary', [RiderSalaryController::class, 'index'])
+    ->name('admin.rider-salary.index');
