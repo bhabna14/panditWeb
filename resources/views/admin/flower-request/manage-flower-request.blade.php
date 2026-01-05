@@ -300,6 +300,7 @@
                             <th>Delivery</th>
                             <th>Items</th>
                             <th>Status</th>
+                            <th>Del. Status</th>
                             <th>Price</th>
                             <th>Rider</th>
                             <th>Address</th>
