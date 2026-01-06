@@ -17,6 +17,7 @@ class RiderDetails extends Model
         'rider_name',
         'phone_number',
         'rider_img',
+        'salary',
         'description',
     ];
 
@@ -37,8 +38,8 @@ class RiderDetails extends Model
     }
 
     public function attendances()
-{
-    return $this->hasMany(\App\Models\RiderAttendance::class, 'rider_id', 'rider_id');
-}
+    {
+        return $this->hasMany(\App\Models\RiderAttendance::class, 'rider_id', 'rider_id');
+    }
 
 }

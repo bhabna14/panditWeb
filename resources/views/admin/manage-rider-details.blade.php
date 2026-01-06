@@ -123,6 +123,7 @@
                                     <th>Phone</th>
                                     <th>Photo</th>
                                     <th>Description</th>
+                                    <th>Salary</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -154,6 +155,7 @@
                                             @endif
                                         </td>
                                         <td class="text-wrap" style="max-width:360px">{{ $rider->description }}</td>
+                                        <td>{{ $rider->salary }}</td>
                                         <td class="actions">
                                             <div class="dropdown">
                                                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
