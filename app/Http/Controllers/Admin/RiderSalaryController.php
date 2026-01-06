@@ -13,7 +13,7 @@ class RiderSalaryController extends Controller
 {
     public function index(Request $request)
     {
-        // Fallback salary if rider salary is null/empty (change to 0 if you prefer)
+        // Fallback salary if rider salary is null/empty
         $defaultMonthlySalary = 5000;
 
         // Attendance weights
@@ -73,10 +73,8 @@ class RiderSalaryController extends Controller
             $absent  = (int) ($row->absent_days ?? 0);
             $marked  = (int) ($row->marked_days ?? 0);
 
-            // Unmarked days treated as unpaid
             $notMarked = max(0, $daysInMonth - $marked);
 
-            // Rider monthly salary from DB (fallback if null/empty)
             $gross = (float) ($r->salary ?? 0);
             if ($gross <= 0) {
                 $gross = (float) $defaultMonthlySalary;
@@ -84,7 +82,6 @@ class RiderSalaryController extends Controller
 
             $perDay = $gross / $daysInMonth;
 
-            // payable units
             $payableUnits =
                 ($present * $weights['present']) +
                 ($half * $weights['half_day']) +
@@ -99,6 +96,7 @@ class RiderSalaryController extends Controller
                 'rider_id' => $r->rider_id,
                 'rider_name' => $r->rider_name,
                 'phone_number' => $r->phone_number,
+
                 'gross' => round($gross, 2),
                 'per_day' => round($perDay, 2),
 
@@ -113,6 +111,41 @@ class RiderSalaryController extends Controller
                 'deduction' => $deduction,
             ];
         });
+
+        // ===========================
+        // NEW: Payroll Summary Cards (Month Total)
+        // ===========================
+        $totalRiders    = $riders->count();
+        $totalGross     = round($allRiderSalary->sum('gross'), 2);
+        $totalPayable   = round($allRiderSalary->sum('salary'), 2);
+        $totalDeduction = round($allRiderSalary->sum('deduction'), 2);
+
+        $totalPresent   = (int) $allRiderSalary->sum('present');
+        $totalHalfDay   = (int) $allRiderSalary->sum('half_day');
+        $totalLeave     = (int) $allRiderSalary->sum('leave');
+        $totalAbsent    = (int) $allRiderSalary->sum('absent');
+        $totalNotMarked = (int) $allRiderSalary->sum('not_marked');
+
+        $payPercent = ($totalGross > 0) ? round(($totalPayable / $totalGross) * 100, 2) : 0;
+
+        $avgPayable = ($totalRiders > 0) ? round($totalPayable / $totalRiders, 2) : 0;
+        $avgGross   = ($totalRiders > 0) ? round($totalGross / $totalRiders, 2) : 0;
+
+        $payrollSummary = [
+            'total_riders'     => $totalRiders,
+            'total_gross'      => $totalGross,
+            'total_payable'    => $totalPayable,
+            'total_deduction'  => $totalDeduction,
+            'pay_percent'      => $payPercent,
+            'avg_payable'      => $avgPayable,
+            'avg_gross'        => $avgGross,
+
+            'present'          => $totalPresent,
+            'half_day'         => $totalHalfDay,
+            'leave'            => $totalLeave,
+            'absent'           => $totalAbsent,
+            'not_marked'       => $totalNotMarked,
+        ];
 
         // ===========================
         // Selected rider: day-wise breakdown
@@ -157,7 +190,7 @@ class RiderSalaryController extends Controller
                     elseif ($status === 'absent') $absent++;
                     else $notMarked++;
 
-                    $weight = $weights[$status] ?? 0.0; // not_marked => 0
+                    $weight = $weights[$status] ?? 0.0;
                     $dayPay = round($perDay * $weight, 2);
 
                     $payableUnits += $weight;
@@ -190,7 +223,6 @@ class RiderSalaryController extends Controller
             }
         }
 
-        // Default selection (optional): first rider
         if (!$selectedRiderId && $riders->count() > 0) {
             $selectedRiderId = (string) $riders->first()->rider_id;
         }
@@ -208,6 +240,9 @@ class RiderSalaryController extends Controller
             'allRiderSalary' => $allRiderSalary,
             'dayRows' => $dayRows,
             'riderTotals' => $riderTotals,
+
+            // NEW
+            'payrollSummary' => $payrollSummary,
         ]);
     }
 }
