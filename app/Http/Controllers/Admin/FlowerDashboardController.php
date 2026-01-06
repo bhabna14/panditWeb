@@ -171,15 +171,15 @@ class FlowerDashboardController extends Controller
             ];
         })->values();
 
-      $paidPaymentExists = function ($sq) {
-    $sq->select(DB::raw(1))
+        $paidPaymentExists = function ($sq) {
+        $sq->select(DB::raw(1))
         ->from('orders as o')
         ->join('flower_payments as fp', 'fp.order_id', '=', 'o.order_id')
         ->whereColumn('o.request_id', 'flower_requests.request_id')
         ->whereRaw('LOWER(COALESCE(fp.payment_status,"")) = "paid"');
-};
+        };
 
-    $paidCustomizeOrders = \App\Models\FlowerRequest::query()
+        $paidCustomizeOrders = \App\Models\FlowerRequest::query()
         ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
         ->where(function ($q) use ($paidPaymentExists) {
             $q->whereRaw('LOWER(COALESCE(status,"")) = "paid"')
@@ -187,7 +187,7 @@ class FlowerDashboardController extends Controller
         })
         ->count();
 
-    $unpaidCustomizeOrders = \App\Models\FlowerRequest::query()
+        $unpaidCustomizeOrders = \App\Models\FlowerRequest::query()
         ->whereRaw('LOWER(COALESCE(status,"")) = "approved"')
         ->whereRaw('LOWER(COALESCE(status,"")) NOT IN ("rejected","cancelled")')
         ->whereNotExists($paidPaymentExists)
@@ -565,7 +565,7 @@ class FlowerDashboardController extends Controller
         ]);
     }
 
-   public function paymentHistory(Request $request)
+ public function paymentHistory(Request $request)
 {
     // -------- Parse filters ----------
     $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month
@@ -574,13 +574,17 @@ class FlowerDashboardController extends Controller
     $methodFilter  = $request->string('payment_method')->toString(); // UPI|Cash|Card|...
     $search        = $request->string('q')->toString(); // search by order/payment id or user
 
+    // NEW: order type filter from clickable cards
+    // type = subscription | customize
+    $typeFilter    = $request->string('type')->toString();
+
     // Resolve [start, end] (inclusive) — defaults to TODAY if nothing provided
     [$start, $end, $effectivePreset] = $this->resolveRange($request, $preset);
 
     /**
      * BASE QUERY (date/user/search only)
      * - Use this for: stats, method cards, type cards
-     * - Then apply status/method only for the table list
+     * - Then apply status/method/type only for the table list
      */
     $base = FlowerPayment::query()
         ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
@@ -616,15 +620,18 @@ class FlowerDashboardController extends Controller
             });
         });
 
-    // -------- TABLE QUERY (apply dropdown filters) ----------
+    // -------- TABLE QUERY (apply dropdown filters + NEW type filter) ----------
     $q = (clone $base)
         ->when($statusFilter, fn($qq) => $qq->where('flower_payments.payment_status', $statusFilter))
         ->when($methodFilter, fn($qq) => $qq->where('flower_payments.payment_method', $methodFilter))
+        // NEW: card-click filter
+        ->when($typeFilter === 'subscription', fn($qq) => $qq->whereNotNull('s.subscription_id'))
+        ->when($typeFilter === 'customize',    fn($qq) => $qq->whereNull('s.subscription_id'))
         ->orderByDesc('flower_payments.created_at');
 
     $payments = $q->paginate(25)->withQueryString();
 
-    // -------- OVERALL STATS (ignore status/method filters; only date/user/search) ----------
+    // -------- OVERALL STATS (ignore status/method/type filters; only date/user/search) ----------
     $statsQ = (clone $base);
     $statsQ->getQuery()->orders  = null;
     $statsQ->getQuery()->columns = null;
@@ -659,7 +666,6 @@ class FlowerDashboardController extends Controller
         ->get();
 
     // -------- TYPE BREAKDOWN: Subscription vs Customize (cards) ----------
-    // Rule: if joined subscription exists => subscription; else => customize.
     $typeQ = (clone $base);
     $typeQ->getQuery()->orders  = null;
     $typeQ->getQuery()->columns = null;
@@ -701,6 +707,7 @@ class FlowerDashboardController extends Controller
         'userId'       => $userId,
         'status'       => $statusFilter,
         'method'       => $methodFilter,
+        'type'         => $typeFilter, // NEW
         'search'       => $search,
 
         'start'        => $start?->toDateString(),
@@ -764,6 +771,5 @@ class FlowerDashboardController extends Controller
 
         return [$start, $end, $effectivePreset];
     }
-
 
 }
