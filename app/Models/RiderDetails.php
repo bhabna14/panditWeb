@@ -21,6 +21,11 @@ class RiderDetails extends Model
         'description',
     ];
 
+    protected $casts = [
+    'salary' => 'decimal:2',
+];
+
+
     public function pickupDetails()
     {
         return $this->hasMany(FlowerPickupDetails::class, 'rider_id','rider_id');

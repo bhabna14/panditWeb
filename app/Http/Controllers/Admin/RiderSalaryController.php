@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class RiderSalaryController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
-        // Fixed monthly salary (global)
-        $fixedMonthlySalary = 5000;
+        // Fallback salary if rider salary is null/empty (change to 0 if you prefer)
+        $defaultMonthlySalary = 5000;
 
-        // Attendance weights (change if needed)
+        // Attendance weights
         $weights = [
             'present'  => 1.0,
             'half_day' => 0.5,
@@ -41,13 +41,10 @@ class RiderSalaryController extends Controller
         $toDate   = $end->toDateString();
         $daysInMonth = $start->daysInMonth;
 
-        // Daily rate (do not round too early)
-        $perDay = $fixedMonthlySalary / $daysInMonth;
-
         $riders = RiderDetails::query()->orderBy('rider_name')->get();
 
         // ===========================
-        // Summary for ALL riders
+        // Summary for ALL riders (attendance counts)
         // ===========================
         $rawSummary = RiderAttendance::query()
             ->select([
@@ -64,7 +61,10 @@ class RiderSalaryController extends Controller
             ->get()
             ->keyBy('rider_id');
 
-        $allRiderSalary = $riders->map(function ($r) use ($rawSummary, $daysInMonth, $perDay, $fixedMonthlySalary, $weights) {
+        // ===========================
+        // Salary summary per rider (uses rider_details.salary)
+        // ===========================
+        $allRiderSalary = $riders->map(function ($r) use ($rawSummary, $daysInMonth, $weights, $defaultMonthlySalary) {
             $row = $rawSummary->get($r->rider_id);
 
             $present = (int) ($row->present_days ?? 0);
@@ -73,8 +73,16 @@ class RiderSalaryController extends Controller
             $absent  = (int) ($row->absent_days ?? 0);
             $marked  = (int) ($row->marked_days ?? 0);
 
-            // Treat unmarked as absent for salary
+            // Unmarked days treated as unpaid
             $notMarked = max(0, $daysInMonth - $marked);
+
+            // Rider monthly salary from DB (fallback if null/empty)
+            $gross = (float) ($r->salary ?? 0);
+            if ($gross <= 0) {
+                $gross = (float) $defaultMonthlySalary;
+            }
+
+            $perDay = $gross / $daysInMonth;
 
             // payable units
             $payableUnits =
@@ -84,20 +92,23 @@ class RiderSalaryController extends Controller
                 ($absent * $weights['absent']) +
                 ($notMarked * 0.0);
 
-            $gross = $fixedMonthlySalary;
-            $payable = round($perDay * $payableUnits, 2);
+            $payable   = round($perDay * $payableUnits, 2);
             $deduction = round(max(0, $gross - $payable), 2);
 
             return [
                 'rider_id' => $r->rider_id,
                 'rider_name' => $r->rider_name,
                 'phone_number' => $r->phone_number,
+                'gross' => round($gross, 2),
+                'per_day' => round($perDay, 2),
+
                 'present' => $present,
                 'half_day' => $half,
                 'leave' => $leave,
                 'absent' => $absent,
                 'not_marked' => $notMarked,
-                'payable_units' => $payableUnits,
+
+                'payable_units' => round($payableUnits, 2),
                 'salary' => $payable,
                 'deduction' => $deduction,
             ];
@@ -113,64 +124,73 @@ class RiderSalaryController extends Controller
         if ($selectedRiderId) {
             $selectedRider = $riders->firstWhere('rider_id', $selectedRiderId);
 
-            $attendanceMap = RiderAttendance::query()
-                ->where('rider_id', $selectedRiderId)
-                ->whereDate('attendance_date', '>=', $fromDate)
-                ->whereDate('attendance_date', '<=', $toDate)
-                ->get()
-                ->keyBy(function ($a) {
-                    return Carbon::parse($a->attendance_date)->toDateString();
-                });
+            if ($selectedRider) {
+                $gross = (float) ($selectedRider->salary ?? 0);
+                if ($gross <= 0) {
+                    $gross = (float) $defaultMonthlySalary;
+                }
 
-            $present = 0; $half = 0; $leave = 0; $absent = 0; $notMarked = 0;
-            $payableUnits = 0.0;
-            $totalPay = 0.0;
+                $perDay = $gross / $daysInMonth;
 
-            for ($d = 1; $d <= $daysInMonth; $d++) {
-                $date = $start->copy()->day($d)->toDateString();
-                $rec = $attendanceMap->get($date);
+                $attendanceMap = RiderAttendance::query()
+                    ->where('rider_id', $selectedRiderId)
+                    ->whereDate('attendance_date', '>=', $fromDate)
+                    ->whereDate('attendance_date', '<=', $toDate)
+                    ->get()
+                    ->keyBy(function ($a) {
+                        return Carbon::parse($a->attendance_date)->toDateString();
+                    });
 
-                $status = $rec->status ?? 'not_marked';
+                $present = 0; $half = 0; $leave = 0; $absent = 0; $notMarked = 0;
+                $payableUnits = 0.0;
+                $totalPay = 0.0;
 
-                // Count and weight
-                if ($status === 'present') $present++;
-                elseif ($status === 'half_day') $half++;
-                elseif ($status === 'leave') $leave++;
-                elseif ($status === 'absent') $absent++;
-                else $notMarked++;
+                for ($d = 1; $d <= $daysInMonth; $d++) {
+                    $date = $start->copy()->day($d)->toDateString();
+                    $rec = $attendanceMap->get($date);
 
-                $weight = $weights[$status] ?? 0.0; // not_marked => 0
-                $dayPay = round($perDay * $weight, 2);
+                    $status = $rec->status ?? 'not_marked';
 
-                $payableUnits += $weight;
-                $totalPay += $dayPay;
+                    if ($status === 'present') $present++;
+                    elseif ($status === 'half_day') $half++;
+                    elseif ($status === 'leave') $leave++;
+                    elseif ($status === 'absent') $absent++;
+                    else $notMarked++;
 
-                $dayRows[] = [
-                    'date' => $date,
-                    'status' => $status,
-                    'check_in' => $rec->check_in_time ?? null,
-                    'check_out' => $rec->check_out_time ?? null,
-                    'working_minutes' => $rec->working_minutes ?? null,
-                    'day_pay' => $dayPay,
+                    $weight = $weights[$status] ?? 0.0; // not_marked => 0
+                    $dayPay = round($perDay * $weight, 2);
+
+                    $payableUnits += $weight;
+                    $totalPay += $dayPay;
+
+                    $dayRows[] = [
+                        'date' => $date,
+                        'status' => $status,
+                        'check_in' => $rec->check_in_time ?? null,
+                        'check_out' => $rec->check_out_time ?? null,
+                        'working_minutes' => $rec->working_minutes ?? null,
+                        'day_pay' => $dayPay,
+                    ];
+                }
+
+                $totalPay = round($totalPay, 2);
+
+                $riderTotals = [
+                    'gross' => round($gross, 2),
+                    'per_day' => round($perDay, 2),
+                    'present' => $present,
+                    'half_day' => $half,
+                    'leave' => $leave,
+                    'absent' => $absent,
+                    'not_marked' => $notMarked,
+                    'payable_units' => round($payableUnits, 2),
+                    'payable' => $totalPay,
+                    'deduction' => round(max(0, $gross - $totalPay), 2),
                 ];
             }
-
-            $totalPay = round($totalPay, 2);
-            $riderTotals = [
-                'gross' => $fixedMonthlySalary,
-                'per_day' => round($perDay, 2),
-                'present' => $present,
-                'half_day' => $half,
-                'leave' => $leave,
-                'absent' => $absent,
-                'not_marked' => $notMarked,
-                'payable_units' => round($payableUnits, 2),
-                'payable' => $totalPay,
-                'deduction' => round(max(0, $fixedMonthlySalary - $totalPay), 2),
-            ];
         }
 
-        // If no rider selected, default to first (optional)
+        // Default selection (optional): first rider
         if (!$selectedRiderId && $riders->count() > 0) {
             $selectedRiderId = (string) $riders->first()->rider_id;
         }
@@ -180,8 +200,8 @@ class RiderSalaryController extends Controller
             'start' => $start,
             'end' => $end,
             'daysInMonth' => $daysInMonth,
-            'fixedMonthlySalary' => $fixedMonthlySalary,
-            'perDay' => round($perDay, 2),
+            'defaultMonthlySalary' => $defaultMonthlySalary,
+
             'riders' => $riders,
             'selectedRiderId' => $selectedRiderId,
             'selectedRider' => $selectedRider,
