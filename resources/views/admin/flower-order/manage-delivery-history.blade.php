@@ -10,7 +10,6 @@
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
 
     <style>
-        /* ====== Hero ====== */
         .page-hero {
             border-radius: 16px;
             background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 55%, #22c55e 100%);
@@ -31,7 +30,6 @@
             color: #fff;
         }
 
-        /* ====== Page tweaks ====== */
         .filter-card {
             border: 1px solid #e7ebf0;
             border-radius: 14px
@@ -60,11 +58,6 @@
             border-color: #0d6efd
         }
 
-        .btn-reset {
-            border-color: #e2e8f0
-        }
-
-        /* Sticky table header */
         table.dataTable thead th {
             position: sticky;
             top: 0;
@@ -76,7 +69,6 @@
             background-color: #f7faff;
         }
 
-        /* Badges & utilities */
         .badge-status {
             font-weight: 600;
             font-size: .78rem
@@ -107,7 +99,6 @@
             white-space: nowrap
         }
 
-        /* Metric cards */
         .metric-card {
             background: #fff;
             border: 1px solid #e7ebf0;
@@ -129,6 +120,15 @@
             font-size: .8rem;
             color: #64748b
         }
+
+        .nav-tabs .nav-link {
+            font-weight: 700;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .tab-pane {
+            padding-top: 14px;
+        }
     </style>
 @endsection
 
@@ -137,40 +137,57 @@
     <div class="page-hero mb-3 mt-2 d-flex align-items-center justify-content-between">
         <div>
             <h5 class="mb-1">Manage Delivery History</h5>
-            <div class="opacity-90">Default view shows the last 7 days. Use filters to refine.</div>
+            <div class="opacity-90">Two tabs: Order Delivery History and Customize Delivery History.</div>
         </div>
         <span class="pill">
-            <i class="bi bi-lightning-charge-fill"></i>
             Updated • {{ now()->format('d M Y, h:i A') }}
         </span>
     </div>
 
-    <!-- Flash messages -->
     @if (session()->has('success'))
         <div class="alert alert-success" id="Message">{{ session('success') }}</div>
     @endif
-    @if ($errors->has('danger'))
-        <div class="alert alert-danger" id="Message">{{ $errors->first('danger') }}</div>
+    @if ($errors->has('error'))
+        <div class="alert alert-danger" id="Message">{{ $errors->first('error') }}</div>
     @endif
 
-    <!-- Summary metrics -->
+    <!-- Summary metrics (both) -->
     <div class="row g-3 mb-3">
-        <div class="col-6 col-md-4">
+        <div class="col-6 col-md-2">
             <div class="metric-card p-3 h-100">
-                <div class="label">Total records (in range)</div>
-                <div class="value">{{ number_format($metrics['total'] ?? 0) }}</div>
+                <div class="label">Orders (range)</div>
+                <div class="value">{{ number_format($metricsOrder['total'] ?? 0) }}</div>
             </div>
         </div>
-        <div class="col-6 col-md-4">
+        <div class="col-6 col-md-2">
             <div class="metric-card p-3 h-100">
-                <div class="label">Delivered</div>
-                <div class="value text-success">{{ number_format($metrics['delivered'] ?? 0) }}</div>
+                <div class="label">Orders Delivered</div>
+                <div class="value text-success">{{ number_format($metricsOrder['delivered'] ?? 0) }}</div>
             </div>
         </div>
-        <div class="col-6 col-md-4">
+        <div class="col-6 col-md-2">
             <div class="metric-card p-3 h-100">
-                <div class="label">Unique riders</div>
-                <div class="value">{{ number_format($metrics['unique_riders'] ?? 0) }}</div>
+                <div class="label">Order Riders</div>
+                <div class="value">{{ number_format($metricsOrder['unique_riders'] ?? 0) }}</div>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-2">
+            <div class="metric-card p-3 h-100">
+                <div class="label">Customize (range)</div>
+                <div class="value">{{ number_format($metricsCustomize['total'] ?? 0) }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="metric-card p-3 h-100">
+                <div class="label">Customize Delivered</div>
+                <div class="value text-success">{{ number_format($metricsCustomize['delivered'] ?? 0) }}</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-2">
+            <div class="metric-card p-3 h-100">
+                <div class="label">Customize Riders</div>
+                <div class="value">{{ number_format($metricsCustomize['unique_riders'] ?? 0) }}</div>
             </div>
         </div>
     </div>
@@ -203,9 +220,8 @@
                         </select>
                     </div>
                     <div class="col-12 col-md-3 d-grid">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Apply</button>
-                        <button type="button" class="btn btn-outline-secondary btn-reset mt-2"
-                            id="resetFilters">Reset</button>
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                        <button type="button" class="btn btn-outline-secondary mt-2" id="resetFilters">Reset</button>
                     </div>
                 </div>
 
@@ -221,107 +237,247 @@
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="card custom-card overflow-hidden">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="delivery-table" class="table table-bordered table-hover w-100 align-middle">
-                    <thead>
-                        <tr>
-                            <th data-priority="1">Order ID</th>
-                            <th data-priority="2">User Number</th>
-                            <th>Product</th>
-                            <th style="min-width:260px">Address</th>
-                            <th>Rider</th>
-                            <th data-priority="3">Status</th>
-                            <th>Location</th>
-                            <th data-priority="4">Delivery Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($deliveryHistory as $history)
-                            @php
-                                $order = optional($history->order);
-                                $user = optional($order->user);
-                                $product = optional($order->flowerProduct);
-                                $addr = optional($order->address);
-                                $locName = optional(optional($addr)->localityDetails)->locality_name;
-                                $rider = optional($history->rider);
-                                $lat = $history->latitude;
-                                $lng = $history->longitude;
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="deliveryTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#ordersPane" type="button"
+                role="tab" aria-controls="ordersPane" aria-selected="true">
+                Order Delivery History (Today: {{ number_format($totalDeliveriesToday ?? 0) }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="customize-tab" data-bs-toggle="tab" data-bs-target="#customizePane"
+                type="button" role="tab" aria-controls="customizePane" aria-selected="false">
+                Customize Delivery History (Today: {{ number_format($totalCustomizeDeliveriesToday ?? 0) }})
+            </button>
+        </li>
+    </ul>
 
-                                $status = trim($history->delivery_status ?? '');
-                                $statusLc = strtolower($status);
-                                $badge = 'secondary';
-                                if (in_array($statusLc, ['delivered', 'completed'])) {
-                                    $badge = 'success';
-                                } elseif (
-                                    in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
-                                ) {
-                                    $badge = 'info';
-                                } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
-                                    $badge = 'warning';
-                                } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
-                                    $badge = 'danger';
-                                }
-                            @endphp
-                            <tr>
-                                <td class="nowrap fw-600">{{ $order->order_id ?? 'N/A' }}</td>
-                                <td>{{ $user->mobile_number ?? 'N/A' }}</td>
-                                <td>
-                                    <div class="fw-600">{{ $product->name ?? 'N/A' }}</div>
-                                    @if (!empty($product->category))
-                                        <div class="text-xxs text-muted">{{ $product->category }}</div>
-                                    @endif
-                                </td>
-                                <td class="addr">
-                                    @if ($addr)
-                                        <div class="fw-600">
-                                            {{ $addr->apartment_flat_plot ?? '' }}{{ $addr->apartment_flat_plot && $locName ? ',' : '' }}
-                                            {{ $locName ?? '' }}
-                                        </div>
-                                        @if (!empty($addr->landmark))
-                                            <div><small>Landmark:</small> {{ $addr->landmark }}</div>
-                                        @endif
-                                        <div class="text-xs text-muted">
-                                            {{ $addr->city ?? '' }}{{ !empty($addr->state) ? ', ' . $addr->state : '' }}
-                                            {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}
-                                        </div>
-                                    @else
-                                        <span class="text-muted text-xs">N/A</span>
-                                    @endif
-                                </td>
-                                <td>{{ $rider->rider_name ?? 'N/A' }}</td>
-                                <td><span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
-                                </td>
-                                <td>
-                                    @if (!empty($lat) && !empty($lng))
-                                        <div class="text-xs"><span class="fw-600">{{ $lat }},
-                                                {{ $lng }}</span></div>
-                                        <div class="text-xxs mt-1">
-                                            <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
-                                                target="_blank" rel="noopener">Open in Maps</a>
-                                            &nbsp;·&nbsp;
-                                            <a href="#" class="copy-coords"
-                                                data-coords="{{ $lat }}, {{ $lng }}">Copy</a>
-                                        </div>
-                                    @else
-                                        <span class="text-muted text-xs">N/A</span>
-                                    @endif
-                                </td>
-                                <td data-order="{{ optional($history->created_at)->timestamp ?? 0 }}" class="nowrap">
-                                    {{ optional($history->created_at)->format('d-m-Y H:i:s') ?? 'N/A' }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="8" class="text-center py-4">
-                                    <div class="text-muted">No delivery history found for the selected filters.</div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+    <div class="tab-content">
+        <!-- TAB 1: Orders -->
+        <div class="tab-pane fade show active" id="ordersPane" role="tabpanel" aria-labelledby="orders-tab">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="orders-delivery-table" class="table table-bordered table-hover w-100 align-middle">
+                            <thead>
+                                <tr>
+                                    <th data-priority="1">Order ID</th>
+                                    <th data-priority="2">User Number</th>
+                                    <th>Product</th>
+                                    <th style="min-width:260px">Address</th>
+                                    <th>Rider</th>
+                                    <th data-priority="3">Status</th>
+                                    <th>Location</th>
+                                    <th data-priority="4">Delivery Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($deliveryHistory as $history)
+                                    @php
+                                        $order = optional($history->order);
+                                        $user = optional($order->user);
+                                        $product = optional($order->flowerProduct);
+                                        $addr = optional($order->address);
+                                        $locName = optional(optional($addr)->localityDetails)->locality_name;
+                                        $rider = optional($history->rider);
+                                        $lat = $history->latitude;
+                                        $lng = $history->longitude;
+
+                                        $status = trim($history->delivery_status ?? '');
+                                        $statusLc = strtolower($status);
+                                        $badge = 'secondary';
+                                        if (in_array($statusLc, ['delivered', 'completed'])) {
+                                            $badge = 'success';
+                                        } elseif (
+                                            in_array($statusLc, [
+                                                'in_transit',
+                                                'out_for_delivery',
+                                                'dispatch',
+                                                'shipped',
+                                            ])
+                                        ) {
+                                            $badge = 'info';
+                                        } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
+                                            $badge = 'warning';
+                                        } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
+                                            $badge = 'danger';
+                                        }
+                                    @endphp
+                                    <tr>
+                                        <td class="nowrap fw-600">{{ $order->order_id ?? 'N/A' }}</td>
+                                        <td>{{ $user->mobile_number ?? 'N/A' }}</td>
+                                        <td>
+                                            <div class="fw-600">{{ $product->name ?? 'N/A' }}</div>
+                                            @if (!empty($product->category))
+                                                <div class="text-xxs text-muted">{{ $product->category }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="addr">
+                                            @if ($addr)
+                                                <div class="fw-600">
+                                                    {{ $addr->apartment_flat_plot ?? '' }}{{ $addr->apartment_flat_plot && $locName ? ',' : '' }}
+                                                    {{ $locName ?? '' }}
+                                                </div>
+                                                @if (!empty($addr->landmark))
+                                                    <div><small>Landmark:</small> {{ $addr->landmark }}</div>
+                                                @endif
+                                                <div class="text-xs text-muted">
+                                                    {{ $addr->city ?? '' }}{{ !empty($addr->state) ? ', ' . $addr->state : '' }}
+                                                    {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}
+                                                </div>
+                                            @else
+                                                <span class="text-muted text-xs">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $rider->rider_name ?? 'N/A' }}</td>
+                                        <td><span
+                                                class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
+                                        </td>
+                                        <td>
+                                            @if (!empty($lat) && !empty($lng))
+                                                <div class="text-xs"><span class="fw-600">{{ $lat }},
+                                                        {{ $lng }}</span></div>
+                                                <div class="text-xxs mt-1">
+                                                    <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
+                                                        target="_blank" rel="noopener">Open in Maps</a>
+                                                    &nbsp;·&nbsp;
+                                                    <a href="#" class="copy-coords"
+                                                        data-coords="{{ $lat }}, {{ $lng }}">Copy</a>
+                                                </div>
+                                            @else
+                                                <span class="text-muted text-xs">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td data-order="{{ optional($history->created_at)->timestamp ?? 0 }}"
+                                            class="nowrap">
+                                            {{ optional($history->created_at)->format('d-m-Y H:i:s') ?? 'N/A' }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4 text-muted">No order delivery history
+                                            found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Customize -->
+        <div class="tab-pane fade" id="customizePane" role="tabpanel" aria-labelledby="customize-tab">
+            <div class="card custom-card overflow-hidden">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table id="customize-delivery-table" class="table table-bordered table-hover w-100 align-middle">
+                            <thead>
+                                <tr>
+                                    <th data-priority="1">Request ID</th>
+                                    <th data-priority="2">User Number</th>
+                                    <th>Product</th>
+                                    <th style="min-width:260px">Address</th>
+                                    <th>Rider</th>
+                                    <th data-priority="3">Status</th>
+                                    <th>Location</th>
+                                    <th data-priority="4">Delivery Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse ($customizeDeliveryHistory as $history)
+                                    @php
+                                        $req = optional($history->flowerRequest);
+                                        $user = optional($req->user);
+                                        $product = optional($req->flowerProduct);
+                                        $addr = optional($req->address);
+                                        $locName = optional(optional($addr)->localityDetails)->locality_name;
+                                        $rider = optional($history->rider);
+                                        $lat = $history->latitude;
+                                        $lng = $history->longitude;
+
+                                        $status = trim($history->delivery_status ?? '');
+                                        $statusLc = strtolower($status);
+                                        $badge = 'secondary';
+                                        if (in_array($statusLc, ['delivered', 'completed'])) {
+                                            $badge = 'success';
+                                        } elseif (
+                                            in_array($statusLc, [
+                                                'in_transit',
+                                                'out_for_delivery',
+                                                'dispatch',
+                                                'shipped',
+                                            ])
+                                        ) {
+                                            $badge = 'info';
+                                        } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
+                                            $badge = 'warning';
+                                        } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
+                                            $badge = 'danger';
+                                        }
+
+                                        $dt = $history->delivery_time ?? $history->created_at;
+                                    @endphp
+                                    <tr>
+                                        <td class="nowrap fw-600">{{ $history->request_id ?? 'N/A' }}</td>
+                                        <td>{{ $user->mobile_number ?? 'N/A' }}</td>
+                                        <td>
+                                            <div class="fw-600">{{ $product->name ?? 'N/A' }}</div>
+                                            @if (!empty($product->category))
+                                                <div class="text-xxs text-muted">{{ $product->category }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="addr">
+                                            @if ($addr)
+                                                <div class="fw-600">
+                                                    {{ $addr->apartment_flat_plot ?? '' }}{{ $addr->apartment_flat_plot && $locName ? ',' : '' }}
+                                                    {{ $locName ?? '' }}
+                                                </div>
+                                                @if (!empty($addr->landmark))
+                                                    <div><small>Landmark:</small> {{ $addr->landmark }}</div>
+                                                @endif
+                                                <div class="text-xs text-muted">
+                                                    {{ $addr->city ?? '' }}{{ !empty($addr->state) ? ', ' . $addr->state : '' }}
+                                                    {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}
+                                                </div>
+                                            @else
+                                                <span class="text-muted text-xs">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $rider->rider_name ?? 'N/A' }}</td>
+                                        <td><span
+                                                class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
+                                        </td>
+                                        <td>
+                                            @if (!empty($lat) && !empty($lng))
+                                                <div class="text-xs"><span class="fw-600">{{ $lat }},
+                                                        {{ $lng }}</span></div>
+                                                <div class="text-xxs mt-1">
+                                                    <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
+                                                        target="_blank" rel="noopener">Open in Maps</a>
+                                                    &nbsp;·&nbsp;
+                                                    <a href="#" class="copy-coords"
+                                                        data-coords="{{ $lat }}, {{ $lng }}">Copy</a>
+                                                </div>
+                                            @else
+                                                <span class="text-muted text-xs">N/A</span>
+                                            @endif
+                                        </td>
+                                        <td data-order="{{ optional($dt)->timestamp ?? 0 }}" class="nowrap">
+                                            {{ optional($dt)->format('d-m-Y H:i:s') ?? 'N/A' }}
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4 text-muted">No customize delivery
+                                            history found.</td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -347,14 +503,12 @@
 
     <script>
         (function() {
-            // Select2 for rider filter
             $('#rider_id').select2({
                 placeholder: 'All Riders',
                 allowClear: true,
                 width: '100%'
             });
 
-            // Quick date ranges
             function toISODate(d) {
                 const tzOffset = d.getTimezoneOffset() * 60000;
                 return new Date(d.getTime() - tzOffset).toISOString().slice(0, 10);
@@ -366,7 +520,6 @@
                     to = new Date();
                 switch (type) {
                     case 'today':
-                        // from = today 00:00, to = today 23:59
                         break;
                     case 'yesterday':
                         from.setDate(now.getDate() - 1);
@@ -376,8 +529,8 @@
                         from.setDate(now.getDate() - 6);
                         break;
                     case 'this_week': {
-                        const day = now.getDay(); // 0 Sun .. 6 Sat
-                        const diff = (day === 0 ? 6 : day - 1); // Monday-start
+                        const day = now.getDay();
+                        const diff = (day === 0 ? 6 : day - 1);
                         from.setDate(now.getDate() - diff);
                         break;
                     }
@@ -393,6 +546,7 @@
                 $('#from_date').val(toISODate(from));
                 $('#to_date').val(toISODate(to));
             }
+
             $('.quick-chip').on('click', function() {
                 $('.quick-chip').removeClass('active');
                 $(this).addClass('active');
@@ -400,25 +554,6 @@
                 $('#filterForm').trigger('submit');
             });
 
-            // Mark "Last 7 Days" as active by default when inputs match controller default
-            @if (($from_date ?? null) && ($to_date ?? null))
-                (function markDefaultChip() {
-                    const f = $('#from_date').val();
-                    const t = $('#to_date').val();
-                    const now = new Date();
-                    const todayISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(
-                        0, 10);
-                    const sevenDaysAgo = new Date(now);
-                    sevenDaysAgo.setDate(now.getDate() - 6);
-                    const sevenISO = new Date(sevenDaysAgo.getTime() - sevenDaysAgo.getTimezoneOffset() * 60000)
-                        .toISOString().slice(0, 10);
-                    if (f === sevenISO && t === todayISO) {
-                        $('.quick-chip[data-range="last_7_days"]').addClass('active');
-                    }
-                })();
-            @endif
-
-            // Reset filters
             $('#resetFilters').on('click', function() {
                 const now = new Date();
                 const seven = new Date();
@@ -431,54 +566,68 @@
                 $('#filterForm').trigger('submit');
             });
 
-            // DataTable init
-            const dt = $('#delivery-table').DataTable({
-                responsive: true,
-                stateSave: true,
-                pageLength: 25,
-                lengthMenu: [
-                    [10, 25, 50, 100, -1],
-                    [10, 25, 50, 100, 'All']
-                ],
-                order: [
-                    [7, 'desc']
-                ], // Delivery Time column (0-indexed)
-                dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
-                buttons: [{
+            function dtButtons(title) {
+                return [{
                         extend: 'copyHtml5',
-                        title: 'Delivery History'
+                        title
                     },
                     {
                         extend: 'csvHtml5',
-                        title: 'delivery_history'
+                        title: title.toLowerCase().replace(/\s+/g, '_')
                     },
                     {
                         extend: 'excelHtml5',
-                        title: 'delivery_history'
+                        title: title.toLowerCase().replace(/\s+/g, '_')
                     },
                     {
                         extend: 'pdfHtml5',
-                        title: 'Delivery History',
+                        title,
                         orientation: 'landscape',
                         pageSize: 'A4'
                     },
                     {
                         extend: 'print',
-                        title: 'Delivery History'
+                        title
                     },
                     {
                         extend: 'colvis',
                         text: 'Columns'
                     }
+                ];
+            }
+
+            const ordersDT = $('#orders-delivery-table').DataTable({
+                responsive: true,
+                stateSave: true,
+                pageLength: 25,
+                order: [
+                    [7, 'desc']
                 ],
-                columnDefs: [{
-                        targets: [3, 4, 6],
-                        responsivePriority: 10001
-                    } // let long columns drop first on small screens
-                ],
+                dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
+                buttons: dtButtons('Order Delivery History'),
                 language: {
                     info: "Showing _START_ to _END_ of _TOTAL_ deliveries"
                 }
+            });
+
+            const customizeDT = $('#customize-delivery-table').DataTable({
+                responsive: true,
+                stateSave: true,
+                pageLength: 25,
+                order: [
+                    [7, 'desc']
+                ],
+                dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
+                buttons: dtButtons('Customize Delivery History'),
+                language: {
+                    info: "Showing _START_ to _END_ of _TOTAL_ deliveries"
+                }
+            });
+
+            // Fix DataTables width when switching tabs
+            document.getElementById('deliveryTabs').addEventListener('shown.bs.tab', function() {
+                ordersDT.columns.adjust().responsive.recalc();
+                customizeDT.columns.adjust().responsive.recalc();
             });
 
             // Copy coordinates
