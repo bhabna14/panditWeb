@@ -10,45 +10,465 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <style>
-        /* ... keep all your existing CSS ... */
+        :root {
+            --brand-blue: #e0f2fe;
+            --brand-blue-edge: #bfdbfe;
+            --header-text: #0b2a5b;
 
-        /* NEW: clickable type cards */
-        .type-card-link{
-            display:flex;
-            text-decoration:none !important;
-            color:inherit !important;
-            cursor:pointer;
-            transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+            --text: #0f172a;
+            --muted: #6b7280;
+            --bg: #f7f8fc;
+            --card: #ffffff;
+            --ring: #e5e7eb;
+            --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.06);
+            --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+            --radius-lg: 16px;
+
+            --accent: #2563eb;
+
+            --success-soft: #ecfdf5;
+            --success-fg: #166534;
+            --warning-soft: #fff7ed;
+            --warning-fg: #9a3412;
+            --info-soft: #eef2ff;
+            --info-fg: #3730a3;
+            --danger-soft: #fef2f2;
+            --danger-fg: #b91c1c;
+
+            --table-head-bg: #0f172a;
+            --table-head-bg-soft: #1f2937;
+            --table-head-text: #e5e7eb;
+            --table-border: #e5e7eb;
+            --table-zebra: #f9fafb;
+            --table-hover: #fefce8;
         }
-        .type-card-link:hover{
-            transform: translateY(-1px);
-            box-shadow: 0 14px 36px rgba(15, 23, 42, 0.10);
-            border-color: rgba(37, 99, 235, .35);
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
         }
-        .type-card-active{
-            border-color: rgba(37, 99, 235, .55) !important;
-            box-shadow: 0 16px 40px rgba(37, 99, 235, 0.14) !important;
+
+        .container-page { max-width: 1320px; }
+
+        .page-header-title { font-weight: 600; color: #0f172a; }
+
+        .section-head {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: .75rem;
+            flex-wrap: wrap;
+            margin: 1rem 0 .65rem;
         }
-        .type-filter-pill{
-            display:inline-flex;
-            align-items:center;
-            gap:.4rem;
-            border:1px solid rgba(15,23,42,.12);
-            background:#fff;
-            border-radius:999px;
-            padding:.25rem .6rem;
-            font-size:.8rem;
-            font-weight:800;
-            color:#0f172a;
+
+        .section-title {
+            font-weight: 700;
+            font-size: .98rem;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin: 0;
         }
-        .type-filter-pill a{
-            color:#0f172a;
-            text-decoration:none;
-            border-left:1px solid rgba(15,23,42,.12);
-            padding-left:.55rem;
-            margin-left:.25rem;
+
+        .section-sub {
+            font-size: .85rem;
+            color: var(--muted);
+            margin: 0;
         }
-        .type-filter-pill a:hover{ text-decoration: underline; }
+
+        /* === KPI CARDS === */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .85rem;
+        }
+
+        .kpi-card {
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: 18px;
+            box-shadow: var(--shadow-md);
+            padding: .95rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .8rem;
+            overflow: hidden;
+        }
+
+        .kpi-left {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+            min-width: 0;
+        }
+
+        .kpi-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            font-size: 1.15rem;
+            border: 1px solid rgba(15,23,42,.08);
+            flex: 0 0 auto;
+        }
+
+        .kpi-meta { min-width: 0; }
+        .kpi-label {
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .kpi-value {
+            font-weight: 800;
+            font-size: 1.05rem;
+            margin-top: .15rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .kpi-note {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-top: .15rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .kpi-slate .kpi-icon { background: #eef2f7; color: #0f172a; }
+        .kpi-green .kpi-icon { background: var(--success-soft); color: var(--success-fg); }
+        .kpi-orange .kpi-icon { background: var(--warning-soft); color: var(--warning-fg); }
+        .kpi-blue .kpi-icon { background: #e0f2fe; color: #0b2a5b; }
+
+        /* === METHOD GRID === */
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: .85rem;
+        }
+
+        .mini-card {
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: 18px;
+            box-shadow: var(--shadow-sm);
+            padding: .9rem 1rem;
+        }
+
+        .mini-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .6rem;
+            margin-bottom: .55rem;
+        }
+
+        .mini-title {
+            font-weight: 800;
+            font-size: .92rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .mini-badge {
+            font-size: .74rem;
+            font-weight: 800;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(15,23,42,.10);
+            background: #f8fafc;
+            color: #0f172a;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .mini-amount {
+            font-weight: 900;
+            font-size: 1.02rem;
+            margin: 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .mini-sub {
+            margin-top: .25rem;
+            font-size: .82rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            gap: .75rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* === TYPE GRID (2 cards) === */
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: .85rem;
+        }
+
+        .type-card {
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border: 1px solid var(--ring);
+            border-radius: 18px;
+            box-shadow: var(--shadow-md);
+            padding: 1rem 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .type-left { display: flex; align-items: center; gap: .75rem; }
+        .type-icon {
+            width: 46px; height: 46px;
+            border-radius: 16px;
+            display: grid; place-items: center;
+            font-size: 1.2rem;
+            border: 1px solid rgba(15,23,42,.08);
+        }
+
+        .type-meta h4 {
+            margin: 0;
+            font-size: .98rem;
+            font-weight: 900;
+        }
+
+        .type-meta p {
+            margin: .2rem 0 0;
+            font-size: .82rem;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .type-right {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .type-right .big {
+            font-weight: 950;
+            font-size: 1.15rem;
+        }
+
+        .type-right .small {
+            margin-top: .15rem;
+            font-size: .82rem;
+            color: var(--muted);
+        }
+
+        .type-sub .type-icon { background: var(--info-soft); color: var(--info-fg); }
+        .type-cus .type-icon { background: #fff7ed; color: #9a3412; }
+
+        /* Toolbar (unchanged) */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: var(--radius-lg);
+            padding: .85rem 1rem;
+            display: grid;
+            gap: .75rem;
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr);
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            margin: 1.1rem 0 1.1rem;
+        }
+
+        .toolbar-left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .75rem;
+            align-items: center;
+        }
+
+        .toolbar-block { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+        .toolbar-label { font-size: .78rem; font-weight: 700; color: var(--muted); }
+
+        .toolbar-select, .toolbar-input {
+            border-radius: 999px;
+            border: 1px solid var(--ring);
+            padding: .45rem .85rem;
+            font-size: .85rem;
+            font-weight: 600;
+        }
+
+        .toolbar-select:focus, .toolbar-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22);
+        }
+
+        .toolbar-right {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .35rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .btn-chip {
+            border-radius: 999px;
+            border: 1px solid var(--ring);
+            background: #fff;
+            color: #0f172a;
+            font-weight: 700;
+            font-size: .8rem;
+            padding: .4rem .9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all .15s ease;
+        }
+
+        .btn-chip:hover { background: #f3f4f6; border-color: #cbd5e1; color: #0f172a; text-decoration: none; }
+        .btn-chip.preset-active {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+            border-color: #020617;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+        }
+
+        .btn-chip.apply-btn {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+            border: none;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+        }
+
+        .btn-chip.reset-btn { border-style: dashed; }
+
+        /* Workbook wrapper + table (unchanged) */
+        .workbook {
+            background: var(--card);
+            border: 1px solid var(--ring);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 1.5rem;
+        }
+
+        .workbook-head {
+            padding: .9rem 1.2rem;
+            background: radial-gradient(circle at top left, #eff6ff, #e5e7eb);
+            border-bottom: 1px solid var(--brand-blue-edge);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: .35rem;
+        }
+
+        .workbook-title {
+            font-weight: 800;
+            color: #111827;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+        }
+
+        .workbook-title::before { content: '💳'; font-size: 1.1rem; }
+        .workbook-sub { font-size: .84rem; color: var(--muted); }
+        .workbook-body { padding: 1rem 1.1rem 1.1rem; }
+
+        .table-payments {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid var(--table-border);
+            border-radius: 14px;
+            overflow: hidden;
+            background: #fff;
+            font-family: 'Nunito Sans', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            font-size: .88rem;
+        }
+
+        .table-payments thead th {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: linear-gradient(135deg, var(--table-head-bg), var(--table-head-bg-soft));
+            color: var(--table-head-text);
+            text-transform: uppercase;
+            font-size: .72rem;
+            letter-spacing: .06em;
+            padding: .55rem .7rem;
+            font-weight: 800;
+            border-bottom: 0;
+            white-space: nowrap;
+        }
+
+        .table-payments tbody td {
+            border-top: 1px solid var(--table-border);
+            padding: .55rem .7rem;
+            vertical-align: middle;
+        }
+
+        .table-payments tbody tr:nth-child(odd) td { background: var(--table-zebra); }
+        .table-payments tbody tr:hover td { background: var(--table-hover); }
+
+        .cell-datetime { min-width: 140px; }
+        .cell-user { min-width: 220px; }
+        .cell-method { min-width: 110px; text-align: center; }
+        .cell-amount { min-width: 120px; text-align: right; }
+        .cell-status { min-width: 110px; text-align: center; }
+
+        .money { font-variant-numeric: tabular-nums; }
+
+        .badge-method {
+            font-weight: 800;
+            border-radius: 999px;
+            padding: .25rem .6rem;
+            font-size: .78rem;
+            border: 1px solid transparent;
+        }
+
+        .badge-upi { background: #ecfeff; color: #155e75; border-color: #bae6fd; }
+        .badge-cash { background: var(--danger-soft); color: #7f1d1d; border-color: #fecaca; }
+        .badge-card { background: #f0f9ff; color: #1e3a8a; border-color: #bae6fd; }
+        .badge-soft { background: var(--info-soft); color: var(--info-fg); border-color: #c7d2fe; }
+
+        .badge-status {
+            font-weight: 800;
+            border-radius: 999px;
+            padding: .25rem .7rem;
+            font-size: .78rem;
+            border: 1px solid transparent;
+        }
+
+        .badge-paid { background: var(--success-soft); color: var(--success-fg); border-color: #bbf7d0; }
+        .badge-pending { background: var(--warning-soft); color: var(--warning-fg); border-color: #fed7aa; }
+
+        .pagination-meta { font-size: .82rem; color: var(--muted); }
+
+        @media (max-width: 1200px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 992px) {
+            .toolbar { grid-template-columns: 1fr; }
+            .toolbar-right { justify-content: flex-start; }
+            .type-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 576px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+            .mini-grid { grid-template-columns: 1fr; }
+        }
     </style>
 @endsection
 
@@ -58,23 +478,6 @@
     @php
         $startLabel = $start ? \Carbon\Carbon::parse($start)->toFormattedDateString() : '—';
         $endLabel   = $end   ? \Carbon\Carbon::parse($end)->toFormattedDateString()   : '—';
-
-        $typeParam  = $type ?? '';
-
-        // Build links that preserve current filters but change type; also reset pagination
-        $qAll = request()->query();
-
-        $typeLink = function(string $typeVal) use ($qAll) {
-            $merged = array_merge($qAll, ['type' => $typeVal]);
-            unset($merged['page']);
-            return route('admin.payments.index', $merged);
-        };
-
-        $clearTypeLink = function() use ($qAll) {
-            $merged = $qAll;
-            unset($merged['type'], $merged['page']);
-            return route('admin.payments.index', $merged);
-        };
     @endphp
 
     {{-- 1) OVERALL SUMMARY CARDS --}}
@@ -176,26 +579,16 @@
         @endforelse
     </div>
 
-    {{-- 3) SUBSCRIPTION vs CUSTOMIZE CARDS (CLICK TO FILTER TABLE) --}}
+    {{-- 3) SUBSCRIPTION vs CUSTOMIZE CARDS --}}
     <div class="section-head">
         <div>
             <p class="section-title"><i class="bi bi-diagram-3"></i> Collected by Order Type</p>
-            <p class="section-sub">
-                Click a card to filter the detailed table below.
-                @if (!empty($typeParam))
-                    <span class="ms-2 type-filter-pill">
-                        <i class="bi bi-funnel"></i>
-                        Type: {{ ucfirst($typeParam) }}
-                        <a href="{{ $clearTypeLink() }}" title="Clear type filter"><i class="bi bi-x-lg"></i></a>
-                    </span>
-                @endif
-            </p>
+            <p class="section-sub">Subscription is identified when a matching subscription exists for the order_id.</p>
         </div>
     </div>
 
     <div class="type-grid">
-        <a href="{{ $typeLink('subscription') }}"
-           class="type-card type-sub type-card-link {{ ($typeParam === 'subscription') ? 'type-card-active' : '' }}">
+        <div class="type-card type-sub">
             <div class="type-left">
                 <div class="type-icon"><i class="bi bi-arrow-repeat"></i></div>
                 <div class="type-meta">
@@ -210,10 +603,9 @@
                 <div class="big">₹{{ number_format($typeStats->subscription_collected ?? 0, 2) }}</div>
                 <div class="small">Pending ₹{{ number_format($typeStats->subscription_pending ?? 0, 2) }}</div>
             </div>
-        </a>
+        </div>
 
-        <a href="{{ $typeLink('customize') }}"
-           class="type-card type-cus type-card-link {{ ($typeParam === 'customize') ? 'type-card-active' : '' }}">
+        <div class="type-card type-cus">
             <div class="type-left">
                 <div class="type-icon"><i class="bi bi-sliders"></i></div>
                 <div class="type-meta">
@@ -228,7 +620,7 @@
                 <div class="big">₹{{ number_format($typeStats->customize_collected ?? 0, 2) }}</div>
                 <div class="small">Pending ₹{{ number_format($typeStats->customize_pending ?? 0, 2) }}</div>
             </div>
-        </a>
+        </div>
     </div>
 
     {{-- Toolbar (filters + presets) --}}
@@ -237,18 +629,13 @@
             $p = $preset ?? '';
             $qAll = request()->query();
             $makeLink = function ($name) use ($qAll) {
-                $merged = array_merge($qAll, [
+                return route('admin.payments.index', array_merge($qAll, [
                     'preset'     => $name,
                     'start_date' => null,
                     'end_date'   => null,
-                ]);
-                unset($merged['page']);
-                return route('admin.payments.index', $merged);
+                ]));
             };
         @endphp
-
-        {{-- NEW: keep type filter when applying --}}
-        <input type="hidden" name="type" value="{{ $typeParam }}">
 
         <div class="toolbar-left">
             <div class="toolbar-block">
@@ -314,12 +701,7 @@
         <div class="workbook-head">
             <div>
                 <div class="workbook-title">Payments — Detailed List</div>
-                <div class="workbook-sub">
-                    Showing payments with type, duration, method, and status.
-                    @if (!empty($typeParam))
-                        <span class="ms-2"><strong>Type Filter:</strong> {{ ucfirst($typeParam) }}</span>
-                    @endif
-                </div>
+                <div class="workbook-sub">Showing payments with type, duration, method, and status.</div>
             </div>
             <div class="workbook-sub">
                 Range: <strong>{{ $startLabel }}</strong> — <strong>{{ $endLabel }}</strong>
@@ -382,7 +764,7 @@
                                     </div>
                                     <div class="text-muted small">
                                         @if ($p->subscription_id)
-                                            Subscription #{{ $p->subscription_id }}
+                                            Sub #{{ $p->subscription_id }}
                                         @else
                                             Customize / Non-subscription
                                         @endif
