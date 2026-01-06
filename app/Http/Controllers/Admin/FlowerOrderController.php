@@ -1095,7 +1095,7 @@ public function mngdeliveryhistory(Request $request)
                 'paused_days' => $pausedDays,
                 'new_end_date' => $newEndDate,
             ]);
-            
+
             return redirect()->back()->with('success', 'Successfully paused subscription');
 
         } catch (\Exception $e) {
@@ -1157,7 +1157,7 @@ public function mngdeliveryhistory(Request $request)
                 'paused_days' => $actualPausedDays,
             ]);
 
-            return redirect()->route('admin.dashboard')->with('success', 'Successfully resumed subscription.');
+            return redirect()->back()->with('success', 'Successfully resumed subscription.');
 
         } catch (\Exception $e) {
 
