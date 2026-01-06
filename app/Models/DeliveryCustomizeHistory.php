@@ -17,6 +17,7 @@ class DeliveryCustomizeHistory extends Model
         'delivery_status',
         'longitude',
         'latitude',
+        'delivery_time'
     ];
 
     public function flowerRequest()
