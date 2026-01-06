@@ -565,7 +565,7 @@ class FlowerDashboardController extends Controller
         ]);
     }
 
-   public function paymentHistory(Request $request)
+public function paymentHistory(Request $request)
 {
     // -------- Parse filters ----------
     $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month

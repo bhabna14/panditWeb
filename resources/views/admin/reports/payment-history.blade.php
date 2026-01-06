@@ -480,6 +480,80 @@
         $endLabel   = $end   ? \Carbon\Carbon::parse($end)->toFormattedDateString()   : '—';
     @endphp
 
+     {{-- Toolbar (filters + presets) --}}
+    <form class="toolbar" method="get" action="{{ route('admin.payments.index') }}">
+        @php
+            $p = $preset ?? '';
+            $qAll = request()->query();
+            $makeLink = function ($name) use ($qAll) {
+                return route('admin.payments.index', array_merge($qAll, [
+                    'preset'     => $name,
+                    'start_date' => null,
+                    'end_date'   => null,
+                ]));
+            };
+        @endphp
+
+        <div class="toolbar-left">
+            <div class="toolbar-block">
+                <span class="toolbar-label">Status</span>
+                <select name="status" class="toolbar-select">
+                    <option value="">Any</option>
+                    <option value="paid" {{ ($status ?? '') === 'paid' ? 'selected' : '' }}>Paid</option>
+                    <option value="pending" {{ ($status ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
+                </select>
+            </div>
+
+            <div class="toolbar-block">
+                <span class="toolbar-label">Method</span>
+                <select name="payment_method" class="toolbar-select">
+                    <option value="">Any</option>
+                    @foreach ($methods as $m)
+                        <option value="{{ $m }}" {{ ($method ?? '') === $m ? 'selected' : '' }}>
+                            {{ $m }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="toolbar-block">
+                <span class="toolbar-label">Start</span>
+                <input type="date" name="start_date" class="toolbar-input" value="{{ $start }}">
+            </div>
+
+            <div class="toolbar-block">
+                <span class="toolbar-label">End</span>
+                <input type="date" name="end_date" class="toolbar-input" value="{{ $end }}">
+            </div>
+        </div>
+
+        <div class="toolbar-right">
+            <a href="{{ $makeLink('today') }}" class="btn-chip {{ $p === 'today' ? 'preset-active' : '' }}">
+                <i class="bi bi-sun"></i><span>Today</span>
+            </a>
+            <a href="{{ $makeLink('yesterday') }}" class="btn-chip {{ $p === 'yesterday' ? 'preset-active' : '' }}">
+                <i class="bi bi-chevron-left"></i><span>Yesterday</span>
+            </a>
+            <a href="{{ $makeLink('tomorrow') }}" class="btn-chip {{ $p === 'tomorrow' ? 'preset-active' : '' }}">
+                <i class="bi bi-chevron-right"></i><span>Tomorrow</span>
+            </a>
+            <a href="{{ $makeLink('this_week') }}" class="btn-chip {{ in_array($p, ['this_week', 'week', '']) ? 'preset-active' : '' }}">
+                <i class="bi bi-calendar-week"></i><span>Week</span>
+            </a>
+            <a href="{{ $makeLink('this_month') }}" class="btn-chip {{ in_array($p, ['this_month', 'month']) ? 'preset-active' : '' }}">
+                <i class="bi bi-calendar-month"></i><span>Month</span>
+            </a>
+
+            <button class="btn-chip apply-btn" type="submit">
+                <i class="bi bi-filter"></i><span>Apply</span>
+            </button>
+            <a href="{{ route('admin.payments.index') }}" class="btn-chip reset-btn">
+                <i class="bi bi-bootstrap-reboot"></i><span>Reset</span>
+            </a>
+        </div>
+    </form>
+
+
     {{-- 1) OVERALL SUMMARY CARDS --}}
     <div class="section-head">
         <div>
@@ -623,79 +697,7 @@
         </div>
     </div>
 
-    {{-- Toolbar (filters + presets) --}}
-    <form class="toolbar" method="get" action="{{ route('admin.payments.index') }}">
-        @php
-            $p = $preset ?? '';
-            $qAll = request()->query();
-            $makeLink = function ($name) use ($qAll) {
-                return route('admin.payments.index', array_merge($qAll, [
-                    'preset'     => $name,
-                    'start_date' => null,
-                    'end_date'   => null,
-                ]));
-            };
-        @endphp
-
-        <div class="toolbar-left">
-            <div class="toolbar-block">
-                <span class="toolbar-label">Status</span>
-                <select name="status" class="toolbar-select">
-                    <option value="">Any</option>
-                    <option value="paid" {{ ($status ?? '') === 'paid' ? 'selected' : '' }}>Paid</option>
-                    <option value="pending" {{ ($status ?? '') === 'pending' ? 'selected' : '' }}>Pending</option>
-                </select>
-            </div>
-
-            <div class="toolbar-block">
-                <span class="toolbar-label">Method</span>
-                <select name="payment_method" class="toolbar-select">
-                    <option value="">Any</option>
-                    @foreach ($methods as $m)
-                        <option value="{{ $m }}" {{ ($method ?? '') === $m ? 'selected' : '' }}>
-                            {{ $m }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="toolbar-block">
-                <span class="toolbar-label">Start</span>
-                <input type="date" name="start_date" class="toolbar-input" value="{{ $start }}">
-            </div>
-
-            <div class="toolbar-block">
-                <span class="toolbar-label">End</span>
-                <input type="date" name="end_date" class="toolbar-input" value="{{ $end }}">
-            </div>
-        </div>
-
-        <div class="toolbar-right">
-            <a href="{{ $makeLink('today') }}" class="btn-chip {{ $p === 'today' ? 'preset-active' : '' }}">
-                <i class="bi bi-sun"></i><span>Today</span>
-            </a>
-            <a href="{{ $makeLink('yesterday') }}" class="btn-chip {{ $p === 'yesterday' ? 'preset-active' : '' }}">
-                <i class="bi bi-chevron-left"></i><span>Yesterday</span>
-            </a>
-            <a href="{{ $makeLink('tomorrow') }}" class="btn-chip {{ $p === 'tomorrow' ? 'preset-active' : '' }}">
-                <i class="bi bi-chevron-right"></i><span>Tomorrow</span>
-            </a>
-            <a href="{{ $makeLink('this_week') }}" class="btn-chip {{ in_array($p, ['this_week', 'week', '']) ? 'preset-active' : '' }}">
-                <i class="bi bi-calendar-week"></i><span>Week</span>
-            </a>
-            <a href="{{ $makeLink('this_month') }}" class="btn-chip {{ in_array($p, ['this_month', 'month']) ? 'preset-active' : '' }}">
-                <i class="bi bi-calendar-month"></i><span>Month</span>
-            </a>
-
-            <button class="btn-chip apply-btn" type="submit">
-                <i class="bi bi-filter"></i><span>Apply</span>
-            </button>
-            <a href="{{ route('admin.payments.index') }}" class="btn-chip reset-btn">
-                <i class="bi bi-bootstrap-reboot"></i><span>Reset</span>
-            </a>
-        </div>
-    </form>
-
+   
     {{-- Table --}}
     <div class="workbook">
         <div class="workbook-head">
