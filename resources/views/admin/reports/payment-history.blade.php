@@ -241,7 +241,7 @@
             position: relative;
         }
         .type-active::after {
-            content: 'Selected';
+            content: '';
             position: absolute;
             top: .8rem;
             right: .9rem;
