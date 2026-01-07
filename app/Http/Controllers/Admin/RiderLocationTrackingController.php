@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Models\RiderDetails;
 use App\Models\RiderLocationTracking;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class RiderLocationTrackingController extends Controller
 {
-     public function index(Request $request)
+      public function index(Request $request)
     {
         $tz = config('app.timezone', 'Asia/Kolkata');
 
