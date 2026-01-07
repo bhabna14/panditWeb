@@ -226,22 +226,16 @@
             transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
         }
 
-        /* NEW: clickable card styling */
-        .type-card-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
+        .type-card-link { text-decoration: none; color: inherit; display: block; }
         .type-card:hover { transform: translateY(-1px); }
 
-        /* NEW: active highlight */
         .type-active {
             border-color: rgba(37, 99, 235, .45);
             box-shadow: 0 12px 34px rgba(37, 99, 235, 0.14);
             position: relative;
         }
         .type-active::after {
-            content: '';
+            content: 'Selected';
             position: absolute;
             top: .8rem;
             right: .9rem;
@@ -263,11 +257,7 @@
             border: 1px solid rgba(15,23,42,.08);
         }
 
-        .type-meta h4 {
-            margin: 0;
-            font-size: .98rem;
-            font-weight: 900;
-        }
+        .type-meta h4 { margin: 0; font-size: .98rem; font-weight: 900; }
 
         .type-meta p {
             margin: .2rem 0 0;
@@ -276,21 +266,9 @@
             font-variant-numeric: tabular-nums;
         }
 
-        .type-right {
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .type-right .big {
-            font-weight: 950;
-            font-size: 1.15rem;
-        }
-
-        .type-right .small {
-            margin-top: .15rem;
-            font-size: .82rem;
-            color: var(--muted);
-        }
+        .type-right { text-align: right; font-variant-numeric: tabular-nums; }
+        .type-right .big { font-weight: 950; font-size: 1.15rem; }
+        .type-right .small { margin-top: .15rem; font-size: .82rem; color: var(--muted); }
 
         .type-sub .type-icon { background: var(--info-soft); color: var(--info-fg); }
         .type-cus .type-icon { background: #fff7ed; color: #9a3412; }
@@ -481,6 +459,41 @@
 
         .pagination-meta { font-size: .82rem; color: var(--muted); }
 
+        /* === Pagination Fix (Bootstrap 5) === */
+        .pagination { margin: 0; gap: .35rem; }
+        .pagination .page-item { margin: 0; }
+        .pagination .page-link {
+            border-radius: 12px;
+            border: 1px solid var(--ring);
+            padding: .42rem .75rem;
+            font-weight: 800;
+            font-size: .85rem;
+            color: #0f172a;
+            background: #fff;
+            box-shadow: none;
+            line-height: 1.15;
+        }
+        .pagination .page-link:hover {
+            background: #f3f4f6;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-color: #020617;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+        }
+        .pagination .page-item.disabled .page-link {
+            opacity: .55;
+            pointer-events: none;
+        }
+        /* Safety: if Tailwind SVG ever appears, keep it small */
+        .pagination svg {
+            width: 16px !important;
+            height: 16px !important;
+        }
+
         @media (max-width: 1200px) {
             .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .mini-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -506,9 +519,7 @@
         $startLabel = $start ? \Carbon\Carbon::parse($start)->toFormattedDateString() : '—';
         $endLabel   = $end   ? \Carbon\Carbon::parse($end)->toFormattedDateString()   : '—';
 
-        // Helpers for card links
         $qAll = request()->query();
-
         $type = $type ?? ''; // subscription|customize|''
 
         $makeTypeLink = function (string $typeName) use ($qAll) {
@@ -524,7 +535,7 @@
         ]));
     @endphp
 
-     {{-- Toolbar (filters + presets) --}}
+    {{-- Toolbar (filters + presets) --}}
     <form class="toolbar" method="get" action="{{ route('admin.payments.index') }}">
         @php
             $p = $preset ?? '';
@@ -538,7 +549,7 @@
             };
         @endphp
 
-        {{-- NEW: keep type filter when Apply is pressed --}}
+        {{-- keep type filter when Apply is pressed --}}
         <input type="hidden" name="type" value="{{ $type }}">
 
         <div class="toolbar-left">
@@ -708,7 +719,6 @@
     </div>
 
     <div class="type-grid">
-        {{-- SUBSCRIPTION CARD (CLICK) --}}
         <a class="type-card-link" href="{{ $makeTypeLink('subscription') }}">
             <div class="type-card type-sub {{ $type === 'subscription' ? 'type-active' : '' }}">
                 <div class="type-left">
@@ -728,7 +738,6 @@
             </div>
         </a>
 
-        {{-- CUSTOMIZE CARD (CLICK) --}}
         <a class="type-card-link" href="{{ $makeTypeLink('customize') }}">
             <div class="type-card type-cus {{ $type === 'customize' ? 'type-active' : '' }}">
                 <div class="type-left">
@@ -887,12 +896,14 @@
                 </table>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center pt-3">
+            <div class="d-flex justify-content-between align-items-center pt-3 flex-wrap gap-2">
                 <div class="pagination-meta">
                     Showing <strong>{{ $payments->firstItem() ?? 0 }}</strong>–<strong>{{ $payments->lastItem() ?? 0 }}</strong>
                     of <strong>{{ $payments->total() }}</strong>
                 </div>
-                {{ $payments->links() }}
+
+                {{-- Force Bootstrap pagination view (fixes huge arrows) --}}
+                {{ $payments->onEachSide(1)->links('pagination::bootstrap-5') }}
             </div>
         </div>
     </div>
