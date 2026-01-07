@@ -169,36 +169,6 @@
         <td>
             <div class="ds-wrap">
                 <span class="badge {{ $deliveryClass }}">{{ $deliveryLabel }}</span>
-
-                @if($canUpdateDelivery)
-                    <form id="deliveryStatusForm_{{ $request->id }}"
-                          action="{{ route('admin.flower-request.delivery-status', $request->id) }}"
-                          method="POST"
-                          class="ds-form">
-                        @csrf
-
-                        <select name="delivery_status" class="form-select form-select-sm" {{ $isDelivered ? 'disabled' : '' }}>
-                            <option value="pending" {{ $ds === 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="assigned" {{ $ds === 'assigned' ? 'selected' : '' }}>Assigned</option>
-                            <option value="out_for_delivery" {{ $ds === 'out_for_delivery' ? 'selected' : '' }}>Out for Delivery</option>
-                            <option value="delivered" {{ $ds === 'delivered' ? 'selected' : '' }}>Delivered</option>
-                            <option value="failed" {{ $ds === 'failed' ? 'selected' : '' }}>Failed</option>
-                            <option value="returned" {{ $ds === 'returned' ? 'selected' : '' }}>Returned</option>
-                        </select>
-
-                        @if($isDelivered)
-                            <button type="button" class="btn btn-sm btn-success" disabled>Delivered</button>
-                        @else
-                            <button type="button"
-                                    class="btn btn-sm btn-outline-primary"
-                                    onclick="confirmDeliveryStatus('{{ $request->id }}', '{{ $request->request_id }}')">
-                                Update
-                            </button>
-                        @endif
-                    </form>
-                @else
-                    <small class="ds-muted">Update allowed after payment (Paid).</small>
-                @endif
             </div>
         </td>
 
