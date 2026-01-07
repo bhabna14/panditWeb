@@ -39,7 +39,8 @@
 {{-- Filters --}}
 <div class="card custom-card mb-3">
     <div class="card-body">
-        <form method="GET" action="{{ route('admin.rider.location-tracking') }}" class="row g-3 align-items-end">
+        {{-- IMPORTANT: your route name is rider.location-tracking (as you shared) --}}
+        <form method="GET" action="{{ route('rider.location-tracking') }}" class="row g-3 align-items-end">
             <div class="col-lg-4">
                 <label class="form-label">Rider</label>
                 <select name="rider_id" class="form-control">
@@ -64,7 +65,7 @@
 
             <div class="col-lg-2 d-flex gap-2">
                 <button class="btn btn-primary w-100" type="submit">Apply</button>
-                <a class="btn btn-soft w-100" href="{{ route('admin.rider.location-tracking') }}">Reset</a>
+                <a class="btn btn-soft w-100" href="{{ route('rider.location-tracking') }}">Reset</a>
             </div>
         </form>
     </div>
@@ -123,6 +124,7 @@
                 <h6 class="mb-0">Tracking History</h6>
                 <small class="text-muted">Showing {{ $trackings->count() }} / {{ $trackings->total() }}</small>
             </div>
+
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-striped mb-0">
@@ -154,8 +156,7 @@
                                 <td class="coord">
                                     {{ $t->latitude }}, {{ $t->longitude }}
                                     <div class="text-muted" style="font-size: .8rem;">
-                                        <a target="_blank"
-                                           href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">
+                                        <a target="_blank" href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">
                                             Open in Google Maps
                                         </a>
                                     </div>
@@ -224,17 +225,25 @@
 @section('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <script>
-        const latestMarkers = @json($latestPerRider->map(function($x){
+    @php
+        // IMPORTANT: build markers in PHP to avoid Blade parsing issues with @json + closures
+        $latestMarkers = collect($latestPerRider)->map(function($x){
             return [
                 'rider_id' => $x->rider_id,
                 'name'     => $x->rider_name ?? ('Rider #' . $x->rider_id),
                 'phone'    => $x->phone_number ?? '',
-                'lat'      => (float) $x->latitude,
-                'lng'      => (float) $x->longitude,
+                'lat'      => $x->latitude !== null ? (float)$x->latitude : null,
+                'lng'      => $x->longitude !== null ? (float)$x->longitude : null,
                 'time'     => $x->date_time ? \Carbon\Carbon::parse($x->date_time)->format('d M Y, h:i A') : '',
             ];
-        }));
+        })->values();
+
+        $latestMarkersJson = $latestMarkers->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    @endphp
+
+    <script>
+        // Safe JSON injection (no Blade @json parsing with closures)
+        const latestMarkers = {!! $latestMarkersJson !!};
 
         // --- Latest Map ---
         const latestMap = L.map('latestMap', { scrollWheelZoom: true });
@@ -245,7 +254,7 @@
 
         const bounds = [];
 
-        if (latestMarkers.length) {
+        if (Array.isArray(latestMarkers) && latestMarkers.length) {
             latestMarkers.forEach(m => {
                 if (!m.lat || !m.lng) return;
 
@@ -261,13 +270,16 @@
                     </div>
                 `;
 
-                const marker = L.marker([m.lat, m.lng]).addTo(latestMap).bindPopup(popup);
+                L.marker([m.lat, m.lng]).addTo(latestMap).bindPopup(popup);
                 bounds.push([m.lat, m.lng]);
             });
 
-            latestMap.fitBounds(bounds, { padding: [30, 30] });
+            if (bounds.length) {
+                latestMap.fitBounds(bounds, { padding: [30, 30] });
+            } else {
+                latestMap.setView([20.5937, 78.9629], 5);
+            }
         } else {
-            // Default view (India)
             latestMap.setView([20.5937, 78.9629], 5);
         }
 
@@ -312,16 +324,11 @@
                 document.getElementById('modalTime').innerText = time ? `Last update: ${time}` : '';
 
                 const gmap = `https://www.google.com/maps?q=${lat},${lng}`;
-                const link = document.getElementById('modalGoogleLink');
-                link.href = gmap;
+                document.getElementById('modalGoogleLink').href = gmap;
 
                 mapModal.show();
                 setTimeout(() => initModalMap(lat, lng), 150);
             });
-        });
-
-        mapModalEl.addEventListener('hidden.bs.modal', () => {
-            // optional: keep map instance; nothing needed here
         });
     </script>
 @endsection
