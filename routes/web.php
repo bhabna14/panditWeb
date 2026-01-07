@@ -61,6 +61,7 @@ use App\Http\Controllers\Admin\WeeklyReportController;
 use App\Http\Controllers\Admin\AdminWhatsappMessageController;
 use App\Http\Controllers\Admin\FlowerDetailsController;
 use App\Http\Controllers\Admin\RiderAttendanceController;
+use App\Http\Controllers\Admin\RiderLocationTrackingController;
 use App\Http\Controllers\Admin\OfficeLedgerController; // Optional if you created a separate ledger page
 
 
