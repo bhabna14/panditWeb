@@ -138,10 +138,8 @@
                                 <td>{{ $trackings->firstItem() + $i }}</td>
                                 <td>
                                     <span class="rider-pill">
-                                        @php
-                                            $img = $t->rider_img ? asset($t->rider_img) : asset('assets/img/faces/6.jpg');
-                                        @endphp
-                                        <img src="{{ $img }}" alt="rider">
+                                      
+                                        <img src="{{ Storage::url($t->rider_img) }}" alt="rider">
                                         <span>
                                             <div style="font-weight: 700;">{{ $t->rider_name ?? ('Rider #' . $t->rider_id) }}</div>
                                             <div class="text-muted" style="font-size: .85rem;">{{ $t->phone_number ?? '—' }}</div>
