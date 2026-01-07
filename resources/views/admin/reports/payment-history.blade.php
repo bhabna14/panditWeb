@@ -799,8 +799,7 @@
         <div class="section-head">
             <div>
                 <p class="section-title"><i class="bi bi-graph-up"></i> Summary (Selected Range)</p>
-                <p class="section-sub">Range: <strong>{{ $startLabel }}</strong> — <strong>{{ $endLabel }}</strong>
-                </p>
+                <p class="section-sub">Range: <strong>{{ $startLabel }}</strong> — <strong>{{ $endLabel }}</strong></p>
             </div>
         </div>
 
@@ -996,6 +995,9 @@
                                     $startAt = $p->start_date ? \Carbon\Carbon::parse($p->start_date) : null;
                                     $endAt = $p->end_date ? \Carbon\Carbon::parse($p->end_date) : null;
                                     $days = $startAt && $endAt ? $startAt->diffInDays($endAt) + 1 : null;
+
+                                    // ✅ FIX: use flower_payments.user_id (comes from flower_payments.*)
+                                    $customerId = $p->user_id ?? null;
                                 @endphp
 
                                 <tr>
@@ -1006,14 +1008,19 @@
                                     </td>
 
                                     <td class="cell-user">
-
-
-                                        <a class="btn btn-warning btn-sm text-center"
-                                            href="{{ route('showCustomerDetails', $p->userid) }}">
+                                        @if (!empty($customerId))
+                                            <a class="btn btn-warning btn-sm text-center"
+                                               href="{{ route('showCustomerDetails', ['id' => $customerId]) }}">
+                                                <span class="fw-semibold">
+                                                    <i class="bi bi-person-circle"></i> {{ $p->user_name ?? '—' }}
+                                                </span>
+                                            </a>
+                                        @else
                                             <div class="fw-semibold">
                                                 <i class="bi bi-person-circle"></i> {{ $p->user_name ?? '—' }}
                                             </div>
-                                        </a>
+                                        @endif
+
                                         <div class="text-muted small">
                                             <i class="bi bi-telephone"></i> {{ $p->user_mobile ?? '' }}
                                         </div>
@@ -1089,8 +1096,7 @@
 
                 <div class="d-flex justify-content-between align-items-center pt-3 flex-wrap gap-2">
                     <div class="pagination-meta">
-                        Showing
-                        <strong>{{ $payments->firstItem() ?? 0 }}</strong>–<strong>{{ $payments->lastItem() ?? 0 }}</strong>
+                        Showing <strong>{{ $payments->firstItem() ?? 0 }}</strong>–<strong>{{ $payments->lastItem() ?? 0 }}</strong>
                         of <strong>{{ $payments->total() }}</strong>
                     </div>
 
