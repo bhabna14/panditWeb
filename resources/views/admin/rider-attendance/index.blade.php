@@ -10,10 +10,6 @@
             <div class="ra-hero-left">
                 <div class="ra-badge">Monthly Report</div>
                 <h2 class="ra-title">Rider Attendance</h2>
-                <p class="ra-subtitle">
-                    Attendance is calculated from <b>delivery_history.created_at</b>.
-                    If a rider has at least one delivery on a date, that day is marked <b>Present</b>.
-                </p>
             </div>
 
             <div class="ra-hero-right">
