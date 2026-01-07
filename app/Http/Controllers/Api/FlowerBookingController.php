@@ -229,7 +229,7 @@ class FlowerBookingController extends Controller
         }
     }
 
-    public function storereqwuest(Request $request)
+    public function storerequest(Request $request)
     {
         try {
             // 1) Normalize items (handles both new/old formats)
