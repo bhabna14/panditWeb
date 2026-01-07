@@ -1,7 +1,6 @@
 @extends('admin.layouts.app')
 
 @section('styles')
-    {{-- Leaflet --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <style>
         .stat-card { border-radius: 14px; }
@@ -22,9 +21,7 @@
             font-size: .85rem;
         }
         .table thead th { white-space: nowrap; }
-        .btn-soft {
-            background: #f6f7fb; border: 1px solid #e9ecef;
-        }
+        .btn-soft { background: #f6f7fb; border: 1px solid #e9ecef; }
         .btn-soft:hover { background: #eef1f7; }
     </style>
 @endsection
@@ -36,10 +33,8 @@
     </div>
 </div>
 
-{{-- Filters --}}
 <div class="card custom-card mb-3">
     <div class="card-body">
-        {{-- IMPORTANT: your route name is rider.location-tracking (as you shared) --}}
         <form method="GET" action="{{ route('rider.location-tracking') }}" class="row g-3 align-items-end">
             <div class="col-lg-4">
                 <label class="form-label">Rider</label>
@@ -71,7 +66,6 @@
     </div>
 </div>
 
-{{-- Stats --}}
 <div class="row">
     <div class="col-lg-4 mb-3">
         <div class="card custom-card stat-card">
@@ -81,6 +75,7 @@
             </div>
         </div>
     </div>
+
     <div class="col-lg-4 mb-3">
         <div class="card custom-card stat-card">
             <div class="card-body">
@@ -89,6 +84,7 @@
             </div>
         </div>
     </div>
+
     <div class="col-lg-4 mb-3">
         <div class="card custom-card stat-card">
             <div class="card-body">
@@ -101,7 +97,6 @@
     </div>
 </div>
 
-{{-- Map + Table --}}
 <div class="row">
     <div class="col-lg-6 mb-3">
         <div class="card custom-card">
@@ -153,6 +148,7 @@
                                         </span>
                                     </span>
                                 </td>
+
                                 <td class="coord">
                                     {{ $t->latitude }}, {{ $t->longitude }}
                                     <div class="text-muted" style="font-size: .8rem;">
@@ -161,9 +157,11 @@
                                         </a>
                                     </div>
                                 </td>
+
                                 <td>
                                     {{ $t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '—' }}
                                 </td>
+
                                 <td>
                                     <button
                                         type="button"
@@ -197,7 +195,6 @@
     </div>
 </div>
 
-{{-- Single View Modal --}}
 <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" style="border-radius: 14px;">
@@ -225,27 +222,10 @@
 @section('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    @php
-        // IMPORTANT: build markers in PHP to avoid Blade parsing issues with @json + closures
-        $latestMarkers = collect($latestPerRider)->map(function($x){
-            return [
-                'rider_id' => $x->rider_id,
-                'name'     => $x->rider_name ?? ('Rider #' . $x->rider_id),
-                'phone'    => $x->phone_number ?? '',
-                'lat'      => $x->latitude !== null ? (float)$x->latitude : null,
-                'lng'      => $x->longitude !== null ? (float)$x->longitude : null,
-                'time'     => $x->date_time ? \Carbon\Carbon::parse($x->date_time)->format('d M Y, h:i A') : '',
-            ];
-        })->values();
-
-        $latestMarkersJson = $latestMarkers->toJson(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    @endphp
-
     <script>
-        // Safe JSON injection (no Blade @json parsing with closures)
-        const latestMarkers = {!! $latestMarkersJson !!};
+        // Markers are already prepared in Controller (so Blade stays safe)
+        const latestMarkers = @json($latestMarkers);
 
-        // --- Latest Map ---
         const latestMap = L.map('latestMap', { scrollWheelZoom: true });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -283,7 +263,7 @@
             latestMap.setView([20.5937, 78.9629], 5);
         }
 
-        // --- Modal Single Map ---
+        // Modal map
         let modalMap = null;
         let modalMarker = null;
 
