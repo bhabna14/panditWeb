@@ -852,7 +852,6 @@
         <div class="section-head">
             <div>
                 <p class="section-title"><i class="bi bi-wallet2"></i> Collected by Payment Method</p>
-                <p class="section-sub">Shows paid collection per method (also displays pending for visibility).</p>
             </div>
         </div>
 
@@ -898,7 +897,6 @@
         <div class="section-head">
             <div>
                 <p class="section-title"><i class="bi bi-diagram-3"></i> Collected by Order Type</p>
-                <p class="section-sub">Click a card to load only that type in the table below.</p>
             </div>
         </div>
 
@@ -948,7 +946,6 @@
                 <div>
                     <div class="workbook-title">Payments — Detailed List</div>
                     <div class="workbook-sub">
-                        Showing payments with type, duration, method, and status.
                         @if (!empty($type))
                             <span class="ms-2">
                                 <strong>Type filter:</strong>
