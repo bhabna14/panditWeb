@@ -51,8 +51,6 @@
 
         .container-page { max-width: 1320px; }
 
-        .page-header-title { font-weight: 600; color: #0f172a; }
-
         .section-head {
             display: flex;
             align-items: flex-end;
@@ -225,6 +223,35 @@
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
+            transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
+        }
+
+        /* NEW: clickable card styling */
+        .type-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .type-card:hover { transform: translateY(-1px); }
+
+        /* NEW: active highlight */
+        .type-active {
+            border-color: rgba(37, 99, 235, .45);
+            box-shadow: 0 12px 34px rgba(37, 99, 235, 0.14);
+            position: relative;
+        }
+        .type-active::after {
+            content: 'Selected';
+            position: absolute;
+            top: .8rem;
+            right: .9rem;
+            font-size: .72rem;
+            font-weight: 900;
+            padding: .2rem .55rem;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.10);
+            color: #1d4ed8;
+            border: 1px solid rgba(37, 99, 235, 0.22);
         }
 
         .type-left { display: flex; align-items: center; gap: .75rem; }
@@ -268,7 +295,7 @@
         .type-sub .type-icon { background: var(--info-soft); color: var(--info-fg); }
         .type-cus .type-icon { background: #fff7ed; color: #9a3412; }
 
-        /* Toolbar (unchanged) */
+        /* Toolbar */
         .toolbar {
             position: sticky;
             top: 0;
@@ -350,7 +377,7 @@
 
         .btn-chip.reset-btn { border-style: dashed; }
 
-        /* Workbook wrapper + table (unchanged) */
+        /* Workbook wrapper + table */
         .workbook {
             background: var(--card);
             border: 1px solid var(--ring);
@@ -478,21 +505,41 @@
     @php
         $startLabel = $start ? \Carbon\Carbon::parse($start)->toFormattedDateString() : '—';
         $endLabel   = $end   ? \Carbon\Carbon::parse($end)->toFormattedDateString()   : '—';
+
+        // Helpers for card links
+        $qAll = request()->query();
+
+        $type = $type ?? ''; // subscription|customize|''
+
+        $makeTypeLink = function (string $typeName) use ($qAll) {
+            return route('admin.payments.index', array_merge($qAll, [
+                'type' => $typeName,
+                'page' => null,
+            ]));
+        };
+
+        $clearTypeLink = route('admin.payments.index', array_merge($qAll, [
+            'type' => null,
+            'page' => null,
+        ]));
     @endphp
 
      {{-- Toolbar (filters + presets) --}}
     <form class="toolbar" method="get" action="{{ route('admin.payments.index') }}">
         @php
             $p = $preset ?? '';
-            $qAll = request()->query();
             $makeLink = function ($name) use ($qAll) {
                 return route('admin.payments.index', array_merge($qAll, [
                     'preset'     => $name,
                     'start_date' => null,
                     'end_date'   => null,
+                    'page'       => null,
                 ]));
             };
         @endphp
+
+        {{-- NEW: keep type filter when Apply is pressed --}}
+        <input type="hidden" name="type" value="{{ $type }}">
 
         <div class="toolbar-left">
             <div class="toolbar-block">
@@ -552,7 +599,6 @@
             </a>
         </div>
     </form>
-
 
     {{-- 1) OVERALL SUMMARY CARDS --}}
     <div class="section-head">
@@ -653,57 +699,73 @@
         @endforelse
     </div>
 
-    {{-- 3) SUBSCRIPTION vs CUSTOMIZE CARDS --}}
+    {{-- 3) SUBSCRIPTION vs CUSTOMIZE CARDS (CLICKABLE) --}}
     <div class="section-head">
         <div>
             <p class="section-title"><i class="bi bi-diagram-3"></i> Collected by Order Type</p>
-            <p class="section-sub">Subscription is identified when a matching subscription exists for the order_id.</p>
+            <p class="section-sub">Click a card to load only that type in the table below.</p>
         </div>
     </div>
 
     <div class="type-grid">
-        <div class="type-card type-sub">
-            <div class="type-left">
-                <div class="type-icon"><i class="bi bi-arrow-repeat"></i></div>
-                <div class="type-meta">
-                    <h4>Subscription Orders</h4>
-                    <p>
-                        Paid: {{ number_format($typeStats->subscription_paid_count ?? 0) }}
-                        | Pending: {{ number_format($typeStats->subscription_pending_count ?? 0) }}
-                    </p>
+        {{-- SUBSCRIPTION CARD (CLICK) --}}
+        <a class="type-card-link" href="{{ $makeTypeLink('subscription') }}">
+            <div class="type-card type-sub {{ $type === 'subscription' ? 'type-active' : '' }}">
+                <div class="type-left">
+                    <div class="type-icon"><i class="bi bi-arrow-repeat"></i></div>
+                    <div class="type-meta">
+                        <h4>Subscription Orders</h4>
+                        <p>
+                            Paid: {{ number_format($typeStats->subscription_paid_count ?? 0) }}
+                            | Pending: {{ number_format($typeStats->subscription_pending_count ?? 0) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="type-right">
+                    <div class="big">₹{{ number_format($typeStats->subscription_collected ?? 0, 2) }}</div>
+                    <div class="small">Pending ₹{{ number_format($typeStats->subscription_pending ?? 0, 2) }}</div>
                 </div>
             </div>
-            <div class="type-right">
-                <div class="big">₹{{ number_format($typeStats->subscription_collected ?? 0, 2) }}</div>
-                <div class="small">Pending ₹{{ number_format($typeStats->subscription_pending ?? 0, 2) }}</div>
-            </div>
-        </div>
+        </a>
 
-        <div class="type-card type-cus">
-            <div class="type-left">
-                <div class="type-icon"><i class="bi bi-sliders"></i></div>
-                <div class="type-meta">
-                    <h4>Customize Orders</h4>
-                    <p>
-                        Paid: {{ number_format($typeStats->customize_paid_count ?? 0) }}
-                        | Pending: {{ number_format($typeStats->customize_pending_count ?? 0) }}
-                    </p>
+        {{-- CUSTOMIZE CARD (CLICK) --}}
+        <a class="type-card-link" href="{{ $makeTypeLink('customize') }}">
+            <div class="type-card type-cus {{ $type === 'customize' ? 'type-active' : '' }}">
+                <div class="type-left">
+                    <div class="type-icon"><i class="bi bi-sliders"></i></div>
+                    <div class="type-meta">
+                        <h4>Customize Orders</h4>
+                        <p>
+                            Paid: {{ number_format($typeStats->customize_paid_count ?? 0) }}
+                            | Pending: {{ number_format($typeStats->customize_pending_count ?? 0) }}
+                        </p>
+                    </div>
+                </div>
+                <div class="type-right">
+                    <div class="big">₹{{ number_format($typeStats->customize_collected ?? 0, 2) }}</div>
+                    <div class="small">Pending ₹{{ number_format($typeStats->customize_pending ?? 0, 2) }}</div>
                 </div>
             </div>
-            <div class="type-right">
-                <div class="big">₹{{ number_format($typeStats->customize_collected ?? 0, 2) }}</div>
-                <div class="small">Pending ₹{{ number_format($typeStats->customize_pending ?? 0, 2) }}</div>
-            </div>
-        </div>
+        </a>
     </div>
 
-   
     {{-- Table --}}
     <div class="workbook">
         <div class="workbook-head">
             <div>
                 <div class="workbook-title">Payments — Detailed List</div>
-                <div class="workbook-sub">Showing payments with type, duration, method, and status.</div>
+                <div class="workbook-sub">
+                    Showing payments with type, duration, method, and status.
+                    @if (!empty($type))
+                        <span class="ms-2">
+                            <strong>Type filter:</strong>
+                            {{ $type === 'subscription' ? 'Subscription' : 'Customize' }}
+                            <a class="btn-chip ms-2" href="{{ $clearTypeLink }}">
+                                <i class="bi bi-x-circle"></i><span>Clear</span>
+                            </a>
+                        </span>
+                    @endif
+                </div>
             </div>
             <div class="workbook-sub">
                 Range: <strong>{{ $startLabel }}</strong> — <strong>{{ $endLabel }}</strong>
@@ -766,7 +828,7 @@
                                     </div>
                                     <div class="text-muted small">
                                         @if ($p->subscription_id)
-                                            Sub #{{ $p->subscription_id }}
+                                            Subscription #{{ $p->subscription_id }}
                                         @else
                                             Customize / Non-subscription
                                         @endif

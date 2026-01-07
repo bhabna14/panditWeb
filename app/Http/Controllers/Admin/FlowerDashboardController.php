@@ -565,152 +565,162 @@ class FlowerDashboardController extends Controller
         ]);
     }
 
-    public function paymentHistory(Request $request)
-    {
-        // -------- Parse filters ----------
-        $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month
-        $userId        = $request->string('user_id')->toString();
-        $statusFilter  = $request->string('status')->toString(); // pending|paid
-        $methodFilter  = $request->string('payment_method')->toString(); // UPI|Cash|Card|...
-        $search        = $request->string('q')->toString(); // search by order/payment id or user
+   public function paymentHistory(Request $request)
+{
+    // -------- Parse filters ----------
+    $preset        = $request->string('preset')->toString(); // today|yesterday|tomorrow|this_week|this_month
+    $userId        = $request->string('user_id')->toString();
+    $statusFilter  = $request->string('status')->toString(); // pending|paid
+    $methodFilter  = $request->string('payment_method')->toString(); // UPI|Cash|Card|...
+    $search        = $request->string('q')->toString(); // search by order/payment id or user
 
-        // Resolve [start, end] (inclusive) — defaults to TODAY if nothing provided
-        [$start, $end, $effectivePreset] = $this->resolveRange($request, $preset);
+    // NEW: type filter from card click
+    $typeFilterRaw = $request->string('type')->toString(); // subscription|customize
+    $typeFilter    = in_array($typeFilterRaw, ['subscription', 'customize'], true) ? $typeFilterRaw : '';
 
-        /**
-         * BASE QUERY (date/user/search only)
-         * - Use this for: stats, method cards, type cards
-         * - Then apply status/method only for the table list
-         */
-        $base = FlowerPayment::query()
-            ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
-            ->leftJoin('subscriptions as s', 's.order_id', '=', 'flower_payments.order_id')
-            ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-            ->select([
-                'flower_payments.*',
-                'users.name as user_name',
-                'users.mobile_number as user_mobile',
+    // Resolve [start, end] (inclusive) — defaults to TODAY if nothing provided
+    [$start, $end, $effectivePreset] = $this->resolveRange($request, $preset);
 
-                // subscription + product fields
-                's.subscription_id',
-                's.start_date',
-                's.end_date',
-                's.status as subscription_status',
-                'p.name as product_name',
-                'p.category as product_category',
-                'p.duration as product_duration',
-            ])
-            ->when($start, fn($qq) => $qq->whereDate('flower_payments.created_at', '>=', $start->toDateString()))
-            ->when($end,   fn($qq) => $qq->whereDate('flower_payments.created_at', '<=', $end->toDateString()))
-            ->when($userId, fn($qq) => $qq->where('flower_payments.user_id', $userId))
-            ->when($search, function ($qq) use ($search) {
-                $needle = '%' . trim($search) . '%';
-                $qq->where(function ($w) use ($needle) {
-                    $w->where('flower_payments.order_id', 'like', $needle)
-                        ->orWhere('flower_payments.payment_id', 'like', $needle)
-                        ->orWhere('users.name', 'like', $needle)
-                        ->orWhere('users.mobile_number', 'like', $needle)
-                        ->orWhere('p.name', 'like', $needle)
-                        ->orWhere('p.category', 'like', $needle)
-                        ->orWhere('s.subscription_id', 'like', $needle);
-                });
+    /**
+     * BASE QUERY (date/user/search only)
+     * - Use this for: stats, method cards, type cards
+     * - Then apply status/method/type only for the table list
+     */
+    $base = FlowerPayment::query()
+        ->leftJoin('users', 'users.userid', '=', 'flower_payments.user_id')
+        ->leftJoin('subscriptions as s', 's.order_id', '=', 'flower_payments.order_id')
+        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
+        ->select([
+            'flower_payments.*',
+            'users.name as user_name',
+            'users.mobile_number as user_mobile',
+
+            // subscription + product fields
+            's.subscription_id',
+            's.start_date',
+            's.end_date',
+            's.status as subscription_status',
+            'p.name as product_name',
+            'p.category as product_category',
+            'p.duration as product_duration',
+        ])
+        ->when($start, fn($qq) => $qq->whereDate('flower_payments.created_at', '>=', $start->toDateString()))
+        ->when($end,   fn($qq) => $qq->whereDate('flower_payments.created_at', '<=', $end->toDateString()))
+        ->when($userId, fn($qq) => $qq->where('flower_payments.user_id', $userId))
+        ->when($search, function ($qq) use ($search) {
+            $needle = '%' . trim($search) . '%';
+            $qq->where(function ($w) use ($needle) {
+                $w->where('flower_payments.order_id', 'like', $needle)
+                    ->orWhere('flower_payments.payment_id', 'like', $needle)
+                    ->orWhere('users.name', 'like', $needle)
+                    ->orWhere('users.mobile_number', 'like', $needle)
+                    ->orWhere('p.name', 'like', $needle)
+                    ->orWhere('p.category', 'like', $needle)
+                    ->orWhere('s.subscription_id', 'like', $needle);
             });
+        });
 
-        // -------- TABLE QUERY (apply dropdown filters) ----------
-        $q = (clone $base)
-            ->when($statusFilter, fn($qq) => $qq->where('flower_payments.payment_status', $statusFilter))
-            ->when($methodFilter, fn($qq) => $qq->where('flower_payments.payment_method', $methodFilter))
-            ->orderByDesc('flower_payments.created_at');
+    // -------- TABLE QUERY (apply dropdown filters + type filter from cards) ----------
+    $q = (clone $base)
+        ->when($statusFilter, fn($qq) => $qq->where('flower_payments.payment_status', $statusFilter))
+        ->when($methodFilter, fn($qq) => $qq->where('flower_payments.payment_method', $methodFilter))
+        // NEW: Apply type filter ONLY to table
+        ->when($typeFilter === 'subscription', fn($qq) => $qq->whereNotNull('s.subscription_id'))
+        ->when($typeFilter === 'customize',    fn($qq) => $qq->whereNull('s.subscription_id'))
+        ->orderByDesc('flower_payments.created_at');
 
-        $payments = $q->paginate(25)->withQueryString();
+    $payments = $q->paginate(25)->withQueryString();
 
-        // -------- OVERALL STATS (ignore status/method filters; only date/user/search) ----------
-        $statsQ = (clone $base);
-        $statsQ->getQuery()->orders  = null;
-        $statsQ->getQuery()->columns = null;
+    // -------- OVERALL STATS (ignore status/method/type; only date/user/search) ----------
+    $statsQ = (clone $base);
+    $statsQ->getQuery()->orders  = null;
+    $statsQ->getQuery()->columns = null;
 
-        $stats = $statsQ
-            ->selectRaw('
-                COUNT(*) as cnt,
-                SUM(CASE WHEN flower_payments.payment_status = "paid" THEN flower_payments.paid_amount ELSE 0 END)    as sum_paid,
-                SUM(CASE WHEN flower_payments.payment_status = "pending" THEN flower_payments.paid_amount ELSE 0 END) as sum_pending,
-                SUM(flower_payments.paid_amount) as sum_all
-            ')
-            ->first();
+    $stats = $statsQ
+        ->selectRaw('
+            COUNT(*) as cnt,
+            SUM(CASE WHEN flower_payments.payment_status = "paid" THEN flower_payments.paid_amount ELSE 0 END)    as sum_paid,
+            SUM(CASE WHEN flower_payments.payment_status = "pending" THEN flower_payments.paid_amount ELSE 0 END) as sum_pending,
+            SUM(flower_payments.paid_amount) as sum_all
+        ')
+        ->first();
 
-        // -------- METHOD-WISE BREAKDOWN (cards) ----------
-        $methodQ = (clone $base);
-        $methodQ->getQuery()->orders  = null;
-        $methodQ->getQuery()->columns = null;
+    // -------- METHOD-WISE BREAKDOWN (cards) ----------
+    $methodQ = (clone $base);
+    $methodQ->getQuery()->orders  = null;
+    $methodQ->getQuery()->columns = null;
 
-        $methodExpr = 'COALESCE(NULLIF(TRIM(flower_payments.payment_method), ""), "Unknown")';
+    $methodExpr = 'COALESCE(NULLIF(TRIM(flower_payments.payment_method), ""), "Unknown")';
 
-        $methodStats = $methodQ
-            ->selectRaw("
-                {$methodExpr} as method,
-                SUM(CASE WHEN flower_payments.payment_status = 'paid' THEN flower_payments.paid_amount ELSE 0 END)    as collected,
-                SUM(CASE WHEN flower_payments.payment_status = 'pending' THEN flower_payments.paid_amount ELSE 0 END) as pending,
-                SUM(CASE WHEN flower_payments.payment_status = 'paid' THEN 1 ELSE 0 END)    as paid_count,
-                SUM(CASE WHEN flower_payments.payment_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
-                COUNT(*) as total_count
-            ")
-            ->groupByRaw($methodExpr)
-            ->orderByDesc('collected')
-            ->get();
+    $methodStats = $methodQ
+        ->selectRaw("
+            {$methodExpr} as method,
+            SUM(CASE WHEN flower_payments.payment_status = 'paid' THEN flower_payments.paid_amount ELSE 0 END)    as collected,
+            SUM(CASE WHEN flower_payments.payment_status = 'pending' THEN flower_payments.paid_amount ELSE 0 END) as pending,
+            SUM(CASE WHEN flower_payments.payment_status = 'paid' THEN 1 ELSE 0 END)    as paid_count,
+            SUM(CASE WHEN flower_payments.payment_status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+            COUNT(*) as total_count
+        ")
+        ->groupByRaw($methodExpr)
+        ->orderByDesc('collected')
+        ->get();
 
-        // -------- TYPE BREAKDOWN: Subscription vs Customize (cards) ----------
-        // Rule: if joined subscription exists => subscription; else => customize.
-        $typeQ = (clone $base);
-        $typeQ->getQuery()->orders  = null;
-        $typeQ->getQuery()->columns = null;
+    // -------- TYPE BREAKDOWN: Subscription vs Customize (cards) ----------
+    $typeQ = (clone $base);
+    $typeQ->getQuery()->orders  = null;
+    $typeQ->getQuery()->columns = null;
 
-        $typeStats = $typeQ
-            ->selectRaw('
-                SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NOT NULL THEN flower_payments.paid_amount ELSE 0 END) as subscription_collected,
-                SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NULL     THEN flower_payments.paid_amount ELSE 0 END) as customize_collected,
+    $typeStats = $typeQ
+        ->selectRaw('
+            SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NOT NULL THEN flower_payments.paid_amount ELSE 0 END) as subscription_collected,
+            SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NULL     THEN flower_payments.paid_amount ELSE 0 END) as customize_collected,
 
-                SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NOT NULL THEN flower_payments.paid_amount ELSE 0 END) as subscription_pending,
-                SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NULL     THEN flower_payments.paid_amount ELSE 0 END) as customize_pending,
+            SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NOT NULL THEN flower_payments.paid_amount ELSE 0 END) as subscription_pending,
+            SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NULL     THEN flower_payments.paid_amount ELSE 0 END) as customize_pending,
 
-                SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NOT NULL THEN 1 ELSE 0 END) as subscription_paid_count,
-                SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NULL     THEN 1 ELSE 0 END) as customize_paid_count,
+            SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NOT NULL THEN 1 ELSE 0 END) as subscription_paid_count,
+            SUM(CASE WHEN flower_payments.payment_status="paid" AND s.subscription_id IS NULL     THEN 1 ELSE 0 END) as customize_paid_count,
 
-                SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NOT NULL THEN 1 ELSE 0 END) as subscription_pending_count,
-                SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NULL     THEN 1 ELSE 0 END) as customize_pending_count
-            ')
-            ->first();
+            SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NOT NULL THEN 1 ELSE 0 END) as subscription_pending_count,
+            SUM(CASE WHEN flower_payments.payment_status="pending" AND s.subscription_id IS NULL     THEN 1 ELSE 0 END) as customize_pending_count
+        ')
+        ->first();
 
-        // -------- Lookups ----------
-        $users = User::query()
-            ->orderBy('name')
-            ->get(['userid','name','mobile_number']);
+    // -------- Lookups ----------
+    $users = User::query()
+        ->orderBy('name')
+        ->get(['userid','name','mobile_number']);
 
-        $methods = FlowerPayment::query()
-            ->distinct()
-            ->orderBy('payment_method')
-            ->pluck('payment_method')
-            ->filter()
-            ->values();
+    $methods = FlowerPayment::query()
+        ->distinct()
+        ->orderBy('payment_method')
+        ->pluck('payment_method')
+        ->filter()
+        ->values();
 
-        return view('admin.reports.payment-history', [
-            'payments'     => $payments,
-            'users'        => $users,
-            'methods'      => $methods,
+    return view('admin.reports.payment-history', [
+        'payments'     => $payments,
+        'users'        => $users,
+        'methods'      => $methods,
 
-            'preset'       => $effectivePreset,
-            'userId'       => $userId,
-            'status'       => $statusFilter,
-            'method'       => $methodFilter,
-            'search'       => $search,
+        'preset'       => $effectivePreset,
+        'userId'       => $userId,
+        'status'       => $statusFilter,
+        'method'       => $methodFilter,
+        'search'       => $search,
 
-            'start'        => $start?->toDateString(),
-            'end'          => $end?->toDateString(),
+        // NEW
+        'type'         => $typeFilter,
 
-            'stats'        => $stats,
-            'methodStats'  => $methodStats,
-            'typeStats'    => $typeStats,
-        ]);
-    }
+        'start'        => $start?->toDateString(),
+        'end'          => $end?->toDateString(),
+
+        'stats'        => $stats,
+        'methodStats'  => $methodStats,
+        'typeStats'    => $typeStats,
+    ]);
+}
+
 
     private function resolveRange(Request $request, ?string $preset): array
     {
