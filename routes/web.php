@@ -1069,3 +1069,5 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::post('/manage-flower-request/{flowerRequest}/delivery-status', [FlowerRequestController::class, 'updateDeliveryStatus'])
         ->name('admin.flower-request.delivery-status');
 
+    Route::get('/admin/rider-location-tracking', [RiderLocationTrackingController::class, 'index'])
+        ->name('rider.location-tracking');

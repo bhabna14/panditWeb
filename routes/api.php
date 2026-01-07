@@ -276,11 +276,9 @@ Route::middleware('auth:vendor-api')->group(function () {
     Route::get('/get-vendor-details', [VendorPickupController::class, 'vendorDetails']);
 });
 
-
 Route::middleware('auth:rider-api')->group(function () {
     Route::post('/rider/requested-deliver/{req_id}', [CustomizeDeliveryController::class, 'markDelivered']);
 });
-
 
 Route::post('/rider/location', [RiderLocationTrackingController::class, 'store'])
     ->middleware('auth:rider-api');

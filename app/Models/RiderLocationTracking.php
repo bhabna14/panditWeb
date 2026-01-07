@@ -17,4 +17,9 @@ class RiderLocationTracking extends Model
         'longitude',
         'date_time',
     ];
+
+    protected $casts = [
+    'date_time' => 'datetime',
+    ];
+
 }
