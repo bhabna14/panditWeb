@@ -264,7 +264,7 @@
         }
 
         .type-active::after {
-            content: 'Selected';
+            content: ' ';
             position: absolute;
             top: .8rem;
             right: .9rem;
@@ -943,7 +943,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="workbook">
+        <div class="workbook" style="margin-top: 2.2rem;">
             <div class="workbook-head">
                 <div>
                     <div class="workbook-title">Payments — Detailed List</div>
