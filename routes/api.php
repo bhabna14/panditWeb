@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\ReferController;
 use App\Http\Controllers\Api\VendorOtpController;
 use App\Http\Controllers\Api\VendorPickupController;
 use App\Http\Controllers\Api\CustomizeDeliveryController;
+use App\Http\Controllers\Api\RiderLocationTrackingController;
 
 use App\Http\Controllers\Admin\NotificationController;
 
@@ -279,3 +280,7 @@ Route::middleware('auth:vendor-api')->group(function () {
 Route::middleware('auth:rider-api')->group(function () {
     Route::post('/rider/requested-deliver/{req_id}', [CustomizeDeliveryController::class, 'markDelivered']);
 });
+
+
+Route::post('/rider/location', [RiderLocationTrackingController::class, 'store'])
+    ->middleware('auth:rider-api');
