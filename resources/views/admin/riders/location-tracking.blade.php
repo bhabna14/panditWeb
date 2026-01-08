@@ -14,12 +14,11 @@
             --shadow-hover: 0 14px 30px rgba(0, 0, 0, .09);
         }
 
-        /* Page header */
         .page-hero {
             border-radius: var(--card-radius);
             background: linear-gradient(135deg, #2b59ff, #7c3aed, #ff3d77);
             color: #fff;
-            padding: 18px 18px;
+            padding: 18px;
             box-shadow: var(--shadow-soft);
         }
 
@@ -36,7 +35,6 @@
             font-size: .9rem;
         }
 
-        /* Filter card */
         .filter-card {
             border-radius: var(--card-radius);
             background: #fff;
@@ -47,7 +45,7 @@
         .filter-strip {
             border-radius: 14px;
             background: linear-gradient(135deg, rgba(43, 89, 255, .10), rgba(124, 58, 237, .10));
-            padding: 12px 12px;
+            padding: 12px;
         }
 
         .form-label {
@@ -55,7 +53,6 @@
             font-size: .88rem;
         }
 
-        /* KPI cards */
         .kpi-card {
             border-radius: var(--card-radius);
             border: 1px solid rgba(0, 0, 0, .04);
@@ -64,7 +61,7 @@
         }
 
         .kpi-body {
-            padding: 16px 16px;
+            padding: 16px;
         }
 
         .kpi-label {
@@ -105,7 +102,6 @@
             color: #fff;
         }
 
-        /* Map / table cards */
         .panel-card {
             border-radius: var(--card-radius);
             border: 1px solid rgba(0, 0, 0, .04);
@@ -141,7 +137,6 @@
             border-radius: 14px;
         }
 
-        /* Rider pill (table) */
         .rider-pill {
             display: flex;
             align-items: center;
@@ -178,7 +173,6 @@
             background: rgba(43, 89, 255, .08);
         }
 
-        /* Table */
         .table thead th {
             white-space: nowrap;
             font-weight: 800;
@@ -214,7 +208,7 @@
 
         .btn-grad:hover {
             color: #fff;
-            filter: brightness(0.98);
+            filter: brightness(.98);
         }
 
         .btn-stop {
@@ -227,16 +221,14 @@
 
         .btn-stop:hover {
             color: #fff;
-            filter: brightness(0.98);
+            filter: brightness(.98);
         }
 
-        /* Modal */
         .modal-content {
             border-radius: var(--card-radius);
             box-shadow: var(--shadow-hover);
         }
 
-        /* Rider Control Cards */
         .rider-control-wrap {
             border-radius: var(--card-radius);
             background: #fff;
@@ -263,7 +255,7 @@
         .rider-card {
             border-radius: 16px;
             border: 1px solid rgba(0, 0, 0, .06);
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
             background: #fff;
             transition: transform .15s ease, box-shadow .15s ease;
             overflow: hidden;
@@ -272,11 +264,11 @@
 
         .rider-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 26px rgba(15, 23, 42, 0.10);
+            box-shadow: 0 12px 26px rgba(15, 23, 42, .10);
         }
 
         .rider-card-top {
-            padding: 14px 14px;
+            padding: 14px;
             display: flex;
             gap: 12px;
             align-items: center;
@@ -375,7 +367,6 @@
             width: 100%;
         }
 
-        /* Toast */
         .mini-toast {
             position: fixed;
             right: 16px;
@@ -408,7 +399,6 @@
 @endsection
 
 @section('content')
-    {{-- HERO HEADER --}}
     <div class="page-hero mb-3">
         <div class="d-flex align-items-center justify-content-between">
             <div>
@@ -438,7 +428,6 @@
                 @foreach ($riderCards as $rc)
                     @php
                         $imgUrl = $rc['img'] ?: asset('assets/img/faces/6.jpg');
-                        // IMPORTANT: use tracking_on boolean from controller
                         $isOn = (bool) ($rc['tracking_on'] ?? false);
                         $badgeClass = $isOn ? 'tracking-badge tracking-on' : 'tracking-badge tracking-off';
                         $badgeText = $isOn ? 'TRACKING ON' : 'TRACKING OFF';
@@ -474,8 +463,7 @@
                                 </div>
 
                                 <div class="mini-row">
-                                    <div class="mini-label"><i class="fa-solid fa-location-crosshairs me-1"></i>Coords
-                                    </div>
+                                    <div class="mini-label"><i class="fa-solid fa-location-crosshairs me-1"></i>Coords</div>
                                     <div class="fw-semibold coord">
                                         @if ($rc['lat'] !== null && $rc['lng'] !== null)
                                             {{ $rc['lat'] }}, {{ $rc['lng'] }}
@@ -512,15 +500,14 @@
                                     <i class="fa-solid fa-filter me-1"></i> View Logs
                                 </a>
                             </div>
+
                         </div>
                     </div>
                 @endforeach
 
                 @if ($riderCards->count() === 0)
                     <div class="col-12">
-                        <div class="text-center text-muted p-4">
-                            No riders found.
-                        </div>
+                        <div class="text-center text-muted p-4">No riders found.</div>
                     </div>
                 @endif
             </div>
@@ -567,9 +554,7 @@
                     <button class="btn btn-grad w-100" type="submit">
                         <i class="fa-solid fa-magnifying-glass me-1"></i> Apply
                     </button>
-                    <a class="btn btn-soft w-100" href="{{ route('rider.location-tracking') }}">
-                        Reset
-                    </a>
+                    <a class="btn btn-soft w-100" href="{{ route('rider.location-tracking') }}">Reset</a>
                 </div>
             </form>
         </div>
@@ -618,7 +603,6 @@
 
     {{-- MAP + TABLE --}}
     <div class="row">
-        {{-- Map --}}
         <div class="col-lg-6 mb-3">
             <div class="panel-card">
                 <div class="panel-head">
@@ -627,14 +611,11 @@
                 </div>
                 <div class="card-body">
                     <div id="latestMap"></div>
-                    <div class="mt-2 panel-note">
-                        Tip: Click a marker to see rider details and open in Google Maps.
-                    </div>
+                    <div class="mt-2 panel-note">Tip: Click a marker to see rider details and open in Google Maps.</div>
                 </div>
             </div>
         </div>
 
-        {{-- Table --}}
         <div class="col-lg-6 mb-3">
             <div class="panel-card">
                 <div class="panel-head">
@@ -667,14 +648,15 @@
                                         }
                                         $imgUrl = $imgUrl ?: asset('assets/img/faces/6.jpg');
                                     @endphp
+
                                     <tr>
                                         <td>{{ $trackings->firstItem() + $i }}</td>
-
                                         <td>
                                             <span class="rider-pill">
                                                 <img src="{{ $imgUrl }}" alt="rider">
                                                 <span>
-                                                    <div class="rider-name">{{ $t->rider_name ?? 'Rider #' . $t->rider_id }}</div>
+                                                    <div class="rider-name">
+                                                        {{ $t->rider_name ?? 'Rider #' . $t->rider_id }}</div>
                                                     <div class="rider-phone mt-1">
                                                         <i class="fa-solid fa-phone"></i>
                                                         <span>{{ $t->phone_number ?? '—' }}</span>
@@ -686,14 +668,13 @@
                                         <td class="coord">
                                             {{ $t->latitude }}, {{ $t->longitude }}
                                             <div class="text-muted" style="font-size: .8rem;">
-                                                <a target="_blank" href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">
-                                                    Open in Google Maps
-                                                </a>
+                                                <a target="_blank"
+                                                    href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">Open
+                                                    in Google Maps</a>
                                             </div>
                                         </td>
 
-                                        <td>
-                                            {{ $t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '—' }}
+                                        <td>{{ $t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '—' }}
                                         </td>
 
                                         <td>
@@ -708,18 +689,15 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center p-4 text-muted">
-                                            No tracking records found for the selected filters.
-                                        </td>
+                                        <td colspan="5" class="text-center p-4 text-muted">No tracking records found
+                                            for the selected filters.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="p-3">
-                        {{ $trackings->links() }}
-                    </div>
+                    <div class="p-3">{{ $trackings->links() }}</div>
                 </div>
             </div>
         </div>
@@ -750,7 +728,7 @@
         </div>
     </div>
 
-    {{-- Toast --}}
+    {{-- Toast (JS will also auto-create if missing) --}}
     <div class="mini-toast" id="miniToast">
         <div class="t-title" id="toastTitle">Done</div>
         <div class="t-sub" id="toastSub">—</div>
@@ -761,190 +739,252 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const latestMarkers = @json($latestMarkers);
-        const trackingToggleUrl = "{{ route('rider.tracking.toggle') }}";
-        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        document.addEventListener('DOMContentLoaded', () => {
+            const latestMarkers = @json($latestMarkers);
+            const trackingToggleUrl = "{{ route('rider.tracking.toggle') }}";
 
-        // Toast
-        const toastEl = document.getElementById('miniToast');
-        const toastTitleEl = document.getElementById('toastTitle');
-        const toastSubEl = document.getElementById('toastSub');
-        let toastTimer = null;
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
-        function showToast(title, sub) {
-            toastTitleEl.textContent = title || 'Done';
-            toastSubEl.textContent = sub || '';
-            toastEl.classList.add('show');
-            if (toastTimer) clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
-        }
+            // ---------- Toast (NULL-SAFE) ----------
+            function ensureToast() {
+                let toastEl = document.getElementById('miniToast');
 
-        // Latest map
-        const latestMap = L.map('latestMap', { scrollWheelZoom: true });
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(latestMap);
+                if (!toastEl) {
+                    toastEl = document.createElement('div');
+                    toastEl.id = 'miniToast';
+                    toastEl.className = 'mini-toast';
+                    toastEl.innerHTML = `
+                        <div class="t-title" id="toastTitle">Done</div>
+                        <div class="t-sub" id="toastSub">—</div>
+                    `;
+                    document.body.appendChild(toastEl);
+                }
 
-        const bounds = [];
+                let titleEl = document.getElementById('toastTitle');
+                let subEl = document.getElementById('toastSub');
 
-        if (Array.isArray(latestMarkers) && latestMarkers.length) {
-            latestMarkers.forEach(m => {
-                if (!m.lat || !m.lng) return;
+                if (!titleEl || !subEl) {
+                    toastEl.innerHTML = `
+                        <div class="t-title" id="toastTitle">Done</div>
+                        <div class="t-sub" id="toastSub">—</div>
+                    `;
+                    titleEl = document.getElementById('toastTitle');
+                    subEl = document.getElementById('toastSub');
+                }
 
-                const gmap = `https://www.google.com/maps?q=${m.lat},${m.lng}`;
-                const popup = `
-                    <div style="min-width:220px;">
-                        <div style="font-weight:800;">${m.name}</div>
-                        <div style="color:#6b7280;font-size:.85rem;">${m.phone ? m.phone : ''}</div>
-                        <div style="margin-top:6px;font-size:.85rem;">Last: ${m.time ? m.time : '—'}</div>
-                        <div style="margin-top:8px;">
-                            <a href="${gmap}" target="_blank">Open in Google Maps</a>
-                        </div>
-                    </div>
-                `;
-
-                L.marker([m.lat, m.lng]).addTo(latestMap).bindPopup(popup);
-                bounds.push([m.lat, m.lng]);
-            });
-
-            if (bounds.length) {
-                latestMap.fitBounds(bounds, { padding: [30, 30] });
-            } else {
-                latestMap.setView([20.5937, 78.9629], 5);
+                return {
+                    toastEl,
+                    titleEl,
+                    subEl
+                };
             }
-        } else {
-            latestMap.setView([20.5937, 78.9629], 5);
-        }
 
-        // Modal map
-        let modalMap = null;
-        let modalMarker = null;
+            const toast = ensureToast();
+            let toastTimer = null;
 
-        const mapModalEl = document.getElementById('mapModal');
-        const mapModal = new bootstrap.Modal(mapModalEl);
+            function showToast(title, sub) {
+                if (!toast || !toast.titleEl || !toast.subEl || !toast.toastEl) return;
 
-        function initModalMap(lat, lng) {
-            if (!modalMap) {
-                modalMap = L.map('singleMap', { scrollWheelZoom: true });
+                toast.titleEl.textContent = title || 'Done';
+                toast.subEl.textContent = sub || '';
+                toast.toastEl.classList.add('show');
+
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => toast.toastEl.classList.remove('show'), 2600);
+            }
+
+            // ---------- Latest map (guard) ----------
+            const latestMapEl = document.getElementById('latestMap');
+            let latestMap = null;
+
+            if (latestMapEl) {
+                latestMap = L.map('latestMap', {
+                    scrollWheelZoom: true
+                });
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(modalMap);
-            }
+                }).addTo(latestMap);
 
-            modalMap.setView([lat, lng], 16);
+                const bounds = [];
+                if (Array.isArray(latestMarkers) && latestMarkers.length) {
+                    latestMarkers.forEach(m => {
+                        if (!m.lat || !m.lng) return;
 
-            if (modalMarker) modalMarker.setLatLng([lat, lng]);
-            else modalMarker = L.marker([lat, lng]).addTo(modalMap);
+                        const gmap = `https://www.google.com/maps?q=${m.lat},${m.lng}`;
+                        const popup = `
+                            <div style="min-width:220px;">
+                                <div style="font-weight:800;">${m.name}</div>
+                                <div style="color:#6b7280;font-size:.85rem;">${m.phone ? m.phone : ''}</div>
+                                <div style="margin-top:6px;font-size:.85rem;">Last: ${m.time ? m.time : '—'}</div>
+                                <div style="margin-top:8px;">
+                                    <a href="${gmap}" target="_blank">Open in Google Maps</a>
+                                </div>
+                            </div>
+                        `;
+                        L.marker([m.lat, m.lng]).addTo(latestMap).bindPopup(popup);
+                        bounds.push([m.lat, m.lng]);
+                    });
 
-            setTimeout(() => modalMap.invalidateSize(), 200);
-        }
-
-        document.querySelectorAll('.js-view-map').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const lat = parseFloat(btn.dataset.lat);
-                const lng = parseFloat(btn.dataset.lng);
-
-                const name = btn.dataset.name || 'Rider Location';
-                const phone = btn.dataset.phone || '';
-                const time = btn.dataset.time || '';
-
-                document.getElementById('modalTitle').innerText = name;
-                document.getElementById('modalSub').innerText = phone ? phone : '—';
-                document.getElementById('modalTime').innerText = time ? `Last update: ${time}` : '';
-
-                const gmap = `https://www.google.com/maps?q=${lat},${lng}`;
-                document.getElementById('modalGoogleLink').href = gmap;
-
-                mapModal.show();
-                setTimeout(() => initModalMap(lat, lng), 150);
-            });
-        });
-
-        // Start/Stop Tracking
-        function setCardUI(card, isOn) {
-            card.dataset.tracking = isOn ? '1' : '0';
-
-            const badge = card.querySelector('.js-tracking-badge');
-            const badgeText = card.querySelector('.js-tracking-text');
-
-            badge.classList.remove('tracking-on', 'tracking-off');
-            badge.classList.add(isOn ? 'tracking-on' : 'tracking-off');
-            badgeText.textContent = isOn ? 'TRACKING ON' : 'TRACKING OFF';
-
-            const btn = card.querySelector('.js-toggle-tracking');
-            const btnText = btn.querySelector('.js-btn-text');
-            const icon = btn.querySelector('i');
-
-            btn.classList.remove('btn-grad', 'btn-stop');
-            btn.classList.add(isOn ? 'btn-stop' : 'btn-grad');
-
-            btn.dataset.action = isOn ? 'stop' : 'start';
-            btnText.textContent = isOn ? 'Stop' : 'Start';
-
-            icon.classList.remove('fa-circle-play', 'fa-circle-stop');
-            icon.classList.add(isOn ? 'fa-circle-stop' : 'fa-circle-play');
-        }
-
-        async function toggleTracking(riderId, action) {
-            const res = await fetch(trackingToggleUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ rider_id: riderId, action })
-            });
-
-            const data = await res.json().catch(() => ({}));
-
-            if (!res.ok || !data.success) {
-                throw new Error(data.message || 'Unable to update tracking right now.');
-            }
-
-            return data;
-        }
-
-        document.querySelectorAll('.js-toggle-tracking').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const riderId = btn.dataset.riderId;
-                const action = btn.dataset.action;
-
-                const card = btn.closest('.js-rider-card');
-                if (!card) return;
-
-                btn.disabled = true;
-                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Please wait`;
-
-                try {
-                    const data = await toggleTracking(riderId, action);
-
-                    // IMPORTANT: use tracking_on from controller response
-                    const isOn = !!data.tracking_on;
-
-                    setCardUI(card, isOn);
-
-                    showToast(
-                        'Tracking updated',
-                        isOn ? 'Tracking started for this rider.' : 'Tracking stopped for this rider.'
-                    );
-                } catch (e) {
-                    showToast('Action failed', e.message || 'Something went wrong');
-                } finally {
-                    btn.disabled = false;
-
-                    const isOn = card.dataset.tracking === '1';
-                    btn.innerHTML = `
-                        <i class="fa-solid ${isOn ? 'fa-circle-stop' : 'fa-circle-play'} me-1"></i>
-                        <span class="js-btn-text">${isOn ? 'Stop' : 'Start'}</span>
-                    `;
-                    btn.classList.remove('btn-grad', 'btn-stop');
-                    btn.classList.add(isOn ? 'btn-stop' : 'btn-grad');
-                    btn.dataset.action = isOn ? 'stop' : 'start';
-                    btn.dataset.riderId = riderId;
+                    if (bounds.length) latestMap.fitBounds(bounds, {
+                        padding: [30, 30]
+                    });
+                    else latestMap.setView([20.5937, 78.9629], 5);
+                } else {
+                    latestMap.setView([20.5937, 78.9629], 5);
                 }
+            }
+
+            // ---------- Modal map ----------
+            const mapModalEl = document.getElementById('mapModal');
+            const singleMapEl = document.getElementById('singleMap');
+
+            let modalMap = null;
+            let modalMarker = null;
+            let mapModal = null;
+
+            if (mapModalEl && typeof bootstrap !== 'undefined') {
+                mapModal = new bootstrap.Modal(mapModalEl);
+            }
+
+            function initModalMap(lat, lng) {
+                if (!singleMapEl) return;
+
+                if (!modalMap) {
+                    modalMap = L.map('singleMap', {
+                        scrollWheelZoom: true
+                    });
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(modalMap);
+                }
+
+                modalMap.setView([lat, lng], 16);
+
+                if (modalMarker) modalMarker.setLatLng([lat, lng]);
+                else modalMarker = L.marker([lat, lng]).addTo(modalMap);
+
+                setTimeout(() => modalMap.invalidateSize(), 200);
+            }
+
+            document.querySelectorAll('.js-view-map').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const lat = parseFloat(btn.dataset.lat);
+                    const lng = parseFloat(btn.dataset.lng);
+
+                    const name = btn.dataset.name || 'Rider Location';
+                    const phone = btn.dataset.phone || '';
+                    const time = btn.dataset.time || '';
+
+                    const t1 = document.getElementById('modalTitle');
+                    const t2 = document.getElementById('modalSub');
+                    const t3 = document.getElementById('modalTime');
+                    const link = document.getElementById('modalGoogleLink');
+
+                    if (t1) t1.innerText = name;
+                    if (t2) t2.innerText = phone ? phone : '—';
+                    if (t3) t3.innerText = time ? `Last update: ${time}` : '';
+
+                    const gmap = `https://www.google.com/maps?q=${lat},${lng}`;
+                    if (link) link.href = gmap;
+
+                    if (mapModal) {
+                        mapModal.show();
+                        setTimeout(() => initModalMap(lat, lng), 150);
+                    }
+                });
+            });
+
+            // ---------- Start/Stop Tracking (ONLY) ----------
+            function setCardUI(card, isOn) {
+                card.dataset.tracking = isOn ? '1' : '0';
+
+                const badge = card.querySelector('.js-tracking-badge');
+                const badgeText = card.querySelector('.js-tracking-text');
+
+                if (badge) {
+                    badge.classList.remove('tracking-on', 'tracking-off');
+                    badge.classList.add(isOn ? 'tracking-on' : 'tracking-off');
+                }
+                if (badgeText) badgeText.textContent = isOn ? 'TRACKING ON' : 'TRACKING OFF';
+
+                const btn = card.querySelector('.js-toggle-tracking');
+                if (!btn) return;
+
+                const btnText = btn.querySelector('.js-btn-text');
+                const icon = btn.querySelector('i');
+
+                btn.classList.remove('btn-grad', 'btn-stop');
+                btn.classList.add(isOn ? 'btn-stop' : 'btn-grad');
+
+                btn.dataset.action = isOn ? 'stop' : 'start';
+
+                if (btnText) btnText.textContent = isOn ? 'Stop' : 'Start';
+
+                if (icon) {
+                    icon.classList.remove('fa-circle-play', 'fa-circle-stop');
+                    icon.classList.add(isOn ? 'fa-circle-stop' : 'fa-circle-play');
+                }
+            }
+
+            async function toggleTracking(riderId, action) {
+                const res = await fetch(trackingToggleUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        rider_id: riderId,
+                        action
+                    })
+                });
+
+                const data = await res.json().catch(() => ({}));
+
+                if (!res.ok || !data.success) {
+                    throw new Error(data.message || 'Unable to update tracking right now.');
+                }
+
+                return data;
+            }
+
+            document.querySelectorAll('.js-toggle-tracking').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const riderId = btn.dataset.riderId;
+                    const action = btn.dataset.action; // start/stop
+
+                    const card = btn.closest('.js-rider-card');
+                    if (!card) return;
+
+                    btn.disabled = true;
+                    const oldHtml = btn.innerHTML;
+                    btn.innerHTML =
+                        `<i class="fa-solid fa-spinner fa-spin me-1"></i> Please wait`;
+
+                    try {
+                        const data = await toggleTracking(riderId, action);
+
+                        // ONLY use tracking_on (boolean) from server response
+                        const isOn = !!data.tracking_on;
+
+                        setCardUI(card, isOn);
+
+                        showToast(
+                            'Tracking updated',
+                            isOn ? 'Tracking started for this rider.' :
+                            'Tracking stopped for this rider.'
+                        );
+                    } catch (e) {
+                        showToast('Action failed', e.message || 'Something went wrong');
+                        btn.innerHTML = oldHtml;
+                    } finally {
+                        btn.disabled = false;
+                    }
+                });
             });
         });
     </script>
