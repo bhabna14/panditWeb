@@ -73,60 +73,49 @@ class RiderLocationTrackingController extends Controller
         }
     }
 
-    public function updateTracking(Request $request)
-    {
-        try {
-            // Validate input (ONLY rider_id + tracking)
-            $validated = $request->validate([
-                'rider_id'  => ['required'],
-                'tracking'  => ['required', 'in:start,stop'],
-            ]);
+public function getTracking(Request $request)
+{
+    try {
+        $rider = Auth::guard('rider-api')->user();
 
-            $riderId = (string) $validated['rider_id'];
-
-            // Create default row if not exists
-            $row = RiderLocationTracking::firstOrCreate(
-                ['rider_id' => $riderId],
-                [
-                    'tracking'  => 'stop',
-                    'date_time' => Carbon::now(),
-                ]
-            );
-
-            // Update tracking
-            $row->tracking  = $validated['tracking'];  // start/stop
-            $row->date_time = Carbon::now();
-            $row->save();
-
-            $message = ($row->tracking === 'start')
-                ? 'Tracking started successfully.'
-                : 'Tracking stopped successfully.';
-
-            return response()->json([
-                'status'  => true,
-                'message' => $message,
-                'data'    => [
-                    'rider_id' => $row->rider_id,
-                    'tracking' => $row->tracking,
-                ],
-            ], 200);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        if (!$rider) {
             return response()->json([
                 'status'  => false,
-                'message' => 'Validation failed.',
-                'errors'  => $e->errors(),
-            ], 422);
-
-        } catch (\Throwable $e) {
-            Log::error('Rider tracking update error: '.$e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'status'  => false,
-                'message' => 'Server error. Unable to update tracking.',
-            ], 500);
+                'message' => 'Unauthorized rider.',
+            ], 401);
         }
+
+        $riderId = $rider->rider_id;
+
+        // Ensure default row exists (tracking = stop)
+        $row = RiderLocationTracking::firstOrCreate(
+            ['rider_id' => $riderId],
+            [
+                'tracking'  => 'stop',
+                'date_time' => Carbon::now(),
+            ]
+        );
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Tracking details fetched successfully.',
+            'data'    => [
+                'rider_id'  => $row->rider_id,
+                'tracking'  => $row->tracking,   // start | stop
+                'date_time' => $row->date_time,  // last updated
+            ],
+        ], 200);
+
+    } catch (\Throwable $e) {
+        Log::error('Get tracking error: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'status'  => false,
+            'message' => 'Server error. Unable to fetch tracking details.',
+        ], 500);
     }
+}
+
 }

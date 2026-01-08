@@ -280,5 +280,6 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::post('/rider/requested-deliver/{req_id}', [CustomizeDeliveryController::class, 'markDelivered']);
 });
 
-Route::post('/rider/location', [RiderLocationTrackingController::class, 'store'])
-    ->middleware('auth:rider-api');
+Route::post('/rider/location', [RiderLocationTrackingController::class, 'store'])->middleware('auth:rider-api');
+
+Route::get('/rider/tracking', [RiderTrackingController::class, 'getTracking'])->middleware('auth:rider-api');
