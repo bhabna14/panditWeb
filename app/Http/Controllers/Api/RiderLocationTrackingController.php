@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\RiderLocationTracking;
+use App\Models\RiderDetails;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class RiderLocationTrackingController extends Controller
 {
-     public function store(Request $request)
+    public function store(Request $request)
     {
         try {
             // Rider auth (your requirement)
@@ -92,6 +93,7 @@ public function getTracking(Request $request)
             ['rider_id' => $riderId],
             [
                 'tracking'  => 'stop',
+
             ]
         );
 
@@ -100,7 +102,7 @@ public function getTracking(Request $request)
             'message' => 'Tracking details fetched successfully.',
             'data'    => [
                 'rider_id'  => $row->rider_id,
-                'tracking'  => $row->tracking,   // start | stop
+                'tracking'  => $row->tracking, // start | stop
             ],
         ], 200);
 
@@ -115,5 +117,4 @@ public function getTracking(Request $request)
         ], 500);
     }
 }
-
 }
