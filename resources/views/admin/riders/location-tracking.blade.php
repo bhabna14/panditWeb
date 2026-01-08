@@ -421,7 +421,7 @@
                                         <td>{{ $t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '—' }}</td>
 
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-grad w-100 js-view-map"
+                                            <button style="color: white" type="button" class="btn btn-sm btn-grad w-100 js-view-map"
                                                 data-lat="{{ $t->latitude }}"
                                                 data-lng="{{ $t->longitude }}"
                                                 data-name="{{ e($t->rider_name ?? 'Rider #' . $t->rider_id) }}"
