@@ -112,39 +112,109 @@ class RiderController extends Controller
 
     public function editRiderDetails($id)
     {
-        $rider = RiderDetails::findOrFail($id); // Fetch rider by ID
-        $localities = Locality::all(); // Fetch all localities
-        return view('admin.edit-rider-details', compact('rider', 'localities'));
+        $rider = RiderDetails::findOrFail($id);
+        $localities = Locality::all();
+
+        // documents is cast to array in model, but keep it safe
+        $existingDocs = $rider->documents ?? [];
+        if (!is_array($existingDocs)) {
+            $existingDocs = (array) $existingDocs;
+        }
+
+        return view('admin.edit-rider-details', compact('rider', 'localities', 'existingDocs'));
     }
-        
+
     public function updateRiderDetails(Request $request, $id)
     {
         $validated = $request->validate([
             'rider_name'   => 'required|string|max:255',
             'phone_number' => 'required|digits:10',
             'salary'       => 'required|numeric|min:0',
+
+            'dob'             => 'required|date|before_or_equal:today',
+            'date_of_joining' => 'nullable|date|after_or_equal:dob|before_or_equal:today',
+
             'rider_img'    => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'description'  => 'nullable|string|max:1000',
+
+            // New uploads
+            'documents'     => 'nullable|array|max:5',
+            'documents.*'   => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
+
+            // Removing existing docs
+            'remove_documents'   => 'nullable|array',
+            'remove_documents.*' => 'string',
+
+            'description'  => 'nullable|string|max:2000',
         ]);
 
         $rider = RiderDetails::findOrFail($id);
 
-        // Update basic details
-        $rider->rider_name   = $validated['rider_name'];
-        $rider->phone_number = '+91' . $validated['phone_number']; // store with +91
-        $rider->salary       = $validated['salary'];
-        $rider->description  = $validated['description'] ?? null;
+        // ---- Phone storage with +91 (avoid double +91) ----
+        $digits10 = preg_replace('/\D/', '', (string) $validated['phone_number']);
+        $digits10 = substr($digits10, -10);
+        $phoneWithCode = '+91' . $digits10;
 
-        // Update image if provided
+        // ---- Existing documents (array) ----
+        $existingDocs = $rider->documents ?? [];
+        if (!is_array($existingDocs)) $existingDocs = [];
+
+        // ---- Remove selected docs ----
+        $removeDocs = $request->input('remove_documents', []);
+        if (!is_array($removeDocs)) $removeDocs = [];
+
+        $remainingDocs = array_values(array_filter($existingDocs, function ($path) use ($removeDocs) {
+            return !in_array($path, $removeDocs, true);
+        }));
+
+        // Delete removed files from disk
+        foreach ($removeDocs as $path) {
+            if ($path && Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        // ---- Upload new documents ----
+        $newDocs = [];
+        if ($request->hasFile('documents')) {
+            foreach ($request->file('documents') as $doc) {
+                $folder = $rider->rider_id ? "riders/{$rider->rider_id}/documents" : "riders/{$rider->id}/documents";
+                $newDocs[] = $doc->store($folder, 'public');
+            }
+        }
+
+        // ---- Enforce total max 5 docs ----
+        $totalDocs = count($remainingDocs) + count($newDocs);
+        if ($totalDocs > 5) {
+            // Rollback newly uploaded docs if limit exceeded
+            foreach ($newDocs as $p) {
+                if (Storage::disk('public')->exists($p)) Storage::disk('public')->delete($p);
+            }
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['documents' => 'Maximum 5 documents allowed (existing + new). Please remove some documents and try again.']);
+        }
+
+        // ---- Update basic fields ----
+        $rider->rider_name       = $validated['rider_name'];
+        $rider->phone_number     = $phoneWithCode;
+        $rider->salary           = $validated['salary'];
+        $rider->dob              = $validated['dob'];
+        $rider->date_of_joining  = $validated['date_of_joining'] ?? null;
+        $rider->description      = $validated['description'] ?? null;
+
+        // ---- Update image if provided ----
         if ($request->hasFile('rider_img')) {
-            // Delete old image from public disk if exists
             if ($rider->rider_img && Storage::disk('public')->exists($rider->rider_img)) {
                 Storage::disk('public')->delete($rider->rider_img);
             }
 
-            // Store new image
-            $rider->rider_img = $request->file('rider_img')->store('images', 'public');
+            $imgFolder = $rider->rider_id ? "riders/{$rider->rider_id}/photo" : "riders/{$rider->id}/photo";
+            $rider->rider_img = $request->file('rider_img')->store($imgFolder, 'public');
         }
+
+        // ---- Save documents merged ----
+        $finalDocs = array_values(array_merge($remainingDocs, $newDocs));
+        $rider->documents = !empty($finalDocs) ? $finalDocs : null;
 
         $rider->save();
 
