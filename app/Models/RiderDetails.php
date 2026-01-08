@@ -19,6 +19,7 @@ class RiderDetails extends Model
         'rider_img',
         'salary',
         'description',
+        'tracking',
     ];
 
     protected $casts = [

@@ -88,11 +88,10 @@ public function getTracking(Request $request)
         $riderId = $rider->rider_id;
 
         // Ensure default row exists (tracking = stop)
-        $row = RiderLocationTracking::firstOrCreate(
+        $row = RiderDetails::firstOrCreate(
             ['rider_id' => $riderId],
             [
                 'tracking'  => 'stop',
-                'date_time' => Carbon::now(),
             ]
         );
 
@@ -102,7 +101,6 @@ public function getTracking(Request $request)
             'data'    => [
                 'rider_id'  => $row->rider_id,
                 'tracking'  => $row->tracking,   // start | stop
-                'date_time' => $row->date_time,  // last updated
             ],
         ], 200);
 
