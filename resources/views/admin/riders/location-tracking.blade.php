@@ -259,7 +259,7 @@
                             <button type="button"
                                     class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
                                     data-rider-id="{{ $rc['rider_id'] }}"
-                                    data-action="{{ $isOn ? 'stop' : 'start' }}">
+                                    data-action="{{ $isOn ? 'stop' : 'start' }}" style="color: white">
                                 <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1 js-btn-icon"></i>
                                 <span class="js-btn-text" style="color: white">{{ $isOn ? 'Stop' : 'Start' }}</span>
                             </button>
