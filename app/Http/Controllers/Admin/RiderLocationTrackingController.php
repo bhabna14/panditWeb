@@ -26,6 +26,7 @@ class RiderLocationTrackingController extends Controller
         // Dropdown riders (include tracking)
         $riders = RiderDetails::query()
             ->orderBy('rider_name')
+            ->where('status', 'active')
             ->get(['rider_id', 'rider_name', 'phone_number', 'rider_img', 'tracking']);
 
         // Base filter for stats
