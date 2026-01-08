@@ -72,7 +72,7 @@ class RiderLocationTrackingController extends Controller
             ->paginate(50)
             ->withQueryString();
 
-        // Latest location per rider (for map + rider cards)
+        // Latest location per rider (for map)
         $latestSub = RiderLocationTracking::query()
             ->select('rider_id', DB::raw('MAX(date_time) as max_date_time'))
             ->when($riderId !== '', function ($q) use ($riderId) {
@@ -122,22 +122,8 @@ class RiderLocationTrackingController extends Controller
             ];
         })->values()->all();
 
-        // Rider cards (all riders + last ping + tracking status)
-        $latestByRider = $latestPerRider->keyBy('rider_id');
-
-        $riderCards = $riders->map(function ($r) use ($latestByRider) {
-            $last = $latestByRider->get($r->rider_id);
-
-            $img = null;
-            if (!empty($r->rider_img)) {
-                try {
-                    $img = \Storage::url($r->rider_img);
-                } catch (\Throwable $e) {
-                    $img = null;
-                }
-            }
-
-            // ONLY start/stop logic
+        // Rider cards (ONLY: name + start/stop)
+        $riderCards = $riders->map(function ($r) {
             $trackingValue = strtolower(trim((string) ($r->tracking ?? 'stop')));
             $trackingValue = in_array($trackingValue, ['start', 'stop'], true) ? $trackingValue : 'stop';
             $trackingOn    = ($trackingValue === 'start');
@@ -145,15 +131,8 @@ class RiderLocationTrackingController extends Controller
             return [
                 'rider_id'       => (string) $r->rider_id,
                 'name'           => $r->rider_name ?: ('Rider #' . $r->rider_id),
-                'phone'          => $r->phone_number ?: '',
-                'img'            => $img,
-
                 'tracking_on'    => $trackingOn,
                 'tracking_value' => $trackingValue, // "start" or "stop"
-
-                'lat'            => ($last && $last->latitude !== null) ? (float) $last->latitude : null,
-                'lng'            => ($last && $last->longitude !== null) ? (float) $last->longitude : null,
-                'last_time'      => ($last && $last->date_time) ? Carbon::parse($last->date_time)->format('d M Y, h:i A') : '',
             ];
         });
 
@@ -193,7 +172,7 @@ class RiderLocationTrackingController extends Controller
             ], 404);
         }
 
-        // Save ONLY "start" / "stop"
+        // Update ONLY tracking column with "start" or "stop"
         $rider->tracking = $action;
         $rider->save();
 
@@ -202,7 +181,7 @@ class RiderLocationTrackingController extends Controller
             'message'        => 'Tracking updated successfully.',
             'rider_id'       => $riderId,
             'tracking_on'    => ($action === 'start'),
-            'tracking_value' => $action,                 // "start" or "stop"
+            'tracking_value' => $action,
         ]);
     }
 }

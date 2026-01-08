@@ -137,42 +137,6 @@
             border-radius: 14px;
         }
 
-        .rider-pill {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-            padding: .45rem .6rem;
-            border-radius: 999px;
-            background: #f8fafc;
-            border: 1px solid rgba(0, 0, 0, .05);
-        }
-
-        .rider-pill img {
-            width: 34px;
-            height: 34px;
-            border-radius: 999px;
-            object-fit: cover;
-            border: 2px solid rgba(43, 89, 255, .25);
-            background: #fff;
-        }
-
-        .rider-name {
-            font-weight: 900;
-            color: #111827;
-            line-height: 1.1;
-        }
-
-        .rider-phone {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            padding: .15rem .45rem;
-            border-radius: 999px;
-            font-size: .78rem;
-            color: #374151;
-            background: rgba(43, 89, 255, .08);
-        }
-
         .table thead th {
             white-space: nowrap;
             font-weight: 800;
@@ -252,6 +216,7 @@
             color: #111827;
         }
 
+        /* UPDATED: minimal card */
         .rider-card {
             border-radius: 16px;
             border: 1px solid rgba(0, 0, 0, .06);
@@ -260,6 +225,7 @@
             transition: transform .15s ease, box-shadow .15s ease;
             overflow: hidden;
             height: 100%;
+            padding: 14px;
         }
 
         .rider-card:hover {
@@ -267,99 +233,12 @@
             box-shadow: 0 12px 26px rgba(15, 23, 42, .10);
         }
 
-        .rider-card-top {
-            padding: 14px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .rider-avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
-            overflow: hidden;
-            flex: 0 0 auto;
-            border: 2px solid rgba(43, 89, 255, .18);
-            background: #f8fafc;
-        }
-
-        .rider-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .rider-card-name {
+        .rider-mini-name {
             font-weight: 900;
             color: #111827;
-            margin: 0;
-            line-height: 1.1;
-        }
-
-        .rider-card-meta {
-            color: #6b7280;
-            font-size: .85rem;
-        }
-
-        .tracking-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: .45rem;
-            padding: .2rem .55rem;
-            border-radius: 999px;
-            font-size: .78rem;
-            font-weight: 800;
-            border: 1px solid rgba(0, 0, 0, .06);
-            white-space: nowrap;
-        }
-
-        .tracking-on {
-            background: rgba(34, 197, 94, .12);
-            color: #166534;
-        }
-
-        .tracking-off {
-            background: rgba(239, 68, 68, .10);
-            color: #991b1b;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: currentColor;
-            opacity: .9;
-        }
-
-        .rider-card-mid {
-            padding: 0 14px 12px;
-        }
-
-        .mini-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: .85rem;
-            color: #374151;
-            padding: 8px 0;
-            border-top: 1px dashed rgba(0, 0, 0, .08);
-        }
-
-        .mini-row:first-child {
-            border-top: none;
-            padding-top: 0;
-        }
-
-        .mini-label {
-            color: #6b7280;
-        }
-
-        .rider-card-actions {
-            padding: 12px 14px 14px;
-            border-top: 1px solid rgba(0, 0, 0, .05);
-            display: flex;
-            gap: 10px;
+            margin-bottom: 12px;
+            line-height: 1.2;
+            font-size: .98rem;
         }
 
         .btn-card {
@@ -411,14 +290,14 @@
         </div>
     </div>
 
-    {{-- RIDER CONTROL CARDS --}}
+    {{-- RIDER CONTROL CARDS (ONLY: NAME + START/STOP BUTTON) --}}
     <div class="rider-control-wrap mb-3">
         <div class="rider-control-head">
             <div>
                 <h6 class="rider-control-title mb-0">
                     <i class="fa-solid fa-toggle-on me-2"></i>Rider Tracking Control
                 </h6>
-                <div class="panel-note">Start/Stop tracking rider-wise (updates RiderDetails.tracking)</div>
+                <div class="panel-note">Start/Stop tracking rider-wise (updates flower__rider_details.tracking)</div>
             </div>
             <div class="panel-note">Total Riders: {{ number_format($riderCards->count()) }}</div>
         </div>
@@ -427,80 +306,23 @@
             <div class="row g-3">
                 @foreach ($riderCards as $rc)
                     @php
-                        $imgUrl = $rc['img'] ?: asset('assets/img/faces/6.jpg');
                         $isOn = (bool) ($rc['tracking_on'] ?? false);
-                        $badgeClass = $isOn ? 'tracking-badge tracking-on' : 'tracking-badge tracking-off';
-                        $badgeText = $isOn ? 'TRACKING ON' : 'TRACKING OFF';
                     @endphp
 
                     <div class="col-xl-3 col-lg-4 col-md-6">
                         <div class="rider-card js-rider-card" data-rider-id="{{ $rc['rider_id'] }}"
                             data-tracking="{{ $isOn ? 1 : 0 }}">
-                            <div class="rider-card-top">
-                                <div class="rider-avatar">
-                                    <img src="{{ $imgUrl }}" alt="rider">
-                                </div>
 
-                                <div class="flex-grow-1">
-                                    <p class="rider-card-name mb-1">{{ $rc['name'] }}</p>
-                                    <div class="rider-card-meta">
-                                        <i class="fa-solid fa-phone me-1"></i>{{ $rc['phone'] ?: '—' }}
-                                    </div>
-                                </div>
-
-                                <div class="text-end">
-                                    <span class="{{ $badgeClass }} js-tracking-badge">
-                                        <span class="dot"></span>
-                                        <span class="js-tracking-text">{{ $badgeText }}</span>
-                                    </span>
-                                </div>
+                            <div class="rider-mini-name">
+                                {{ $rc['name'] }}
                             </div>
 
-                            <div class="rider-card-mid">
-                                <div class="mini-row">
-                                    <div class="mini-label"><i class="fa-solid fa-clock me-1"></i>Last Ping</div>
-                                    <div class="fw-semibold">{{ $rc['last_time'] ?: '—' }}</div>
-                                </div>
-
-                                <div class="mini-row">
-                                    <div class="mini-label"><i class="fa-solid fa-location-crosshairs me-1"></i>Coords</div>
-                                    <div class="fw-semibold coord">
-                                        @if ($rc['lat'] !== null && $rc['lng'] !== null)
-                                            {{ $rc['lat'] }}, {{ $rc['lng'] }}
-                                        @else
-                                            —
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div class="mini-row">
-                                    <div class="mini-label"><i class="fa-solid fa-map me-1"></i>Open</div>
-                                    <div class="fw-semibold">
-                                        @if ($rc['lat'] !== null && $rc['lng'] !== null)
-                                            <a target="_blank"
-                                                href="https://www.google.com/maps?q={{ $rc['lat'] }},{{ $rc['lng'] }}">Google
-                                                Maps</a>
-                                        @else
-                                            —
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="rider-card-actions">
-                                <button type="button"
-                                    class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
-                                    data-rider-id="{{ $rc['rider_id'] }}" data-action="{{ $isOn ? 'stop' : 'start' }}">
-                                    <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1"></i>
-                                    <span class="js-btn-text">{{ $isOn ? 'Stop' : 'Start' }}</span>
-                                </button>
-
-                                <a class="btn btn-soft btn-card"
-                                    href="{{ route('rider.location-tracking', ['rider_id' => $rc['rider_id']]) }}">
-                                    <i class="fa-solid fa-filter me-1"></i> View Logs
-                                </a>
-                            </div>
-
+                            <button type="button"
+                                class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
+                                data-rider-id="{{ $rc['rider_id'] }}" data-action="{{ $isOn ? 'stop' : 'start' }}">
+                                <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1"></i>
+                                <span class="js-btn-text">{{ $isOn ? 'Stop' : 'Start' }}</span>
+                            </button>
                         </div>
                     </div>
                 @endforeach
@@ -637,32 +459,16 @@
                             </thead>
                             <tbody>
                                 @forelse($trackings as $i => $t)
-                                    @php
-                                        $imgUrl = null;
-                                        if (!empty($t->rider_img)) {
-                                            try {
-                                                $imgUrl = Storage::url($t->rider_img);
-                                            } catch (\Throwable $e) {
-                                                $imgUrl = null;
-                                            }
-                                        }
-                                        $imgUrl = $imgUrl ?: asset('assets/img/faces/6.jpg');
-                                    @endphp
-
                                     <tr>
                                         <td>{{ $trackings->firstItem() + $i }}</td>
+
                                         <td>
-                                            <span class="rider-pill">
-                                                <img src="{{ $imgUrl }}" alt="rider">
-                                                <span>
-                                                    <div class="rider-name">
-                                                        {{ $t->rider_name ?? 'Rider #' . $t->rider_id }}</div>
-                                                    <div class="rider-phone mt-1">
-                                                        <i class="fa-solid fa-phone"></i>
-                                                        <span>{{ $t->phone_number ?? '—' }}</span>
-                                                    </div>
-                                                </span>
-                                            </span>
+                                            <div style="font-weight:800;color:#111827;">
+                                                {{ $t->rider_name ?? 'Rider #' . $t->rider_id }}
+                                            </div>
+                                            <div class="text-muted" style="font-size:.85rem;">
+                                                <i class="fa-solid fa-phone me-1"></i>{{ $t->phone_number ?? '—' }}
+                                            </div>
                                         </td>
 
                                         <td class="coord">
@@ -689,8 +495,9 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="text-center p-4 text-muted">No tracking records found
-                                            for the selected filters.</td>
+                                        <td colspan="5" class="text-center p-4 text-muted">
+                                            No tracking records found for the selected filters.
+                                        </td>
                                     </tr>
                                 @endforelse
                             </tbody>
@@ -728,7 +535,7 @@
         </div>
     </div>
 
-    {{-- Toast (JS will also auto-create if missing) --}}
+    {{-- Toast --}}
     <div class="mini-toast" id="miniToast">
         <div class="t-title" id="toastTitle">Done</div>
         <div class="t-sub" id="toastSub">—</div>
@@ -746,7 +553,7 @@
             const csrfMeta = document.querySelector('meta[name="csrf-token"]');
             const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
-            // ---------- Toast (NULL-SAFE) ----------
+            // ---------- Toast ----------
             function ensureToast() {
                 let toastEl = document.getElementById('miniToast');
 
@@ -794,7 +601,7 @@
                 toastTimer = setTimeout(() => toast.toastEl.classList.remove('show'), 2600);
             }
 
-            // ---------- Latest map (guard) ----------
+            // ---------- Latest map ----------
             const latestMapEl = document.getElementById('latestMap');
             let latestMap = null;
 
@@ -897,18 +704,9 @@
                 });
             });
 
-            // ---------- Start/Stop Tracking (ONLY) ----------
+            // ---------- Start/Stop Tracking ----------
             function setCardUI(card, isOn) {
                 card.dataset.tracking = isOn ? '1' : '0';
-
-                const badge = card.querySelector('.js-tracking-badge');
-                const badgeText = card.querySelector('.js-tracking-text');
-
-                if (badge) {
-                    badge.classList.remove('tracking-on', 'tracking-off');
-                    badge.classList.add(isOn ? 'tracking-on' : 'tracking-off');
-                }
-                if (badgeText) badgeText.textContent = isOn ? 'TRACKING ON' : 'TRACKING OFF';
 
                 const btn = card.querySelector('.js-toggle-tracking');
                 if (!btn) return;
@@ -967,16 +765,14 @@
 
                     try {
                         const data = await toggleTracking(riderId, action);
-
-                        // ONLY use tracking_on (boolean) from server response
                         const isOn = !!data.tracking_on;
 
                         setCardUI(card, isOn);
 
                         showToast(
                             'Tracking updated',
-                            isOn ? 'Tracking started for this rider.' :
-                            'Tracking stopped for this rider.'
+                            isOn ? 'Tracking set to START for this rider.' :
+                            'Tracking set to STOP for this rider.'
                         );
                     } catch (e) {
                         showToast('Action failed', e.message || 'Something went wrong');
