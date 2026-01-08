@@ -261,7 +261,7 @@
                                     data-rider-id="{{ $rc['rider_id'] }}"
                                     data-action="{{ $isOn ? 'stop' : 'start' }}">
                                 <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1 js-btn-icon"></i>
-                                <span class="js-btn-text">{{ $isOn ? 'Stop' : 'Start' }}</span>
+                                <span class="js-btn-text" style="color: white">{{ $isOn ? 'Stop' : 'Start' }}</span>
                             </button>
                         </div>
                     </div>
