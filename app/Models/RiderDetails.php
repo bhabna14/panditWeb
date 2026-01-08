@@ -18,17 +18,21 @@ class RiderDetails extends Model
         'phone_number',
         'rider_img',
         'salary',
+        'dob',
+        'documents',
         'description',
         'tracking',
     ];
-        
+
     protected $casts = [
-        'salary'   => 'decimal:2',
+        'salary'    => 'decimal:2',
+        'dob'       => 'date',
+        'documents' => 'array', // store JSON array of file paths
     ];
 
     public function pickupDetails()
     {
-        return $this->hasMany(FlowerPickupDetails::class, 'rider_id','rider_id');
+        return $this->hasMany(FlowerPickupDetails::class, 'rider_id', 'rider_id');
     }
 
     public function orders()
@@ -36,7 +40,6 @@ class RiderDetails extends Model
         return $this->hasMany(Order::class, 'rider_id', 'rider_id');
     }
 
-    // NEW: all deliveries done by this rider (can be used anywhere else)
     public function deliveryHistories()
     {
         return $this->hasMany(DeliveryHistory::class, 'rider_id', 'rider_id');
@@ -46,5 +49,4 @@ class RiderDetails extends Model
     {
         return $this->hasMany(\App\Models\RiderAttendance::class, 'rider_id', 'rider_id');
     }
-
 }

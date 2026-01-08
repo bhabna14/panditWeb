@@ -15,44 +15,63 @@ class RiderController extends Controller
     
     public function addRiderDetails()
     {
-        $localities = Locality::where('status','active')->get();
-
+        $localities = Locality::where('status', 'active')->get();
         return view('admin.add-rider-details', compact('localities'));
     }
-        
+
     public function saveRiderDetails(Request $request)
     {
         $validatedData = $request->validate([
             'rider_name'    => 'required|string|max:255',
             'phone_number'  => 'required|digits:10',
             'salary'        => 'required|numeric|min:0',
-            'rider_img'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // 2MB
-            'description'   => 'nullable|string',
+
+            'dob'           => 'required|date|before_or_equal:today',
+
+            'rider_img'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+
+            // Documents (multiple)
+            'documents'     => 'nullable|array|max:5',
+            'documents.*'   => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
+
+            'description'   => 'nullable|string|max:2000',
         ]);
 
         try {
             // Prepend +91 to the phone number
             $phoneNumber = '+91' . $validatedData['phone_number'];
 
-            // Upload image if present
-            $imagePath = null;
-            if ($request->hasFile('rider_img')) {
-                $imagePath = $request->file('rider_img')->store('images', 'public');
-            }
-
             // Generate unique Rider ID (avoid collision)
             do {
                 $rider_id = 'RIDER' . rand(10000, 99999);
             } while (RiderDetails::where('rider_id', $rider_id)->exists());
 
-            // Save
+            // Upload image if present
+            $imagePath = null;
+            if ($request->hasFile('rider_img')) {
+                $imagePath = $request->file('rider_img')->store("riders/{$rider_id}/photo", 'public');
+            }
+
+            // Upload documents if present (store as array in DB)
+            $docPaths = [];
+            if ($request->hasFile('documents')) {
+                foreach ($request->file('documents') as $doc) {
+                    $docPaths[] = $doc->store("riders/{$rider_id}/documents", 'public');
+                }
+            }
+
             RiderDetails::create([
                 'rider_id'      => $rider_id,
                 'rider_name'    => $validatedData['rider_name'],
                 'phone_number'  => $phoneNumber,
                 'salary'        => $validatedData['salary'],
+                'dob'           => $validatedData['dob'],
                 'rider_img'     => $imagePath,
+                'documents'     => !empty($docPaths) ? $docPaths : null,
                 'description'   => $validatedData['description'] ?? null,
+
+                // optional default
+                'tracking'      => 'stop',
             ]);
 
             return redirect()->back()->with('success', 'Rider details saved successfully.');
@@ -61,7 +80,7 @@ class RiderController extends Controller
 
             return redirect()->back()->with('error', 'Failed to save rider details. Please try again.');
         }
-    } 
+    }
 
     public function manageRiderDetails()
     {
@@ -139,8 +158,6 @@ class RiderController extends Controller
             return redirect()->back()->with('error', 'Failed to delete rider. Please try again.');
         }
     }
-
-    // Rider Order Assign controllre 
 
     public function addOrderAssign()
     {

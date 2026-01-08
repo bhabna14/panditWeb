@@ -3,20 +3,20 @@
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
     <style>
-        /* ===== Form polishing ===== */
         .page-title { font-weight: 700; }
 
         .section-card {
             border: 1px solid #e7ebf0;
             border-radius: 14px;
-            margin-bottom: 1rem
+            margin-bottom: 1rem;
+            background: #fff;
         }
 
         .section-card .card-header {
             background: #f8fafc;
             border-bottom: 1px solid #eef2f7;
             border-top-left-radius: 14px;
-            border-top-right-radius: 14px
+            border-top-right-radius: 14px;
         }
 
         .section-card .card-header h6 {
@@ -24,41 +24,37 @@
             font-weight: 700;
             display: flex;
             align-items: center;
-            gap: .5rem
+            gap: .5rem;
         }
 
-        .required:after { content: ' *'; color: #dc2626 }
+        .required:after { content: ' *'; color: #dc2626; }
 
-        .form-text { color: #64748b; font-size: .82rem }
+        .form-text { color: #64748b; font-size: .82rem; }
 
-        .input-group-text { background: #f1f5f9 }
+        .input-group-text { background: #f1f5f9; }
 
-        .shadow-hover { transition: .2s }
-
+        .shadow-hover { transition: .2s; }
         .shadow-hover:hover { box-shadow: 0 10px 24px rgba(0, 0, 0, .06); }
 
-        .divider { height: 1px; background: #eef2f7; margin: 1rem 0 }
+        .actions { gap: .5rem; }
 
-        .actions { gap: .5rem }
-
-        /* Image picker */
+        /* Upload UI */
         .upload-zone {
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
             padding: 1rem;
             text-align: center;
             cursor: pointer;
-            background: #fcfdff
+            background: #fcfdff;
         }
-
-        .upload-zone.dragover { background: #f0f9ff; border-color: #38bdf8 }
+        .upload-zone.dragover { background: #f0f9ff; border-color: #38bdf8; }
 
         .upload-thumb {
             width: 96px;
             height: 96px;
             border-radius: 12px;
             object-fit: cover;
-            border: 1px solid #e5e7eb
+            border: 1px solid #e5e7eb;
         }
 
         .visually-hidden {
@@ -70,20 +66,44 @@
             overflow: hidden;
             clip: rect(0, 0, 0, 0);
             white-space: nowrap;
-            border: 0
+            border: 0;
         }
 
+        .doc-list {
+            margin: .75rem 0 0;
+            padding: 0;
+            list-style: none;
+        }
+        .doc-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: .75rem;
+            padding: .5rem .65rem;
+            border: 1px solid #eef2f7;
+            border-radius: 10px;
+            margin-bottom: .5rem;
+            background: #ffffff;
+        }
+        .doc-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 240px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+        .doc-meta { color: #64748b; font-size: .82rem; white-space: nowrap; }
+
         /* Alerts spacing */
-        .alert ul { margin: 0 0 0 1rem }
+        .alert ul { margin: 0 0 0 1rem; }
     </style>
 @endsection
 
 @section('content')
-    <!-- Page header -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="page-title">Add Rider</span>
-            <p class="mb-0 text-muted">Create a rider profile with contact info, salary and a photo.</p>
+            <p class="mb-0 text-muted">Create a rider profile with contact info, salary, DOB, documents and a photo.</p>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
@@ -93,7 +113,6 @@
         </div>
     </div>
 
-    <!-- Alerts -->
     @if ($errors->any())
         <div class="alert alert-danger shadow-sm shadow-hover">
             <strong>There were some problems with your input.</strong>
@@ -121,15 +140,17 @@
         @csrf
 
         <div class="row">
+            <!-- LEFT -->
             <div class="col-lg-8">
-                <!-- Identity -->
                 <div class="card section-card">
                     <div class="card-header">
-                        <h6><i class="bi bi-person-badge"></i> Rider Identity</h6>
+                        <h6><i class="bi bi-person-badge"></i> Rider Details</h6>
                     </div>
+
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-8">
+                            <!-- Name -->
+                            <div class="col-md-6">
                                 <label for="rider_name" class="form-label required">Rider Name</label>
                                 <input type="text"
                                        class="form-control"
@@ -142,7 +163,8 @@
                                 <div class="form-text">Use the rider's full legal name.</div>
                             </div>
 
-                            <div class="col-md-4">
+                            <!-- Phone -->
+                            <div class="col-md-3">
                                 <label for="phone_number" class="form-label required">Phone Number</label>
                                 <div class="input-group">
                                     <span class="input-group-text">+91</span>
@@ -160,8 +182,8 @@
                                 <div class="form-text">Only digits, no spaces or dashes.</div>
                             </div>
 
-                            <!-- NEW: Salary -->
-                            <div class="col-md-4">
+                            <!-- Salary -->
+                            <div class="col-md-3">
                                 <label for="salary" class="form-label required">Salary</label>
                                 <div class="input-group">
                                     <span class="input-group-text">₹</span>
@@ -175,10 +197,23 @@
                                            step="0.01"
                                            required>
                                 </div>
-                                <div class="form-text">Monthly salary (numbers only).</div>
+                                <div class="form-text">Monthly salary.</div>
                             </div>
 
-                            <div class="col-12">
+                            <!-- DOB -->
+                            <div class="col-md-4">
+                                <label for="dob" class="form-label required">Date of Birth</label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="dob"
+                                       name="dob"
+                                       value="{{ old('dob') }}"
+                                       required>
+                                <div class="form-text">Used for rider profile and verification.</div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-md-8">
                                 <label for="description" class="form-label">Short Description</label>
                                 <textarea class="form-control"
                                           id="description"
@@ -191,7 +226,7 @@
                     </div>
                 </div>
 
-                <!-- Actions -->
+                <!-- ACTIONS -->
                 <div class="card section-card">
                     <div class="card-body d-flex flex-wrap justify-content-between align-items-center actions">
                         <div class="text-muted">
@@ -205,8 +240,9 @@
                 </div>
             </div>
 
+            <!-- RIGHT -->
             <div class="col-lg-4">
-                <!-- Photo -->
+                <!-- PHOTO -->
                 <div class="card section-card">
                     <div class="card-header">
                         <h6><i class="bi bi-image"></i> Rider Photo</h6>
@@ -227,13 +263,40 @@
                                        accept="image/*">
                             </div>
                         </div>
-                        <div id="dropZone" class="upload-zone text-muted">
-                            Drag & drop an image here, or click above.
+
+                        <div id="dropZonePhoto" class="upload-zone text-muted">
+                            Drag & drop an image here, or click “Choose Image”.
                         </div>
                     </div>
                 </div>
 
-                <!-- Notes -->
+                <!-- DOCUMENTS -->
+                <div class="card section-card">
+                    <div class="card-header">
+                        <h6><i class="bi bi-folder2-open"></i> Documents</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-text mb-2">
+                            Upload rider documents (PDF/JPG/PNG). Max 5 files, 5 MB each.
+                        </div>
+
+                        <label for="documents" class="btn btn-outline-primary btn-sm">Choose Documents</label>
+                        <input type="file"
+                               class="visually-hidden"
+                               id="documents"
+                               name="documents[]"
+                               accept=".pdf,image/*"
+                               multiple>
+
+                        <div id="dropZoneDocs" class="upload-zone text-muted mt-3">
+                            Drag & drop documents here, or click “Choose Documents”.
+                        </div>
+
+                        <ul id="docList" class="doc-list"></ul>
+                    </div>
+                </div>
+
+                <!-- NOTES -->
                 <div class="card section-card">
                     <div class="card-header">
                         <h6><i class="bi bi-info-circle"></i> Notes</h6>
@@ -279,50 +342,156 @@
             });
         }
 
-        // Image preview + drag & drop
-        const input = document.getElementById('rider_img');
-        const preview = document.getElementById('preview');
-        const dropZone = document.getElementById('dropZone');
+        // DOB: prevent future date
+        const dob = document.getElementById('dob');
+        if (dob) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            dob.max = `${yyyy}-${mm}-${dd}`;
+        }
 
-        function handleFiles(files) {
+        // ===== Photo: preview + drag drop =====
+        const inputPhoto = document.getElementById('rider_img');
+        const preview = document.getElementById('preview');
+        const dropZonePhoto = document.getElementById('dropZonePhoto');
+
+        function handlePhoto(files) {
             if (!files || !files.length) return;
             const file = files[0];
             const isImage = file.type.startsWith('image/');
             const tooBig = file.size > 2 * 1024 * 1024; // 2MB
-            if (!isImage) {
-                alert('Please choose an image file.');
-                return;
-            }
-            if (tooBig) {
-                alert('Image is larger than 2 MB.');
-                return;
-            }
-            const url = URL.createObjectURL(file);
-            preview.src = url;
+
+            if (!isImage) { alert('Please choose an image file.'); return; }
+            if (tooBig) { alert('Image is larger than 2 MB.'); return; }
+
+            preview.src = URL.createObjectURL(file);
         }
 
-        if (input) {
-            input.addEventListener('change', function() {
-                handleFiles(this.files);
+        if (inputPhoto) {
+            inputPhoto.addEventListener('change', function() {
+                handlePhoto(this.files);
             });
         }
 
-        if (dropZone) {
-            ['dragenter', 'dragover'].forEach(evt => dropZone.addEventListener(evt, e => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.add('dragover');
+        if (dropZonePhoto) {
+            ['dragenter', 'dragover'].forEach(evt => dropZonePhoto.addEventListener(evt, e => {
+                e.preventDefault(); e.stopPropagation();
+                dropZonePhoto.classList.add('dragover');
+            }));
+            ['dragleave', 'drop'].forEach(evt => dropZonePhoto.addEventListener(evt, e => {
+                e.preventDefault(); e.stopPropagation();
+                dropZonePhoto.classList.remove('dragover');
+            }));
+            dropZonePhoto.addEventListener('drop', function(e) {
+                handlePhoto(e.dataTransfer.files);
+                if (inputPhoto) inputPhoto.files = e.dataTransfer.files;
+            });
+        }
+
+        // ===== Documents: list + drag drop =====
+        const inputDocs = document.getElementById('documents');
+        const dropZoneDocs = document.getElementById('dropZoneDocs');
+        const docList = document.getElementById('docList');
+
+        const MAX_DOCS = 5;
+        const MAX_DOC_SIZE = 5 * 1024 * 1024; // 5MB
+        const allowedDocTypes = [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'image/jpg'
+        ];
+
+        function bytesToSize(bytes) {
+            const sizes = ['Bytes','KB','MB','GB'];
+            if (bytes === 0) return '0 Byte';
+            const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
+            return Math.round(bytes / Math.pow(1024, i) * 10) / 10 + ' ' + sizes[i];
+        }
+
+        function renderDocList(files) {
+            if (!docList) return;
+            docList.innerHTML = '';
+
+            if (!files || !files.length) return;
+
+            Array.from(files).forEach(f => {
+                const li = document.createElement('li');
+
+                const left = document.createElement('div');
+                left.className = 'doc-name';
+                left.title = f.name;
+                left.textContent = f.name;
+
+                const right = document.createElement('div');
+                right.className = 'doc-meta';
+                right.textContent = bytesToSize(f.size);
+
+                li.appendChild(left);
+                li.appendChild(right);
+                docList.appendChild(li);
+            });
+        }
+
+        function validateDocs(files) {
+            const arr = Array.from(files || []);
+            if (!arr.length) return { ok: true };
+
+            if (arr.length > MAX_DOCS) {
+                return { ok: false, msg: `Maximum ${MAX_DOCS} documents allowed.` };
+            }
+
+            for (const f of arr) {
+                const typeOk = allowedDocTypes.includes(f.type);
+                const sizeOk = f.size <= MAX_DOC_SIZE;
+                if (!typeOk) return { ok: false, msg: 'Only PDF, JPG, JPEG, PNG documents are allowed.' };
+                if (!sizeOk) return { ok: false, msg: 'One or more documents exceed 5 MB.' };
+            }
+
+            return { ok: true };
+        }
+
+        function handleDocs(files) {
+            const v = validateDocs(files);
+            if (!v.ok) {
+                alert(v.msg);
+                if (inputDocs) inputDocs.value = '';
+                renderDocList([]);
+                return;
+            }
+
+            renderDocList(files);
+        }
+
+        if (inputDocs) {
+            inputDocs.addEventListener('change', function() {
+                handleDocs(this.files);
+            });
+        }
+
+        if (dropZoneDocs) {
+            ['dragenter', 'dragover'].forEach(evt => dropZoneDocs.addEventListener(evt, e => {
+                e.preventDefault(); e.stopPropagation();
+                dropZoneDocs.classList.add('dragover');
+            }));
+            ['dragleave', 'drop'].forEach(evt => dropZoneDocs.addEventListener(evt, e => {
+                e.preventDefault(); e.stopPropagation();
+                dropZoneDocs.classList.remove('dragover');
             }));
 
-            ['dragleave', 'drop'].forEach(evt => dropZone.addEventListener(evt, e => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.remove('dragover');
-            }));
+            dropZoneDocs.addEventListener('drop', function(e) {
+                const files = e.dataTransfer.files;
+                const v = validateDocs(files);
+                if (!v.ok) { alert(v.msg); return; }
 
-            dropZone.addEventListener('drop', function(e) {
-                handleFiles(e.dataTransfer.files);
-                if (input) input.files = e.dataTransfer.files;
+                if (inputDocs) inputDocs.files = files;
+                renderDocList(files);
+            });
+
+            dropZoneDocs.addEventListener('click', function() {
+                if (inputDocs) inputDocs.click();
             });
         }
     </script>
