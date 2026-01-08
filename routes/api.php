@@ -282,4 +282,4 @@ Route::middleware('auth:rider-api')->group(function () {
 
 Route::post('/rider/location', [RiderLocationTrackingController::class, 'store'])->middleware('auth:rider-api');
 
-Route::get('/rider/tracking', [RiderTrackingController::class, 'getTracking'])->middleware('auth:rider-api');
+Route::get('/rider/tracking', [RiderLocationTrackingController::class, 'getTracking'])->middleware('auth:rider-api');
