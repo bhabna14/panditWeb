@@ -331,19 +331,12 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
     Route::put('/orders/{id}/update-price', [FlowerOrderController::class, 'updatePrice'])->name('admin.orders.updatePrice');
 
-
-
-    // Followup Controller 
-
     Route::get('/follow-up-subscriptions', [FollowUpController::class, 'followUpSubscriptions'])->name('admin.followUpSubscriptions');
     Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
 
-
-
-Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::class, 'sendUserNotification'])
+    Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::class, 'sendUserNotification'])
     ->name('admin.followup.sendUserNotification'); // ← exact name your Blade calls
 
-    // PRODUCT DETAILS ROUTES
     Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/manage-customize-request','showCustomizeRequest')->name('product-customize-request');
         Route::get('/manage-product-subscription','showProductSubscription')->name('admin.productSubscriptionOrder');
@@ -355,14 +348,11 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
     Route::get('/revenue-report', [ReportController::class, 'showRevenueReport'])->name('admin.revenueReport');
     Route::post('/revenue-report', [ReportController::class, 'filterRevenueReport'])->name('admin.filterRevenueReport');
 
-    // flower vendor controller
-
     Route::controller(FlowerVendorController::class)->group(function() {
         Route::get('/add-vendor-details', 'addVendorDetails')->name('admin.addVendorDetails');
         Route::post('/save-vendor-details', 'saveVendorDetails')->name('admin.saveVendorDetails');
         Route::get('/manage-vendor-details', 'manageVendorDetails')->name('admin.managevendor');
         Route::get('/vendor-all-details/{id}', 'vendorAllDetails')->name('admin.vendorAllDetails');
-
         Route::post('/delete-vendor-details/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
         Route::get('/edit-vendor-details/{id}', 'editVendorDetails')->name('admin.editVendorDetails');
         Route::put('/update-vendor-details/{vendor_id}',  'updateVendorDetails')->name('admin.updateVendorDetails');
@@ -402,12 +392,10 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
         Route::get('/manage-users', 'manageuser')->name('manageuser');
         Route::put('/admin/users/{user}', 'updateUserData')->name('admin.users.update');
-
         Route::get('/user-profile/{id}', 'userProfile')->name('userprofile');
         Route::post('admin/pandit/accept/{id}', 'acceptPandit')->name('acceptPandit');
         Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');
         Route::get('pandit-profile/{id}',  'showProfile')->name('panditProfile');
-
         Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
         Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
         Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
@@ -417,7 +405,6 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::post('/save-career', 'savecareer');
         Route::get('admin/order-assign/{riderId}', 'showRiderDetails')->name('admin.orderAssign');
         Route::post('/admin/transfer-order', 'transferOrders')->name('admin.transferOrder');
-
         Route::get('/address-categories', 'showAddressByCategory')->name('admin.address.categories');
         Route::get('/address-category-users','getAddressUsersByCategory')->name('admin.address.category.users');
         Route::post('/address-update','updateAddress')->name('admin.address.update');
@@ -428,27 +415,23 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
         Route::get('/manage-special-puja', 'manageSpecialPuja')->name('manageSpecialPuja');
-
         Route::get('/add-puja', 'addpuja')->name('addpuja');
         Route::post('/savepuja', 'savepuja')->name('savepuja');
         Route::get('/editpooja/{pooja}', 'editpooja')->name('editpooja');
         Route::post('/updatepooja/{pooja}', 'updatepooja')->name('updatepooja');
         Route::get('/dltpooja/{pooja}', 'dltpooja')->name('dltpooja');
-
         Route::get('/manage-puja-list', 'managePujaList')->name('managePujaList');
         Route::post('/saveitem', 'saveitem')->name('saveitem');
         Route::get('/edititem/{item}', 'edititem')->name('edititem');
         Route::put('/updateitem', 'updateitem')->name('updateitem');
         Route::get('/dltitem/{item}', 'dltitem')->name('dltitem');
-        
-        // Route::get('/add-puja-list', 'addpujalist')->name('addpujalist');
-
         Route::get('/manage-puja-unit', 'manageunit')->name('manageunit');
         Route::post('/saveunit', 'saveunit')->name('saveunit');
         Route::get('/editunit/{unit}', 'editunit')->name('editunit');
         Route::put('/updateunit', 'updateunit')->name('updateunit');
         Route::get('/dltunit/{unit}', 'dltunit')->name('dltunit');
     });
+
     Route::controller(LocationController::class)->group(function() {
         Route::get('/manage-location', 'managelocation')->name('managelocation');
         Route::get('/add-location', 'addlocation')->name('addlocation');
@@ -509,39 +492,29 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
     Route::controller(PodcastEditingController::class)->group(function () {
         Route::get('/podcast-editing', 'podcastEditing')->name('podcastEditing');
         Route::post('/podcast/save-editing/{podcast_id}', 'saveEditing')->name('podcast.saveEditing');
-    
         Route::post('/start-podcast-edit/{podcast_id}', 'startPodcastEdit')->name('startPodcastEdit');
         Route::post('/cancel-podcast-edit/{podcast_id}', 'cancelPodcastEdit')->name('cancelPodcastEdit');
         Route::post('/complete-podcast-edit/{podcast_id}', 'completePodcastEdit')->name('completePodcastEdit');
-
         Route::get('/podcast-editing-verified', 'podcastEditingVerified')->name('podcastEditingVerified');
         Route::post('/update-editing-verified/{podcast_id}', 'updateEditingVerified')->name('updateEditingVerified');
-
         Route::post('/approve-editing-podcast/{podcast_id}', 'approvePodcastEditing')->name('approvePodcastEditing');
         Route::post('/reject-editing-podcast/{podcast_id}','rejectPodcastEditing')->name('rejectPodcastEditing');
     });
     
 
     Route::controller(PodcastScriptController::class)->group(function() {
-
         Route::get('/podcast-script', 'podcastScript')->name('podcastScript');
         Route::post('/update-podcast-details/{id}', 'updatePodcastDetails')->name('updatePodcastDetails');
-
         Route::post('/update-podcast-script/{podcast_id}', 'updatePodcastScript')->name('updatePodcastScript');
         Route::get('/podcast-recording', 'podcastRecording')->name('podcastRecording');
-
         Route::post('/start-podcast/{podcast_id}',  'startPodcast')->name('startPodcast');
         Route::post('/cancel-podcast/{podcast_id}', 'cancelPodcast')->name('cancelPodcast');
         Route::post('/complete-podcast/{podcast_id}','completePodcast')->name('completePodcast');
         Route::post('/save-complete-url/{podcast_id}','saveCompleteUrl')->name('saveCompleteUrl');
-
-        // script editor
         Route::get('/script-editor/{podcast_id}','scriptEditor')->name('scriptEditor');
         Route::post('/save-script-editor/{podcast_id}','saveScriptEditor')->name('saveScriptEditor');
-
         Route::get('/podcast-script-verified', 'podcastScriptVerified')->name('podcastScriptVerified');
         Route::post('/update-script-verified/{podcast_id}', 'updateScriptVerified')->name('updateScriptVerified');
-
         Route::post('/approve-script-podcast/{podcast_id}', 'approvePodcastScript')->name('approvePodcastScript');
         Route::post('/reject-script-podcast/{podcast_id}','rejectPodcastScript')->name('rejectPodcastScript');
     });
@@ -610,11 +583,9 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
     Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
     Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
     Route::post('/notifications/resend/{id}', [AdminNotificationController::class, 'resend'])->name('admin.notifications.resend');
-  Route::get('/whatsapp-notification', [AdminNotificationController::class, 'whatsappcreate'])
-        ->name('whatsapp-notification.create');
-            Route::post('/whatsapp-notification/send', [AdminNotificationController::class, 'whatsappSend'])->name('whatsapp-notification.send');
+    Route::get('/whatsapp-notification', [AdminNotificationController::class, 'whatsappcreate'])->name('whatsapp-notification.create');
+    Route::post('/whatsapp-notification/send', [AdminNotificationController::class, 'whatsappSend'])->name('whatsapp-notification.send');
             
-
     Route::controller(YoutubeController::class)->group(function() {
         Route::get('/youtube', 'youTube')->name('youTube');
         Route::post('/save-youtube-url', 'store')->name('saveYoutubeUrl');
@@ -630,7 +601,8 @@ Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::cla
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
         Route::get('/user-devices', 'index')->name('admin.adminUserDevice');
     });
-Route::controller(UserCustomizeOrderController::class)->group(function() {
+
+    Route::controller(UserCustomizeOrderController::class)->group(function() {
     Route::get('/create-customize-order', 'createCustomizeOrder')->name('createCustomizeOrder');
     Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
     Route::get('/get-user-addresses/{userId}','getUserAddresses');
@@ -642,41 +614,10 @@ Route::controller(UserCustomizeOrderController::class)->group(function() {
 
 });
 
-// user routes
-// Route::prefix('user')->middleware(['user'])->group(function () {
-//     Route::controller(userController::class)->group(function() {
-//         Route::get('/dashboard', 'dashboard')->name('user.dashboard');
-//     });
-// });
-
-// Route::controller(PanditLoginController::class)->group(function() {
-//     Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
-//     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
-//     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
-// }); 
-
-// Route::controller(PanditLoginController::class)->group(function() {
-//     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
-// });
-
-
 Route::controller(PanditOtpController::class)->group(function() {
     Route::post('/send-otp',  'sendOtp');
     Route::post('/verify-otp',  'verifyOtp');
 });
-
-/// pandit routes
-// Route::group(['prefix' => 'pandit'], function () {
-//         Route::controller(PanditController::class)->group(function() {
-//         Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
-//         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-//         Route::get('/booking/details/{id}', 'getDetails')->name('bookingdetails');
-//         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
-//         Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
-//         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
-//         Route::post('/panditlogout', 'panditlogout')->name('pandit.logout');
-//     });
-// });
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
@@ -691,7 +632,6 @@ Route::group(['prefix' => 'pandit'], function () {
     });
 });
 
-// pandit profile crud operation
     Route::group(['prefix' => 'pandit'], function () {
     Route::controller(ProfileController::class)->group(function() {
     Route::get('/profile', 'panditprofiles')->name('pandit.profile');
@@ -701,7 +641,6 @@ Route::group(['prefix' => 'pandit'], function () {
     });
 });
 
-// pandit career crud operation
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(CareerController::class)->group(function() {
     Route::get('/career', 'profilecareer')->name('profilecareer');
@@ -714,8 +653,7 @@ Route::group(['prefix' => 'pandit'], function () {
     });
 
     });
-// pandit skill crud operation
-Route::group(['prefix' => 'pandit'], function () {
+    Route::group(['prefix' => 'pandit'], function () {
     Route::controller(SkillController::class)->group(function() {
     Route::post('/save-skillpooja', 'saveSkillPooja');
     Route::put('/update-skillpooja', 'updateSkillPooja')->name('updateSkillPooja');
@@ -723,7 +661,6 @@ Route::group(['prefix' => 'pandit'], function () {
     Route::get('/managepoojaskill', 'managepoojaskill')->name('managepoojaskill');
     });
 });
-// pandit pooja details crud operation
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaDetailsController::class)->group(function() {
@@ -761,20 +698,6 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::post('/saveaddress', 'saveaddress');
     });
 });
-
-// Route::group(['prefix' => 'pandit'], function () {
-//         Route::controller(PoojaListController::class)->group(function() {
-//         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-//         Route::get('/poojaitem', 'singlepoojaitem');
-//         Route::post('/save-poojaitemlist', 'savePoojaItemList');
-//         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
-//         Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
-//         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
-//         Route::put('/updatepoojalist', 'updatePoojalist');
-//         Route::get('/get-variants/{listName}', 'getVariants');
-//         Route::put('/pooja/{id}', 'updatePoojaItem');
-//     });
-// });
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaListController::class)->group(function() {
@@ -952,10 +875,6 @@ Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
         ->name('payment.collection.collect');
 });
 
-// Route::post('/admin/payment-collection//collect', [PaymentCollectionController::class, 'collect'])
-//     ->name('payment.collection.collect')
-//     ->middleware(['auth']);
-
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/subscription-package-estimates', [SubscriptionPackageEstimateController::class, 'index'])
         ->name('subscriptionPackageEstimate');
@@ -1062,15 +981,10 @@ Route::prefix('admin')->as('admin.')->group(function () {
     Route::get('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'indexAttendance'])->name('admin.rider-attendance.manual');
     Route::post('/admin/rider-attendance-manual', [RiderAttendanceController::class, 'store'])->name('admin.rider-attendance.manual.store');
 
-    Route::get('/admin/rider-salary', [RiderSalaryController::class, 'index'])
-        ->name('admin.rider-salary.index');
-
-
-    Route::post('/manage-flower-request/{flowerRequest}/delivery-status', [FlowerRequestController::class, 'updateDeliveryStatus'])
-        ->name('admin.flower-request.delivery-status');
-
-    Route::get('/admin/location', [RiderLocationTrackingController::class, 'index'])
-        ->name('rider.location-tracking');
-
-        Route::post('/admin/riders/tracking/toggle', [RiderLocationTrackingController::class, 'toggleTracking'])
-    ->name('rider.tracking.toggle');
+    Route::get('/admin/rider-salary', [RiderSalaryController::class, 'index'])->name('admin.rider-salary.index');
+        
+    Route::post('/manage-flower-request/{flowerRequest}/delivery-status', [FlowerRequestController::class, 'updateDeliveryStatus'])->name('admin.flower-request.delivery-status');
+        
+    Route::get('/admin/location', [RiderLocationTrackingController::class, 'index'])->name('rider.location-tracking');
+    Route::post('/admin/riders/tracking/toggle', [RiderLocationTrackingController::class, 'toggleTracking'])->name('rider.tracking.toggle');
+    
