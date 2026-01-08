@@ -72,4 +72,61 @@ class RiderLocationTrackingController extends Controller
             ], 500);
         }
     }
+
+    public function updateTracking(Request $request)
+    {
+        try {
+            // Validate input (ONLY rider_id + tracking)
+            $validated = $request->validate([
+                'rider_id'  => ['required'],
+                'tracking'  => ['required', 'in:start,stop'],
+            ]);
+
+            $riderId = (string) $validated['rider_id'];
+
+            // Create default row if not exists
+            $row = RiderLocationTracking::firstOrCreate(
+                ['rider_id' => $riderId],
+                [
+                    'tracking'  => 'stop',
+                    'date_time' => Carbon::now(),
+                ]
+            );
+
+            // Update tracking
+            $row->tracking  = $validated['tracking'];  // start/stop
+            $row->date_time = Carbon::now();
+            $row->save();
+
+            $message = ($row->tracking === 'start')
+                ? 'Tracking started successfully.'
+                : 'Tracking stopped successfully.';
+
+            return response()->json([
+                'status'  => true,
+                'message' => $message,
+                'data'    => [
+                    'rider_id' => $row->rider_id,
+                    'tracking' => $row->tracking,
+                ],
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Validation failed.',
+                'errors'  => $e->errors(),
+            ], 422);
+
+        } catch (\Throwable $e) {
+            Log::error('Rider tracking update error: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'status'  => false,
+                'message' => 'Server error. Unable to update tracking.',
+            ], 500);
+        }
+    }
 }

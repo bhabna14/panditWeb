@@ -16,6 +16,7 @@ class RiderLocationTracking extends Model
         'latitude',
         'longitude',
         'date_time',
+        'tracking'
     ];
 
     protected $casts = [

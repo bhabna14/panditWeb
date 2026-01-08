@@ -19,94 +19,94 @@ use Illuminate\Support\Facades\Log;
 
 class FlowerRequestController extends Controller
 {
-    
-public function showRequests(Request $request)
-{
-    $filter = $request->query('filter', 'all');
 
-    $tz          = config('app.timezone', 'Asia/Kolkata');
-    $todayCarbon = Carbon::today($tz);
-    $today       = $todayCarbon->toDateString();
+    public function showRequests(Request $request)
+    {
+        $filter = $request->query('filter', 'all');
 
-    $startDateCarbon = $todayCarbon->copy()->addDay();
-    $endDateCarbon   = $todayCarbon->copy()->addDays(3);
-    $startDate       = $startDateCarbon->toDateString();
-    $endDate         = $endDateCarbon->toDateString();
+        $tz          = config('app.timezone', 'Asia/Kolkata');
+        $todayCarbon = Carbon::today($tz);
+        $today       = $todayCarbon->toDateString();
 
-    $query = FlowerRequest::with([
-        'order' => function ($q) {
-            $q->with('flowerPayments', 'delivery', 'rider');
-        },
-        'flowerProduct',
-        'user',
-        'address.localityDetails',
-        'flowerRequestItems',
-    ])->orderByDesc('id');
+        $startDateCarbon = $todayCarbon->copy()->addDay();
+        $endDateCarbon   = $todayCarbon->copy()->addDays(3);
+        $startDate       = $startDateCarbon->toDateString();
+        $endDate         = $endDateCarbon->toDateString();
 
-    $this->applyRequestFilter($query, $filter, $today, $startDate, $endDate);
+        $query = FlowerRequest::with([
+            'order' => function ($q) {
+                $q->with('flowerPayments', 'delivery', 'rider');
+            },
+            'flowerProduct',
+            'user',
+            'address.localityDetails',
+            'flowerRequestItems',
+        ])->orderByDesc('id');
 
-    $pendingRequests = $query->get();
+        $this->applyRequestFilter($query, $filter, $today, $startDate, $endDate);
 
-    // ---------------------------
-    // Card Counts (Global)
-    // ---------------------------
-    $totalCustomizeOrders    = FlowerRequest::count();
-    $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
-    $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
+        $pendingRequests = $query->get();
 
-    $pendingCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyPendingFilter($q);
-        })
-        ->count();
+        // ---------------------------
+        // Card Counts (Global)
+        // ---------------------------
+        $totalCustomizeOrders    = FlowerRequest::count();
+        $todayCustomizeOrders    = FlowerRequest::whereDate('date', $today)->count();
+        $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$startDate, $endDate])->count();
 
-    $approvedCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyApprovedFilter($q);
-        })
-        ->count();
+        $pendingCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyPendingFilter($q);
+            })
+            ->count();
 
-    // ✅ PAID COUNT (UPDATED to your required logic)
-    $paidCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyPaidFilter($q);
-        })
-        ->count();
+        $approvedCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyApprovedFilter($q);
+            })
+            ->count();
 
-    $rejectCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyRejectedFilter($q);
-        })
-        ->count();
+        // ✅ PAID COUNT (UPDATED to your required logic)
+        $paidCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyPaidFilter($q);
+            })
+            ->count();
 
-    // ✅ UNPAID = approved but NOT paid (no successful payment)
-    $unpaidCustomizeOrders = FlowerRequest::query()
-        ->where(function ($q) {
-            $this->applyUnpaidFilter($q);
-        })
-        ->count();
+        $rejectCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyRejectedFilter($q);
+            })
+            ->count();
 
-    $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
-    $paidCollectedAmount   = $this->computePaidCollectedAmount();
+        // ✅ UNPAID = approved but NOT paid (no successful payment)
+        $unpaidCustomizeOrders = FlowerRequest::query()
+            ->where(function ($q) {
+                $this->applyUnpaidFilter($q);
+            })
+            ->count();
 
-    $riders = RiderDetails::where('status', 'active')->get();
+        $unpaidAmountToCollect = $this->computeUnpaidAmountToCollect();
+        $paidCollectedAmount   = $this->computePaidCollectedAmount();
 
-    return view('admin.flower-request.manage-flower-request', compact(
-        'riders',
-        'pendingRequests',
-        'totalCustomizeOrders',
-        'todayCustomizeOrders',
-        'upcomingCustomizeOrders',
-        'pendingCustomizeOrders',
-        'approvedCustomizeOrders',
-        'paidCustomizeOrders',
-        'rejectCustomizeOrders',
-        'unpaidCustomizeOrders',
-        'unpaidAmountToCollect',
-        'paidCollectedAmount',
-        'filter'
-    ));
-}
+        $riders = RiderDetails::where('status', 'active')->get();
+
+        return view('admin.flower-request.manage-flower-request', compact(
+            'riders',
+            'pendingRequests',
+            'totalCustomizeOrders',
+            'todayCustomizeOrders',
+            'upcomingCustomizeOrders',
+            'pendingCustomizeOrders',
+            'approvedCustomizeOrders',
+            'paidCustomizeOrders',
+            'rejectCustomizeOrders',
+            'unpaidCustomizeOrders',
+            'unpaidAmountToCollect',
+            'paidCollectedAmount',
+            'filter'
+        ));
+    }
 
 
 public function ajaxData(Request $request)
