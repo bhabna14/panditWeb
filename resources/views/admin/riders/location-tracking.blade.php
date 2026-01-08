@@ -236,9 +236,7 @@
             box-shadow: var(--shadow-hover);
         }
 
-        /* -----------------------------
-           NEW: Rider Control Cards
-        ------------------------------*/
+        /* Rider Control Cards */
         .rider-control-wrap {
             border-radius: var(--card-radius);
             background: #fff;
@@ -423,11 +421,13 @@
         </div>
     </div>
 
-    {{-- NEW: RIDER CONTROL CARDS --}}
+    {{-- RIDER CONTROL CARDS --}}
     <div class="rider-control-wrap mb-3">
         <div class="rider-control-head">
             <div>
-                <h6 class="rider-control-title mb-0"><i class="fa-solid fa-toggle-on me-2"></i>Rider Tracking Control</h6>
+                <h6 class="rider-control-title mb-0">
+                    <i class="fa-solid fa-toggle-on me-2"></i>Rider Tracking Control
+                </h6>
                 <div class="panel-note">Start/Stop tracking rider-wise (updates RiderDetails.tracking)</div>
             </div>
             <div class="panel-note">Total Riders: {{ number_format($riderCards->count()) }}</div>
@@ -438,15 +438,15 @@
                 @foreach ($riderCards as $rc)
                     @php
                         $imgUrl = $rc['img'] ?: asset('assets/img/faces/6.jpg');
-                        $isOn   = (bool) $rc['tracking'];
+                        // IMPORTANT: use tracking_on boolean from controller
+                        $isOn = (bool) ($rc['tracking_on'] ?? false);
                         $badgeClass = $isOn ? 'tracking-badge tracking-on' : 'tracking-badge tracking-off';
-                        $badgeText  = $isOn ? 'TRACKING ON' : 'TRACKING OFF';
+                        $badgeText = $isOn ? 'TRACKING ON' : 'TRACKING OFF';
                     @endphp
 
                     <div class="col-xl-3 col-lg-4 col-md-6">
-                        <div class="rider-card js-rider-card"
-                             data-rider-id="{{ $rc['rider_id'] }}"
-                             data-tracking="{{ $isOn ? 1 : 0 }}">
+                        <div class="rider-card js-rider-card" data-rider-id="{{ $rc['rider_id'] }}"
+                            data-tracking="{{ $isOn ? 1 : 0 }}">
                             <div class="rider-card-top">
                                 <div class="rider-avatar">
                                     <img src="{{ $imgUrl }}" alt="rider">
@@ -461,7 +461,8 @@
 
                                 <div class="text-end">
                                     <span class="{{ $badgeClass }} js-tracking-badge">
-                                        <span class="dot"></span> <span class="js-tracking-text">{{ $badgeText }}</span>
+                                        <span class="dot"></span>
+                                        <span class="js-tracking-text">{{ $badgeText }}</span>
                                     </span>
                                 </div>
                             </div>
@@ -473,9 +474,10 @@
                                 </div>
 
                                 <div class="mini-row">
-                                    <div class="mini-label"><i class="fa-solid fa-location-crosshairs me-1"></i>Coords</div>
+                                    <div class="mini-label"><i class="fa-solid fa-location-crosshairs me-1"></i>Coords
+                                    </div>
                                     <div class="fw-semibold coord">
-                                        @if($rc['lat'] !== null && $rc['lng'] !== null)
+                                        @if ($rc['lat'] !== null && $rc['lng'] !== null)
                                             {{ $rc['lat'] }}, {{ $rc['lng'] }}
                                         @else
                                             —
@@ -486,8 +488,10 @@
                                 <div class="mini-row">
                                     <div class="mini-label"><i class="fa-solid fa-map me-1"></i>Open</div>
                                     <div class="fw-semibold">
-                                        @if($rc['lat'] !== null && $rc['lng'] !== null)
-                                            <a target="_blank" href="https://www.google.com/maps?q={{ $rc['lat'] }},{{ $rc['lng'] }}">Google Maps</a>
+                                        @if ($rc['lat'] !== null && $rc['lng'] !== null)
+                                            <a target="_blank"
+                                                href="https://www.google.com/maps?q={{ $rc['lat'] }},{{ $rc['lng'] }}">Google
+                                                Maps</a>
                                         @else
                                             —
                                         @endif
@@ -497,15 +501,14 @@
 
                             <div class="rider-card-actions">
                                 <button type="button"
-                                        class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
-                                        data-rider-id="{{ $rc['rider_id'] }}"
-                                        data-action="{{ $isOn ? 'stop' : 'start' }}">
+                                    class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
+                                    data-rider-id="{{ $rc['rider_id'] }}" data-action="{{ $isOn ? 'stop' : 'start' }}">
                                     <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1"></i>
                                     <span class="js-btn-text">{{ $isOn ? 'Stop' : 'Start' }}</span>
                                 </button>
 
                                 <a class="btn btn-soft btn-card"
-                                   href="{{ route('rider.location-tracking', ['rider_id' => $rc['rider_id']]) }}">
+                                    href="{{ route('rider.location-tracking', ['rider_id' => $rc['rider_id']]) }}">
                                     <i class="fa-solid fa-filter me-1"></i> View Logs
                                 </a>
                             </div>
@@ -513,7 +516,7 @@
                     </div>
                 @endforeach
 
-                @if($riderCards->count() === 0)
+                @if ($riderCards->count() === 0)
                     <div class="col-12">
                         <div class="text-center text-muted p-4">
                             No riders found.
@@ -671,8 +674,7 @@
                                             <span class="rider-pill">
                                                 <img src="{{ $imgUrl }}" alt="rider">
                                                 <span>
-                                                    <div class="rider-name">
-                                                        {{ $t->rider_name ?? 'Rider #' . $t->rider_id }}</div>
+                                                    <div class="rider-name">{{ $t->rider_name ?? 'Rider #' . $t->rider_id }}</div>
                                                     <div class="rider-phone mt-1">
                                                         <i class="fa-solid fa-phone"></i>
                                                         <span>{{ $t->phone_number ?? '—' }}</span>
@@ -684,8 +686,7 @@
                                         <td class="coord">
                                             {{ $t->latitude }}, {{ $t->longitude }}
                                             <div class="text-muted" style="font-size: .8rem;">
-                                                <a target="_blank"
-                                                    href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">
+                                                <a target="_blank" href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">
                                                     Open in Google Maps
                                                 </a>
                                             </div>
@@ -762,10 +763,9 @@
     <script>
         const latestMarkers = @json($latestMarkers);
         const trackingToggleUrl = "{{ route('rider.tracking.toggle') }}";
-
         const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-        // ---------- Toast ----------
+        // Toast
         const toastEl = document.getElementById('miniToast');
         const toastTitleEl = document.getElementById('toastTitle');
         const toastSubEl = document.getElementById('toastSub');
@@ -779,7 +779,7 @@
             toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2600);
         }
 
-        // ---------- Latest map ----------
+        // Latest map
         const latestMap = L.map('latestMap', { scrollWheelZoom: true });
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -817,7 +817,7 @@
             latestMap.setView([20.5937, 78.9629], 5);
         }
 
-        // ---------- Modal map ----------
+        // Modal map
         let modalMap = null;
         let modalMarker = null;
 
@@ -835,11 +835,8 @@
 
             modalMap.setView([lat, lng], 16);
 
-            if (modalMarker) {
-                modalMarker.setLatLng([lat, lng]);
-            } else {
-                modalMarker = L.marker([lat, lng]).addTo(modalMap);
-            }
+            if (modalMarker) modalMarker.setLatLng([lat, lng]);
+            else modalMarker = L.marker([lat, lng]).addTo(modalMap);
 
             setTimeout(() => modalMap.invalidateSize(), 200);
         }
@@ -865,7 +862,7 @@
             });
         });
 
-        // ---------- NEW: Start/Stop Tracking ----------
+        // Start/Stop Tracking
         function setCardUI(card, isOn) {
             card.dataset.tracking = isOn ? '1' : '0';
 
@@ -898,17 +895,13 @@
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({
-                    rider_id: riderId,
-                    action: action
-                })
+                body: JSON.stringify({ rider_id: riderId, action })
             });
 
             const data = await res.json().catch(() => ({}));
 
             if (!res.ok || !data.success) {
-                const msg = data.message || 'Unable to update tracking right now.';
-                throw new Error(msg);
+                throw new Error(data.message || 'Unable to update tracking right now.');
             }
 
             return data;
@@ -917,30 +910,31 @@
         document.querySelectorAll('.js-toggle-tracking').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const riderId = btn.dataset.riderId;
-                const action = btn.dataset.action; // start/stop
+                const action = btn.dataset.action;
 
                 const card = btn.closest('.js-rider-card');
                 if (!card) return;
 
                 btn.disabled = true;
-                const oldHtml = btn.innerHTML;
                 btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin me-1"></i> Please wait`;
 
                 try {
                     const data = await toggleTracking(riderId, action);
 
-                    // data.tracking => 1/0
-                    setCardUI(card, !!data.tracking);
+                    // IMPORTANT: use tracking_on from controller response
+                    const isOn = !!data.tracking_on;
+
+                    setCardUI(card, isOn);
 
                     showToast(
                         'Tracking updated',
-                        data.tracking ? 'Tracking started for this rider.' : 'Tracking stopped for this rider.'
+                        isOn ? 'Tracking started for this rider.' : 'Tracking stopped for this rider.'
                     );
                 } catch (e) {
                     showToast('Action failed', e.message || 'Something went wrong');
                 } finally {
                     btn.disabled = false;
-                    // rebuild label from current card state
+
                     const isOn = card.dataset.tracking === '1';
                     btn.innerHTML = `
                         <i class="fa-solid ${isOn ? 'fa-circle-stop' : 'fa-circle-play'} me-1"></i>

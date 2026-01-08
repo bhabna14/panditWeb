@@ -11,6 +11,34 @@ use Illuminate\Support\Facades\DB;
 
 class RiderLocationTrackingController extends Controller
 {
+    private function normalizeTracking($value): string
+    {
+        return strtolower(trim((string)($value ?? '')));
+    }
+
+    private function isTrackingOn($value): bool
+    {
+        $v = $this->normalizeTracking($value);
+
+        // ON values
+        if (in_array($v, ['1', 'true', 'start', 'on', 'yes', 'active'], true)) {
+            return true;
+        }
+
+        // OFF values
+        if ($v === '' || in_array($v, ['0', 'false', 'stop', 'off', 'no', 'inactive'], true)) {
+            return false;
+        }
+
+        // fallback: if it's numeric, treat >0 as ON else OFF
+        if (is_numeric($v)) {
+            return ((int)$v) > 0;
+        }
+
+        // fallback: unknown string => OFF (safer)
+        return false;
+    }
+
     public function index(Request $request)
     {
         $tz = config('app.timezone', 'Asia/Kolkata');
@@ -22,7 +50,7 @@ class RiderLocationTrackingController extends Controller
         $fromCarbon = $from !== '' ? Carbon::parse($from, $tz)->startOfDay() : null;
         $toCarbon   = $to   !== '' ? Carbon::parse($to,   $tz)->endOfDay()   : null;
 
-        // Dropdown riders (include tracking)
+        // Dropdown riders
         $riders = RiderDetails::query()
             ->orderBy('rider_name')
             ->get(['rider_id', 'rider_name', 'phone_number', 'rider_img', 'tracking']);
@@ -89,7 +117,7 @@ class RiderLocationTrackingController extends Controller
         $latestPerRider = RiderLocationTracking::query()
             ->joinSub($latestSub, 't', function ($join) {
                 $join->on('rider__location_tracking.rider_id', '=', 't.rider_id')
-                    ->on('rider__location_tracking.date_time', '=', 't.max_date_time');
+                     ->on('rider__location_tracking.date_time', '=', 't.max_date_time');
             })
             ->leftJoin('flower__rider_details as rd', function ($join) {
                 $join->on(
@@ -122,7 +150,7 @@ class RiderLocationTrackingController extends Controller
             ];
         })->values()->all();
 
-        // NEW: Rider cards (all riders + last ping + tracking status)
+        // Rider cards (all riders + last ping + tracking status)
         $latestByRider = $latestPerRider->keyBy('rider_id');
 
         $riderCards = $riders->map(function ($r) use ($latestByRider) {
@@ -137,16 +165,21 @@ class RiderLocationTrackingController extends Controller
                 }
             }
 
-            return [
-                'rider_id'   => (string) $r->rider_id,
-                'name'       => $r->rider_name ?: ('Rider #' . $r->rider_id),
-                'phone'      => $r->phone_number ?: '',
-                'img'        => $img,
-                'tracking'   => (bool) $r->tracking,
+            $trackingOn = $this->isTrackingOn($r->tracking);
 
-                'lat'        => $last && $last->latitude !== null ? (float) $last->latitude : null,
-                'lng'        => $last && $last->longitude !== null ? (float) $last->longitude : null,
-                'last_time'  => $last && $last->date_time ? Carbon::parse($last->date_time)->format('d M Y, h:i A') : '',
+            return [
+                'rider_id'      => (string) $r->rider_id,
+                'name'          => $r->rider_name ?: ('Rider #' . $r->rider_id),
+                'phone'         => $r->phone_number ?: '',
+                'img'           => $img,
+
+                // IMPORTANT: send boolean for UI
+                'tracking_on'   => $trackingOn,
+                'tracking_value'=> $r->tracking, // optional debug / display if you want
+
+                'lat'           => $last && $last->latitude !== null ? (float) $last->latitude : null,
+                'lng'           => $last && $last->longitude !== null ? (float) $last->longitude : null,
+                'last_time'     => $last && $last->date_time ? Carbon::parse($last->date_time)->format('d M Y, h:i A') : '',
             ];
         });
 
@@ -186,14 +219,31 @@ class RiderLocationTrackingController extends Controller
             ], 404);
         }
 
-        $rider->tracking = ($action === 'start') ? 1 : 0;
-        $rider->save();
+        // Prefer saving "start/stop" (your requirement).
+        // If column is numeric (tinyint), fallback to 1/0 automatically.
+        try {
+            $rider->tracking = ($action === 'start') ? 'start' : 'stop';
+            $rider->save();
+        } catch (\Throwable $e) {
+            $rider->tracking = ($action === 'start') ? 1 : 0;
+            $rider->save();
+        }
+
+        $trackingOn = $this->isTrackingOn($rider->tracking);
 
         return response()->json([
-            'success'  => true,
-            'message'  => 'Tracking updated successfully.',
-            'rider_id' => $riderId,
-            'tracking' => (int) $rider->tracking, // 1 or 0
+            'success'        => true,
+            'message'        => 'Tracking updated successfully.',
+            'rider_id'       => $riderId,
+
+            // IMPORTANT: JS must use this boolean
+            'tracking_on'    => $trackingOn,
+
+            // Optional: raw value saved in DB
+            'tracking_value' => $rider->tracking,
+
+            // Optional: numeric 1/0 mirror (safe for JS too)
+            'tracking'       => $trackingOn ? 1 : 0,
         ]);
     }
 }
