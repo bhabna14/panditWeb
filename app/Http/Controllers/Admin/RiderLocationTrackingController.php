@@ -8,6 +8,7 @@ use App\Models\RiderDetails;
 use App\Models\RiderLocationTracking;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class RiderLocationTrackingController extends Controller
 {
@@ -151,37 +152,38 @@ class RiderLocationTrackingController extends Controller
         ));
     }
 
-    public function toggleTracking(Request $request)
-    {
-        $validated = $request->validate([
-            'rider_id' => 'required',
-            'action'   => 'required|in:start,stop',
-        ]);
+public function toggleTracking(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'rider_id' => 'required',
+        'action'   => 'required|in:start,stop',
+    ]);
 
-        $riderId = (string) $validated['rider_id'];
-        $action  = $validated['action']; // "start" or "stop"
-
-        $rider = RiderDetails::query()
-            ->where('rider_id', $riderId)
-            ->first();
-
-        if (!$rider) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Rider not found.',
-            ], 404);
-        }
-
-        // Update ONLY tracking column with "start" or "stop"
-        $rider->tracking = $action;
-        $rider->save();
-
-        return response()->json([
-            'success'        => true,
-            'message'        => 'Tracking updated successfully.',
-            'rider_id'       => $riderId,
-            'tracking_on'    => ($action === 'start'),
-            'tracking_value' => $action,
-        ]);
+    if ($validator->fails()) {
+        // Plain text response (no JSON)
+        return response($validator->errors()->first(), 422);
     }
+
+    $riderId = (string) $request->input('rider_id');
+    $action  = (string) $request->input('action'); // start|stop
+
+    $rider = RiderDetails::query()
+        ->where('rider_id', $riderId)
+        ->first();
+
+    if (!$rider) {
+        return response('Rider not found.', 404);
+    }
+
+    $rider->tracking = $action;   // only start/stop
+    $rider->save();
+
+    $msg = $action === 'start'
+        ? 'Tracking started successfully for this rider.'
+        : 'Tracking stopped successfully for this rider.';
+
+    // Plain text success
+    return response($msg, 200);
+}
+
 }

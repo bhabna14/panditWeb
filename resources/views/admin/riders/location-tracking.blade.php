@@ -60,9 +60,7 @@
             overflow: hidden;
         }
 
-        .kpi-body {
-            padding: 16px;
-        }
+        .kpi-body { padding: 16px; }
 
         .kpi-label {
             font-size: .85rem;
@@ -87,20 +85,9 @@
             border: 1px solid rgba(255, 255, 255, .25);
         }
 
-        .kpi-1 {
-            background: linear-gradient(135deg, #00c2ff, #2b59ff);
-            color: #fff;
-        }
-
-        .kpi-2 {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #fff;
-        }
-
-        .kpi-3 {
-            background: linear-gradient(135deg, #fb7185, #f97316);
-            color: #fff;
-        }
+        .kpi-1 { background: linear-gradient(135deg, #00c2ff, #2b59ff); color: #fff; }
+        .kpi-2 { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
+        .kpi-3 { background: linear-gradient(135deg, #fb7185, #f97316); color: #fff; }
 
         .panel-card {
             border-radius: var(--card-radius);
@@ -131,8 +118,7 @@
             color: #6b7280;
         }
 
-        #latestMap,
-        #singleMap {
+        #latestMap, #singleMap {
             height: 420px;
             border-radius: 14px;
         }
@@ -157,10 +143,7 @@
             border: 1px solid #e9ecef;
             border-radius: 12px;
         }
-
-        .btn-soft:hover {
-            background: #eef1f7;
-        }
+        .btn-soft:hover { background: #eef1f7; }
 
         .btn-grad {
             border-radius: 12px;
@@ -169,11 +152,7 @@
             background: linear-gradient(135deg, #2b59ff, #7c3aed);
             box-shadow: 0 8px 18px rgba(43, 89, 255, .18);
         }
-
-        .btn-grad:hover {
-            color: #fff;
-            filter: brightness(.98);
-        }
+        .btn-grad:hover { color: #fff; filter: brightness(.98); }
 
         .btn-stop {
             border-radius: 12px;
@@ -182,11 +161,7 @@
             background: linear-gradient(135deg, #ef4444, #f97316);
             box-shadow: 0 8px 18px rgba(239, 68, 68, .18);
         }
-
-        .btn-stop:hover {
-            color: #fff;
-            filter: brightness(.98);
-        }
+        .btn-stop:hover { color: #fff; filter: brightness(.98); }
 
         .modal-content {
             border-radius: var(--card-radius);
@@ -216,7 +191,6 @@
             color: #111827;
         }
 
-        /* UPDATED: minimal card */
         .rider-card {
             border-radius: 16px;
             border: 1px solid rgba(0, 0, 0, .06);
@@ -241,39 +215,7 @@
             font-size: .98rem;
         }
 
-        .btn-card {
-            border-radius: 12px;
-            width: 100%;
-        }
-
-        .mini-toast {
-            position: fixed;
-            right: 16px;
-            bottom: 16px;
-            z-index: 99999;
-            min-width: 260px;
-            max-width: 360px;
-            background: #111827;
-            color: #fff;
-            border-radius: 14px;
-            padding: 12px 14px;
-            box-shadow: 0 14px 30px rgba(0, 0, 0, .25);
-            display: none;
-        }
-
-        .mini-toast.show {
-            display: block;
-        }
-
-        .mini-toast .t-title {
-            font-weight: 900;
-            margin-bottom: 4px;
-        }
-
-        .mini-toast .t-sub {
-            opacity: .9;
-            font-size: .9rem;
-        }
+        .btn-card { border-radius: 12px; width: 100%; }
     </style>
 @endsection
 
@@ -305,22 +247,20 @@
         <div class="p-3">
             <div class="row g-3">
                 @foreach ($riderCards as $rc)
-                    @php
-                        $isOn = (bool) ($rc['tracking_on'] ?? false);
-                    @endphp
+                    @php $isOn = (bool) ($rc['tracking_on'] ?? false); @endphp
 
                     <div class="col-xl-3 col-lg-4 col-md-6">
-                        <div class="rider-card js-rider-card" data-rider-id="{{ $rc['rider_id'] }}"
-                            data-tracking="{{ $isOn ? 1 : 0 }}">
+                        <div class="rider-card js-rider-card"
+                             data-rider-id="{{ $rc['rider_id'] }}"
+                             data-tracking="{{ $isOn ? 1 : 0 }}">
 
-                            <div class="rider-mini-name">
-                                {{ $rc['name'] }}
-                            </div>
+                            <div class="rider-mini-name">{{ $rc['name'] }}</div>
 
                             <button type="button"
-                                class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
-                                data-rider-id="{{ $rc['rider_id'] }}" data-action="{{ $isOn ? 'stop' : 'start' }}">
-                                <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1"></i>
+                                    class="btn {{ $isOn ? 'btn-stop' : 'btn-grad' }} btn-card js-toggle-tracking"
+                                    data-rider-id="{{ $rc['rider_id'] }}"
+                                    data-action="{{ $isOn ? 'stop' : 'start' }}">
+                                <i class="fa-solid {{ $isOn ? 'fa-circle-stop' : 'fa-circle-play' }} me-1 js-btn-icon"></i>
                                 <span class="js-btn-text">{{ $isOn ? 'Stop' : 'Start' }}</span>
                             </button>
                         </div>
@@ -474,18 +414,16 @@
                                         <td class="coord">
                                             {{ $t->latitude }}, {{ $t->longitude }}
                                             <div class="text-muted" style="font-size: .8rem;">
-                                                <a target="_blank"
-                                                    href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">Open
-                                                    in Google Maps</a>
+                                                <a target="_blank" href="https://www.google.com/maps?q={{ $t->latitude }},{{ $t->longitude }}">Open in Google Maps</a>
                                             </div>
                                         </td>
 
-                                        <td>{{ $t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '—' }}
-                                        </td>
+                                        <td>{{ $t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '—' }}</td>
 
                                         <td>
                                             <button type="button" class="btn btn-sm btn-grad w-100 js-view-map"
-                                                data-lat="{{ $t->latitude }}" data-lng="{{ $t->longitude }}"
+                                                data-lat="{{ $t->latitude }}"
+                                                data-lng="{{ $t->longitude }}"
                                                 data-name="{{ e($t->rider_name ?? 'Rider #' . $t->rider_id) }}"
                                                 data-phone="{{ e($t->phone_number ?? '') }}"
                                                 data-time="{{ e($t->date_time ? \Carbon\Carbon::parse($t->date_time)->format('d M Y, h:i A') : '') }}">
@@ -534,16 +472,13 @@
             </div>
         </div>
     </div>
-
-    {{-- Toast --}}
-    <div class="mini-toast" id="miniToast">
-        <div class="t-title" id="toastTitle">Done</div>
-        <div class="t-sub" id="toastSub">—</div>
-    </div>
 @endsection
 
 @section('scripts')
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -553,52 +488,29 @@
             const csrfMeta = document.querySelector('meta[name="csrf-token"]');
             const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : '';
 
-            // ---------- Toast ----------
-            function ensureToast() {
-                let toastEl = document.getElementById('miniToast');
-
-                if (!toastEl) {
-                    toastEl = document.createElement('div');
-                    toastEl.id = 'miniToast';
-                    toastEl.className = 'mini-toast';
-                    toastEl.innerHTML = `
-                        <div class="t-title" id="toastTitle">Done</div>
-                        <div class="t-sub" id="toastSub">—</div>
-                    `;
-                    document.body.appendChild(toastEl);
-                }
-
-                let titleEl = document.getElementById('toastTitle');
-                let subEl = document.getElementById('toastSub');
-
-                if (!titleEl || !subEl) {
-                    toastEl.innerHTML = `
-                        <div class="t-title" id="toastTitle">Done</div>
-                        <div class="t-sub" id="toastSub">—</div>
-                    `;
-                    titleEl = document.getElementById('toastTitle');
-                    subEl = document.getElementById('toastSub');
-                }
-
-                return {
-                    toastEl,
-                    titleEl,
-                    subEl
-                };
+            // ---------- SweetAlert helpers ----------
+            function swalSuccess(message) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: message || 'Updated successfully.',
+                    showConfirmButton: false,
+                    timer: 2200,
+                    timerProgressBar: true
+                });
             }
 
-            const toast = ensureToast();
-            let toastTimer = null;
-
-            function showToast(title, sub) {
-                if (!toast || !toast.titleEl || !toast.subEl || !toast.toastEl) return;
-
-                toast.titleEl.textContent = title || 'Done';
-                toast.subEl.textContent = sub || '';
-                toast.toastEl.classList.add('show');
-
-                if (toastTimer) clearTimeout(toastTimer);
-                toastTimer = setTimeout(() => toast.toastEl.classList.remove('show'), 2600);
+            function swalError(message) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: message || 'Something went wrong.',
+                    showConfirmButton: false,
+                    timer: 2600,
+                    timerProgressBar: true
+                });
             }
 
             // ---------- Latest map ----------
@@ -606,9 +518,7 @@
             let latestMap = null;
 
             if (latestMapEl) {
-                latestMap = L.map('latestMap', {
-                    scrollWheelZoom: true
-                });
+                latestMap = L.map('latestMap', { scrollWheelZoom: true });
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '&copy; OpenStreetMap contributors'
@@ -634,9 +544,7 @@
                         bounds.push([m.lat, m.lng]);
                     });
 
-                    if (bounds.length) latestMap.fitBounds(bounds, {
-                        padding: [30, 30]
-                    });
+                    if (bounds.length) latestMap.fitBounds(bounds, { padding: [30, 30] });
                     else latestMap.setView([20.5937, 78.9629], 5);
                 } else {
                     latestMap.setView([20.5937, 78.9629], 5);
@@ -659,9 +567,7 @@
                 if (!singleMapEl) return;
 
                 if (!modalMap) {
-                    modalMap = L.map('singleMap', {
-                        scrollWheelZoom: true
-                    });
+                    modalMap = L.map('singleMap', { scrollWheelZoom: true });
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
                         attribution: '&copy; OpenStreetMap contributors'
@@ -704,7 +610,7 @@
                 });
             });
 
-            // ---------- Start/Stop Tracking ----------
+            // ---------- Start/Stop Tracking UI ----------
             function setCardUI(card, isOn) {
                 card.dataset.tracking = isOn ? '1' : '0';
 
@@ -712,73 +618,90 @@
                 if (!btn) return;
 
                 const btnText = btn.querySelector('.js-btn-text');
-                const icon = btn.querySelector('i');
+                const icon = btn.querySelector('.js-btn-icon');
 
+                // button style
                 btn.classList.remove('btn-grad', 'btn-stop');
                 btn.classList.add(isOn ? 'btn-stop' : 'btn-grad');
 
+                // next action
                 btn.dataset.action = isOn ? 'stop' : 'start';
 
+                // label
                 if (btnText) btnText.textContent = isOn ? 'Stop' : 'Start';
 
+                // icon
                 if (icon) {
-                    icon.classList.remove('fa-circle-play', 'fa-circle-stop');
+                    icon.classList.remove('fa-spinner', 'fa-spin', 'fa-circle-play', 'fa-circle-stop');
                     icon.classList.add(isOn ? 'fa-circle-stop' : 'fa-circle-play');
                 }
             }
 
+            function setBtnLoading(btn, loading) {
+                const btnText = btn.querySelector('.js-btn-text');
+                const icon = btn.querySelector('.js-btn-icon');
+
+                if (loading) {
+                    btn.disabled = true;
+                    if (btnText) btnText.textContent = 'Please wait';
+                    if (icon) {
+                        icon.classList.remove('fa-circle-play', 'fa-circle-stop');
+                        icon.classList.add('fa-spinner', 'fa-spin');
+                    }
+                } else {
+                    btn.disabled = false;
+                    // icon/text will be restored by setCardUI()
+                    if (icon) icon.classList.remove('fa-spinner', 'fa-spin');
+                }
+            }
+
+            // ---------- NO JSON request: read TEXT ----------
             async function toggleTracking(riderId, action) {
                 const res = await fetch(trackingToggleUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
+                        'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({
-                        rider_id: riderId,
-                        action
-                    })
+                    body: JSON.stringify({ rider_id: riderId, action })
                 });
 
-                const data = await res.json().catch(() => ({}));
+                const text = await res.text().catch(() => '');
 
-                if (!res.ok || !data.success) {
-                    throw new Error(data.message || 'Unable to update tracking right now.');
+                if (!res.ok) {
+                    throw new Error(text || 'Unable to update tracking right now.');
                 }
 
-                return data;
+                return text || 'Tracking updated successfully.';
             }
 
             document.querySelectorAll('.js-toggle-tracking').forEach(btn => {
                 btn.addEventListener('click', async () => {
                     const riderId = btn.dataset.riderId;
                     const action = btn.dataset.action; // start/stop
-
                     const card = btn.closest('.js-rider-card');
                     if (!card) return;
 
-                    btn.disabled = true;
-                    const oldHtml = btn.innerHTML;
-                    btn.innerHTML =
-                        `<i class="fa-solid fa-spinner fa-spin me-1"></i> Please wait`;
+                    // current state before request (for rollback on error)
+                    const prevIsOn = (card.dataset.tracking === '1');
+
+                    setBtnLoading(btn, true);
 
                     try {
-                        const data = await toggleTracking(riderId, action);
-                        const isOn = !!data.tracking_on;
+                        const message = await toggleTracking(riderId, action);
+
+                        // since response is text only, we determine new state from clicked action
+                        const isOn = (action === 'start');
 
                         setCardUI(card, isOn);
-
-                        showToast(
-                            'Tracking updated',
-                            isOn ? 'Tracking set to START for this rider.' :
-                            'Tracking set to STOP for this rider.'
-                        );
+                        swalSuccess(message);
                     } catch (e) {
-                        showToast('Action failed', e.message || 'Something went wrong');
-                        btn.innerHTML = oldHtml;
+                        // rollback UI to previous state
+                        setCardUI(card, prevIsOn);
+                        swalError(e.message || 'Something went wrong.');
                     } finally {
-                        btn.disabled = false;
+                        setBtnLoading(btn, false);
                     }
                 });
             });
