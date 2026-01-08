@@ -24,7 +24,6 @@ class RiderDetails extends Model
         
     protected $casts = [
         'salary'   => 'decimal:2',
-        'tracking' => 'boolean',
     ];
 
     public function pickupDetails()
