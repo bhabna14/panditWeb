@@ -1071,3 +1071,6 @@ Route::prefix('admin')->as('admin.')->group(function () {
 
     Route::get('/admin/location', [RiderLocationTrackingController::class, 'index'])
         ->name('rider.location-tracking');
+
+        Route::post('/admin/riders/tracking/toggle', [RiderLocationTrackingController::class, 'toggleTracking'])
+    ->name('rider.tracking.toggle');

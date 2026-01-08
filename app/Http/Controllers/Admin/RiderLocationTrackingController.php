@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class RiderLocationTrackingController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
         $tz = config('app.timezone', 'Asia/Kolkata');
 
@@ -22,10 +22,10 @@ class RiderLocationTrackingController extends Controller
         $fromCarbon = $from !== '' ? Carbon::parse($from, $tz)->startOfDay() : null;
         $toCarbon   = $to   !== '' ? Carbon::parse($to,   $tz)->endOfDay()   : null;
 
-        // Dropdown riders
+        // Dropdown riders (include tracking)
         $riders = RiderDetails::query()
             ->orderBy('rider_name')
-            ->get(['rider_id', 'rider_name', 'phone_number']);
+            ->get(['rider_id', 'rider_name', 'phone_number', 'rider_img', 'tracking']);
 
         // Base filter for stats
         $base = RiderLocationTracking::query();
@@ -44,10 +44,7 @@ class RiderLocationTrackingController extends Controller
         $uniqueRiders = (clone $base)->distinct('rider_id')->count('rider_id');
         $latestPing   = (clone $base)->max('date_time');
 
-        /**
-         * NOTE: Collation workaround in JOIN (prevents Illegal mix of collations)
-         * Replace utf8mb4_unicode_ci with your chosen common collation if needed.
-         */
+        // Tracking table (history)
         $trackings = RiderLocationTracking::query()
             ->leftJoin('flower__rider_details as rd', function ($join) {
                 $join->on(
@@ -75,7 +72,7 @@ class RiderLocationTrackingController extends Controller
             ->paginate(50)
             ->withQueryString();
 
-        // Latest location per rider (for map)
+        // Latest location per rider (for map + rider cards)
         $latestSub = RiderLocationTracking::query()
             ->select('rider_id', DB::raw('MAX(date_time) as max_date_time'))
             ->when($riderId !== '', function ($q) use ($riderId) {
@@ -92,7 +89,7 @@ class RiderLocationTrackingController extends Controller
         $latestPerRider = RiderLocationTracking::query()
             ->joinSub($latestSub, 't', function ($join) {
                 $join->on('rider__location_tracking.rider_id', '=', 't.rider_id')
-                     ->on('rider__location_tracking.date_time', '=', 't.max_date_time');
+                    ->on('rider__location_tracking.date_time', '=', 't.max_date_time');
             })
             ->leftJoin('flower__rider_details as rd', function ($join) {
                 $join->on(
@@ -113,7 +110,7 @@ class RiderLocationTrackingController extends Controller
             ->orderBy('rd.rider_name')
             ->get();
 
-        // Build marker array in controller (so Blade stays simple and error-free)
+        // Markers for map
         $latestMarkers = $latestPerRider->map(function ($x) {
             return [
                 'rider_id' => $x->rider_id,
@@ -125,8 +122,37 @@ class RiderLocationTrackingController extends Controller
             ];
         })->values()->all();
 
+        // NEW: Rider cards (all riders + last ping + tracking status)
+        $latestByRider = $latestPerRider->keyBy('rider_id');
+
+        $riderCards = $riders->map(function ($r) use ($latestByRider) {
+            $last = $latestByRider->get($r->rider_id);
+
+            $img = null;
+            if (!empty($r->rider_img)) {
+                try {
+                    $img = \Storage::url($r->rider_img);
+                } catch (\Throwable $e) {
+                    $img = null;
+                }
+            }
+
+            return [
+                'rider_id'   => (string) $r->rider_id,
+                'name'       => $r->rider_name ?: ('Rider #' . $r->rider_id),
+                'phone'      => $r->phone_number ?: '',
+                'img'        => $img,
+                'tracking'   => (bool) $r->tracking,
+
+                'lat'        => $last && $last->latitude !== null ? (float) $last->latitude : null,
+                'lng'        => $last && $last->longitude !== null ? (float) $last->longitude : null,
+                'last_time'  => $last && $last->date_time ? Carbon::parse($last->date_time)->format('d M Y, h:i A') : '',
+            ];
+        });
+
         return view('admin.riders.location-tracking', compact(
             'riders',
+            'riderCards',
             'trackings',
             'totalPings',
             'uniqueRiders',
@@ -137,5 +163,37 @@ class RiderLocationTrackingController extends Controller
             'from',
             'to'
         ));
+    }
+
+    public function toggleTracking(Request $request)
+    {
+        $validated = $request->validate([
+            'rider_id' => 'required',
+            'action'   => 'required|in:start,stop',
+        ]);
+
+        $riderId = (string) $validated['rider_id'];
+        $action  = $validated['action'];
+
+        $rider = RiderDetails::query()
+            ->where('rider_id', $riderId)
+            ->first();
+
+        if (!$rider) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Rider not found.',
+            ], 404);
+        }
+
+        $rider->tracking = ($action === 'start') ? 1 : 0;
+        $rider->save();
+
+        return response()->json([
+            'success'  => true,
+            'message'  => 'Tracking updated successfully.',
+            'rider_id' => $riderId,
+            'tracking' => (int) $rider->tracking, // 1 or 0
+        ]);
     }
 }

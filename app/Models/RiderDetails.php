@@ -21,11 +21,11 @@ class RiderDetails extends Model
         'description',
         'tracking',
     ];
-
+        
     protected $casts = [
-    'salary' => 'decimal:2',
-];
-
+        'salary'   => 'decimal:2',
+        'tracking' => 'boolean',
+    ];
 
     public function pickupDetails()
     {

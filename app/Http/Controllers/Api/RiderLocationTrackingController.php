@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 
 class RiderLocationTrackingController extends Controller
 {
+
     public function store(Request $request)
     {
         try {
@@ -74,47 +75,48 @@ class RiderLocationTrackingController extends Controller
         }
     }
 
-public function getTracking(Request $request)
-{
-    try {
-        $rider = Auth::guard('rider-api')->user();
+    public function getTracking(Request $request)
+    {
+        try {
+            $rider = Auth::guard('rider-api')->user();
 
-        if (!$rider) {
+            if (!$rider) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Unauthorized rider.',
+                ], 401);
+            }
+
+            $riderId = $rider->rider_id;
+
+            // Ensure default row exists (tracking = stop)
+            $row = RiderDetails::firstOrCreate(
+                ['rider_id' => $riderId],
+                [
+                    'tracking'  => 'stop',
+
+                ]
+            );
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Tracking details fetched successfully.',
+                'data'    => [
+                    'rider_id'  => $row->rider_id,
+                    'tracking'  => $row->tracking, // start | stop
+                ],
+            ], 200);
+
+        } catch (\Throwable $e) {
+            Log::error('Get tracking error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'status'  => false,
-                'message' => 'Unauthorized rider.',
-            ], 401);
+                'message' => 'Server error. Unable to fetch tracking details.',
+            ], 500);
         }
-
-        $riderId = $rider->rider_id;
-
-        // Ensure default row exists (tracking = stop)
-        $row = RiderDetails::firstOrCreate(
-            ['rider_id' => $riderId],
-            [
-                'tracking'  => 'stop',
-
-            ]
-        );
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Tracking details fetched successfully.',
-            'data'    => [
-                'rider_id'  => $row->rider_id,
-                'tracking'  => $row->tracking, // start | stop
-            ],
-        ], 200);
-
-    } catch (\Throwable $e) {
-        Log::error('Get tracking error: ' . $e->getMessage(), [
-            'trace' => $e->getTraceAsString(),
-        ]);
-
-        return response()->json([
-            'status'  => false,
-            'message' => 'Server error. Unable to fetch tracking details.',
-        ], 500);
     }
-}
+
 }
