@@ -20,6 +20,7 @@ class RiderDetails extends Model
         'salary',
         'dob',
         'documents',
+        'date_of_joining',
         'description',
         'tracking',
     ];

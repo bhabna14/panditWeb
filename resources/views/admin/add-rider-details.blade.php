@@ -94,7 +94,6 @@
         }
         .doc-meta { color: #64748b; font-size: .82rem; white-space: nowrap; }
 
-        /* Alerts spacing */
         .alert ul { margin: 0 0 0 1rem; }
     </style>
 @endsection
@@ -103,7 +102,7 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="page-title">Add Rider</span>
-            <p class="mb-0 text-muted">Create a rider profile with contact info, salary, DOB, documents and a photo.</p>
+            <p class="mb-0 text-muted">Create a rider profile with contact info, salary, DOB, joining date, documents and a photo.</p>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
@@ -212,8 +211,19 @@
                                 <div class="form-text">Used for rider profile and verification.</div>
                             </div>
 
+                            <!-- Date of Joining (NEW) -->
+                            <div class="col-md-4">
+                                <label for="date_of_joining" class="form-label">Date of Joining</label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="date_of_joining"
+                                       name="date_of_joining"
+                                       value="{{ old('date_of_joining') }}">
+                                <div class="form-text">Optional: when the rider joined your team.</div>
+                            </div>
+
                             <!-- Description -->
-                            <div class="col-md-8">
+                            <div class="col-md-4">
                                 <label for="description" class="form-label">Short Description</label>
                                 <textarea class="form-control"
                                           id="description"
@@ -318,13 +328,11 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 
     <script>
-        // Hide flash messages after 3s
         setTimeout(function() {
             const m = document.getElementById('Message');
             if (m) m.style.display = 'none';
         }, 3000);
 
-        // Phone: hard limit 10 digits & sanitize
         const phone = document.getElementById('phone_number');
         if (phone) {
             phone.addEventListener('input', function() {
@@ -332,7 +340,6 @@
             });
         }
 
-        // Salary: sanitize (no negative)
         const salary = document.getElementById('salary');
         if (salary) {
             salary.addEventListener('input', function() {
@@ -342,15 +349,20 @@
             });
         }
 
-        // DOB: prevent future date
-        const dob = document.getElementById('dob');
-        if (dob) {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            dob.max = `${yyyy}-${mm}-${dd}`;
+        // Set max date for DOB and Joining date (cannot be future)
+        function todayISO() {
+            const t = new Date();
+            const yyyy = t.getFullYear();
+            const mm = String(t.getMonth() + 1).padStart(2, '0');
+            const dd = String(t.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
         }
+
+        const dob = document.getElementById('dob');
+        if (dob) dob.max = todayISO();
+
+        const doj = document.getElementById('date_of_joining');
+        if (doj) doj.max = todayISO();
 
         // ===== Photo: preview + drag drop =====
         const inputPhoto = document.getElementById('rider_img');
@@ -361,7 +373,7 @@
             if (!files || !files.length) return;
             const file = files[0];
             const isImage = file.type.startsWith('image/');
-            const tooBig = file.size > 2 * 1024 * 1024; // 2MB
+            const tooBig = file.size > 2 * 1024 * 1024;
 
             if (!isImage) { alert('Please choose an image file.'); return; }
             if (tooBig) { alert('Image is larger than 2 MB.'); return; }
@@ -396,7 +408,7 @@
         const docList = document.getElementById('docList');
 
         const MAX_DOCS = 5;
-        const MAX_DOC_SIZE = 5 * 1024 * 1024; // 5MB
+        const MAX_DOC_SIZE = 5 * 1024 * 1024;
         const allowedDocTypes = [
             'application/pdf',
             'image/jpeg',
@@ -414,7 +426,6 @@
         function renderDocList(files) {
             if (!docList) return;
             docList.innerHTML = '';
-
             if (!files || !files.length) return;
 
             Array.from(files).forEach(f => {
@@ -439,9 +450,7 @@
             const arr = Array.from(files || []);
             if (!arr.length) return { ok: true };
 
-            if (arr.length > MAX_DOCS) {
-                return { ok: false, msg: `Maximum ${MAX_DOCS} documents allowed.` };
-            }
+            if (arr.length > MAX_DOCS) return { ok: false, msg: `Maximum ${MAX_DOCS} documents allowed.` };
 
             for (const f of arr) {
                 const typeOk = allowedDocTypes.includes(f.type);
@@ -449,7 +458,6 @@
                 if (!typeOk) return { ok: false, msg: 'Only PDF, JPG, JPEG, PNG documents are allowed.' };
                 if (!sizeOk) return { ok: false, msg: 'One or more documents exceed 5 MB.' };
             }
-
             return { ok: true };
         }
 
@@ -461,7 +469,6 @@
                 renderDocList([]);
                 return;
             }
-
             renderDocList(files);
         }
 

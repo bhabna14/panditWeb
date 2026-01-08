@@ -28,9 +28,11 @@ class RiderController extends Controller
 
             'dob'           => 'required|date|before_or_equal:today',
 
+            // Joining date: optional, but if given should be <= today and >= dob
+            'date_of_joining' => 'nullable|date|after_or_equal:dob|before_or_equal:today',
+
             'rider_img'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
 
-            // Documents (multiple)
             'documents'     => 'nullable|array|max:5',
             'documents.*'   => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
 
@@ -38,21 +40,17 @@ class RiderController extends Controller
         ]);
 
         try {
-            // Prepend +91 to the phone number
             $phoneNumber = '+91' . $validatedData['phone_number'];
 
-            // Generate unique Rider ID (avoid collision)
             do {
                 $rider_id = 'RIDER' . rand(10000, 99999);
-            } while (RiderDetails::where('rider_id', $rider_id)->exists());
+            } while (\App\Models\RiderDetails::where('rider_id', $rider_id)->exists());
 
-            // Upload image if present
             $imagePath = null;
             if ($request->hasFile('rider_img')) {
                 $imagePath = $request->file('rider_img')->store("riders/{$rider_id}/photo", 'public');
             }
 
-            // Upload documents if present (store as array in DB)
             $docPaths = [];
             if ($request->hasFile('documents')) {
                 foreach ($request->file('documents') as $doc) {
@@ -60,24 +58,22 @@ class RiderController extends Controller
                 }
             }
 
-            RiderDetails::create([
-                'rider_id'      => $rider_id,
-                'rider_name'    => $validatedData['rider_name'],
-                'phone_number'  => $phoneNumber,
-                'salary'        => $validatedData['salary'],
-                'dob'           => $validatedData['dob'],
-                'rider_img'     => $imagePath,
-                'documents'     => !empty($docPaths) ? $docPaths : null,
-                'description'   => $validatedData['description'] ?? null,
-
-                // optional default
-                'tracking'      => 'stop',
+            \App\Models\RiderDetails::create([
+                'rider_id'        => $rider_id,
+                'rider_name'      => $validatedData['rider_name'],
+                'phone_number'    => $phoneNumber,
+                'salary'          => $validatedData['salary'],
+                'dob'             => $validatedData['dob'],
+                'date_of_joining' => $validatedData['date_of_joining'] ?? null,
+                'rider_img'       => $imagePath,
+                'documents'       => !empty($docPaths) ? $docPaths : null,
+                'description'     => $validatedData['description'] ?? null,
+                'tracking'        => 'stop',
             ]);
 
             return redirect()->back()->with('success', 'Rider details saved successfully.');
         } catch (\Exception $e) {
-            Log::error('Failed to save rider details: ' . $e->getMessage());
-
+            \Log::error('Failed to save rider details: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to save rider details. Please try again.');
         }
     }
