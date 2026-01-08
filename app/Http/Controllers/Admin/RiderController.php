@@ -77,19 +77,35 @@ class RiderController extends Controller
             return redirect()->back()->with('error', 'Failed to save rider details. Please try again.');
         }
     }
-
+        
     public function manageRiderDetails()
     {
-        // Fetch rider details along with their locality names
         $rider_details = RiderDetails::where('status', 'active')
-            ->get()
-            ->map(function ($rider) {
-                $localityIds = explode(',', $rider->locality_id); // Convert comma-separated string to an array
-                $rider->locality_names = Locality::whereIn('id', $localityIds)
-                    ->pluck('locality_name')
-                    ->toArray(); // Fetch locality names and convert to an array
-                return $rider;
-            });
+            ->orderByDesc('id')
+            ->get();
+
+        // Collect all locality IDs once (avoid N+1)
+        $allLocalityIds = $rider_details->flatMap(function ($rider) {
+            $ids = explode(',', (string) ($rider->locality_id ?? ''));
+            return array_filter(array_map('trim', $ids));
+        })->unique()->values();
+
+        $localityMap = Locality::whereIn('id', $allLocalityIds)
+            ->pluck('locality_name', 'id');
+
+        // Attach locality names
+        $rider_details = $rider_details->map(function ($rider) use ($localityMap) {
+            $ids = explode(',', (string) ($rider->locality_id ?? ''));
+            $ids = array_filter(array_map('trim', $ids));
+
+            $rider->locality_names = collect($ids)
+                ->map(fn ($id) => $localityMap[$id] ?? null)
+                ->filter()
+                ->values()
+                ->toArray();
+
+            return $rider;
+        });
 
         return view('admin.manage-rider-details', compact('rider_details'));
     }
