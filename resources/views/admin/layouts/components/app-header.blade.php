@@ -19,9 +19,9 @@
 								</a>
 							</div>
 							
-							<li class="nav-item ps-1">
+							{{-- <li class="nav-item ps-1">
 								<span id="google_translate_element"></span>
-							</li>
+							</li> --}}
 						</div>
 						<div class="main-header-center">
 							<div class="d-flex align-items-center">
@@ -34,9 +34,9 @@
 							</div>
 						</div>
 						<div class="main-header-right">
-							{{-- <button class="navbar-toggler navresponsive-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
+							<button class="navbar-toggler navresponsive-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
 								<span class="navbar-toggler-icon fe fe-more-vertical "></span>
-							</button> --}}
+							</button>
 						
 							<div class="mb-0 navbar navbar-expand-lg navbar-nav-right responsive-navbar navbar-dark p-0">
 								<div class="collapse navbar-collapse" id="navbarSupportedContent-4">
